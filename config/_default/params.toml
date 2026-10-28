@@ -16,7 +16,7 @@ mainSections = ["posts"]
   showAppearanceSwitcher = true
   showScrollToTop = true
 [homepage]
-  layout = "background"
+  layout = "custom"
   homepageImage = "images/blognaver-aurora.svg"
   showRecent = true
   showRecentItems = 12
