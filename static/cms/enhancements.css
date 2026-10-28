@@ -1,0 +1,10 @@
+
+/* BlogNaver Studio editorial enhancements */
+.studio-smart{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:13px 15px;margin:18px 0 16px;border:1px solid #44688e;border-radius:12px;background:#142d4d}
+.studio-smart>div{flex:1;min-width:190px}.studio-smart strong{color:#e8f5ff}.studio-smart p{font-size:12px;margin:4px 0 0;color:#b2c8e6}.studio-smart small{flex-basis:100%;color:#a9d8fb}.studio-smart button{white-space:nowrap}
+.studio-seo-audit{margin:15px 0;border:1px solid #3a5982;background:#112744;padding:13px;border-radius:10px}
+.studio-seo-audit strong{color:#e8f5ff}.studio-seo-audit ul{list-style:none;margin:8px 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:6px}
+.studio-seo-audit li{font-size:12px}.studio-seo-audit li.pass{color:#9beacc}.studio-seo-audit li.pending{color:#edc88f}
+.studio-media-library{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:10px}
+.studio-media-library button{padding:2px;background:#1c3558;border:2px solid transparent;border-radius:8px;aspect-ratio:1;overflow:hidden}
+.studio-media-library button.selected{border-color:#8fd2ff}.studio-media-library img{height:100%;width:100%;object-fit:cover}
