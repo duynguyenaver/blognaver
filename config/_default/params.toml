@@ -5,7 +5,6 @@ enableSearch = true
 enableCodeCopy = true
 enableStructuredBreadcrumbs = true
 disableImageOptimization = false
-defaultBackgroundImage = "images/blognaver-aurora.svg"
 backgroundCanvas = false
 mainSections = ["posts"]
 [header]
@@ -17,7 +16,6 @@ mainSections = ["posts"]
   showScrollToTop = true
 [homepage]
   layout = "custom"
-  homepageImage = "images/blognaver-aurora.svg"
   showRecent = true
   showRecentItems = 12
   showMoreLink = true
@@ -40,9 +38,9 @@ mainSections = ["posts"]
   showRelatedContent = true
   relatedContentLimit = 3
 [list]
-  showHero = true
+  showHero = false
   heroStyle = "background"
-  layoutBackgroundBlur = true
+  layoutBackgroundBlur = false
   layoutBackgroundHeaderSpace = false
   showBreadcrumbs = false
   showViews = false
