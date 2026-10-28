@@ -1,0 +1,10 @@
+siteNamePostfix = "/"
+mainSections = ["posts"]
+rssFullContent = true
+[Default.Hero]
+Blurry = true
+Vibrant = false
+[footer]
+since = 2026
+[comments]
+enabled = false
