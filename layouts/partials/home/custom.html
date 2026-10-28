@@ -1,16 +1,1 @@
-{{/* BlogNaver home-only two-column editorial layout. */}}
-<div class="bn-home-grid">
-  <aside class="bn-home-sidebar" aria-label="Giới thiệu BlogNaver">
-    <div class="bn-home-profile">
-      {{ with resources.Get "avatar.svg" }}
-        <img src="{{ .RelPermalink }}" width="76" height="76" alt="BlogNaver" class="bn-home-avatar" loading="eager">
-      {{ end }}
-      <h1>BlogNaver</h1>
-      <p class="bn-home-tagline">Technology · Travel · Stories</p>
-      <a class="bn-home-github" href="https://github.com/duynguyenaver" target="_blank" rel="noopener noreferrer" aria-label="GitHub BlogNaver">
-        GitHub ↗
-      </a>
-      <div class="bn-home-description">{{ .Content }}</div>
-    </div>
-  </aside>
-</div>
+{{/* Home intro intentionally removed. Blowfish renders its configured Recent articles section below. */}}
