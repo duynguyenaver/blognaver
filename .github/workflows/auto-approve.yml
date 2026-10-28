@@ -1,0 +1,104 @@
+name: Auto Approve PR and Merge After Green Tests
+
+on:
+  workflow_run:
+    workflows: ["PR Bug Checker"]
+    types: [completed]
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+  checks: read
+
+concurrency:
+  group: verified-auto-merge-${{ github.event.workflow_run.head_branch }}
+  cancel-in-progress: false
+
+jobs:
+  approve-and-merge:
+    name: Verify, approve and merge
+    if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate PR, confirm current tests, approve, merge and dispatch Pages build
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner, repo = context.repo.repo;
+            const run = context.payload.workflow_run;
+            // workflow_run.head_sha is a pull_request merge ref on some events; use run's
+            // linked PR number and the SHA actually tested by the checkout.
+            const linked = run.pull_requests || [];
+            const candidates = linked.length ? linked : (await github.rest.repos.listPullRequestsAssociatedWithCommit({
+              owner,repo,commit_sha:run.head_sha
+            })).data;
+            const prs = candidates.filter(x => x.number);
+            if (prs.length !== 1) { core.warning('Cannot uniquely identify PR; stop.'); return; }
+            const number = prs[0].number;
+            const {data: pr} = await github.rest.pulls.get({owner,repo,pull_number:number});
+            if (pr.state !== 'open' || pr.draft || pr.base.ref !== 'main' ||
+                pr.head.repo.full_name !== `${owner}/${repo}`) {
+              core.warning('Not an open, non-draft, same-repository PR to main.'); return;
+            }
+            // Require the latest PR SHA in addition to the checked event's SHA.
+            if (pr.head.sha !== run.head_sha) {
+              core.warning('Bug Checker tested an old head or synthetic ref: '+run.head_sha+
+                           '; current head is '+pr.head.sha+'. No merge.');
+              return;
+            }
+            const {data: jobs} = await github.rest.actions.listJobsForWorkflowRun({owner,repo,run_id:run.id,per_page:100});
+            if (!jobs.jobs.some(j => j.name === 'Bug Checker — Blowfish (3 attempts max)' && j.conclusion === 'success')) {
+              core.warning('Bug Checker job not successful.'); return;
+            }
+            // Check that other checks associated with this commit are not pending or failed.
+            const {data: checks} = await github.rest.checks.listForRef({owner,repo,ref:pr.head.sha,per_page:100});
+            const relevant=checks.check_runs.filter(x => x.name !== 'Verify, approve and merge');
+            const bad=relevant.filter(x => x.status !== 'completed' || !['success','neutral','skipped'].includes(x.conclusion));
+            if (bad.length) {
+              core.warning('Pending/failed checks: '+bad.map(x=>x.name+':'+(x.conclusion||x.status)).join(', '));
+              return;
+            }
+            // GitHub doesn't accept self-review; Actions review permission may also be disabled.
+            try {
+              const {data: reviews}=await github.rest.pulls.listReviews({owner,repo,pull_number:number,per_page:100});
+              if (!reviews.some(x=>x.user.login==='github-actions[bot]' && x.state==='APPROVED' && x.commit_id===pr.head.sha)) {
+                await github.rest.pulls.createReview({
+                  owner,repo,pull_number:number,event:'APPROVE',
+                  commit_id:pr.head.sha,
+                  body:'Automated approval: Bug Checker and all visible checks passed on this commit. This is CI validation, not human review.'
+                });
+              }
+            } catch(e) {
+              core.warning('GitHub blocked automatic APPROVE: '+e.message+
+                '. Enable Actions approval permissions or use a separate authorized reviewer bot.');
+              return;
+            }
+            // Final compare-and-swap prevents merging code changed after checks.
+            const {data: latest}=await github.rest.pulls.get({owner,repo,pull_number:number});
+            if (latest.head.sha!==pr.head.sha || latest.state!=='open' || latest.mergeable===false) {
+              core.warning('PR moved, closed or became conflicting. No merge.'); return;
+            }
+            let merged;
+            try {
+              const result=await github.rest.pulls.merge({
+                owner,repo,pull_number:number,merge_method:'squash',sha:pr.head.sha,
+                commit_title:'ci(auto-merge): PR #'+number+' after successful checks'
+              });
+              merged=result.data;
+            } catch(e) {
+              core.warning('Merge refused by GitHub: '+e.message); return;
+            }
+            if(!merged.merged) { core.warning('GitHub did not merge.'); return; }
+            core.notice('PR #'+number+' merged at '+merged.sha);
+            // A push made using GITHUB_TOKEN does not trigger push workflows.
+            // Dispatch Hugo deployment explicitly to keep GitHub Pages up-to-date.
+            try {
+              await github.rest.actions.createWorkflowDispatch({
+                owner,repo,workflow_id:'hugo.yml',ref:'main'
+              });
+              core.notice('Started production Hugo deployment.');
+            } catch(e) {
+              core.setFailed('PR merged, but production dispatch failed: '+e.message+
+                '. Trigger Build and deploy Hugo manually.');
+            }
