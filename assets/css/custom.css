@@ -150,3 +150,17 @@ aside:has(#TableOfContents)::-webkit-scrollbar { display: none !important; }
   word-break: normal;
   white-space: normal;
 }
+
+/* TOC desktop root is <details id="TOCView" class="overflow-y-auto bf-scrollbar">.
+   Remove scrolling at its actual source (not just nested #TableOfContents). */
+html body #TOCView.toc-right {
+  overflow: visible !important;
+  overflow-y: visible !important;
+  overflow-x: visible !important;
+  max-height: none !important;
+  height: auto !important;
+  scrollbar-width: none !important;
+  overscroll-behavior: auto !important;
+}
+html body #TOCView.toc-right::-webkit-scrollbar { display: none !important; }
+html body #TOCView.toc-right > div { max-height: none !important; overflow: visible !important; }
