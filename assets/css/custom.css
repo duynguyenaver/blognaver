@@ -305,3 +305,71 @@ article .article-content,.article-content{max-width:780px!important;margin-inlin
 @media(max-width:940px){.bn-blog-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:35px 22px}.bn-blog-index{padding-top:48px}}
 @media(max-width:590px){.bn-blog-grid{grid-template-columns:1fr;gap:37px}.bn-blog-index{padding:34px 16px 60px}.bn-blog-heading{margin-bottom:34px}.bn-blog-heading h1{font-size:2.4rem}.bn-blog-card-content{padding-top:15px}.bn-blog-cover{aspect-ratio:1.7}}
 @media(prefers-reduced-motion:reduce){.bn-blog-cover img{transition:none}}
+
+
+/* BlogNaver Stack-inspired redesign (Dartmoor Walking reference).
+   Original CSS adaptation: retain Blowfish/Hugo and current CMS integrations. */
+:root{--bn-bg:#f4f5f7;--bn-surface:#fff;--bn-text:#30343b;--bn-muted:#6d7683;--bn-primary:#3278b7;--bn-link:#2879b8;--bn-border:#e1e5e9}
+html,html.dark{background:#f4f5f7!important;scroll-behavior:smooth}
+html body,html.dark body{background:#f4f5f7!important;color:#30343b!important}
+html #main-content,html.dark #main-content{color:#30343b!important}
+html .prose,html.dark .prose{color:#404751!important}
+html .prose a,html.dark .prose a{color:#2879b8!important}
+html .prose strong,html.dark .prose strong,html.dark .prose :is(h2,h3){color:#30343b!important}
+html .prose blockquote,html.dark .prose blockquote{border-left-color:#6e99c5;background:#f0f5fa;color:#394c63}
+html.dark .prose code{color:#425e7d}
+html.dark .prose pre{background:#242d36}
+html.dark .prose table th,html .prose table th{background:#f2f4f7!important;color:#30343b!important}
+html.dark .prose table td,html .prose table td{border-color:#e1e5e9}
+html.dark .prose a{text-decoration-color:#bad3e6}
+html.dark #menu-blur,html.dark header,html #menu-blur{border-color:#e0e5e9}
+body>header,header.fixed,#menu-blur{background:rgba(255,255,255,.95)!important;color:#344052!important;box-shadow:0 2px 10px rgba(28,45,67,.04)}
+header nav a,header nav button,header nav span,header nav svg,header .main-menu a,header .main-menu button,#menu-blur a,#menu-blur button,#menu-blur svg{color:#364152!important}
+header nav a:hover,header nav a:focus-visible,header nav button:hover,header nav button:focus-visible{color:#2879b8!important}
+html.dark .article-content a,html .article-content a{color:#2879b8!important;text-decoration-color:#b4d0e3}
+html.dark .article-content strong,html .article-content strong{color:#2d3540}
+html.dark .article-content blockquote,html .article-content blockquote{background:#eff4f9;color:#40536a;border-left-color:#3e87bf}
+html.dark .article-content th,html .article-content th{background:#eff2f6;color:#344153}
+.article-content :not(pre)>code{background:#eef2f7;color:#38536f;border-color:#d7e0eb}
+html.dark .article-content li::marker,.article-content li::marker{color:#397eaf}
+html.dark #single_header .text-neutral-500{color:#76808b!important}
+#single_header{background:#fff;border:1px solid #e2e6eb;border-radius:17px;padding:32px 38px!important;max-width:900px;margin-top:36px;box-shadow:0 5px 26px #202c3b0a}
+#single_header h1{color:#2e3540;font-size:clamp(2rem,4vw,3.35rem)!important;max-width:none!important;letter-spacing:-.045em!important}
+.article-content{max-width:840px!important;background:#fff;border:1px solid #e2e6eb;border-radius:17px;padding:38px 42px!important;margin-top:24px!important;box-shadow:0 5px 25px #1d2c4208;font-size:1.035rem;line-height:1.8}
+.article-content h2{font-size:1.65rem;margin-top:2em}
+.article-content img,.article-content figure img{border-radius:10px}
+.article-content figcaption{color:#7c8792}
+#main-content{max-width:1320px;margin-inline:auto}
+.bn-stack-intro{max-width:1100px;margin:34px auto 32px;background:#fff;border:1px solid #e2e6ec;border-radius:18px;padding:39px 43px;box-shadow:0 6px 26px #1e2a4009}
+.bn-stack-intro-tag{font-size:11px;letter-spacing:.14em;font-weight:800;color:#638cad}
+.bn-stack-intro h1{color:#30343b;font-size:clamp(2rem,4.2vw,3.5rem);font-weight:780;letter-spacing:-.055em;margin:12px 0}
+.bn-stack-intro p{font-size:1.04rem;line-height:1.75;color:#65707c;max-width:760px}
+.bn-stack-quicklinks{display:flex;flex-wrap:wrap;gap:10px;margin-top:23px}
+.bn-stack-quicklinks a{color:#3b759e!important;border:1px solid #dce5ee;background:#f7fafd;border-radius:9px;padding:10px 14px;font-size:13px;font-weight:680;text-decoration:none!important}
+.bn-stack-quicklinks a:hover{background:#eaf2f9}
+.bn-blog-index{width:min(1200px,100%);padding:35px 20px 80px}
+.bn-blog-heading{background:#fff;border:1px solid #e1e5e9;border-radius:17px;padding:35px;margin-bottom:30px;text-align:left}
+.bn-blog-kicker{color:#4f8ab6}
+.bn-blog-heading h1{font-size:clamp(2.1rem,4vw,3.25rem);color:#30343b}
+.bn-blog-heading p{color:#687481}
+.bn-blog-grid{gap:25px;grid-template-columns:repeat(2,minmax(0,1fr))}
+.bn-blog-card{background:#fff;border:1px solid #e2e6eb;border-radius:16px;overflow:hidden;box-shadow:0 5px 22px #182b4509}
+.bn-blog-cover{border:0;border-radius:0;aspect-ratio:1.75}
+.bn-blog-card-content{padding:23px 25px 26px}
+.bn-blog-card h2{font-size:1.38rem}
+.bn-blog-card h2 a{color:#313943!important}
+.bn-blog-card h2 a:hover{color:#2879b8!important}
+.bn-blog-tags span{color:#3679aa}
+.bn-blog-excerpt{color:#65717e}
+.bn-blog-meta{color:#7c8793}
+.bn-blog-noimage{background:linear-gradient(140deg,#dbe8f1,#a5c4d9);color:#466c86}
+.bn-blog-noimage span{color:#386e94}
+.bn-blog-noimage strong{color:#2d4d67}
+.bn-blog-pagination a,.bn-blog-pagination span{background:#fff;color:#566273;border:1px solid #dbe2e9}
+.bn-blog-pagination a:hover{color:#286c9e;border-color:#86b8d6}
+.bn-blog-pagination .is-current{background:#3278b7;color:#fff;border-color:#3278b7}
+.bn-blog-pagination .is-disabled{opacity:.45}
+html.dark .article-link--card,html.dark .article-link--simple{border-color:#e2e6eb}
+#main-content article a,html.dark #main-content article a{transition:color .2s ease}
+@media(max-width:760px){.bn-blog-grid{grid-template-columns:1fr}.bn-blog-heading{padding:23px}.bn-stack-intro{margin-top:16px;padding:25px}.article-content{padding:22px 20px!important;border-radius:12px}#single_header{padding:24px 20px!important;border-radius:12px}.bn-blog-index{padding:22px 12px 60px}}
+@media print{html,html.dark,body,html.dark body{background:#fff!important}.article-content,#single_header{box-shadow:none;border:0;padding:0!important}}
