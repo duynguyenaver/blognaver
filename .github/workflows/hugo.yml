@@ -29,13 +29,23 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: '1.23.x'
+          cache: false
       - name: Setup Hugo
         uses: peaceiris/actions-hugo@v3
         with:
           hugo-version: '0.162.0'
           extended: true
-      - name: Fetch Hugo modules
-        run: hugo mod get
+      - name: Cache Hugo module downloads and build resources
+        uses: actions/cache@v4
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-hugo-v2-${{ hashFiles('go.mod', 'go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-hugo-v2-
+      # Hugo downloads missing pinned modules during build.
+      # Do not run "hugo mod get" on every deployment: it may change module versions.
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
       - name: Build site
         env:
           HUGO_ENVIRONMENT: production
