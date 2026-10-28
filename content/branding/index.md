@@ -14,15 +14,17 @@ showTableOfContents: true
 **Tên thương hiệu:** BlogNaver  
 **Tagline:** Technology · Travel · Stories  
 **Tinh thần:** tinh gọn, hiện đại, đậm chất editorial, tập trung nội dung, thân thiện, nhất quán.  
-**Thiết kế mặc định:** Dark-first, Neon accents, typography dễ đọc, tương phản tốt.
+**Thiết kế mặc định:** Dark-first, navy and royal-blue accents, typography dễ đọc, tương phản tốt.
 
 Không sao chép logo, hình ảnh, nhận dạng cá nhân hoặc nội dung của N9O. Mục tiêu là tham chiếu bố cục và nguyên tắc UI, không phải giả mạo thương hiệu gốc.
 
 ## 2. Color palette — nguồn chuẩn
 
+**Bản hiệu chỉnh:** Từ 28/10/2026 không dùng palette tím/hồng `neon`. Màu chủ đạo mới là **navy / royal blue / cyan** như screenshot tham chiếu. Đây là quy chuẩn thay thế mọi bảng màu cũ.
+
 {{< brand-swatches >}}
 
-**Supporting tokens:** border `rgba(189,201,234,.20)`; translucent surface `rgba(18,22,43,.69)`.
+**Supporting tokens:** border `rgba(150,177,223,.22)`; translucent surface `#1C2747`.
 
 Đây là **màu thương hiệu đã chọn cho BlogNaver**, không phải tuyên bố rằng các mã HEX trùng chính xác N9O. Không sử dụng màu tùy tiện nếu đã có semantic token tương đương. Light mode phải duy trì tương phản tốt và không đảo màu ảnh/logo một cách máy móc.
 
@@ -47,7 +49,7 @@ Không sao chép logo, hình ảnh, nhận dạng cá nhân hoặc nội dung c�
 
 | Thành phần | Quy tắc |
 |---|---|
-| Buttons | Nổi bật bằng Cyan/Violet, thể hiện hover/focus/disabled rõ |
+| Buttons | Nổi bật bằng Blue/Cyan, thể hiện hover/focus/disabled rõ |
 | Links | Có underline hoặc tín hiệu tương tác không chỉ phụ thuộc vào màu |
 | Cards | Nội dung dẫn dắt, metadata ngắn, khoảng cách cân đối |
 | Forms / CMS | Label luôn hiển thị, validation gần trường nhập, trạng thái lưu và lỗi tường minh |
