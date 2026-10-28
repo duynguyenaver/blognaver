@@ -2,16 +2,14 @@ languageCode = "vi-VN"
 languageName = "Tiếng Việt"
 weight = 1
 title = "BlogNaver"
-
 [params]
   displayName = "VI"
   isoCode = "vi"
-  dateFormat = "02/01/2006"
-  description = "Blog cá nhân: công nghệ, du lịch, các câu chuyện và góc nhìn đáng đọc."
-
+  dateFormat = "2006-01"
+  description = "BlogNaver — các bài viết, dự án, trải nghiệm và góc nhìn cá nhân."
 [params.author]
   name = "BlogNaver"
   image = "avatar.svg"
-  headline = "Ideas • Stories • Discoveries"
-  bio = "Một không gian cá nhân để ghi lại điều thú vị, những trải nghiệm đáng nhớ và các kiến thức hữu ích."
+  headline = "Technology · Travel · Stories"
+  bio = "Những điều đáng học, những nơi đáng đến và những câu chuyện đáng kể."
   links = [{ github = "https://github.com/duynguyenaver" }]
