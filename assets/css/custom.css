@@ -234,3 +234,40 @@ html.dark .thumbnail_card,.dark .card{border-color:rgba(255,255,255,.12)}
 html.dark #main-content .article-link--simple,html.dark .article-link--card{border-color:#37393b}
 @media(max-width:700px){.bn-wf-hero{padding:65px 5px 38px}.bn-wf-actions{margin-bottom:35px}.bn-wf-terminal-line{grid-template-columns:24px 1fr auto;gap:8px;padding:15px 13px}.bn-wf-terminal-line>span:nth-child(3){display:none}.bn-wf-terminal-top{padding:12px}.bn-wf-indicator{font-size:9px}}
 @media(prefers-reduced-motion:reduce){.bn-wf-hero *{animation:none!important;transition:none!important}}
+
+
+/* Editorial reading page inspired by Watchfire's minimalist single-article treatment.
+   Scoped to article containers; homepage/CMS remain unaffected. */
+html.dark article:has(.article-content),html.dark article:has(.prose){color:#e7e8e5}
+#single_header{max-width:860px;margin-left:auto!important;margin-right:auto!important;padding-top:44px}
+#single_header h1{font-size:clamp(2.35rem,5.1vw,4.5rem)!important;line-height:1.09!important;letter-spacing:-.065em!important;font-weight:790!important;max-width:18ch;text-wrap:balance}
+#single_header .text-neutral-500,#single_header .text-neutral-400{color:#a8aaa8!important}
+#single_header .flex.flex-row.flex-wrap{row-gap:9px}
+#single_header .rounded-md,#single_header .rounded-full{border-radius:5px}
+#single_header+div{margin-top:26px}
+article .article-content,.article-content{max-width:780px!important;margin-inline:auto!important;font-size:1.08rem;line-height:1.84;letter-spacing:-.008em;overflow-wrap:anywhere}
+.article-content.prose,.article-content .prose{color:#d9dbd7}
+.article-content :is(h2,h3,h4){font-weight:740;letter-spacing:-.035em;line-height:1.25;scroll-margin-top:100px;text-wrap:pretty}
+.article-content h2{font-size:clamp(1.5rem,2.6vw,2rem);margin-top:2.6em;margin-bottom:.7em}
+.article-content h3{font-size:1.3rem;margin-top:2em;margin-bottom:.6em}
+.article-content p{margin-block:1.15em}
+.article-content :is(ul,ol){padding-left:1.4em}
+.article-content li{padding-left:.18em;margin-block:.35em}
+.article-content li::marker{color:#e4a85c}
+.article-content strong{color:#f0f0ee}
+.article-content a{color:#efb876!important;text-decoration:underline;text-decoration-color:rgba(239,184,118,.45);text-underline-offset:4px}
+.article-content a:hover{text-decoration-color:#efb876}
+.article-content blockquote{background:#1c1e20;border-left:3px solid #e4a85c;border-radius:0 8px 8px 0;padding:16px 22px;color:#d7d6d1;font-style:normal}
+.article-content :is(pre,figure,table){border-radius:8px}
+.article-content pre{padding:22px;overflow:auto;border:1px solid #393b3e}
+.article-content :not(pre)>code{background:#282a2d;border:1px solid #414247;border-radius:4px;padding:.09em .32em;font-size:.88em}
+.article-content figure img,.article-content img{max-width:100%;height:auto;border-radius:8px}
+.article-content figcaption{font-size:.81rem;color:#969995;text-align:center;margin-top:10px}
+.article-content table{width:100%;font-size:.92rem}
+.article-content th,.article-content td{padding:11px 13px;border-bottom:1px solid #393b3e}
+.article-content th{font-weight:710;color:#f3f0ec;background:#25272a}
+.article-content tr:nth-child(even) td{background:rgba(255,255,255,.018)}
+.article-content hr{border-color:#393b3e;margin:45px 0}
+@media(min-width:1100px){#single_header{padding-top:56px}.article-content{font-size:1.12rem}}
+@media(max-width:700px){#single_header{padding-top:26px}#single_header h1{font-size:clamp(2rem,9vw,3rem)!important}.article-content{font-size:1rem;line-height:1.77}.article-content blockquote{padding:12px 14px}.article-content table{font-size:.83rem}}
+@media print{#single_header h1{font-size:26pt!important}.article-content{color:#111!important;font-size:11pt;line-height:1.5}.article-content a,.article-content strong{color:#111!important}.article-content blockquote{background:none;color:#111;border-left-color:#888}.article-content pre{white-space:pre-wrap}}
