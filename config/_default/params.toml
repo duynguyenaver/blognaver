@@ -6,7 +6,7 @@ enableCodeCopy = true
 enableStructuredBreadcrumbs = true
 disableImageOptimization = false
 defaultBackgroundImage = "images/blognaver-aurora.svg"
-backgroundCanvas = true
+backgroundCanvas = false
 mainSections = ["posts"]
 [header]
   layout = "fixed"
@@ -24,12 +24,12 @@ mainSections = ["posts"]
   showMoreLinkDest = "posts"
   cardView = true
   cardViewScreenWidth = false
-  layoutBackgroundBlur = true
+  layoutBackgroundBlur = false
 [article]
   showDate = true
   showDateUpdated = true
   showBreadcrumbs = true
-  showHero = true
+  showHero = false
   heroStyle = "background"
   showSummary = true
   showHeadingAnchors = true
