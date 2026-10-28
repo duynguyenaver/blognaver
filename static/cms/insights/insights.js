@@ -3,7 +3,23 @@ const API="https://api.github.com/repos/duynguyenaver/blognaver",SITE="https://d
 const $=s=>document.querySelector(s);
 const el=(tag,cls,txt)=>{const x=document.createElement(tag);if(cls)x.className=cls;if(txt!==undefined)x.textContent=String(txt);return x};
 function activity(){try{return JSON.parse(localStorage.getItem(KEY)||"[]")}catch{return []}}
-function showActivity(){const area=$("#activityList");area.replaceChildren();const acts=activity();if(!acts.length){area.append(el("p","muted","Chưa có thao tác được lưu trên trình duyệt này."));return}for(const a of acts.slice(0,80)){const line=el("div","activity-item"),icon=el("div","activity-icon",a.type==="publish"?"↗":a.type==="draft"?"✎":"•"),info=el("div");info.append(el("strong","",a.message||a.type),el("small","",a.detail||""));const t=el("time","",new Date(a.time).toLocaleString("vi-VN"));line.append(icon,info,t);area.append(line)}}
+const ACTIVITY_PAGE_SIZE=10;let activityPage=1;
+function showActivity(){
+ const area=$("#activityList"),acts=activity(),pages=Math.max(1,Math.ceil(acts.length/ACTIVITY_PAGE_SIZE));
+ activityPage=Math.min(Math.max(1,activityPage),pages);
+ $("#activityTotal").textContent=acts.length;
+ $("#activityPageInfo").textContent="Trang "+activityPage+"/"+pages+" · "+acts.length+" hoạt động";
+ $("#activityPrevious").disabled=activityPage===1;
+ $("#activityNext").disabled=activityPage===pages;
+ area.replaceChildren();
+ if(!acts.length){area.append(el("p","muted","Chưa ghi nhận hoạt động trên thiết bị này."));return}
+ const start=(activityPage-1)*ACTIVITY_PAGE_SIZE;
+ for(const a of acts.slice(start,start+ACTIVITY_PAGE_SIZE)){
+  const line=el("div","activity-item"),icon=el("div","activity-icon",a.type==="publish"?"↗":a.type==="draft"?"✎":"•"),info=el("div");
+  info.append(el("strong","",a.message||a.type),el("small","",a.detail||""));
+  const t=el("time","",new Date(a.time).toLocaleString("vi-VN"));line.append(icon,info,t);area.append(line)
+ }
+}
 const fmt=x=>new Date(x).toLocaleDateString("vi-VN");
 function front(src){const m=src.match(/^---\s*\n([\s\S]*?)\n---/);return m?{fm:m[1],body:src.slice(m[0].length)}:{fm:"",body:src}}
 function field(fm,name){const m=fm.match(new RegExp("^"+name+":\\s*(.*)$","m"));if(!m)return "";try{return JSON.parse(m[1].trim())}catch{return m[1].trim().replace(/^['"]|['"]$/g,"")}}
@@ -69,5 +85,5 @@ async function posts(){
 async function refresh(){const b=$("#refreshInsights");b.disabled=true;$("#lastSync").textContent="Đang đồng bộ GitHub…";const results=await Promise.allSettled([workflows(),posts()]);const errors=results.filter(x=>x.status==="rejected").map(x=>x.reason.message);$("#lastSync").textContent=(errors.length?"Một phần dữ liệu chưa cập nhật: "+errors.join("; "):"Đã tải thống kê lúc "+new Date().toLocaleTimeString("vi-VN"))+" · Danh sách bài lấy từ bản deploy mới nhất; workflow theo GitHub API.";b.disabled=false}
 function showAuth(){const has=!!window.BNAuth?.read();const label=$("#authState"),button=$("#insightsDisconnect");if(label)label.textContent=has?"● Đang dùng GitHub của CMS":"Chưa đăng nhập GitHub · vẫn đọc được bài viết";if(button)button.hidden=!has}
 $("#insightsDisconnect")?.addEventListener("click",()=>{if(confirm("Xóa GitHub token đã ghi nhớ trên thiết bị?")){window.BNAuth?.forget();showAuth();workflowRetryAfter=0;refresh()}});
-showAuth();$("#refreshInsights").addEventListener("click",refresh);$("#clearActivity").addEventListener("click",()=>{if(confirm("Xóa Activity đã ghi trên thiết bị này?")){localStorage.removeItem(KEY);showActivity()}});document.addEventListener("visibilitychange",()=>{if(!document.hidden)refresh()});showActivity();refresh();setInterval(()=>{if(!document.hidden)refresh()},90000);
+showAuth();$("#refreshInsights").addEventListener("click",refresh);$("#clearActivity").addEventListener("click",()=>{if(confirm("Xóa Activity đã ghi trên thiết bị này?")){localStorage.removeItem(KEY);activityPage=1;showActivity()}});$("#activityPrevious").addEventListener("click",()=>{if(activityPage>1){activityPage--;showActivity()}});$("#activityNext").addEventListener("click",()=>{activityPage++;showActivity()});document.addEventListener("visibilitychange",()=>{if(!document.hidden)refresh()});showActivity();refresh();setInterval(()=>{if(!document.hidden)refresh()},90000);
 })();
