@@ -5,8 +5,8 @@ draft: false
 slug: "tranh-luan-tu-nhan-hoa-kai-gia-tang-khi-hanwha-mo-rong-so-huu"
 description: ""
 summary: ""
-categories: []
-tags: []
+categories: ["Kinh tế", "Hàng không"]
+tags: ["KAI", "Hanwha", "Tư nhân hóa", "Công nghiệp quốc phòng", "Hàn Quốc"]
 showTableOfContents: true
 featureimage: "https://duynguyenaver.github.io/blognaver/uploads/tranh-luan-tu-nhan-hoa-kai-gia-tang-khi-hanwha-mo-rong-so-huu-1793168636995.jpg"
 externalUrl: ""
