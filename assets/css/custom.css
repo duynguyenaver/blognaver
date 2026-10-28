@@ -1,6 +1,9 @@
-html {scroll-behavior:smooth}
-body {-webkit-font-smoothing:antialiased}
-.prose {line-height:1.85;overflow-wrap:anywhere}
-.prose :is(h2,h3) {scroll-margin-top:6rem;letter-spacing:-.018em}
-a:focus-visible,button:focus-visible {outline:3px solid #0d9488;outline-offset:3px}
-@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important}}
+html { scroll-behavior: smooth; }
+body { -webkit-font-smoothing: antialiased; }
+.prose { line-height: 1.85; overflow-wrap: anywhere; }
+.prose :is(h2,h3) { scroll-margin-top: 6rem; }
+a:focus-visible, button:focus-visible { outline: 3px solid #22d3ee; outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *,*::before,*::after { transition-duration: .01ms!important; animation-duration: .01ms!important; }
+}
