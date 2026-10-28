@@ -29,3 +29,22 @@ html:not(.dark) .bn-swatch{background:#f4f6fb;color:#202538;border-color:#d5d9e4
 html:not(.dark) .bn-swatch small{color:#536078}
 @media(max-width:640px){main h1{font-size:clamp(2rem,8vw,3.2rem)}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important}}
+
+/* Accessibility hotfix: navigation sits over dark and blue hero backgrounds.
+   Keep white text and high-contrast controls in both appearance modes. */
+body > header, header.fixed, #menu-blur { color:#f8fbff !important; }
+header nav a, header nav button, header nav span, header nav svg,
+header .main-menu a, header .main-menu button,
+#menu-blur a, #menu-blur button, #menu-blur svg {
+  color:#f8fbff !important;
+}
+header nav a:hover, header nav a:focus-visible,
+header nav button:hover, header nav button:focus-visible {
+  color:#b9e7ff !important;
+}
+header nav svg, header nav button svg {stroke:currentColor}
+header nav a[aria-current="page"] {color:#b9e7ff !important}
+#search-button, #search-button-mobile {color:#f8fbff !important}
+header nav a:focus-visible,header nav button:focus-visible {
+  outline:2px solid #b9e7ff !important;outline-offset:3px;
+}
