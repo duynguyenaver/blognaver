@@ -1,0 +1,84 @@
+name: Safe PR Conflict Auto-Fixer
+
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: write
+  pull-requests: read
+
+concurrency:
+  group: conflict-fixer-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  known-footer-conflict:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout trusted main workflow (never execute PR scripts)
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Resolve only known obsolete Stack footer modify/delete conflict
+        shell: bash
+        env:
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          BRANCH: ${{ github.event.pull_request.head.ref }}
+        run: |
+          set -euo pipefail
+          git fetch origin main "$HEAD_SHA"
+          git checkout --detach "$HEAD_SHA"
+          # Only rollback-to-Blowfish PRs qualify.
+          if ! grep -Fq 'github.com/nunocoracao/blowfish/v3' config/_default/module.toml; then
+            echo "Not a Blowfish rollback; no changes."
+            exit 0
+          fi
+          obsolete="layouts/_partials/footer/custom.html"
+          # Head must intentionally delete obsolete Stack footer and main must still contain it.
+          if git cat-file -e "HEAD:$obsolete" 2>/dev/null || ! git cat-file -e "origin/main:$obsolete" 2>/dev/null; then
+            echo "Known modify/delete pattern not present; no changes."
+            exit 0
+          fi
+          # Do not alter a branch that already merged the latest main.
+          if git merge-base --is-ancestor origin/main HEAD; then
+            echo "Already up-to-date."
+            exit 0
+          fi
+          set +e
+          git merge --no-commit --no-ff origin/main
+          rc=$?
+          set -e
+          if [ "$rc" -eq 0 ]; then
+            echo "No conflict requiring automatic repair; leave branch unchanged."
+            exit 0
+          fi
+          conflicts="$(git diff --name-only --diff-filter=U)"
+          if [ "$conflicts" != "$obsolete" ]; then
+            echo "::warning::Unrecognized or multiple conflicts; manual resolution required: $conflicts"
+            exit 0
+          fi
+          # GitHub's modify/delete situation: keep deletion because Blowfish uses extend-footer.
+          if ! test -f layouts/partials/extend-footer.html; then
+            echo "::warning::Active Blowfish footer missing; do not fix automatically."
+            exit 0
+          fi
+          if ! grep -Fq 'data-commit-status' layouts/partials/extend-footer.html; then
+            echo "::warning::Latest Commit Status dashboard missing; do not fix automatically."
+            exit 0
+          fi
+          git rm -- "$obsolete"
+          git add -- layouts/partials/extend-footer.html static/js/commit-status.js static/css/commit-dashboard.css
+          if test -n "$(git diff --name-only --diff-filter=U)"; then
+            echo "::warning::Unresolved conflicts remain; no push."
+            exit 0
+          fi
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'fix(ci): auto-resolve obsolete Stack footer conflict in Blowfish rollback'
+          # Fast-forward push only. Reject concurrent updates; never force-push.
+          git push origin "HEAD:refs/heads/$BRANCH"
+          echo "## Conflict auto-fixed" >> "$GITHUB_STEP_SUMMARY"
+          echo "Resolved the known obsolete Stack footer conflict, preserved Blowfish's active dashboard, and pushed the fix to the PR branch. Owner review/merge remains manual." >> "$GITHUB_STEP_SUMMARY"
