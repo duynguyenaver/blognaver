@@ -1,6 +1,6 @@
 colorScheme = "blognaver-blue"
-defaultAppearance = "dark"
-autoSwitchAppearance = true
+defaultAppearance = "light"
+autoSwitchAppearance = false
 enableSearch = true
 enableCodeCopy = true
 enableStructuredBreadcrumbs = true
