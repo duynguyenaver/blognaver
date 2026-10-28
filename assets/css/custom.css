@@ -187,3 +187,50 @@ html body #TOCView.toc-right > div { max-height: none !important; overflow: visi
 #main-content .bn-home-articles > :first-child{margin-top:0!important;padding-top:0!important}
 #main-content .bn-home-articles h2:first-child,#main-content .bn-home-articles h3:first-child{margin-top:0!important}
 @media(max-width:800px){#main-content:has(.bn-home-grid){padding-top:56px!important}}
+
+
+/* Watchfire-inspired editorial design system — public Hugo pages only. */
+:root{--bn-bg:#101113;--bn-surface:#191b1f;--bn-text:#f0f0ee;--bn-muted:#a1a39f;--bn-primary:#e4a85c;--bn-link:#f2bb75;--bn-border:rgba(255,255,255,.12)}
+html.dark body{background:#101113!important;color:#f0f0ee}
+html.dark #main-content{color:#f0f0ee}
+html.dark .prose{color:#ced0ce}
+html.dark .prose a,html.dark a:hover{color:#f2bb75}
+html.dark .prose blockquote{border-left-color:#e4a85c}
+html.dark #menu-blur,html.dark header{border-color:rgba(255,255,255,.1)}
+header#single_header,header#site-header{backdrop-filter:blur(18px)}
+html.dark article,html.dark .article{--tw-ring-color:rgba(255,255,255,.1)}
+#main-content h1,#main-content h2{letter-spacing:-.055em}
+#main-content h1{font-weight:760}
+html.dark .prose :is(h2,h3){color:#f3f0ec}
+html.dark .prose code{color:#f1c58b}
+html.dark .prose pre{background:#191b1f}
+html.dark .prose table th{background:#202227;color:#f3f0ec}
+html.dark .prose table td{border-color:#393b3e}
+html.dark .prose a{text-decoration-color:rgba(242,187,117,.5)}
+html.dark a:focus-visible,html.dark button:focus-visible{outline-color:#e4a85c}
+html.dark .thumbnail_card,.dark .card{border-color:rgba(255,255,255,.12)}
+.bn-wf-hero{max-width:1120px;margin:0 auto;padding:94px 14px 58px;color:#f0f0ee}
+.bn-wf-eyebrow{font-size:11px;letter-spacing:.13em;font-weight:760;color:#aaa9a4;display:flex;align-items:center;gap:10px}
+.bn-wf-led{width:8px;height:8px;border-radius:50%;background:#e6a858;box-shadow:0 0 0 4px rgba(230,168,88,.09)}
+.bn-wf-separator{color:#55565a}
+.bn-wf-hero h1{font-size:clamp(44px,6.5vw,87px);font-weight:780;line-height:1.04;letter-spacing:-.075em;margin:27px 0 21px}
+.bn-wf-hero h1 span{color:#e5aa61}
+.bn-wf-lede{max-width:650px;font-size:clamp(15px,1.7vw,19px);line-height:1.75;color:#b7b9b7}
+.bn-wf-actions{display:flex;align-items:center;gap:22px;margin:29px 0 55px;flex-wrap:wrap}
+.bn-wf-cta,.bn-wf-ghost{display:inline-flex;align-items:center;gap:20px;padding:12px 17px;border-radius:7px;font-size:13px;font-weight:720;text-decoration:none!important}
+.bn-wf-cta{background:#ecb166;color:#171412!important;border:1px solid #ecb166}
+.bn-wf-cta:hover{background:#ffcc86;color:#171412!important}
+.bn-wf-ghost{border:1px solid #4b4c4b;color:#e5e5e3!important;background:#1b1c1f}
+.bn-wf-ghost:hover{border-color:#e0a55c}
+.bn-wf-terminal{border:1px solid #343538;background:#16181b;border-radius:13px;overflow:hidden;box-shadow:0 22px 55px rgba(0,0,0,.24)}
+.bn-wf-terminal-top{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:13px 20px;background:#1e2023;border-bottom:1px solid #323437;color:#989b9b;font:11px/1.4 ui-monospace,SFMono-Regular,Consolas,monospace}
+.bn-wf-dots{letter-spacing:4px;color:#d3a05c}
+.bn-wf-terminal-line{display:grid;grid-template-columns:33px minmax(115px,1fr) minmax(150px,1.9fr) auto;align-items:center;gap:16px;padding:19px 20px;border-bottom:1px solid #2a2d30;font:12px/1.4 ui-monospace,SFMono-Regular,Consolas,monospace;color:#a7a9ac}
+.bn-wf-terminal-line:last-child{border-bottom:0}
+.bn-wf-terminal-line strong{color:#e9e8e5;letter-spacing:.045em}
+.bn-wf-indicator{font-size:10px;color:#96bf8e;white-space:nowrap}
+.bn-wf-terminal-line>span:first-child{color:#7c7f85}
+.bn-wf-hero + section{margin-top:0}
+html.dark #main-content .article-link--simple,html.dark .article-link--card{border-color:#37393b}
+@media(max-width:700px){.bn-wf-hero{padding:65px 5px 38px}.bn-wf-actions{margin-bottom:35px}.bn-wf-terminal-line{grid-template-columns:24px 1fr auto;gap:8px;padding:15px 13px}.bn-wf-terminal-line>span:nth-child(3){display:none}.bn-wf-terminal-top{padding:12px}.bn-wf-indicator{font-size:9px}}
+@media(prefers-reduced-motion:reduce){.bn-wf-hero *{animation:none!important;transition:none!important}}
