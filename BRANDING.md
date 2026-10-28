@@ -3,9 +3,9 @@ Last reviewed: 2026-10-28
 Public guide: https://duynguyenaver.github.io/blognaver/branding/
 
 ## Non-negotiable standards
-- Use Blowfish 3, dark-first Neon editorial visual language. Inspired by n9o.xyz; preserve BlogNaver's distinct brand.
-- Brand palette: background #0D1023, card #12162B, primary text #EDF3FB, muted text #B6BFD2, accent violet #C49CFF, accent cyan #67D4EB.
-- Border rgba(189,201,234,.20), glass surface rgba(18,22,43,.69). Colors are BlogNaver design decisions, not claimed pixel-exact N9O extraction.
+- Use Blowfish 3, dark-first navy-blue editorial visual language. Inspired by n9o.xyz; preserve BlogNaver's distinct brand.
+- Brand palette: background #10172F, card #1C2747, primary text #EDF3FF, muted text #A9B8D7, accent blue #397BE0, link blue #70B6F8.
+- Border rgba(150,177,223,.22), surface #1C2747. Colors are BlogNaver design decisions, not claimed pixel-exact N9O extraction.
 - Typography: Inter, Be Vietnam Pro, system UI; Vietnamese support; body 16px, line-height 1.7–1.85; editorial headings bold.
 - Header fixed; homepage background hero, profile, cards of up to 12 recent articles. Navigation: About / Posts / Projects / Resume / Search.
 - Long-form reading width ~76ch; clean content hierarchy, breadcrumbs, TOC, reading time, related links.
@@ -18,3 +18,6 @@ Public guide: https://duynguyenaver.github.io/blognaver/branding/
 - Update this file and public guide when changing design tokens or rules.
 - Never claim 100% pixel match without comparative screenshots at the same viewport.
 Implementation: assets/css/custom.css; config/_default/params.toml; languages.vi.toml; menus.vi.toml.
+
+## Palette correction (2026-10-28)
+Do not use neon/pink/magenta/violet as primary or secondary website accents. Use custom Blowfish scheme `assets/css/schemes/blognaver-blue.css`; colorScheme must remain `blognaver-blue`. This explicitly supersedes earlier purple Neon guidelines. Reference is N9O navy + royal blue + bright cyan link treatment.
