@@ -20,14 +20,7 @@ Không sao chép logo, hình ảnh, nhận dạng cá nhân hoặc nội dung c�
 
 ## 2. Color palette — nguồn chuẩn
 
-<div class="bn-swatches">
-  <div><i style="background:#0D1023"></i><b>Midnight</b><code>#0D1023</code><small>Page background</small></div>
-  <div><i style="background:#12162B"></i><b>Deep Surface</b><code>#12162B</code><small>Cards, panels</small></div>
-  <div><i style="background:#EDF3FB"></i><b>Primary Text</b><code>#EDF3FB</code><small>Text on dark</small></div>
-  <div><i style="background:#B6BFD2"></i><b>Muted Text</b><code>#B6BFD2</code><small>Secondary information</small></div>
-  <div><i style="background:#C49CFF"></i><b>Neon Violet</b><code>#C49CFF</code><small>Accent, highlights</small></div>
-  <div><i style="background:#67D4EB"></i><b>Neon Cyan</b><code>#67D4EB</code><small>Links, interactive states</small></div>
-</div>
+{{< brand-swatches >}}
 
 **Supporting tokens:** border `rgba(189,201,234,.20)`; translucent surface `rgba(18,22,43,.69)`.
 
