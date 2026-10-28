@@ -1,8 +1,0 @@
-/* Shared UI for both independently rendered Hugo themes. */
-#bn-theme-switch{position:fixed;right:18px;bottom:18px;z-index:9999;display:inline-flex;align-items:center;gap:9px;padding:11px 15px;border:1px solid rgba(110,135,160,.5);border-radius:999px;background:#fff;color:#26394d;text-decoration:none;font:650 13px/1.2 system-ui,-apple-system,Segoe UI,sans-serif;box-shadow:0 6px 24px rgba(21,39,60,.22);transition:transform .15s ease,box-shadow .15s ease}
-#bn-theme-switch:hover{transform:translateY(-2px);box-shadow:0 10px 27px rgba(21,39,60,.28)}
-#bn-theme-switch:focus-visible{outline:3px solid #3278b7;outline-offset:3px}
-.bn-theme-switch-icon{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#e7f0f7;font-size:17px}
-@media(max-width:500px){#bn-theme-switch{right:12px;bottom:12px;padding:10px 12px;font-size:12px}}
-@media print{#bn-theme-switch{display:none!important}}
-@media(prefers-reduced-motion:reduce){#bn-theme-switch{transition:none}}

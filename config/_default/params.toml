@@ -1,53 +1,55 @@
+colorScheme = "blognaver-blue"
+defaultAppearance = "dark"
+autoSwitchAppearance = true
+enableSearch = true
+enableCodeCopy = true
+enableStructuredBreadcrumbs = true
+disableImageOptimization = false
+defaultBackgroundImage = "images/blognaver-aurora.svg"
+backgroundCanvas = true
 mainSections = ["posts"]
-rssFullContent = true
-SortBy = "default"
-
+[header]
+  layout = "fixed"
 [footer]
-  since = 2026
-  customText = ""
-
-[dateFormat]
-  published = ":date_medium"
-  lastUpdated = ":date_medium"
-
-[sidebar]
-  compact = false
-  emoji = "📝"
-  subtitle = "Công nghệ · Hàn Quốc · Cuộc sống"
-  avatar = ""
-
+  showCopyright = true
+  showThemeAttribution = false
+  showAppearanceSwitcher = true
+  showScrollToTop = true
+[homepage]
+  layout = "custom"
+  homepageImage = "images/blognaver-aurora.svg"
+  showRecent = true
+  showRecentItems = 12
+  showMoreLink = true
+  showMoreLinkDest = "posts"
+  cardView = true
+  cardViewScreenWidth = false
+  layoutBackgroundBlur = true
 [article]
-  headingAnchor = true
-  math = false
-  toc = true
-  readingTime = true
-  [article.list]
-    showTags = true
-  [article.license]
-    enabled = false
-
-[widgets]
-  homepage = [
-    { type = "search" },
-    { type = "archives", params = { limit = 5 } },
-    { type = "categories", params = { limit = 10 } },
-    { type = "tag-cloud", params = { limit = 15 } },
-  ]
-  page = [{ type = "toc" }]
-
-[colorScheme]
-  toggle = true
-  default = "light"
-
-[comments]
-  enabled = false
-
-[imageProcessing]
-  autoOrient = false
-  [imageProcessing.external]
-    timeout = "5s"
-  [imageProcessing.content]
-    enabled = true
-    widths = [800, 1600, 2400]
-  [imageProcessing.thumbnail]
-    enabled = true
+  showDate = true
+  showDateUpdated = true
+  showBreadcrumbs = true
+  showHero = true
+  heroStyle = "background"
+  showSummary = true
+  showHeadingAnchors = true
+  showPagination = true
+  showReadingTime = true
+  showTableOfContents = true
+  showTaxonomies = true
+  showRelatedContent = true
+  relatedContentLimit = 3
+[list]
+  showHero = true
+  heroStyle = "background"
+  layoutBackgroundBlur = true
+  layoutBackgroundHeaderSpace = false
+  showBreadcrumbs = false
+  showViews = false
+  showLikes = false
+  showSummary = false
+  showTableOfContents = false
+  showCards = true
+  groupByYear = false
+  cardView = true
+  cardViewScreenWidth = false
