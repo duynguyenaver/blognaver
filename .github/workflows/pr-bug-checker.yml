@@ -29,6 +29,8 @@ jobs:
         with:
           hugo-version: '0.162.0'
           extended: true
+      - name: Validate bug knowledge classifier fixtures
+        run: python3 scripts/test-ci-knowledge.py
       - name: Bug checks, known-fix guidance and 2 retries
         shell: bash
         run: |
@@ -42,20 +44,18 @@ jobs:
               exit 0
             fi
             echo "::endgroup::"
-            # Known safe remediation guidance only; NEVER execute guessed or downloaded fixes.
-            if grep -Eq 'dateFormat.*type string|colorScheme.*type string' "$RUNNER_TEMP/bug-check-$attempt.log"; then
-              echo "::warning::Known Hugo theme config mismatch: check config/_default/params.toml and languages.vi.toml (AGENTS.md)."
-              echo "- Known issue: theme config schema mismatch. Compare against active theme's configuration." >> "$GITHUB_STEP_SUMMARY"
-            elif grep -Eiq 'Dart Sass binary|TOCSS-DART|no Dart Sass' "$RUNNER_TEMP/bug-check-$attempt.log"; then
-              echo "::warning::Known Sass failure: validate required Dart Sass executable (AGENTS.md)."
-              echo "- Known issue: missing/incompatible Dart Sass. Check executable/version in CI." >> "$GITHUB_STEP_SUMMARY"
-            elif grep -Eiq 'module.*not found|failed to download modules' "$RUNNER_TEMP/bug-check-$attempt.log"; then
-              echo "::warning::Check Hugo module import, version and Go dependency cache."
-              echo "- Hugo module retrieval failure: verify module path/version and connectivity." >> "$GITHUB_STEP_SUMMARY"
-            else
-              echo "::warning::Unknown failure. Inspect build log; do not auto-modify source from an unverified guess."
-              echo "- Unclassified failure: consult job logs and upstream theme/Hugo docs before manual fix." >> "$GITHUB_STEP_SUMMARY"
-            fi
+            # Knowledge-base classification is advisory; no code is modified.
+            python3 scripts/ci-classify-failure.py --log "$RUNNER_TEMP/bug-check-$attempt.log" --out "$RUNNER_TEMP/bug-diagnosis-$attempt.json"
+            echo "### Attempt $attempt: known-issue analysis" >> "$GITHUB_STEP_SUMMARY"
+            python3 - "$RUNNER_TEMP/bug-diagnosis-$attempt.json" >> "$GITHUB_STEP_SUMMARY" <<'PY'
+          import json,sys
+          report=json.load(open(sys.argv[1]))
+          if not report["matches"]:
+              print("- Unclassified failure: inspect raw logs and official Hugo / GitHub docs.")
+          for case in report["matches"]:
+              print("- **"+case["title"]+"** ("+case["kind"]+"): "+case["advice"]+" [Documentation]("+case["source"]+")")
+          print("- Classification is heuristic; no source files were changed.")
+          PY
             if [ "$attempt" -lt 3 ]; then
               echo "::warning::Retry after 10s (attempt $((attempt+1))/3)."
               sleep 10

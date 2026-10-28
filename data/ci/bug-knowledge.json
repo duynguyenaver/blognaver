@@ -1,0 +1,115 @@
+{
+  "schema": "blognaver-bug-knowledge-v1",
+  "updated": "2026-10-29",
+  "policy": "Evidence-based diagnostics; pattern matching is not proof of root cause; no autonomous fixes or external commands.",
+  "cases": [
+    {
+      "id": "hugo-template-schema",
+      "title": "Hugo theme config schema mismatch",
+      "regex": "dateFormat.*type string|colorScheme.*type string|can't evaluate field .* in type string",
+      "kind": "deterministic",
+      "advice": "Check theme version and params shape; restore nested tables expected by active theme",
+      "source": "https://gohugo.io/configuration/",
+      "evidence": "historical-blognaver-stack"
+    },
+    {
+      "id": "hugo-template-missing",
+      "title": "Hugo template or partial missing",
+      "regex": "partial .*not found|template .* not defined|failed to render pages|render of .* failed",
+      "kind": "deterministic",
+      "advice": "Inspect first nested template error, check layouts override precedence and version compatibility",
+      "source": "https://gohugo.io/templates/",
+      "evidence": "general"
+    },
+    {
+      "id": "hugo-module",
+      "title": "Hugo Go module resolution",
+      "regex": "failed to download modules|module .*not found|module declares its path as|unknown revision|checksum mismatch",
+      "kind": "transient-or-deterministic",
+      "advice": "Check go.mod, go.sum, module path/version and network; never bypass checksum verification",
+      "source": "https://gohugo.io/hugo-modules/use-modules/",
+      "evidence": "general"
+    },
+    {
+      "id": "dart-sass",
+      "title": "Dart Sass missing or incompatible",
+      "regex": "no Dart Sass binary|TOCSS-DART|unexpected EOF when executing .sass.",
+      "kind": "deterministic",
+      "advice": "Install official Dart Sass executable required by Hugo and verify PATH; not just npm sass CLI",
+      "source": "https://gohugo.io/functions/css/sass/",
+      "evidence": "historical-blognaver-prism"
+    },
+    {
+      "id": "hugo-version",
+      "title": "Hugo version mismatch",
+      "regex": "minimum Hugo version|requires Hugo|hugoVersion|unknown flag",
+      "kind": "deterministic",
+      "advice": "Compare Hugo Extended version with theme module minimum and action setup",
+      "source": "https://gohugo.io/installation/",
+      "evidence": "general"
+    },
+    {
+      "id": "hugo-asset",
+      "title": "Missing generated assets or resources",
+      "regex": "missing-asset|resource .*not found|failed to execute resource|get resource .*nil",
+      "kind": "deterministic",
+      "advice": "Check asset pipeline, image/resource paths, GitHub Pages baseURL and pathprefix",
+      "source": "https://gohugo.io/hugo-pipes/",
+      "evidence": "general"
+    },
+    {
+      "id": "javascript",
+      "title": "JavaScript parse error",
+      "regex": "js-syntax|SyntaxError:|Unexpected token|Unexpected end of input",
+      "kind": "deterministic",
+      "advice": "Run node --check on changed JavaScript; inspect source and avoid retrying unchanged code",
+      "source": "https://nodejs.org/api/cli.html",
+      "evidence": "general"
+    },
+    {
+      "id": "missing-output",
+      "title": "Expected route missing",
+      "regex": "missing-output|invalid-html|permalink|404.html not found",
+      "kind": "deterministic",
+      "advice": "Inspect page front matter, drafts, menu links, permalink config and published public directory",
+      "source": "https://gohugo.io/content-management/urls/",
+      "evidence": "general"
+    },
+    {
+      "id": "github-permissions",
+      "title": "GitHub Actions permission restriction",
+      "regex": "Resource not accessible by integration|403 Forbidden|owner marked spam|workflow is not permitted",
+      "kind": "permissions",
+      "advice": "Inspect token scopes, repository restrictions and account-level blocks; do not assume quota issue",
+      "source": "https://docs.github.com/en/actions/security-for-github-actions/security-guides/automatic-token-authentication",
+      "evidence": "general"
+    },
+    {
+      "id": "github-pages",
+      "title": "GitHub Pages deployment error",
+      "regex": "deploy-pages.*failed|Failed to deploy|Pages build and deployment|Artifact not found",
+      "kind": "infrastructure",
+      "advice": "Inspect deploy job logs, Pages environment, artifact paths and permissions",
+      "source": "https://docs.github.com/en/pages",
+      "evidence": "general"
+    },
+    {
+      "id": "network-rate",
+      "title": "Temporary network/API quota",
+      "regex": "429 Too Many Requests|rate limit exceeded|connection reset|TLS handshake timeout|503 Service Unavailable|502 Bad Gateway",
+      "kind": "transient",
+      "advice": "Retry bounded with backoff; use API snapshot/cache fallback when appropriate",
+      "source": "https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api",
+      "evidence": "general"
+    },
+    {
+      "id": "merge-conflict",
+      "title": "PR branch conflict",
+      "regex": "merge conflict|mergeable_state.*dirty|CONFLICT \\(modify/delete\\)",
+      "kind": "deterministic",
+      "advice": "Compare latest main, resolve conflict preserving newer content; rerun Bug Checker",
+      "source": "https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/addressing-merge-conflicts",
+      "evidence": "historical-blognaver"
+    }
+  ]
+}
