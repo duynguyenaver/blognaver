@@ -27,9 +27,9 @@ Prevention: one feature = one branch/PR; rebase or merge latest `main` before re
 
 - Each independent change gets its own PR, using a feature branch. Never push feature changes directly to main or merge automatically.
 - `PR Bug Checker` runs one initial build/check and retries at most twice (3 attempts total). It classifies familiar Hugo config, Dart Sass, and module retrieval failures using verified historical playbooks. Diagnostic messages are advisory, **not evidence that a code fix was applied**. Unknown failures halt after the retry limit, with logs available for manual diagnosis and external documentation research.
-- The `Auto-review after Bug Checker` workflow may submit an explicit GitHub APPROVE review **only** after the linked PR's Bug Checker run succeeds, the checked SHA still equals the PR head, and no known check has failed. It never merges, force-pushes or changes source.
+- The `Auto-review after Bug Checker` workflow may submit an explicit GitHub APPROVE review **only** after the linked PR's Bug Checker run succeeds, the checked SHA still equals the PR head, and no known check has failed. The dedicated auto-approve.yml workflow conditionally merges the verified SHA and dispatches the production build; it never force-pushes.
 - GitHub may refuse automatic reviews until Settings → Actions → General → Workflow permissions → Allow GitHub Actions to create and approve pull requests is enabled; authors cannot approve their own PRs. The workflow logs that limitation and leaves human approval as fallback.
-- An automated CI approval is not the same as a human security/content review. The repository owner remains responsible for manually deciding whether to merge. New commits require fresh checks.
+- An automated CI approval is not the same as a human security/content review. The repository owner has explicitly authorized automated merge after checks; GitHub permissions and branch protection still apply. New commits require fresh checks.
 
 ## Safe automatic conflict repair
 
@@ -58,3 +58,10 @@ The source of truth for conflict resolution is the actual current PR merge state
 ### Incident: CI Git history missing on PR checkout (2026-10-29)
 
 Verified from GitHub Actions run 40786196594 / job 123159871722: Hugo generated 89 pages and the CMS index successfully, but `scripts/ci-site-audit.py` failed with `tooling: git merge-base origin/main HEAD exited 128`. GitHub's checkout did not provide `origin/main` history. This is **not** an application or JS syntax failure. Repair by configuring `actions/checkout` with `fetch-depth: 0` and explicitly fetching `refs/heads/main:refs/remotes/origin/main` before diff-based audits. Validate `git merge-base origin/main HEAD` succeeds. Classify future occurrences under `tooling/git-history` and stop rather than retrying three times without changing the checkout. The CI test should still fail if history truly cannot be fetched; never silently skip the JS audit.
+
+
+## Automated PR merge pipeline (2026-10-29)
+
+`.github/workflows/auto-approve.yml` runs only when `PR Bug Checker` completes successfully for a PR opened against main in this repository. It checks the exact current commit SHA, the Bug Checker job result, other completed check results, and PR mergeability. It attempts a GitHub review `APPROVE`, then squash-merges via a compare-and-swap of the checked head SHA. It **never merges on a failing, pending, stale, conflicted, draft or fork PR**. If GitHub blocks approval (e.g., workflow permissions or self-review restriction), it stops without merging and reports a warning.
+
+Merges done with GitHub Actions' `GITHUB_TOKEN` do not start regular `push` workflows. Immediately after successful merge, `auto-approve.yml` calls workflow_dispatch on `hugo.yml` for main to deploy the site; dispatch failures must be surfaced as errors (the merge itself has already occurred). Do not run third-party auto-approve actions directly on `pull_request.opened` because that approves before tests.
