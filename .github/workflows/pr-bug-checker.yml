@@ -22,7 +22,7 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0
-      - name: Fetch base branch history for changed-file audits
+      - name: Fetch main history required for JS diff audit
         run: |
           git fetch --no-tags origin +refs/heads/main:refs/remotes/origin/main
           git merge-base origin/main HEAD
@@ -34,6 +34,8 @@ jobs:
         with:
           hugo-version: '0.162.0'
           extended: true
+      - name: Validate bug knowledge classifier fixtures
+        run: python3 scripts/test-ci-knowledge.py
       - name: Bug checks, known-fix guidance and 2 retries
         shell: bash
         run: |
@@ -47,23 +49,21 @@ jobs:
               exit 0
             fi
             echo "::endgroup::"
-            # Known safe remediation guidance only; NEVER execute guessed or downloaded fixes.
-            if grep -Eq 'dateFormat.*type string|colorScheme.*type string' "$RUNNER_TEMP/bug-check-$attempt.log"; then
-              echo "::warning::Known Hugo theme config mismatch: check config/_default/params.toml and languages.vi.toml (AGENTS.md)."
-              echo "- Known issue: theme config schema mismatch. Compare against active theme's configuration." >> "$GITHUB_STEP_SUMMARY"
-            elif grep -Eiq 'Dart Sass binary|TOCSS-DART|no Dart Sass' "$RUNNER_TEMP/bug-check-$attempt.log"; then
-              echo "::warning::Known Sass failure: validate required Dart Sass executable (AGENTS.md)."
-              echo "- Known issue: missing/incompatible Dart Sass. Check executable/version in CI." >> "$GITHUB_STEP_SUMMARY"
-            elif grep -Eiq 'JS diff audit unavailable|merge-base.*exit status 128|Not a valid object name origin/main' "$RUNNER_TEMP/bug-check-$attempt.log"; then
-              echo "::error::Git history not available for changed-file audit. Fetch origin/main with fetch-depth: 0."
-              echo "- Deterministic CI tooling failure: missing base branch Git history. Repair checkout/fetch rather than repeating unchanged checks." >> "$GITHUB_STEP_SUMMARY"
+            # Knowledge-base classification is advisory; no code is modified.
+            python3 scripts/ci-classify-failure.py --log "$RUNNER_TEMP/bug-check-$attempt.log" --out "$RUNNER_TEMP/bug-diagnosis-$attempt.json"
+            echo "### Attempt $attempt: known-issue analysis" >> "$GITHUB_STEP_SUMMARY"
+            python3 - "$RUNNER_TEMP/bug-diagnosis-$attempt.json" >> "$GITHUB_STEP_SUMMARY" <<'PY'
+          import json,sys
+          report=json.load(open(sys.argv[1]))
+          if not report["matches"]:
+              print("- Unclassified failure: inspect raw logs and official Hugo / GitHub docs.")
+          for case in report["matches"]:
+              print("- **"+case["title"]+"** ("+case["kind"]+"): "+case["advice"]+" [Documentation]("+case["source"]+")")
+          print("- Classification is heuristic; no source files were changed.")
+          PY
+            if grep -Eiq 'JS diff audit unavailable|merge-base.*exit status 128|Not a valid object name origin/main|"category": "tooling"' "$RUNNER_TEMP/bug-check-$attempt.log"; then
+              echo "::error::Deterministic CI Git history error. Fix checkout fetch-depth and main ref; do not retry unchanged code."
               break
-            elif grep -Eiq 'module.*not found|failed to download modules' "$RUNNER_TEMP/bug-check-$attempt.log"; then
-              echo "::warning::Check Hugo module import, version and Go dependency cache."
-              echo "- Hugo module retrieval failure: verify module path/version and connectivity." >> "$GITHUB_STEP_SUMMARY"
-            else
-              echo "::warning::Unknown failure. Inspect build log; do not auto-modify source from an unverified guess."
-              echo "- Unclassified failure: consult job logs and upstream theme/Hugo docs before manual fix." >> "$GITHUB_STEP_SUMMARY"
             fi
             if [ "$attempt" -lt 3 ]; then
               echo "::warning::Retry after 10s (attempt $((attempt+1))/3)."

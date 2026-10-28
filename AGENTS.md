@@ -18,7 +18,7 @@ Recognize the exact pattern before applying a fix:
 2. Confirm the active target theme is Blowfish: `config/_default/module.toml` imports `github.com/nunocoracao/blowfish/v3`. Blowfish uses `layouts/partials/extend-footer.html`, not Stack's `layouts/_partials/footer/custom.html`.
 3. For this specific conflict only: preserve deletion of the obsolete Stack footer, preserve/bring over the NEWER dashboard implementation from `main` in `layouts/partials/extend-footer.html`, `static/js/commit-status.js`, and `static/css/commit-dashboard.css`; keep the rollback's Blowfish configuration and content.
 4. Merge the current `main` into the PR branch with BOTH parents recorded (or git merge with an explicit per-file resolution); never force-push, reset `main`, or discard unrelated later main changes. Re-fetch GitHub mergeability and rerun Bug Checker on the resulting branch.
-5. Auto-fix scope: only the above verified **obsolete Stack footer vs Blowfish footer** path mapping. For any other conflict or conflicting edits in the active footer, fail with an actionable message and require a human review. Never auto-merge PRs. **Automatically APPROVE PRs after Bug Checker PASS** when the checked head SHA is current, required checks pass, and GitHub permits automated reviews. Human review remains optional; only the owner merges.
+5. Auto-fix scope: only the above verified **obsolete Stack footer vs Blowfish footer** path mapping. For any other conflict or conflicting edits in the active footer, fail with an actionable message and require a human review. Never auto-merge or auto-approve PRs. PASS checks permit *manual* approval only.
 
 Prevention: one feature = one branch/PR; rebase or merge latest `main` before review; use the PR Bug Checker (up to 3 attempts) and do not promote changes from a conflicting or failing PR. Keep a native theme-specific footer adapter instead of directly editing multiple theme internals.
 
@@ -27,16 +27,22 @@ Prevention: one feature = one branch/PR; rebase or merge latest `main` before re
 
 - Each independent change gets its own PR, using a feature branch. Never push feature changes directly to main or merge automatically.
 - `PR Bug Checker` runs one initial build/check and retries at most twice (3 attempts total). It classifies familiar Hugo config, Dart Sass, and module retrieval failures using verified historical playbooks. Diagnostic messages are advisory, **not evidence that a code fix was applied**. Unknown failures halt after the retry limit, with logs available for manual diagnosis and external documentation research.
-- The `Auto-review after Bug Checker` workflow **must automatically submit an explicit GitHub APPROVE review** after the linked PR's Bug Checker run succeeds, the checked SHA still equals the PR head, and no known check has failed. It never merges, force-pushes or changes source.
+- The `Auto-review after Bug Checker` workflow may submit an explicit GitHub APPROVE review **only** after the linked PR's Bug Checker run succeeds, the checked SHA still equals the PR head, and no known check has failed. It never merges, force-pushes or changes source.
 - GitHub may refuse automatic reviews until Settings → Actions → General → Workflow permissions → Allow GitHub Actions to create and approve pull requests is enabled; authors cannot approve their own PRs. The workflow logs that limitation and leaves human approval as fallback.
 - An automated CI approval is not the same as a human security/content review. The repository owner remains responsible for manually deciding whether to merge. New commits require fresh checks.
 
 ## Safe automatic conflict repair
 
-Workflow `.github/workflows/safe-conflict-fixer.yml` listens on same-repository pull requests. It auto-repairs **only** the verified Stack footer modify/delete conflict when the PR switches to Blowfish. It checks the module import, verifies the obsolete footer exists on main but is intentionally deleted on the PR, verifies this is the **only** merge conflict, retains the Blowfish `extend-footer.html` and Commit Status dashboard, then pushes a normal fast-forward merge commit on the PR branch. It never merges to `main`, never force-pushes, and does not itself approve a PR; CI review is handled separately.
+Workflow `.github/workflows/safe-conflict-fixer.yml` listens on same-repository pull requests. It auto-repairs **only** the verified Stack footer modify/delete conflict when the PR switches to Blowfish. It checks the module import, verifies the obsolete footer exists on main but is intentionally deleted on the PR, verifies this is the **only** merge conflict, retains the Blowfish `extend-footer.html` and Commit Status dashboard, then pushes a normal fast-forward merge commit on the PR branch. It never merges to `main`, never force-pushes, and never approves a PR.
 
-Other conflicts are intentionally left for human resolution to avoid deleting recent work. Bug Checker must pass after any auto-fix; then CI automatically approves the PR when GitHub authorizes it, while the owner alone manually merges.
+Other conflicts are intentionally left for human resolution to avoid deleting recent work. Bug Checker must pass after any auto-fix and the owner must manually review and merge.
 
+
+## Evidence-based CI knowledge base (2026-10-29)
+
+- `data/ci/bug-knowledge.json` maintains curated, documented Hugo / Blowfish / Go Modules / GitHub Actions / GitHub Pages / static CMS failure signatures and past BlogNaver incidents. `scripts/ci-classify-failure.py` detects candidate causes from real CI output and points to remedies and documentation. It is heuristic, **not** proof of root cause or an autonomous AI engine.
+- `scripts/test-ci-knowledge.py` supplies regression fixtures so changes to classification rules must pass deterministic tests. New cases require an authentic failure signature, minimal reproducer or real log, reliable documentation, and preferably a verified successful fix.
+- No web access, model API, secrets or untrusted generated code is executed in the pull-request check. If a failure remains unknown, retain logs, stop after the existing retry limit, and investigate with official sources separately. Never auto-merge. The auto-review workflow may approve only verified-green checks when GitHub allows it.
 
 ## Bug Checker coverage and evidence rules (2026-10-29)
 
