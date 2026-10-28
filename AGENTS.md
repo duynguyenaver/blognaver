@@ -43,3 +43,18 @@ Other conflicts are intentionally left for human resolution to avoid deleting re
 - `data/ci/bug-knowledge.json` maintains curated, documented Hugo / Blowfish / Go Modules / GitHub Actions / GitHub Pages / static CMS failure signatures and past BlogNaver incidents. `scripts/ci-classify-failure.py` detects candidate causes from real CI output and points to remedies and documentation. It is heuristic, **not** proof of root cause or an autonomous AI engine.
 - `scripts/test-ci-knowledge.py` supplies regression fixtures so changes to classification rules must pass deterministic tests. New cases require an authentic failure signature, minimal reproducer or real log, reliable documentation, and preferably a verified successful fix.
 - No web access, model API, secrets or untrusted generated code is executed in the pull-request check. If a failure remains unknown, retain logs, stop after the existing retry limit, and investigate with official sources separately. Never auto-merge. The auto-review workflow may approve only verified-green checks when GitHub allows it.
+
+## Bug Checker coverage and evidence rules (2026-10-29)
+
+Project-specific CI rules are implemented in `scripts/pr-bug-checker.sh` and `scripts/ci-site-audit.py`. Validate: Hugo production build, CMS post index generation, key HTML routes, presence of published article outputs, first-party JS/CSS references from key pages, and syntax of changed JavaScript using `node --check`. These checks complement rather than replace UI, browser, integration, security, and editorial testing.
+
+Failures must be distinguished by category: `missing-output`, `invalid-html`, `permalink`, `missing-asset`, `js-syntax`, `tooling`, Hugo template/module configuration errors, and transient infrastructure/network failures. Link diagnoses to real logs and successful fixes. Do not claim "AI/big data self-fix" without a tested deterministic fixer.
+
+Retry transient failures at most twice (three checks total). Deterministic syntax, missing file and template failures normally require a source change; retrying alone is not a repair. Never download/execute suggested fixes from a search result. Never auto-merge main. PR mergeability and Bug Checker PASS are independent: a PR can pass CI while still having a merge conflict.
+
+The source of truth for conflict resolution is the actual current PR merge state and the latest main head. Preserve both sides' nonconflicting edits, re-run checks, and never overwrite newer AGENTS.md policies.
+
+
+### Incident: CI Git history missing on PR checkout (2026-10-29)
+
+Verified from GitHub Actions run 40786196594 / job 123159871722: Hugo generated 89 pages and the CMS index successfully, but `scripts/ci-site-audit.py` failed with `tooling: git merge-base origin/main HEAD exited 128`. GitHub's checkout did not provide `origin/main` history. This is **not** an application or JS syntax failure. Repair by configuring `actions/checkout` with `fetch-depth: 0` and explicitly fetching `refs/heads/main:refs/remotes/origin/main` before diff-based audits. Validate `git merge-base origin/main HEAD` succeeds. Classify future occurrences under `tooling/git-history` and stop rather than retrying three times without changing the checkout. The CI test should still fail if history truly cannot be fetched; never silently skip the JS audit.
