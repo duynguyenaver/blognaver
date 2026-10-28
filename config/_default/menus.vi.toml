@@ -15,7 +15,11 @@ name = "Resume"
 pageRef = "resume"
 weight = 40
 [[main]]
-identifier = "search"
+name = "Branding"
+pageRef = "branding"
 weight = 50
+[[main]]
+identifier = "search"
+weight = 60
 [main.params]
   action = "search"
