@@ -8,6 +8,7 @@ on:
 permissions:
   contents: read
   actions: read
+  checks: read
   pull-requests: write
 
 jobs:
@@ -22,7 +23,11 @@ jobs:
           script: |
             const owner = context.repo.owner, repo = context.repo.repo;
             const run = context.payload.workflow_run;
-            const prs = run.pull_requests || [];
+            let prs = run.pull_requests || [];
+            if (!prs.length) {
+              const {data: associated} = await github.rest.repos.listPullRequestsAssociatedWithCommit({owner, repo, commit_sha: run.head_sha});
+              prs = associated.filter(p => p.state === 'open');
+            }
             if (prs.length !== 1) {
               core.warning('No unique PR associated with this check. Manual review required.');
               return;
