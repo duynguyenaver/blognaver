@@ -52,13 +52,20 @@ jobs:
               core.warning('Bug Checker job not successful.'); return;
             }
             // Check that other checks associated with this commit are not pending or failed.
-            const {data: checks} = await github.rest.checks.listForRef({owner,repo,ref:pr.head.sha,per_page:100});
-            const relevant=checks.check_runs.filter(x => x.name !== 'Verify, approve and merge');
-            const bad=relevant.filter(x => x.status !== 'completed' || !['success','neutral','skipped'].includes(x.conclusion));
-            if (bad.length) {
-              core.warning('Pending/failed checks: '+bad.map(x=>x.name+':'+(x.conclusion||x.status)).join(', '));
-              return;
+            // A companion checker may still be completing when Bug Checker finishes.
+            // Wait briefly for pending checks; NEVER continue if they fail or stay pending.
+            let checksReady = false;
+            for (let attempt=0; attempt<6; attempt++) {
+              const {data: checks} = await github.rest.checks.listForRef({owner,repo,ref:pr.head.sha,per_page:100});
+              const relevant=checks.check_runs.filter(x => x.name !== 'Verify, approve and merge');
+              const bad=relevant.filter(x => x.status === 'completed' && !['success','neutral','skipped'].includes(x.conclusion));
+              if (bad.length) { core.warning('Failed checks: '+bad.map(x=>x.name).join(', ')); return; }
+              const pending=relevant.filter(x=>x.status !== 'completed');
+              if (!pending.length) { checksReady=true; break; }
+              if (attempt===5) { core.warning('Checks still pending: '+pending.map(x=>x.name).join(', ')); return; }
+              await new Promise(resolve => setTimeout(resolve,10000));
             }
+            if (!checksReady) return;
             // GitHub doesn't accept self-review; Actions review permission may also be disabled.
             try {
               const {data: reviews}=await github.rest.pulls.listReviews({owner,repo,pull_number:number,per_page:100});
