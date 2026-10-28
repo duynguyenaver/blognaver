@@ -130,3 +130,23 @@ header nav a:focus-visible,header nav button:focus-visible {
     padding-top: 10px !important;
   }
 }
+
+/* Article TOC: one natural page scroll, never an inner scroll bar. */
+#TableOfContents,
+#TableOfContents ul,
+.toc,
+.toc-container,
+aside:has(#TableOfContents),
+div:has(> #TableOfContents) {
+  max-height: none !important;
+  overflow-y: visible !important;
+  scrollbar-width: none !important;
+}
+#TableOfContents::-webkit-scrollbar,
+aside:has(#TableOfContents)::-webkit-scrollbar { display: none !important; }
+/* Keep long Korean/Vietnamese headings readable in a narrow TOC. */
+#TableOfContents a {
+  overflow-wrap: anywhere;
+  word-break: normal;
+  white-space: normal;
+}
