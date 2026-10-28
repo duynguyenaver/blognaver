@@ -32,3 +32,12 @@ Version 1.0 — 2026-10-28
 ## Notes about commit-to-deployment
 
 With `queue: max` and no in-progress cancellation, intermediate workflows are not intentionally collapsed by our config. GitHub still has queue limits and infrastructure limitations, so this is not an unconditional guarantee of one visible deployment per commit.
+
+## Speed optimization — 2026-10-28
+
+- The workflow caches `~/go/pkg/mod` via `actions/cache@v4`, using a key based on `go.mod` / `go.sum` and a fallback cache key. Future builds can reuse downloaded Hugo Module dependencies.
+- Removed the unconditional `hugo mod get` step. Hugo resolves needed modules during normal builds instead of refreshing the dependency graph on every deploy.
+- `actions/setup-go` internal cache is disabled because dependency caching is configured explicitly.
+- `actions/configure-pages@v5` runs before build; Pages upload and deploy remain separate jobs.
+- The queue still publishes each commit by design; with rapid consecutive pushes, queue waiting can dominate build time. To minimize latency further, batch related changes into one commit or explicitly opt for latest-only deployment (which changes the prior per-commit requirement).
+- Compare durations after multiple subsequent successful Actions runs; the first cache miss may not be faster.
