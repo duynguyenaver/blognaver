@@ -7,27 +7,23 @@ enableStructuredBreadcrumbs = true
 disableImageOptimization = false
 defaultBackgroundImage = "cover.svg"
 mainSections = ["posts"]
-
 [header]
   layout = "fixed"
-
 [footer]
   showCopyright = true
-  showThemeAttribution = true
+  showThemeAttribution = false
   showAppearanceSwitcher = true
   showScrollToTop = true
-
 [homepage]
   layout = "background"
   homepageImage = "cover.svg"
   showRecent = true
-  showRecentItems = 6
+  showRecentItems = 12
   showMoreLink = true
-  showMoreLinkDest = "/posts"
+  showMoreLinkDest = "posts"
   cardView = true
   cardViewScreenWidth = false
   layoutBackgroundBlur = true
-
 [article]
   showDate = true
   showDateUpdated = true
@@ -42,7 +38,6 @@ mainSections = ["posts"]
   showTaxonomies = true
   showRelatedContent = true
   relatedContentLimit = 3
-
 [list]
   showBreadcrumbs = true
   showSummary = true
