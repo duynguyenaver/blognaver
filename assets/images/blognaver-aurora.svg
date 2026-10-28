@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Animated blue aurora background for BlogNaver">
+<defs>
+<radialGradient id="azure"><stop stop-color="#397be0" stop-opacity=".66"/><stop offset="1" stop-color="#397be0" stop-opacity="0"/></radialGradient>
+<radialGradient id="cyan"><stop stop-color="#32b8dc" stop-opacity=".46"/><stop offset="1" stop-color="#32b8dc" stop-opacity="0"/></radialGradient>
+<radialGradient id="royal"><stop stop-color="#194596" stop-opacity=".70"/><stop offset="1" stop-color="#194596" stop-opacity="0"/></radialGradient>
+<linearGradient id="trails" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#3b82f6" stop-opacity="0"/><stop offset=".42" stop-color="#70b6f8" stop-opacity=".32"/><stop offset=".75" stop-color="#64d6e4" stop-opacity=".21"/><stop offset="1" stop-color="#60a5fa" stop-opacity="0"/></linearGradient>
+<filter id="soft"><feGaussianBlur stdDeviation="42"/></filter>
+<filter id="texture"><feTurbulence type="fractalNoise" baseFrequency=".55" numOctaves="2" seed="8" stitchTiles="stitch"/><feColorMatrix type="matrix" values="0 0 0 0 0.5 0 0 0 0 .67 0 0 0 0 .9 0 0 0 .045 0"/></filter>
+</defs>
+<rect width="1600" height="900" fill="#10172f"/>
+<g filter="url(#soft)">
+<ellipse cx="265" cy="160" rx="405" ry="335" fill="url(#azure)"><animateTransform attributeName="transform" type="translate" values="0 0;110 120;-30 40;0 0" dur="29s" repeatCount="indefinite"/></ellipse>
+<ellipse cx="1280" cy="700" rx="465" ry="340" fill="url(#cyan)"><animateTransform attributeName="transform" type="translate" values="0 0;-120 -115;35 -30;0 0" dur="33s" repeatCount="indefinite"/></ellipse>
+<ellipse cx="850" cy="275" rx="340" ry="280" fill="url(#royal)"><animateTransform attributeName="transform" type="translate" values="0 0;-65 145;100 30;0 0" dur="24s" repeatCount="indefinite"/></ellipse>
+</g>
+<g fill="none" stroke="url(#trails)" stroke-width="1.4" opacity=".76">
+<path d="M-120 680 C280 370 450 780 790 545 S1340 300 1720 550"><animate attributeName="d" dur="21s" repeatCount="indefinite" values="M-120 680 C280 370 450 780 790 545 S1340 300 1720 550;M-120 570 C260 770 560 340 870 630 S1290 410 1720 390;M-120 680 C280 370 450 780 790 545 S1340 300 1720 550"/></path>
+<path d="M-100 790 C220 540 550 865 840 690 S1340 380 1720 660"><animate attributeName="d" dur="27s" repeatCount="indefinite" values="M-100 790 C220 540 550 865 840 690 S1340 380 1720 660;M-100 715 C280 875 530 550 890 740 S1280 460 1720 510;M-100 790 C220 540 550 865 840 690 S1340 380 1720 660"/></path>
+<path d="M-140 415 C220 215 530 540 850 370 S1370 160 1720 325" opacity=".35"><animate attributeName="d" dur="31s" repeatCount="indefinite" values="M-140 415 C220 215 530 540 850 370 S1370 160 1720 325;M-140 345 C200 470 560 230 880 420 S1380 220 1720 405;M-140 415 C220 215 530 540 850 370 S1370 160 1720 325"/></path>
+</g>
+<rect width="1600" height="900" filter="url(#texture)" opacity=".42"/>
+<style>@media(prefers-reduced-motion:reduce){animate,animateTransform{display:none!important}}</style>
+</svg>
