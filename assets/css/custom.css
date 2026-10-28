@@ -101,3 +101,32 @@ header nav a:focus-visible,header nav button:focus-visible {
     text-align: left !important;
   }
 }
+
+/* Homepage hero spacing fix: remove excess air between fixed navbar and intro.
+   Keep the animation background intact; do not affect posts/article layouts. */
+#main-content > article.prose > .relative > .mx-auto > .relative {
+  min-height: 0 !important;
+  padding-top: 12px !important;
+  padding-bottom: 16px !important;
+}
+#main-content > article.prose > .relative > .mx-auto > .relative > .relative.z-10 {
+  margin-top: 0 !important;
+  padding-top: 12px !important;
+  padding-bottom: 12px !important;
+}
+/* Reduce any reserved header gap inside the homepage content alone. */
+#main-content:has(> article.prose > .relative > .mx-auto > .relative > .relative.z-10) {
+  padding-top: 68px !important;
+}
+@media(max-width:640px){
+  #main-content:has(> article.prose > .relative > .mx-auto > .relative > .relative.z-10){
+    padding-top: 56px !important;
+  }
+  #main-content > article.prose > .relative > .mx-auto > .relative {
+    padding-top: 0 !important;
+    padding-bottom: 10px !important;
+  }
+  #main-content > article.prose > .relative > .mx-auto > .relative > .relative.z-10 {
+    padding-top: 10px !important;
+  }
+}
