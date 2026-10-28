@@ -1,21 +1,20 @@
 [[main]]
-name = "Trang chủ"
-pageRef = "/"
-weight = 10
-[[main]]
 name = "Bài viết"
 pageRef = "posts"
-weight = 20
+weight = 10
+
 [[main]]
-name = "Chủ đề"
-pageRef = "categories"
-weight = 30
+name = "Thẻ"
+pageRef = "tags"
+weight = 20
+
 [[main]]
 name = "Giới thiệu"
 pageRef = "about"
-weight = 40
+weight = 30
+
 [[main]]
 identifier = "search"
-weight = 50
+weight = 40
 [main.params]
   action = "search"
