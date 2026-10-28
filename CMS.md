@@ -51,3 +51,12 @@ The Studio **SEO & mô tả** section now provides **Tự động SEO** (enabled
 - The estimated score checks 10 weighted rules totaling 100: title (15), description (20), slug (10), category (10), tags (5), content >=300 words (15), heading (10), link (5), cover (5), content >=600 words (5).
 - This is a content readiness heuristic, **not** a Google ranking score, PageSpeed score, search-result position or ranking prediction.
 - Publishing still requires a successful GitHub Actions deployment.
+
+## Smart Insights & CMS Activity — 2026-10-28
+
+- Dashboard: `/cms/insights/`; also linked from the Studio sidebar.
+- After the GitHub Contents API confirms a successful *publish* commit, Studio redirects to Smart Insights. A draft-save stays in the editor.
+- The dashboard reads public GitHub Actions workflow runs, lists source Hugo posts from `main`, and computes article totals, front-matter draft/published states, average words, image/tag coverage and category distribution from readable page bundles. It auto-refreshes every 90 seconds while visible. GitHub unauthenticated API rate limits can interrupt refresh; these are source metrics, **not actual live traffic, Google Analytics or confirmed public URLs**.
+- The previous published commit SHA is retained temporarily in **sessionStorage** to match its workflow and indicate queued/running/success/failure. A successful commit does **not** imply successful deployment.
+- The Activity section, below analytics, records publish attempts, confirmed GitHub publishes/draft saves, edits, previews, navigation and image actions from this browser only in **localStorage**, limited to 200 events. No token or body text is logged. It is not a server-side audit log and does not merge actions from other devices; clearing browser data clears this history.
+- For true cross-device complete audit trails, a separate authenticated backend or a repository-backed event log is needed. Do not claim the local log covers every action everywhere.
