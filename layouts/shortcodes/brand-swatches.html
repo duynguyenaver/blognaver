@@ -1,0 +1,12 @@
+<div class="bn-swatches">
+{{ range (slice
+(dict "name" "Midnight" "hex" "#0D1023" "usage" "Page background")
+(dict "name" "Deep Surface" "hex" "#12162B" "usage" "Cards / panels")
+(dict "name" "Primary Text" "hex" "#EDF3FB" "usage" "Text on dark")
+(dict "name" "Muted Text" "hex" "#B6BFD2" "usage" "Secondary information")
+(dict "name" "Neon Violet" "hex" "#C49CFF" "usage" "Accent / highlights")
+(dict "name" "Neon Cyan" "hex" "#67D4EB" "usage" "Links / focus")
+) }}
+<div class="bn-swatch"><span class="bn-color" style="background-color:{{ .hex | safeCSS }}"></span><strong>{{ .name }}</strong><code>{{ .hex }}</code><small>{{ .usage }}</small></div>
+{{ end }}
+</div>
