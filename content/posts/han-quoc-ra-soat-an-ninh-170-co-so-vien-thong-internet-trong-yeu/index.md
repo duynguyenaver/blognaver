@@ -2,6 +2,7 @@
 title: "Hàn Quốc rà soát an ninh hơn 170 cơ sở viễn thông và Internet trọng yếu"
 date: 2026-10-28T16:25:00+07:00
 draft: false
+aliases: ["/posts/han-quoc-ra-soat-an-ninh-170-co-so-vien-thong-internet-trong-yeu/"]
 slug: "han-quoc-ra-soat-an-ninh-170-co-so-vien-thong-internet-trong-yeu"
 description: "Hàn Quốc kiểm tra an ninh hơn 170 cơ sở hạ tầng thông tin quan trọng thuộc 111 tổ chức tư nhân sau các sự cố tấn công mạng tại lĩnh vực tài chính."
 summary: "Chính phủ Hàn Quốc mở rộng rà soát an ninh mạng đối với hạ tầng viễn thông và Internet trọng yếu, tập trung vào máy chủ, website và các tài sản kết nối Internet."
