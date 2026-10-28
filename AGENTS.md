@@ -30,3 +30,9 @@ Prevention: one feature = one branch/PR; rebase or merge latest `main` before re
 - The `Auto-review after Bug Checker` workflow may submit an explicit GitHub APPROVE review **only** after the linked PR's Bug Checker run succeeds, the checked SHA still equals the PR head, and no known check has failed. It never merges, force-pushes or changes source.
 - GitHub may refuse automatic reviews until Settings → Actions → General → Workflow permissions → Allow GitHub Actions to create and approve pull requests is enabled; authors cannot approve their own PRs. The workflow logs that limitation and leaves human approval as fallback.
 - An automated CI approval is not the same as a human security/content review. The repository owner remains responsible for manually deciding whether to merge. New commits require fresh checks.
+
+## Safe automatic conflict repair
+
+Workflow `.github/workflows/safe-conflict-fixer.yml` listens on same-repository pull requests. It auto-repairs **only** the verified Stack footer modify/delete conflict when the PR switches to Blowfish. It checks the module import, verifies the obsolete footer exists on main but is intentionally deleted on the PR, verifies this is the **only** merge conflict, retains the Blowfish `extend-footer.html` and Commit Status dashboard, then pushes a normal fast-forward merge commit on the PR branch. It never merges to `main`, never force-pushes, and never approves a PR.
+
+Other conflicts are intentionally left for human resolution to avoid deleting recent work. Bug Checker must pass after any auto-fix and the owner must manually review and merge.
