@@ -19,11 +19,5 @@ pageRef = "branding"
 weight = 40
 
 [[main]]
-name = "Tìm kiếm"
-pageRef = "search"
+identifier = "search"
 weight = 50
-
-[[main]]
-name = "Lưu trữ"
-pageRef = "archives"
-weight = 60

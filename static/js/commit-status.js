@@ -40,7 +40,7 @@
     $("[data-legend-success]").textContent=success;
     $("[data-legend-failure]").textContent=fail;
     $("[data-legend-other]").textContent=other;
-    const chart=document.createDocumentFragment(),list=document.createDocumentFragment();
+    const chart=document.createDocumentFragment();
     for(const [index,run] of all.entries()){
       const s=status(run),g=group(s),url=linkForRun(run);
       const item=el("a",g);
@@ -49,20 +49,44 @@
       item.style.height=(index%4===0?"97":index%4===1?"70":index%4===2?"88":"55")+"%";
       chart.append(item);
     }
-    for(const run of all.slice(0,8)){
-      const s=status(run),line=el("div","bn-commit-run");
-      const sha=String(run.head_sha||"").slice(0,8),shaNode=el("a","bn-commit-sha",sha||"—");
-      if(/^[a-f0-9]{7,40}$/i.test(run.head_sha||"")){shaNode.href="https://github.com/duynguyenaver/blognaver/commit/"+run.head_sha;shaNode.target="_blank";shaNode.rel="noopener noreferrer"}
-      const info=el("div"),title=el("div","bn-commit-title",run.display_title||run.head_commit?.message?.split("\n")[0]||"Workflow");
-      title.title=title.textContent;
-      info.append(title,el("div","bn-commit-meta","#"+(run.run_number||run.id)+" · "+(run.head_branch||"main")));
-      const badge=el("a","bn-commit-state",labels[s]||s);badge.dataset.state=s;
-      const url=linkForRun(run);if(url){badge.href=url;badge.target="_blank";badge.rel="noopener noreferrer"}
-      line.append(shaNode,info,badge);list.append(line);
+    // Verified historical incidents only. Never infer root causes from run titles alone.
+    const known = [
+      {title:"Stack: cấu hình theme và ngày đăng không tương thích", description:"Chẩn đoán đã xác minh từ log: colorScheme và dateFormat còn dùng cấu trúc Blowfish, gây lỗi render với Stack.", solution:"Đã sửa schema colorScheme và dateFormat trong cấu hình Hugo; bản build sau đó thành công.", failure:40781677019, success:40781833677},
+      {title:"Prism: thiếu Dart Sass executable", description:"Log xác nhận thiếu Dart Sass binary hoặc giao thức CLI không tương thích trong bước build Prism.", solution:"Đã thay bằng bản Dart Sass executable chính thức; CI kiểm tra hai theme thành công.", failure:40782828081, success:40783106998}
+    ];
+    const insights=document.createDocumentFragment();
+    for(const item of known){
+      const card=el("article","bn-failure-insight");
+      const heading=el("div","bn-failure-heading");
+      heading.append(el("strong","",item.title),el("span","bn-failure-fixed","Đã xử lý · lịch sử"));
+      const reason=el("p","",item.description);
+      const remedy=el("p","bn-failure-remedy","Giải pháp đã dùng: "+item.solution);
+      const refs=el("div","bn-failure-refs");
+      for(const [label,id] of [["Log lỗi",item.failure],["Build thành công",item.success]]){
+        const link=el("a","",label+" ↗");
+        link.href="https://github.com/duynguyenaver/blognaver/actions/runs/"+id;
+        link.target="_blank";link.rel="noopener noreferrer";refs.append(link);
+      }
+      card.append(heading,reason,remedy,refs);insights.append(card);
     }
+    const recentFailed=all.filter(run=>group(status(run))==="failure");
+    const overview=el("p","",recentFailed.length
+      ? recentFailed.length+" / "+all.length+" lượt gần nhất thất bại. Không thể xác định nguyên nhân từ trạng thái API; cần xem log từng run."
+      : "Không có lượt thất bại trong "+all.length+" workflow gần nhất. Dưới đây là các ca lỗi lịch sử đã xác minh.");
+    if(recentFailed.length){
+      const box=el("div","bn-failure-recent");
+      box.append(el("strong","","Lượt thất bại gần đây (chưa xác minh nguyên nhân)"));
+      for(const run of recentFailed.slice(0,5)){
+        const link=el("a","",("#"+(run.run_number||run.id))+" · Xem log ↗");
+        link.href=linkForRun(run);link.target="_blank";link.rel="noopener noreferrer";box.append(link);
+      }
+      box.append(el("p","","Đề xuất: mở log bước Build site/Deploy, so khớp lỗi với các ca đã xử lý ở dưới. Không tự suy diễn nguyên nhân hoặc chạy sửa lỗi."));
+      insights.prepend(box);
+    }
+    $("[data-failure-overview]").replaceChildren(overview);
+    $("[data-failure-insights]").replaceChildren(insights);
     $("[data-timeline]").replaceChildren(chart);
-    $("[data-runs]").replaceChildren(list);
-    $("[data-feedback]").textContent=all.length?"Hiển thị 8 workflow mới nhất (trên 20 lượt thống kê).":"Chưa có workflow.";
+    $("[data-feedback]").textContent="Phân tích chỉ đọc · 2 ca lỗi đã xác minh";
   }
   async function load(){
     if(busy||document.hidden||!details.open)return;
