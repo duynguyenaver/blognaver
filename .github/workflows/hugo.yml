@@ -52,6 +52,10 @@ jobs:
         run: hugo --gc --minify --baseURL 'https://duynguyenaver.github.io/blognaver/'
       - name: Generate complete CMS post index (including drafts)
         run: node scripts/generate-cms-index.mjs
+      - name: Snapshot recent workflows for API fallback
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/generate-workflow-snapshot.mjs
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
