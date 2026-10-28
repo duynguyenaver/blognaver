@@ -23,3 +23,12 @@
 .side-bottom{padding:14px 11px 2px;border-top:1px solid #2c4162;margin-top:auto;gap:11px}
 .side-bottom a{font-size:11px;color:#a6caff}
 @media(max-width:760px){.shell{display:block}.side{padding:10px 12px;overflow:visible}.side .nav{width:auto;display:inline-flex;max-width:100%;vertical-align:middle}.side .nav .nav-label{overflow:visible}.side .nav .nav-counter{display:none}.side-section-tools{display:none}.side .studio-manager-link{display:inline-flex}.postlist,.searchbox,.side-bottom{display:none}}
+
+/* Keep site settings at the very bottom, visually separate from writing. */
+.side-bottom{margin-top:auto;display:flex;flex-direction:column;gap:12px;padding:12px 10px 4px;border-top:1px solid #2c4162}
+.side-tools-bottom{padding-bottom:12px;border-bottom:1px solid #2c4162;display:flex;flex-direction:column;gap:8px}
+.side-tools-heading{display:block;font-size:10px;font-weight:800;letter-spacing:.12em;color:#9dbce7;padding:0 5px}
+.side-bottom .studio-manager-link{display:flex!important;width:100%;min-height:42px;margin:0;background:#1b304f;border:1px solid #39567c;text-decoration:none!important}
+.side-bottom .studio-manager-link:hover{background:#26436b}
+.side-bottom > a:not(.studio-manager-link){padding:0 5px;text-decoration:none}
+@media(max-width:760px){.side-bottom{display:flex;padding:10px 0 0;margin-top:8px;gap:8px}.side-tools-bottom{padding-bottom:8px}.side-tools-heading{display:none}.side-bottom .studio-manager-link{display:flex!important;width:100%}.side-bottom>a:not(.studio-manager-link){display:none}}
