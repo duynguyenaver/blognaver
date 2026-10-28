@@ -1,28 +1,40 @@
-colorScheme = "blowfish"
-defaultAppearance = "light"
+colorScheme = "neon"
+defaultAppearance = "dark"
 autoSwitchAppearance = true
 enableSearch = true
 enableCodeCopy = true
 enableStructuredBreadcrumbs = true
+disableImageOptimization = false
+defaultBackgroundImage = "cover.svg"
 mainSections = ["posts"]
+
 [header]
-  layout = "basic"
+  layout = "fixed"
+
 [footer]
   showCopyright = true
-  showThemeAttribution = false
+  showThemeAttribution = true
   showAppearanceSwitcher = true
   showScrollToTop = true
+
 [homepage]
-  layout = "page"
+  layout = "background"
+  homepageImage = "cover.svg"
   showRecent = true
   showRecentItems = 6
   showMoreLink = true
-  showMoreLinkDest = "posts"
+  showMoreLinkDest = "/posts"
   cardView = true
+  cardViewScreenWidth = false
+  layoutBackgroundBlur = true
+
 [article]
   showDate = true
   showDateUpdated = true
   showBreadcrumbs = true
+  showHero = true
+  heroStyle = "background"
+  showSummary = true
   showHeadingAnchors = true
   showPagination = true
   showReadingTime = true
@@ -30,7 +42,12 @@ mainSections = ["posts"]
   showTaxonomies = true
   showRelatedContent = true
   relatedContentLimit = 3
+
 [list]
   showBreadcrumbs = true
   showSummary = true
+  showHero = true
+  heroStyle = "background"
+  showCards = true
+  groupByYear = false
   cardView = true
