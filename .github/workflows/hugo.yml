@@ -22,21 +22,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout exact triggering commit
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           persist-credentials: false
       - name: Setup Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff
         with:
           go-version: '1.23.x'
           cache: false
       - name: Setup Hugo
-        uses: peaceiris/actions-hugo@v3
+        uses: peaceiris/actions-hugo@2752ce1d29631191ea3f27c23495fa06139a5b78
         with:
           hugo-version: '0.162.0'
           extended: true
       - name: Cache Hugo module downloads and build resources
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
         with:
           path: ~/go/pkg/mod
           key: ${{ runner.os }}-hugo-v2-${{ hashFiles('go.mod', 'go.sum') }}
@@ -45,7 +45,7 @@ jobs:
       # Hugo downloads missing pinned modules during build.
       # Do not run "hugo mod get" on every deployment: it may change module versions.
       - name: Configure Pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b
       - name: Build site
         env:
           HUGO_ENVIRONMENT: production
@@ -57,7 +57,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         run: node scripts/generate-workflow-snapshot.mjs
       - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa
         with:
           path: ./public
 
@@ -70,7 +70,7 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e
       - name: Summarize deployment
         env:
           URL: ${{ steps.deployment.outputs.page_url }}
