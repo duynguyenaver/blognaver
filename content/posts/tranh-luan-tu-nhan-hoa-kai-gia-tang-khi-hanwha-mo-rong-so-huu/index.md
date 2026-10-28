@@ -126,92 +126,19 @@ Despite Hanwha's growing influence, KAI's privatization has not been ap
 
 ## Từ vựng tiếng Hàn quan trọng
 
-Tiếng Hàn
-
-Tiếng Việt
-
-English
-
-민영화
-
-Tư nhân hóa
-
-Privatization
-
-지분 확대
-
-Mở rộng cổ phần
-
-Stake expansion
-
-지배구조
-
-Cơ cấu quản trị/sở hữu
-
-Corporate governance
-
-경영권
-
-Quyền điều hành
-
-Management control
-
-최대 주주
-
-Cổ đông lớn nhất
-
-Largest shareholder
-
-지분 취득
-
-Mua cổ phần
-
-Stake acquisition
-
-공정거래위원회
-
-Ủy ban Thương mại Công bằng
-
-Fair Trade Commission
-
-우선협상대상자
-
-Đơn vị ưu tiên đàm phán
-
-Preferred bidder
-
-시장 지배력
-
-Sức mạnh thị trường
-
-Market power
-
-경쟁력 강화
-
-Nâng cao năng lực cạnh tranh
-
-Competitiveness enhancement
-
-노동조합
-
-Công đoàn
-
-Labor union
-
-체계통합
-
-Tích hợp hệ thống
-
-Systems integration
-
-국정감사
-
-Kiểm toán/giám sát của Quốc hội
-
-Parliamentary audit
-
-이해관계자
-
-Các bên liên quan
-
-Stakeholders
+| Tiếng Hàn | Tiếng Việt | English |
+| --- | --- | --- |
+| 민영화 | Tư nhân hóa | Privatization |
+| 지분 확대 | Mở rộng cổ phần | Stake expansion |
+| 지배구조 | Cơ cấu quản trị/sở hữu | Corporate governance |
+| 경영권 | Quyền điều hành | Management control |
+| 최대 주주 | Cổ đông lớn nhất | Largest shareholder |
+| 지분 취득 | Mua cổ phần | Stake acquisition |
+| 공정거래위원회 | Ủy ban Thương mại Công bằng | Fair Trade Commission |
+| 우선협상대상자 | Đơn vị ưu tiên đàm phán | Preferred bidder |
+| 시장 지배력 | Sức mạnh thị trường | Market power |
+| 경쟁력 강화 | Nâng cao năng lực cạnh tranh | Competitiveness enhancement |
+| 노동조합 | Công đoàn | Labor union |
+| 체계통합 | Tích hợp hệ thống | Systems integration |
+| 국정감사 | Giám sát của Quốc hội | Parliamentary audit |
+| 이해관계자 | Các bên liên quan | Stakeholders |
