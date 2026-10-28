@@ -40,3 +40,14 @@ From BlogNaver Studio, select **Quản lý Menu & Section**.
 - **Security:** use a repository-scoped PAT in tab memory only. Do not include it in Git or email.
 - **Scope:** this manager supports file-backed menus and Markdown sections. Arbitrary theme template regions, hardcoded footer widgets, static CMS code, custom layouts, and binary media are not fully editable with this initial GUI. Edit those via code or a future dedicated component manager.
 - **Best practice:** after saving, check Actions and verify the public page. Page content is converted from Markdown to HTML and back; complex Markdown syntax may not round-trip precisely, so review changes for legacy pages.
+
+## Automatic SEO and estimated score (2026-10-28)
+
+The Studio **SEO & mô tả** section now provides **Tự động SEO** (enabled by default) and an estimated SEO score out of 100. It runs in the browser, needs no paid API and sends no article content to a classification service.
+
+- As title/body are edited, it proposes Vietnamese metadata from the actual text, canonical categories and relevant tags.
+- Auto-generated description aims for 110–160 characters when enough source text is available. If insufficient, the score flags the missing length; it never invents facts to pad text.
+- Manual edits take precedence. Existing metadata is preserved when opening saved articles. Turning auto mode off stops generation. Turn it back on to apply suggestions to empty or previously system-generated fields.
+- The estimated score checks 10 weighted rules totaling 100: title (15), description (20), slug (10), category (10), tags (5), content >=300 words (15), heading (10), link (5), cover (5), content >=600 words (5).
+- This is a content readiness heuristic, **not** a Google ranking score, PageSpeed score, search-result position or ranking prediction.
+- Publishing still requires a successful GitHub Actions deployment.
