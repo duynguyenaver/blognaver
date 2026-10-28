@@ -60,3 +60,11 @@ The Studio **SEO & mô tả** section now provides **Tự động SEO** (enabled
 - The previous published commit SHA is retained temporarily in **sessionStorage** to match its workflow and indicate queued/running/success/failure. A successful commit does **not** imply successful deployment.
 - The Activity section, below analytics, records publish attempts, confirmed GitHub publishes/draft saves, edits, previews, navigation and image actions from this browser only in **localStorage**, limited to 200 events. No token or body text is logged. It is not a server-side audit log and does not merge actions from other devices; clearing browser data clears this history.
 - For true cross-device complete audit trails, a separate authenticated backend or a repository-backed event log is needed. Do not claim the local log covers every action everywhere.
+
+## Paste-to-table support (2026-10-28)
+
+- In BlogNaver Studio editor, paste a real HTML table from Word/ChatGPT or tab-separated rows from Excel/Sheets. A custom Quill table embed displays a structured table rather than flattening it into paragraphs.
+- The **Chèn bảng** button also accepts tab-separated text, pipe-delimited Markdown tables and a vocabulary list headed by `Tiếng Hàn / Tiếng Việt / English` with a number of entries divisible by three.
+- On publishing, the CMS converts the embedded table to a GitHub-flavored Markdown pipe table for Hugo/Blowfish rendering. Vertical overflow is avoided with horizontal scrolling for narrow screens.
+- This handles simple rectangular tables. Merged rows/columns, nested tables, complex embedded HTML and arbitrary text with ambiguous column boundaries still require manual review.
+- Hotfixed the KAI privatization post: the 14 Korean–Vietnamese–English vocabulary entries are now a genuine three-column Markdown table.
