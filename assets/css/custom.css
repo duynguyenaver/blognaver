@@ -164,3 +164,18 @@ html body #TOCView.toc-right {
 }
 html body #TOCView.toc-right::-webkit-scrollbar { display: none !important; }
 html body #TOCView.toc-right > div { max-height: none !important; overflow: visible !important; }
+
+/* BlogNaver home-only editorial sidebar. Other pages stay unchanged. */
+.bn-home-grid{display:grid;grid-template-columns:minmax(215px,270px) minmax(0,1fr);gap:clamp(22px,3vw,48px);align-items:start;width:100%;max-width:1280px;margin:0 auto;padding:clamp(16px,2.5vw,35px) clamp(14px,2vw,26px) 40px}
+.bn-home-sidebar{min-width:0;position:sticky;top:84px;align-self:start}
+.bn-home-profile{padding:24px 20px;background:rgba(21,36,64,.76);border:1px solid rgba(113,159,211,.32);border-radius:17px;box-shadow:0 14px 40px rgba(2,11,30,.12);backdrop-filter:blur(9px);text-align:left}
+.bn-home-avatar{width:68px;height:68px;border-radius:100%;display:block;margin:0 0 16px;border:1px solid rgba(99,191,229,.48)}
+.bn-home-profile h1{font-size:clamp(1.5rem,2vw,2rem);font-weight:850;line-height:1.18;letter-spacing:-.04em;margin:0 0 6px;color:#f5f9ff}
+.bn-home-tagline{font-size:12px!important;line-height:1.45!important;color:#b4ccec!important;font-weight:650;margin:0 0 12px!important}
+.bn-home-github{display:inline-flex;align-items:center;margin:0 0 18px;color:#8dc9ff!important;font-size:12px;font-weight:750;text-decoration:none}
+.bn-home-github:hover{text-decoration:underline}
+.bn-home-description{border-top:1px solid rgba(136,171,217,.25);padding-top:15px;max-width:100%;font-size:13px;line-height:1.8;color:#d7e5fb;text-align:left;overflow-wrap:break-word}
+.bn-home-description p{margin:0 0 8px}
+.bn-home-articles{min-width:0;margin:0;padding:0}
+.bn-home-articles .max-w-prose,.bn-home-articles .max-w-7xl{max-width:100%}
+@media(max-width:800px){.bn-home-grid{grid-template-columns:1fr;gap:16px;padding:12px 14px 30px}.bn-home-sidebar{position:static}.bn-home-profile{padding:16px 18px;display:grid;grid-template-columns:58px minmax(0,1fr);column-gap:14px;align-items:center}.bn-home-avatar{width:54px;height:54px;grid-row:1/4;margin:0}.bn-home-profile h1{font-size:1.5rem}.bn-home-tagline{margin:0!important}.bn-home-github{margin:4px 0!important}.bn-home-description{grid-column:1/-1;margin-top:12px;padding-top:12px;font-size:13px}.bn-home-articles{width:100%}}
