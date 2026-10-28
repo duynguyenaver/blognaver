@@ -1,10 +1,11 @@
-locale = "vi-VN"
-label = "Tiếng Việt"
+languageCode = "vi-VN"
+languageName = "Tiếng Việt"
 weight = 1
 title = "BlogNaver"
 [params]
   displayName = "VI"
   isoCode = "vi"
+  dateFormat = "2006-01"
   description = "BlogNaver — các bài viết, dự án, trải nghiệm và góc nhìn cá nhân."
 [params.author]
   name = "BlogNaver"
