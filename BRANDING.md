@@ -21,3 +21,6 @@ Implementation: assets/css/custom.css; config/_default/params.toml; languages.vi
 
 ## Palette correction (2026-10-28)
 Do not use neon/pink/magenta/violet as primary or secondary website accents. Use custom Blowfish scheme `assets/css/schemes/blognaver-blue.css`; colorScheme must remain `blognaver-blue`. This explicitly supersedes earlier purple Neon guidelines. Reference is N9O navy + royal blue + bright cyan link treatment.
+
+## Header contrast hotfix (2026-10-28)
+Header/nav text and icons must remain #F8FBFF on dark/navy/blue hero and transparent header backgrounds in both theme appearances; hover/focus #B9E7FF. Never use dark menu text over dark backgrounds. Keep a visible keyboard focus outline.
