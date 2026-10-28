@@ -48,3 +48,56 @@ header nav a[aria-current="page"] {color:#b9e7ff !important}
 header nav a:focus-visible,header nav button:focus-visible {
   outline:2px solid #b9e7ff !important;outline-offset:3px;
 }
+
+/* Homepage introduction: compact, left-aligned editorial header.
+   Targets Blowfish's background homepage partial only. */
+#main-content > article.prose > .relative > .mx-auto > .relative > .relative.z-10 {
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
+  text-align: left !important;
+  padding: clamp(18px, 3vw, 40px) clamp(16px, 3vw, 36px) 22px !important;
+  width: 100%;
+  min-height: 0 !important;
+}
+#main-content > article.prose > .relative > .mx-auto > .relative > .relative.z-10 > img.rounded-full {
+  width: 76px !important;
+  height: 76px !important;
+  margin: 0 0 10px !important;
+}
+#main-content > article.prose > .relative > .mx-auto > .relative > .relative.z-10 > h1 {
+  margin: 0 0 5px !important;
+  font-size: clamp(1.7rem, 2.8vw, 2.5rem) !important;
+  line-height: 1.15 !important;
+}
+#main-content > article.prose > .relative > .mx-auto > .relative > .relative.z-10 > h2 {
+  margin: 0 0 4px !important;
+  font-size: clamp(.92rem, 1.5vw, 1.12rem) !important;
+  line-height: 1.5 !important;
+}
+#main-content > article.prose > .relative > .mx-auto > .relative > .relative.z-10 > .mt-3 {
+  margin: 6px 0 12px !important;
+  font-size: 1.25rem !important;
+}
+#main-content > article.prose > .relative > .mx-auto > .relative > .relative.z-10 > section.prose {
+  width: 100% !important;
+  max-width: none !important;
+  text-align: justify !important;
+  text-justify: inter-word;
+  line-height: 1.75;
+  margin: 0 !important;
+}
+#main-content > article.prose > .relative > .mx-auto > .relative > .relative.z-10 > section.prose p {
+  margin: 0 0 8px !important;
+}
+@media (max-width: 640px) {
+  #main-content > article.prose > .relative > .mx-auto > .relative > .relative.z-10 {
+    padding: 18px 14px 14px !important;
+  }
+  #main-content > article.prose > .relative > .mx-auto > .relative > .relative.z-10 > img.rounded-full {
+    width: 64px !important;
+    height: 64px !important;
+  }
+  #main-content > article.prose > .relative > .mx-auto > .relative > .relative.z-10 > section.prose {
+    text-align: left !important;
+  }
+}
