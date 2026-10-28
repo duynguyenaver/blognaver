@@ -5,7 +5,8 @@ enableSearch = true
 enableCodeCopy = true
 enableStructuredBreadcrumbs = true
 disableImageOptimization = false
-defaultBackgroundImage = "cover.svg"
+defaultBackgroundImage = "images/blognaver-aurora.svg"
+backgroundCanvas = true
 mainSections = ["posts"]
 [header]
   layout = "fixed"
@@ -16,7 +17,7 @@ mainSections = ["posts"]
   showScrollToTop = true
 [homepage]
   layout = "background"
-  homepageImage = "cover.svg"
+  homepageImage = "images/blognaver-aurora.svg"
   showRecent = true
   showRecentItems = 12
   showMoreLink = true
