@@ -24,3 +24,10 @@ Do not use neon/pink/magenta/violet as primary or secondary website accents. Use
 
 ## Header contrast hotfix (2026-10-28)
 Header/nav text and icons must remain #F8FBFF on dark/navy/blue hero and transparent header backgrounds in both theme appearances; hover/focus #B9E7FF. Never use dark menu text over dark backgrounds. Keep a visible keyboard focus outline.
+
+## Animated article background (2026-10-28)
+- Original artwork: `assets/images/blognaver-aurora.svg` (navy/royal-blue/cyan fluid light and animated ribbons).
+- Applied through Blowfish `defaultBackgroundImage` and `homepage.homepageImage` in `config/_default/params.toml`; `backgroundCanvas = true` enables Blowfish background canvas treatment.
+- Do not use the N9O SVG itself. Keep this original BlogNaver asset and the approved blue color palette.
+- Preserve reduced-motion preferences: SVG animations are disabled when `prefers-reduced-motion: reduce`.
+- Confirm background renders on homepage and article pages after GitHub Pages deployment.
