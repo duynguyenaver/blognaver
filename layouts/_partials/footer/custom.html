@@ -1,36 +1,33 @@
-<section class="bn-commit-status" aria-labelledby="bn-commit-heading" data-commit-status>
-  <div class="bn-commit-head">
-    <div><h2 id="bn-commit-heading">Commit Status <span class="bn-live-dot" aria-hidden="true"></span></h2><p>Theo dõi GitHub Actions · duynguyenaver/blognaver</p></div>
-    <div class="bn-commit-controls"><button type="button" data-refresh aria-label="Cập nhật trạng thái commit">↻ Làm mới</button><a href="https://github.com/duynguyenaver/blognaver/actions" target="_blank" rel="noopener noreferrer">GitHub Actions ↗</a></div>
-  </div>
-  <p class="bn-commit-feedback" data-feedback role="status" aria-live="polite">Đang tải trạng thái GitHub…</p>
-  <div data-runs class="bn-commit-runs"></div>
-  <p class="bn-commit-updated" data-updated>Đồng bộ khoảng mỗi 90 giây khi trang đang mở.</p>
+<section class="bn-commit-dashboard" data-commit-status aria-label="GitHub Commit Status Dashboard">
+  <details class="bn-commit-disclosure">
+    <summary class="bn-commit-summary">
+      <span class="bn-commit-summary-info"><span class="bn-live-dot" aria-hidden="true"></span><strong>Commit Status</strong><small data-headline>Nhấn để xem thống kê build &amp; deploy</small></span>
+      <span class="bn-commit-summary-right"><span class="bn-commit-summary-pill" data-compact-state>Chưa tải</span><span class="bn-commit-chevron" aria-hidden="true">⌄</span></span>
+    </summary>
+    <div class="bn-commit-panel">
+      <div class="bn-commit-topline"><div><strong>GitHub Actions Insights</strong><p>Thống kê từ các workflow gần nhất trên nhánh main</p></div><div class="bn-commit-actions"><button type="button" data-refresh>↻ Làm mới</button><a href="https://github.com/duynguyenaver/blognaver/actions" target="_blank" rel="noopener noreferrer">Xem Actions ↗</a></div></div>
+      <div class="bn-commit-kpis">
+        <div class="bn-commit-kpi"><span>Tổng workflow</span><strong data-total>—</strong><small>Trong 20 lượt gần nhất</small></div>
+        <div class="bn-commit-kpi"><span>Thành công</span><strong data-success>—</strong><small>Build / deploy hoàn tất</small></div>
+        <div class="bn-commit-kpi"><span>Thất bại</span><strong data-failed>—</strong><small>Cần kiểm tra log</small></div>
+        <div class="bn-commit-kpi"><span>Tỷ lệ thành công</span><strong data-rate>—</strong><small>Trên số lượt đã hoàn tất</small></div>
+      </div>
+      <div class="bn-commit-visuals">
+        <div class="bn-commit-chart-card">
+          <h3>Phân bố kết quả</h3>
+          <div class="bn-commit-distribution">
+            <div class="bn-commit-donut" data-donut role="img" aria-label="Chưa có dữ liệu"><span data-donut-number>—</span></div>
+            <div class="bn-commit-legend"><span><i class="bn-swatch-success"></i> Thành công <b data-legend-success>—</b></span><span><i class="bn-swatch-failure"></i> Thất bại <b data-legend-failure>—</b></span><span><i class="bn-swatch-other"></i> Khác / đang chạy <b data-legend-other>—</b></span></div>
+          </div>
+        </div>
+        <div class="bn-commit-chart-card"><h3>20 lần chạy gần nhất</h3><div class="bn-commit-timeline" data-timeline aria-label="Biểu đồ trạng thái từng workflow"></div><p class="bn-commit-chart-caption">Mới nhất ở bên trái · Chạm/click cột để mở GitHub Actions</p></div>
+      </div>
+      <div class="bn-commit-history"><div class="bn-commit-history-heading"><h3>Workflow gần đây</h3><span data-feedback role="status" aria-live="polite">Đang chờ mở dashboard…</span></div><div data-runs class="bn-commit-runs"></div></div>
+      <p class="bn-commit-updated" data-updated>Chỉ tải khi mở · Tự cập nhật mỗi 90 giây khi đang mở</p>
+    </div>
+  </details>
 </section>
-<style>
-.bn-commit-status{width:min(1100px,calc(100% - 32px));margin:26px auto 18px;padding:20px 22px;border:1px solid #38547a;border-radius:15px;background:#152341;color:#edf3ff;text-align:left;font-family:Inter,"Be Vietnam Pro",system-ui,sans-serif;font-size:14px}
-.bn-commit-status *{box-sizing:border-box}
-.bn-commit-head{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
-.bn-commit-head h2{font-size:17px;font-weight:750;margin:0;color:#fff}
-.bn-commit-head p,.bn-commit-updated{margin:5px 0;color:#b5c8e2;font-size:12px}
-.bn-live-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#70b6f8;vertical-align:middle;margin-left:5px}
-.bn-commit-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.bn-commit-controls a,.bn-commit-controls button{display:inline-block;padding:7px 10px;border:1px solid #49638a;border-radius:7px;color:#e7f4ff!important;background:#203756;text-decoration:none;font-size:12px;line-height:1.5;cursor:pointer}
-.bn-commit-controls a:hover,.bn-commit-controls button:hover{background:#31527b}
-.bn-commit-controls :focus-visible,.bn-commit-runs a:focus-visible{outline:3px solid #70b6f8;outline-offset:2px}
-.bn-commit-feedback{margin:13px 0;font-size:12px;color:#b5c8e2}
-.bn-commit-runs{display:grid;gap:7px}
-.bn-commit-run{display:grid;grid-template-columns:88px minmax(0,1fr) auto;align-items:center;gap:12px;padding:10px 12px;border:1px solid #344969;border-radius:9px;background:#1c2b49}
-.bn-commit-sha{font:600 12px/1.5 ui-monospace,monospace;color:#94c8ff!important;text-decoration:none}
-.bn-commit-title{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#e7f0ff;font-size:13px}
-.bn-commit-meta{font-size:11px;color:#b6c8df}
-.bn-commit-state{font-size:11px;font-weight:700;padding:4px 8px;border-radius:6px;white-space:nowrap;background:#33445e;color:#eaf2ff}
-.bn-commit-state[data-state="success"]{background:#123f37;color:#8debd1}
-.bn-commit-state[data-state="failure"],.bn-commit-state[data-state="cancelled"],.bn-commit-state[data-state="timed_out"]{background:#5c2939;color:#ffd4de}
-.bn-commit-state[data-state="in_progress"]{background:#20466e;color:#a9d7ff}
-.bn-commit-state[data-state="queued"],.bn-commit-state[data-state="pending"],.bn-commit-state[data-state="waiting"]{background:#514120;color:#ffe2a2}
-@media(max-width:650px){.bn-commit-status{padding:15px}.bn-commit-run{grid-template-columns:72px minmax(0,1fr);gap:5px 8px}.bn-commit-state{grid-column:2;justify-self:start}.bn-commit-title{white-space:normal;overflow-wrap:anywhere}}
-</style>
+<link rel="stylesheet" href="{{ "css/commit-dashboard.css" | relURL }}">
 <script src="{{ "js/commit-status.js" | relURL }}" defer></script>
 <link rel="stylesheet" href="{{ "theme-switch.css" | relURL }}">
 <script src="{{ "theme-switch.js" | relURL }}" defer></script>
