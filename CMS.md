@@ -28,3 +28,15 @@ URL: https://duynguyenaver.github.io/blognaver/cms/
 
 ## Maintenance
 Follow `BRANDING.md` and `AGENTS.md`. Do not change Resume CMS or deployment logic as part of BlogNaver Studio changes.
+
+## Site Manager — menu and section editing (2026-10-28)
+
+URL: https://duynguyenaver.github.io/blognaver/cms/site-manager/
+
+From BlogNaver Studio, select **Quản lý Menu & Section**.
+- **Menus:** edit labels and page references, toggle visibility, change order, add new menu items, preserve built-in Search, preview and commit the modified `config/_default/menus.vi.toml`.
+- **Sections:** discover Hugo section/page index Markdown files (e.g. homepage, posts, about, projects, branding, tags), open a page and edit title, description, and ordinary text with a WYSIWYG editor. Existing front matter keys are preserved. Complex pages with Hugo shortcodes or special HTML are metadata-only to prevent content damage.
+- **Publishing:** each save writes to `main` using GitHub Contents API with the current file SHA for concurrency conflict protection. GitHub Actions then builds and deploys the result; the public website does not update until this succeeds. The Studio reports the commit and links to Actions.
+- **Security:** use a repository-scoped PAT in tab memory only. Do not include it in Git or email.
+- **Scope:** this manager supports file-backed menus and Markdown sections. Arbitrary theme template regions, hardcoded footer widgets, static CMS code, custom layouts, and binary media are not fully editable with this initial GUI. Edit those via code or a future dedicated component manager.
+- **Best practice:** after saving, check Actions and verify the public page. Page content is converted from Markdown to HTML and back; complex Markdown syntax may not round-trip precisely, so review changes for legacy pages.
