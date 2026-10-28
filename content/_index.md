@@ -1,10 +1,6 @@
 ---
 title: "BlogNaver"
-description: "Sống chậm một chút. Hiểu sâu thêm một chút."
+description: "Khám phá những ý tưởng, trải nghiệm và câu chuyện đáng nhớ."
 ---
 
-# Những câu chuyện đáng để đọc.
-
-Chào mừng bạn đến với **BlogNaver** — nơi chia sẻ kinh nghiệm, những ý tưởng hữu ích về công nghệ, du lịch và cuộc sống.
-
-Khám phá các bài viết mới nhất bên dưới.
+Khám phá những bài viết về **công nghệ**, **du lịch** và **cuộc sống** — được viết để chia sẻ, kết nối và truyền cảm hứng.
