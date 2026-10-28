@@ -68,3 +68,11 @@ The Studio **SEO & mô tả** section now provides **Tự động SEO** (enabled
 - On publishing, the CMS converts the embedded table to a GitHub-flavored Markdown pipe table for Hugo/Blowfish rendering. Vertical overflow is avoided with horizontal scrolling for narrow screens.
 - This handles simple rectangular tables. Merged rows/columns, nested tables, complex embedded HTML and arbitrary text with ambiguous column boundaries still require manual review.
 - Hotfixed the KAI privatization post: the 14 Korean–Vietnamese–English vocabulary entries are now a genuine three-column Markdown table.
+
+## Shared GitHub login and Insights inventory — 2026-10-28
+
+- CMS, Site Manager and Smart Insights use `/cms/shared-auth.js`. On the **Ghi nhớ** option, the fine-grained GitHub PAT is retained in this browser's localStorage; otherwise it lives only in sessionStorage. A stored login survives refresh and can be reused on the same device/browser and origin. Clicking **Ngắt GitHub** clears both storage copies.
+- **Security warning:** browser-local persistence is not encrypted against scripts running on the same origin. Use a repository-scoped, minimum-permission token only on a trusted private device; avoid shared machines. Clearing site data also removes the login. No token is committed into source files.
+- Smart Insights reuses the CMS credential for authenticated GitHub Actions requests and can work without one for its static post index. The user need not re-enter a token on that dashboard.
+- The complete article list is generated during Hugo deployment by `node scripts/generate-cms-index.mjs` into `public/cms/posts-index.json`, including drafts. This prevents one GitHub API 403 from truncating the list to whatever individual files happened to load successfully. The index reflects the most recently deployed commit; cached data is used if temporarily offline.
+- GitHub Actions API rate limits are handled via workflow caching and a backoff period. Workflow state and article index refresh independently.
