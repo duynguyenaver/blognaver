@@ -179,3 +179,11 @@ html body #TOCView.toc-right > div { max-height: none !important; overflow: visi
 .bn-home-articles{min-width:0;margin:0;padding:0}
 .bn-home-articles .max-w-prose,.bn-home-articles .max-w-7xl{max-width:100%}
 @media(max-width:800px){.bn-home-grid{grid-template-columns:1fr;gap:16px;padding:12px 14px 30px}.bn-home-sidebar{position:static}.bn-home-profile{padding:16px 18px;display:grid;grid-template-columns:58px minmax(0,1fr);column-gap:14px;align-items:center}.bn-home-avatar{width:54px;height:54px;grid-row:1/4;margin:0}.bn-home-profile h1{font-size:1.5rem}.bn-home-tagline{margin:0!important}.bn-home-github{margin:4px 0!important}.bn-home-description{grid-column:1/-1;margin-top:12px;padding-top:12px;font-size:13px}.bn-home-articles{width:100%}}
+
+/* Home-only: pull "Gần đây" editorial feed up under the fixed navbar. */
+#main-content:has(.bn-home-grid){padding-top:52px!important;margin-top:0!important}
+#main-content .bn-home-grid{padding-top:0!important;margin-top:0!important;align-items:start}
+#main-content .bn-home-articles{margin-top:0!important;padding-top:0!important}
+#main-content .bn-home-articles > :first-child{margin-top:0!important;padding-top:0!important}
+#main-content .bn-home-articles h2:first-child,#main-content .bn-home-articles h3:first-child{margin-top:0!important}
+@media(max-width:800px){#main-content:has(.bn-home-grid){padding-top:56px!important}}
