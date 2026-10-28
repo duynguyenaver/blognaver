@@ -24,7 +24,7 @@ $('#uploadExcel').addEventListener('change',async ev=>{
   const skills=rows(w,'Ky nang').map(x=>x.skill).filter(Boolean);
   if(!personal.name)throw Error('Sheet Ho so phải có trường name');
   if(!confirm('Nạp dữ liệu Excel sẽ thay thế các trường đang nhập trên màn hình. Tiếp tục?'))return;
-  $('#reset').click();
+  $('#newResumeBtn').click();
   for(const [key,val] of Object.entries(personal)){const control=document.querySelector('#form [name="'+CSS.escape(key)+'"]');if(control)control.value=val}
   clearAndFill($('#experiences'),$('#addexp'),ex);
   clearAndFill($('#educations'),$('#addedu'),ed);
