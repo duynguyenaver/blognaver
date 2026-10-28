@@ -29,6 +29,8 @@ jobs:
         with:
           hugo-version: '0.162.0'
           extended: true
+      - name: Validate bug knowledge classifier fixtures
+        run: python3 scripts/test-ci-knowledge.py
       - name: Bug checks, known-fix guidance and 2 retries
         shell: bash
         run: |
