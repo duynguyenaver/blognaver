@@ -28,14 +28,14 @@ mainSections = ["posts"]
 [article]
   showDate = true
   showDateUpdated = true
-  showBreadcrumbs = true
+  showBreadcrumbs = false
   showHero = false
   heroStyle = "background"
   showSummary = true
   showHeadingAnchors = true
   showPagination = true
   showReadingTime = true
-  showTableOfContents = true
+  showTableOfContents = false
   showTaxonomies = true
   showRelatedContent = true
   relatedContentLimit = 3
