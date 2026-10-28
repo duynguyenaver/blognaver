@@ -47,3 +47,8 @@ Failures must be distinguished by category: `missing-output`, `invalid-html`, `p
 Retry transient failures at most twice (three checks total). Deterministic syntax, missing file and template failures normally require a source change; retrying alone is not a repair. Never download/execute suggested fixes from a search result. Never auto-merge main. PR mergeability and Bug Checker PASS are independent: a PR can pass CI while still having a merge conflict.
 
 The source of truth for conflict resolution is the actual current PR merge state and the latest main head. Preserve both sides' nonconflicting edits, re-run checks, and never overwrite newer AGENTS.md policies.
+
+
+### Incident: CI Git history missing on PR checkout (2026-10-29)
+
+Verified from GitHub Actions run 40786196594 / job 123159871722: Hugo generated 89 pages and the CMS index successfully, but `scripts/ci-site-audit.py` failed with `tooling: git merge-base origin/main HEAD exited 128`. GitHub's checkout did not provide `origin/main` history. This is **not** an application or JS syntax failure. Repair by configuring `actions/checkout` with `fetch-depth: 0` and explicitly fetching `refs/heads/main:refs/remotes/origin/main` before diff-based audits. Validate `git merge-base origin/main HEAD` succeeds. Classify future occurrences under `tooling/git-history` and stop rather than retrying three times without changing the checkout. The CI test should still fail if history truly cannot be fetched; never silently skip the JS audit.
