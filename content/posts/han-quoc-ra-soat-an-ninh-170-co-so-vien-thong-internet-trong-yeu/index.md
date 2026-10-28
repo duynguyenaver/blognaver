@@ -1,6 +1,6 @@
 ---
 title: "Hàn Quốc rà soát an ninh hơn 170 cơ sở viễn thông và Internet trọng yếu"
-date: 2026-10-28T16:25:00+07:00
+date: 2026-10-28T15:45:00+07:00
 draft: false
 aliases: ["/posts/han-quoc-ra-soat-an-ninh-170-co-so-vien-thong-internet-trong-yeu/"]
 slug: "han-quoc-ra-soat-an-ninh-170-co-so-vien-thong-internet-trong-yeu"
