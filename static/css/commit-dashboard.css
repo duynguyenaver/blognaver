@@ -11,3 +11,21 @@
 .bn-commit-history{margin-top:13px}.bn-commit-history-heading{display:flex;align-items:start;justify-content:space-between;gap:10px;flex-wrap:wrap}.bn-commit-history-heading [data-feedback]{font-size:12px;color:#a9c6e4}.bn-commit-runs{display:grid;gap:8px}.bn-commit-run{display:grid;grid-template-columns:95px minmax(0,1fr) auto;align-items:center;gap:10px;background:#152943;border:1px solid #34516f;border-radius:9px;padding:10px 12px}.bn-commit-sha{color:#9fd4ff!important;text-decoration:none;font:650 12px ui-monospace,monospace}.bn-commit-title{font-size:12px;color:#f0f6ff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.bn-commit-meta,.bn-commit-updated{font-size:11px;color:#acc4e0}.bn-commit-state{font-size:11px;border-radius:6px;background:#314f70;color:#d6e7fc;padding:4px 8px;text-decoration:none;white-space:nowrap}.bn-commit-state[data-state=success]{background:#1a513f;color:#a3f3cf}.bn-commit-state[data-state=failure]{background:#69313e;color:#ffd4de}.bn-commit-state[data-state=in_progress],.bn-commit-state[data-state=pending]{background:#375375;color:#d6eaff}.bn-commit-updated{margin:13px 0 0}
 @media(max-width:850px){.bn-commit-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.bn-commit-visuals{grid-template-columns:1fr}}@media(max-width:520px){.bn-commit-summary{padding:15px}.bn-commit-summary-info small{width:100%;padding-left:20px}.bn-commit-panel{padding:13px}.bn-commit-run{grid-template-columns:75px minmax(0,1fr)}.bn-commit-state{grid-column:2;justify-self:start}.bn-commit-title{white-space:normal}.bn-commit-dashboard{width:calc(100% - 20px)}}
 @media(prefers-reduced-motion:reduce){.bn-commit-chevron,.bn-commit-timeline a{transition:none}}@media print{.bn-commit-dashboard{display:none!important}}
+
+/* Read-only deployment failure Smart Insights */
+.bn-commit-insights-subtitle{font-size:12px;color:#a8c2e2;margin:2px 0 12px}
+.bn-failure-overview{background:#142943;border:1px solid #385777;border-radius:9px;padding:12px 14px;color:#c8def4;font-size:12px;margin-bottom:13px}
+.bn-failure-overview p{margin:0}
+.bn-failure-insights{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.bn-failure-insight,.bn-failure-recent{background:#132841;border:1px solid #395777;border-radius:11px;padding:16px;color:#c9dcf0;min-width:0}
+.bn-failure-heading{display:flex;align-items:flex-start;gap:8px;justify-content:space-between;flex-wrap:wrap}
+.bn-failure-heading strong{font-size:13px;color:#fff}
+.bn-failure-fixed{font-size:10px;font-weight:700;color:#94ecd0;background:#195241;border-radius:6px;padding:4px 7px;white-space:nowrap}
+.bn-failure-insight p,.bn-failure-recent p{font-size:12px;line-height:1.65;color:#bfd5eb;margin:11px 0}
+.bn-failure-remedy{border-left:3px solid #69c9a8;padding-left:10px}
+.bn-failure-refs{display:flex;flex-wrap:wrap;gap:14px}
+.bn-failure-refs a,.bn-failure-recent a{font-size:12px;color:#a6d7ff!important;text-decoration:underline;text-underline-offset:3px}
+.bn-failure-recent{grid-column:1/-1;border-color:#785465;background:#3b263c}
+.bn-failure-recent strong{color:#ffd3de}
+.bn-failure-recent a{display:inline-block;margin:9px 13px 0 0}
+@media(max-width:720px){.bn-failure-insights{grid-template-columns:1fr}}
