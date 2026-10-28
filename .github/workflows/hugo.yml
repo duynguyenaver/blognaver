@@ -50,6 +50,8 @@ jobs:
         env:
           HUGO_ENVIRONMENT: production
         run: hugo --gc --minify --baseURL 'https://duynguyenaver.github.io/blognaver/'
+      - name: Generate complete CMS post index (including drafts)
+        run: node scripts/generate-cms-index.mjs
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
