@@ -1,23 +1,19 @@
 [[main]]
+name = "Giới thiệu"
+pageRef = "about"
+weight = 10
+[[main]]
 name = "Bài viết"
 pageRef = "posts"
-weight = 10
-
+weight = 20
+[[main]]
+name = "Dự án"
+pageRef = "projects"
+weight = 30
 [[main]]
 name = "Resume"
 pageRef = "resume"
-weight = 20
-
-[[main]]
-name = "Thẻ"
-pageRef = "tags"
-weight = 30
-
-[[main]]
-name = "Giới thiệu"
-pageRef = "about"
 weight = 40
-
 [[main]]
 identifier = "search"
 weight = 50
