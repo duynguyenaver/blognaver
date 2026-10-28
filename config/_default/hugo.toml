@@ -1,0 +1,21 @@
+baseURL = "https://duynguyenaver.github.io/blognaver/"
+title = "BlogNaver"
+languageCode = "vi-VN"
+defaultContentLanguage = "vi"
+enableRobotsTXT = true
+summaryLength = 30
+timeZone = "Asia/Ho_Chi_Minh"
+[pagination]
+  pagerSize = 10
+[outputs]
+  home = ["HTML", "RSS", "JSON"]
+[taxonomies]
+  tag = "tags"
+  category = "categories"
+[permalinks]
+  posts = "/bai-viet/:slug/"
+[sitemap]
+  changefreq = "weekly"
+  priority = 0.5
+[privacy.youtube]
+  privacyEnhanced = true
