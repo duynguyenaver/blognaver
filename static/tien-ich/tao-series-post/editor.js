@@ -2,6 +2,24 @@
 const repo="duynguyenaver/blognaver",api="https://api.github.com/repos/"+repo;
 const $=s=>document.querySelector(s),items=$("#editorItems"),status=$("#editorStatus"),save=$("#editorSave"),all=$("#editorSelectAll");
 let records=[],busy=false,baseHead="";
+
+const search=$("#editorSearch"),searchCount=$("#editorSearchCount");
+const searchNormalize=s=>String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim();
+function applyEditorSearch(){
+ const q=searchNormalize(search.value),matches=[];
+ records.forEach((r,index)=>{
+  const fields=[r.original.title,r.original.series,r.original.sourceUrl,r.path,...(r.fields||[]).map(f=>f.value)];
+  const ok=!q||fields.some(v=>searchNormalize(v).includes(q));
+  r.card.hidden=!ok;
+  if(ok){const t=searchNormalize(r.original.title);matches.push({r,index,score:!q?0:t===q?0:t.startsWith(q)?1:t.includes(q)?2:3})}
+ });
+ matches.sort((a,b)=>a.score-b.score||a.index-b.index);
+ matches.forEach(x=>items.append(x.r.card));
+ searchCount.textContent=q?matches.length+" bài phù hợp":records.length+" bài đã tải";
+ updateCount();
+}
+search.addEventListener("input",applyEditorSearch);
+
 const getToken=()=>window.BNAuth?.read?.()||$("#githubManual")?.value.trim()||"";
 async function request(path,method="GET",data){
  const token=getToken();if(!token)throw Error("Vui lòng kết nối GitHub token ở phần Kết nối AI & GitHub.");
@@ -32,7 +50,8 @@ function rowInput(label,key,value,tag="input"){
 }
 function updateCount(){
  const chosen=records.filter(r=>r.checkbox?.checked);
- all.checked=Boolean(records.length)&&chosen.length===records.length;
+ const visible=records.filter(r=>r.card&&!r.card.hidden);
+ all.checked=Boolean(visible.length)&&visible.every(r=>r.checkbox?.checked);
  const changed=chosen.filter(r=>r.fields.some(f=>f.value!==r.original[f.dataset.field]));
  $("#editorSummary").textContent=records.length+" bài đã tải · "+chosen.length+" đã chọn · "+changed.length+" có thay đổi";
  save.disabled=busy||!changed.length;
@@ -53,9 +72,9 @@ function render(){
    const w=rowInput(labels[key],key,r.original[key],key==="description"?"textarea":"input");
    const el=w.querySelector("[data-field]");r.fields.push(el);grid.append(w);
   }
-  card.append(grid);items.append(card);
+  card.append(grid);r.card=card;items.append(card);
  });
- updateCount();
+ applyEditorSearch();
 }
 async function load(){
  if(busy)return;busy=true;$("#editorLoad").disabled=true;status.textContent="Đang đọc danh sách bài đã commit từ GitHub…";
@@ -123,6 +142,6 @@ async function commit(){
  finally{busy=false;$("#editorLoad").disabled=false;updateCount()}
 }
 $("#editorLoad").addEventListener("click",load);
-all.addEventListener("change",()=>{records.forEach(r=>{r.checkbox.checked=all.checked});updateCount()});
+all.addEventListener("change",()=>{records.filter(r=>r.card&&!r.card.hidden).forEach(r=>{r.checkbox.checked=all.checked});updateCount()});
 save.addEventListener("click",commit);
 })();
