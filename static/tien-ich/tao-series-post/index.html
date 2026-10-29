@@ -65,10 +65,10 @@
 </div></details></section>
 <section class="panel" id="recentCommitsPanel"><details class="editor-collapse" id="recentCommitsDisclosure"><summary><span class="step"><span>08</span><span><strong>Bài gần nhất commit thành công</strong><small>Commit GitHub · URL bài viết dự kiến · trạng thái deploy</small></span></span></summary>
 <div class="editor-collapse-body">
-<div class="recent-commits-actions"><p>Danh sách commit có thay đổi trong <code>content/posts/</code>, mới nhất trước. Trạng thái từ GitHub Actions; URL là đường dẫn dự kiến theo Hugo, không phải bằng chứng bài đã lên live.</p><button type="button" class="ghost" id="recentCommitsRefresh">Làm mới ngay</button></div>
-<p id="recentCommitsStatus" role="status" aria-live="polite">Nhấn “Làm mới ngay” để kiểm tra GitHub. Không tự tải dữ liệu.</p>
+<div class="recent-commits-actions"><p>Chỉ hiển thị bài viết được commit gần nhất trong <code>content/posts/</code>. URL dự kiến theo Hugo; cần chờ deploy thành công trước khi truy cập.</p><button type="button" class="ghost" id="recentCommitsRefresh">Làm mới ngay</button></div>
+<p id="recentCommitsStatus" role="status" aria-live="polite">Đang tải bài commit gần nhất…</p>
 <div id="recentCommitsList" class="recent-commits-list"></div>
-<p class="tip">Chỉ kết nối GitHub khi bạn nhấn “Làm mới ngay”. Nếu GitHub API bị giới hạn, dữ liệu cũ được giữ kèm cảnh báo; không báo live khi chưa xác nhận deploy.</p>
+<p class="tip">Tự tải bài gần nhất khi mở trang và cập nhật ngay sau commit mới; không tự khẳng định bài đã live trước khi deploy thành công.</p>
 </div></details></section><section class="panel" id="studioMiniCms"><details class="editor-collapse"><summary><span class="step"><span>09</span><span><strong>Mini CMS · Bài viết Research Studio</strong><small>Danh sách riêng · chỉnh Markdown · xóa bài qua Pull Request</small></span></span></summary>
 <div class="editor-collapse-body"><div class="editor-toolbar"><button type="button" class="ghost" id="miniCmsReload">Tải bài từ GitHub</button><a href="../../cms/posts/" target="_blank" rel="noopener noreferrer">Mở Tất cả bài viết CMS ↗</a></div>
 <label for="miniCmsSearch">Tìm bài Research Studio<input id="miniCmsSearch" type="search" placeholder="Tên bài hoặc series…"></label>
