@@ -1,0 +1,40 @@
+name: Publish Fix Bug 2026 case studies
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'Merged PR number to evaluate for an evidence-backed bug-fix article'
+        required: true
+        type: string
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+permissions:
+  contents: write
+  actions: write
+  pull-requests: read
+
+concurrency:
+  group: fixbug-2026-publisher
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Publish verified CI recovery
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out trusted main only
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: main
+          persist-credentials: false
+      - name: Ensure article only describes a real merged and recovered PR
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.inputs.pr_number || github.event.pull_request.number }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: node scripts/publish-fixbug-postmortem.mjs

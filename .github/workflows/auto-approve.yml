@@ -105,6 +105,17 @@ jobs:
                 owner,repo,workflow_id:'hugo.yml',ref:'main'
               });
               core.notice('Started production Hugo deployment.');
+              // Publish a case study only if this PR has evidenced failed-then-passed CI.
+              // workflow_dispatch runs even when GITHUB_TOKEN performed the merge.
+              try {
+                await github.rest.actions.createWorkflowDispatch({
+                  owner,repo,workflow_id:'publish-fixbug-2026.yml',ref:'main',
+                  inputs:{pr_number:String(number)}
+                });
+                core.notice('Queued Fix Bug 2026 evidence check for PR #'+number);
+              } catch(e) {
+                core.warning('PR merged and Hugo dispatched; Fix Bug 2026 dispatch unavailable: '+e.message);
+              }
             } catch(e) {
               core.setFailed('PR merged, but production dispatch failed: '+e.message+
                 '. Trigger Build and deploy Hugo manually.');

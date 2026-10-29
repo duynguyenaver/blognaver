@@ -11,7 +11,7 @@
   {{ $published = add $published $count }}
   {{ $goal := int (.total | default $count) }}
   {{ $planned = add $planned $goal }}
-  {{ if and (gt $goal 0) (ge $count $goal) }}{{ $finished = add $finished 1 }}{{ end }}
+  {{ if and (gt (int (.total | default 0)) 0) (ge $count $goal) }}{{ $finished = add $finished 1 }}{{ end }}
 {{ end }}
 <main class="series-library" aria-labelledby="series-title">
   <header class="sl-hero">
@@ -48,14 +48,15 @@
     {{ $percent := 0 }}
     {{ if gt $total 0 }}{{ $percent = div (mul $count 100) $total }}{{ end }}
     {{ if gt $percent 100 }}{{ $percent = 100 }}{{ end }}
-    {{ $complete := and (gt $total 0) (ge $count $total) }}
+    {{ $ongoing := eq (int (.total | default 0)) 0 }}
+    {{ $complete := and (not $ongoing) (gt $total 0) (ge $count $total) }}
     {{ $lastDate := 0 }}
     {{ range $matches }}{{ if gt .Date.Unix $lastDate }}{{ $lastDate = .Date.Unix }}{{ end }}{{ end }}
     <article class="sl-card" data-search="{{ printf "%s %s %s" .title .description .category | lower }}" data-status="{{ if $complete }}complete{{ else }}active{{ end }}" data-title="{{ .title | lower }}" data-progress="{{ $percent }}" data-date="{{ $lastDate }}">
       <div class="sl-card-head"><span class="sl-category">{{ .category }}</span><span class="sl-status">{{ if $complete }}Hoàn thành{{ else }}Đang viết{{ end }}</span></div>
       <h2>{{ .title }}</h2><p class="sl-desc">{{ .description }}</p>
-      <div class="sl-stats"><span><b>{{ $count }}</b> / {{ $total }} kỳ</span><strong>{{ $percent }}%</strong></div>
-      <div class="sl-track" role="progressbar" aria-label="Tiến độ {{ .title }}" aria-valuenow="{{ $percent }}" aria-valuemin="0" aria-valuemax="100"><span style="width:{{ $percent }}%"></span></div>
+      <div class="sl-stats"><span><b>{{ $count }}</b>{{ if $ongoing }} bài · đang cập nhật{{ else }} / {{ $total }} kỳ{{ end }}</span><strong>{{ if $ongoing }}Liên tục{{ else }}{{ $percent }}%{{ end }}</strong></div>
+      {{ if not $ongoing }}<div class="sl-track" role="progressbar" aria-label="Tiến độ {{ .title }}" aria-valuenow="{{ $percent }}" aria-valuemin="0" aria-valuemax="100"><span style="width:{{ $percent }}%"></span></div>{{ end }}
       <details class="sl-details">
         <summary><span>Xem {{ $count }} bài trong series</span><span aria-hidden="true">⌄</span></summary>
         <ol>
