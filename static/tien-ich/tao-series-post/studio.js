@@ -124,6 +124,9 @@ function selectedSeries(){
  return id;
 }
 const QUEUE_STORE="bn_series_research_fifo_queue_v1";
+const EMERGENCY_STOP="bn_research_emergency_stop_v1";
+let emergencyStopped=false;
+function stopIsArmed(){try{return sessionStorage.getItem(EMERGENCY_STOP)==="1"}catch{return emergencyStopped}}
 const QUEUE_DB="bn_series_queue_durable_v2";
 function queueDisk(key,value,mode="put"){
  return new Promise((resolve,reject)=>{
@@ -231,6 +234,7 @@ function scheduleCloudQueueSync(){
  },3000);
 }
 async function pullQueueCloud(autoRun=true){
+ if(emergencyStopped)return;
  const button=$("#restoreQueueGithubBtn");button.disabled=true;
  try{
   // Finish queued local writes before merging cloud state.
@@ -247,7 +251,7 @@ async function pullQueueCloud(autoRun=true){
   if(!Array.isArray(parsed.items))throw Error("Bản sao GitHub không chứa hàng đợi hợp lệ.");
   const seen=new Set(queue.map(x=>jobIdentity(x))),added=[];
   for(const item of parsed.items){
-   if(!item?.id||typeof item.source!=="string"||item.source.length<700||isQueueDone(item)||seen.has(jobIdentity(item))||sameQueueJob(activeSource,item))continue;
+   if(!item?.id||typeof item.source!=="string"||item.source.length<700||isQueueDone(item)||seen.has(jobIdentity(item))||sameQueueJob(activeSource,item)||queue.some(x=>youtubeVideoId(x.sourceUrl)&&youtubeVideoId(x.sourceUrl)===youtubeVideoId(item.sourceUrl)))continue;
    if(!SERIES[item.series])SERIES[item.series]={name:item.series,tag:item.series,category:"Nghiên cứu"};
    seen.add(jobIdentity(item));added.push(item);
   }
@@ -259,7 +263,7 @@ async function pullQueueCloud(autoRun=true){
   if(queue.length!==parsed.items.length||added.length||parsed.items.some(isQueueDone))scheduleCloudQueueSync();
   renderQueue();queueCloudStatus();
   $("#queueMessage").textContent="Đã tải "+added.length+" bài chưa có trên máy từ GitHub. Tự chạy bài chờ tiếp theo.";
-  if(autoRun&&!working)dispatchNext();
+  if(autoRun&&!working&&!stopIsArmed())dispatchNext();
  }catch(e){
   $("#queueMessage").textContent="Không thể tải hàng đợi từ GitHub: "+e.message+". Dữ liệu hiện tại không bị xóa.";
  }finally{button.disabled=false}
@@ -284,6 +288,9 @@ async function hydrateQueue(){
   const seen=new Set();
   queue=combined.filter(job=>{
    if(!job||typeof job.source!=="string"||job.source.length<700||isQueueDone(job))return false;
+   const video=youtubeVideoId(job.sourceUrl);
+   if(video&&seen.has("youtube:"+video))return false;
+   if(video)seen.add("youtube:"+video);
    if(job.series&&!SERIES[job.series])SERIES[job.series]={name:job.series,tag:job.series,category:"Nghiên cứu"};
    const id=jobIdentity(job);
    if(seen.has(id))return false;
@@ -450,6 +457,7 @@ function populateJob(job){
  $("#sourceStats").textContent=job.source.length.toLocaleString("vi-VN")+" ký tự";
 }
 function dispatchNext(force=false){
+ if(emergencyStopped||stopIsArmed())return;
  if(!queueHydrated)return;
  if(queueRetryTimer){clearTimeout(queueRetryTimer);queueRetryTimer=null}
  if(working||queueBusy||!queue.length)return;
@@ -1240,6 +1248,7 @@ function saveMarkdown(){const blob=new Blob([rawMarkdown],{type:"text/markdown;c
 $("#studioForm").addEventListener("submit",start);
 $("#restoreQueueGithubBtn").addEventListener("click",pullQueueCloud);
 $("#runQueueBtn").addEventListener("click",async()=>{
+ emergencyStopped=false;try{sessionStorage.removeItem(EMERGENCY_STOP)}catch{}
  const btn=$("#runQueueBtn");btn.disabled=true;
  try{
   if(working||queueBusy){$("#queueMessage").textContent="Bài hiện tại đang chạy; sẽ tự chạy bài tiếp theo sau khi hoàn thành.";return}
@@ -1255,7 +1264,17 @@ $("#runQueueBtn").addEventListener("click",async()=>{
  }catch(e){$("#queueMessage").textContent="Không khởi chạy được hàng đợi: "+e.message;state(e.message,true)}
  finally{btn.disabled=false}
 });
-$("#cancelBtn").onclick=()=>{abort?.abort();runData.runStatus="stopped";checkpoint({runStatus:"stopped"});state("Đã yêu cầu dừng tự retry. Bản thảo vẫn được lưu.")};
+$("#cancelBtn").onclick=()=>{
+ emergencyStopped=true;
+ try{sessionStorage.setItem(EMERGENCY_STOP,"1")}catch{}
+ if(queueRetryTimer){clearTimeout(queueRetryTimer);queueRetryTimer=null}
+ if(cloudSyncTimer){clearTimeout(cloudSyncTimer);cloudSyncTimer=null}
+ stopStallWatch();
+ rotationRequested=false;
+ abort?.abort();
+ $("#queueMessage").textContent="DỪNG KHẨN CẤP · toàn bộ auto retry đã tắt. Tải lại trang…";
+ window.location.reload();
+};
 $("#sourceFile").onchange=async e=>{const f=e.target.files?.[0];if(!f)return;if(f.size>750000){state("File trên 750 KB: hãy chia thành nhiều phần.",true);return}$("#transcript").value=await f.text();$("#transcript").dispatchEvent(new Event("input"));checkpoint()};
 $("#transcript").addEventListener("input",()=>{$("#sourceStats").textContent=$("#transcript").value.length.toLocaleString("vi-VN")+" ký tự"});
 $("#testAI").onclick=()=>models().catch(e=>state(e.name==="AbortError"?"Gemini không phản hồi trong 15 giây, vui lòng thử lại.":e.message,true));
@@ -1421,6 +1440,7 @@ try{
  }
 }catch{}
 Promise.all([hydrateQueue(),connectionReady]).then(async()=>{
+ if(stopIsArmed()){emergencyStopped=true;$("#queueMessage").textContent="Đã dừng khẩn cấp. Hàng đợi giữ nguyên; bấm Chạy bài ở hàng đợi để chủ động bắt đầu lại.";renderQueue();return}
  restoreFailedFromDraft();
  if(githubQueueToken())await pullQueueCloud(false);
  if(queue.length){
