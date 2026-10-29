@@ -42,14 +42,14 @@ async function load(){
   for(let i=0;i<paths.length;i+=5){
    const batch=await Promise.all(paths.slice(i,i+5).map(async path=>{
     try{const file=await req("/contents/"+path+"?ref=main");const source=dec(file.content);
-     return /^researchStudio:\s*/m.test((source.match(/^---\r?\n([\s\S]*?)\r?\n---/)||[])[1]||"")?{path,source,sha:file.sha,seriesName:String(fmValue(source,"seriesName")||(fmValue(source,"series")||[])[0]||""),title:String(fmValue(source,"title")||"")}:null
+     return /^researchStudio:\s*/m.test((source.match(/^---\r?\n([\s\S]*?)\r?\n---/)||[])[1]||"")?{path,source,sha:file.sha,seriesName:String(fmValue(source,"seriesName")||(fmValue(source,"series")||[])[0]||""),title:String(fmValue(source,"title")||""),date:String(fmValue(source,"date")||"")}:null
     }catch{return null}
    }));
    found.push(...batch.filter(Boolean));
   }
-  posts=found;loaded=true;
+  posts=found.sort((a,b)=>Date.parse(b.date||0)-Date.parse(a.date||0)||b.path.localeCompare(a.path));loaded=true;
   editorStatus.textContent="Đã tải "+posts.length+" bài Research Studio. Nhập tên series rồi tạo PR.";
-  miniStatus.textContent="Đã tải "+posts.length+" bài. Chỉnh sửa hoặc xóa sẽ mở Pull Request, không thay đổi main ngay.";
+  miniStatus.textContent=posts.length?"Đã tải "+posts.length+" bài Research Studio · mới nhất trước. Chỉnh sửa hoặc xóa sẽ tạo Pull Request.":"Không tìm thấy bài có metadata researchStudio. Bài đăng trước đây thiếu metadata có thể vẫn nằm trong Tất cả bài viết CMS.";
   drawEditor();drawMini();
  }catch(e){editorStatus.textContent="Không tải được: "+e.message;miniStatus.textContent=editorStatus.textContent}
  finally{active=false;$("#editorLoad").disabled=false;$("#miniCmsReload").disabled=false}
