@@ -399,9 +399,21 @@ async function findPublishedYoutube(job){
  let response;
  try{response=await fetch("https://api.github.com/search/code?"+query,{cache:"no-store",headers:{
   Authorization:"Bearer "+token,Accept:"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"
- }})}catch(cause){const error=Error("Không kết nối được GitHub để kiểm tra video YouTube (Failed to fetch). Đã tạm dừng để tránh đăng trùng.");error.code="YOUTUBE_PREFLIGHT_UNAVAILABLE";error.cause=cause;throw error;}
+ }})}catch(cause){
+  const reason="GitHub Code Search không kết nối được; tiếp tục với bước bảo vệ slug khi commit.";
+  $("#queueMessage").textContent=reason;
+  state(reason,true);
+  return null;
+ }
  const result=await response.json().catch(()=>({}));
- if(!response.ok||result.incomplete_results){const error=Error("Không kiểm chứng được nguồn YouTube đã đăng (GitHub HTTP "+response.status+"). Dừng để tránh đăng trùng.");error.code="YOUTUBE_PREFLIGHT_UNAVAILABLE";error.status=response.status;throw error;}
+ if(!response.ok||result.incomplete_results){
+  // Code Search commonly returns 403 for fine-grained tokens without search access.
+  // Do not treat search availability as a network outage or block every article.
+  const reason="GitHub Code Search HTTP "+response.status+"; bỏ qua bước tìm kiếm tùy chọn. GitHub vẫn kiểm tra slug khi commit.";
+  $("#queueMessage").textContent=reason;
+  state(reason,true);
+  return null;
+ }
  for(const match of result.items||[]){
   if(!String(match.path||"").startsWith("content/posts/")||!String(match.path).endsWith(".md"))continue;
   const file=await github("contents/"+match.path+"?ref=main");
