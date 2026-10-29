@@ -322,3 +322,25 @@
 .recent-deploy-pill{border-radius:99px;padding:5px 10px;font-size:12px;font-weight:800;background:#e8edf2;color:#42566b}
 .recent-deploy-pill.success{background:#d9f5e5;color:#146143}.recent-deploy-pill.pending{background:#fff0c8;color:#795307}.recent-deploy-pill.error{background:#ffe0e0;color:#982c2c}
 @media(max-width:580px){#recentCommitsPanel .editor-collapse>summary{padding:12px}#recentCommitsPanel .editor-collapse>summary .step>span:first-child{flex-basis:42px;width:42px;height:42px}#recentCommitsPanel .editor-collapse-body{padding:12px}}
+
+
+/* Simplified series-only editor and mini CMS */
+#batchEditor .editor-collapse-body,#studioMiniCms .editor-collapse-body{display:grid;gap:15px}
+#batchEditor .editor-items,#studioMiniCms .editor-items{display:grid;gap:12px}
+#batchEditor .editor-card,#studioMiniCms .editor-card{border:1px solid #b7cfe7;border-radius:14px;background:#f4f9ff;padding:16px;display:grid;gap:10px}
+#batchEditor .editor-card>strong,#studioMiniCms .editor-card>strong{font-size:15px;color:#173f69;line-height:1.5}
+#batchEditor .editor-card label,#studioMiniCms .editor-card label{display:grid;gap:8px;font-size:13px}
+#batchEditor .editor-card small,#studioMiniCms .editor-card small{font-size:12px;color:#477397;overflow-wrap:anywhere}
+#studioMiniCms{border:2px solid #9abce3;background:#eef6ff}
+#studioMiniCms .editor-collapse>summary{display:flex;width:100%;align-items:center;gap:14px;background:#dfedff;border:1px solid #b7d1ee;border-radius:12px;padding:16px}
+#studioMiniCms .editor-collapse>summary .step{display:flex;flex:1;min-width:0;align-items:center;gap:14px;margin:0}
+#studioMiniCms .editor-collapse>summary .step>span:first-child{flex:0 0 50px;width:50px;height:50px;display:flex;align-items:center;justify-content:center;background:#badcff;color:#155888;border-radius:14px;font-weight:800}
+#studioMiniCms .editor-collapse>summary .step>span:nth-child(2){display:block;flex:1;min-width:0;width:auto;height:auto;background:none;place-items:unset;color:#173f69}
+#studioMiniCms .editor-collapse>summary strong{font-size:clamp(18px,2vw,25px);word-break:normal}
+#studioMiniCms .editor-collapse>summary small{display:block;color:#426887;margin-top:4px;font-size:12px}
+#studioMiniCms .editor-collapse-body{padding:16px;background:#fff;border-radius:12px;border:1px solid #c9dcf0;margin-top:14px}
+#studioMiniCms .editor-toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+#studioMiniCms .editor-toolbar button{width:auto}
+#studioMiniCms .mini-cms-edit textarea{width:100%;resize:vertical;min-height:180px;font-family:ui-monospace,monospace;font-size:12px}
+#studioMiniCms .mini-cms-edit[hidden]{display:none}
+#studioMiniCms .editor-card{min-width:0}
