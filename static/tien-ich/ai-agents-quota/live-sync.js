@@ -1,5 +1,5 @@
 (()=>{"use strict";
-const endpoint="http://127.0.0.1:19473/quota";
+const endpoint="http://127.0.0.1:19474/quota";
 const button=document.getElementById("syncLive"),state=document.getElementById("liveState"),updated=document.getElementById("liveUpdated");
 if(!button||!state||!updated)return;
 let busy=false,lastError="";
