@@ -250,12 +250,59 @@ async function geminiRequest(url,body=null,signal=null){
 }
 function availableKey(){return key||clean($("#geminiKey").value)||sessionStorage.getItem(KEYSTORE)||""}
 async function models(){
- available();state("Đang kiểm tra các model Gemini hỗ trợ generateContent…");
- const data=await geminiRequest("https://generativelanguage.googleapis.com/v1beta/models");
- const list=(data.models||[]).filter(m=>(m.supportedGenerationMethods||[]).includes("generateContent")).filter(m=>/flash/i.test(m.name)).sort((a,b)=>{const rank=x=>/3[.-]/.test(x.name)?0:/2[.-]5/.test(x.name)?1:2;return rank(a)-rank(b)});
- if(!list.length)throw Error("Không tìm thấy model Gemini Flash có thể tạo nội dung với API key này.");
- const select=$("#model");select.replaceChildren(...list.map(m=>new Option((m.displayName||m.name)+" · "+m.name,m.name)));
- currentModel=select.value;geminiVerified=true;foldCredentials();window.BNQuota?.refresh();state("Gemini kết nối thành công · "+currentModel);if(queue.length&&!working)dispatchNext();return currentModel
+ // Model discovery is a connection test, NOT generation: do not apply 429
+ // cooldown left over from another key/model. Never silently wait for hours.
+ const token=clean($("#geminiKey").value)||sessionStorage.getItem(KEYSTORE)||"";
+ if(!token)throw Error("Hãy nhập Gemini API key trước khi kiểm tra model.");
+ const button=$("#testAI"),select=$("#model");
+ button.disabled=true;button.textContent="Đang xác thực Gemini…";
+ state("Đang kiểm tra Gemini API key và danh sách model…");
+ try{
+  const listed=[];let pageToken="";
+  for(let page=0;page<5;page++){
+   const ctl=new AbortController(),timeout=setTimeout(()=>ctl.abort(),15000);
+   let response,payload;
+   try{
+    const url="https://generativelanguage.googleapis.com/v1beta/models?pageSize=100"+(pageToken?"&pageToken="+encodeURIComponent(pageToken):"");
+    response=await fetch(url,{method:"GET",cache:"no-store",headers:{"x-goog-api-key":token},signal:ctl.signal});
+    payload=await response.json().catch(()=>({}));
+   }finally{clearTimeout(timeout)}
+   if(!response.ok){
+    const detail=String(payload?.error?.message||"API request failed").slice(0,170);
+    const error=Error("Gemini HTTP "+response.status+": "+detail);
+    error.code=response.status;throw error;
+   }
+   listed.push(...(payload.models||[]));
+   pageToken=payload.nextPageToken||"";
+   if(!pageToken)break;
+  }
+  const list=listed.filter(m=>(m.supportedGenerationMethods||[]).includes("generateContent")&&m.name)
+   .sort((a,b)=>{
+    const rank=m=>/flash/i.test(m.name)?0:/pro/i.test(m.name)?1:2;
+    return rank(a)-rank(b);
+   });
+  if(!list.length)throw Error("Gemini kết nối được nhưng không tìm thấy model hỗ trợ generateContent. Hãy kiểm tra quyền API hoặc model của project.");
+  const previous=select.value;
+  select.replaceChildren(...list.map(m=>new Option((m.displayName||m.name)+" · "+m.name,m.name)));
+  if(list.some(m=>m.name===previous))select.value=previous;
+  currentModel=select.value;
+  key=token;
+  sessionStorage.setItem(KEYSTORE,token);
+  geminiVerified=true;
+  foldCredentials();
+  window.BNQuota?.refresh();
+  $("#geminiConnectionFeedback").textContent="✓ Kết nối Gemini thành công · "+list.length+" model khả dụng";
+  $("#geminiConnectionFeedback").dataset.status="ok";
+  state("Đã kết nối Gemini · "+currentModel);
+  if(queue.length&&!working)dispatchNext();
+  return currentModel;
+ }catch(e){
+  geminiVerified=false;
+  $("#geminiConnectionFeedback").textContent="Lỗi kết nối: "+(e.name==="AbortError"?"Quá thời gian phản hồi (15 giây)":e.message);
+  $("#geminiConnectionFeedback").dataset.status="error";
+  openCredentials("Kiểm tra lại Gemini");
+  throw e;
+ }finally{button.disabled=false;button.textContent="Kiểm tra Gemini / chọn model"}
 }
 async function generate(prompt,signal,maxTokens=6500){
  const useGroq=canUseGroq();
@@ -453,7 +500,7 @@ $("#queueResume").onclick=()=>{if(working)return;const old=JSON.parse(localStora
 $("#cancelBtn").onclick=()=>{abort?.abort();runData.runStatus="stopped";checkpoint({runStatus:"stopped"});state("Đã yêu cầu dừng tự retry. Bản thảo vẫn được lưu.")};
 $("#sourceFile").onchange=async e=>{const f=e.target.files?.[0];if(!f)return;if(f.size>750000){state("File trên 750 KB: hãy chia thành nhiều phần.",true);return}$("#transcript").value=await f.text();$("#transcript").dispatchEvent(new Event("input"));checkpoint()};
 $("#transcript").addEventListener("input",()=>{$("#sourceStats").textContent=$("#transcript").value.length.toLocaleString("vi-VN")+" ký tự"});
-$("#testAI").onclick=()=>models().catch(e=>{openCredentials("Kiểm tra lại Gemini");state(e.message,true)});
+$("#testAI").onclick=()=>models().catch(e=>state(e.name==="AbortError"?"Gemini không phản hồi trong 15 giây, vui lòng thử lại.":e.message,true));
 const SUPADATA_STORE="bn_series_supadata_session_v1";
 function youtubeId(url){
  try{
@@ -523,6 +570,11 @@ async function verifyExistingConnections(){
 }
 
 $("#model").onchange=()=>{currentModel=$("#model").value;state("Model đã chọn: "+currentModel)};
+$("#geminiKey").addEventListener("input",()=>{
+ geminiVerified=false;currentModel="";
+ $("#geminiConnectionFeedback").textContent="API key thay đổi · bấm Kiểm tra Gemini để tải model mới";
+ $("#geminiConnectionFeedback").dataset.status="warning";
+});
 $("#copyDraft").onclick=()=>navigator.clipboard.writeText(rawMarkdown).then(()=>state("Đã copy Markdown.")).catch(e=>state(e.message,true));
 $("#downloadDraft").onclick=saveMarkdown;
 $("#connectGithub").onclick=async()=>{try{const value=clean($("#githubManual").value);if(value){await window.BNAuth.validate(value);window.BNAuth.save(value,$("#rememberGithub").checked);$("#githubManual").value=""}else{const t=window.BNAuth?.read();if(!t)throw Error("Chưa có token CMS. Hãy nhập token phía dưới.");await window.BNAuth.validate(t)}$("#githubState").textContent="● Đã kết nối GitHub (token CMS chung)";githubVerified=true;window.BNSeriesInsights?.setConnection(true);foldCredentials();window.BNSeriesInsights?.sync().catch(()=>{});if(queue.length&&!working)dispatchNext();}catch(e){githubVerified=false;window.BNSeriesInsights?.setConnection(false);openCredentials("Kiểm tra lại GitHub");state("Không thể kết nối GitHub: "+e.message,true)}};
