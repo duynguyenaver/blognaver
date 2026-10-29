@@ -10,12 +10,10 @@ permissions:
   pages: write
   id-token: write
 
-# Every pushed revision gets a run. Queue instead of canceling intermediate runs.
-# GitHub can retain up to 100 pending runs with queue: max.
+# Publish the newest main revision; cancel outdated queued/running deploys.
 concurrency:
   group: blognaver-pages-production
-  queue: max
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   build:
