@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-29T16:17:51.256Z",
+  "updatedAt": "2026-10-29T17:32:23.997Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -25,6 +25,23 @@
       "sha": "78b05a44518447864456b4716fef7b0b4caa0092",
       "commitAt": "2026-10-29T15:09:58Z",
       "live": true
+    },
+    {
+      "slug": "cold-fusion-touchscreen-tren-macbook-pro-loi-ich-cho-nguoi-sang-tao-va-gioi-han-voi-ngu-2026-10-29",
+      "title": "Touchscreen trên MacBook Pro: Lợi ích cho người sáng tạo và giới hạn với người dùng phổ thông",
+      "series": "cold-fusion",
+      "sha": "edcd80507104e8f8cb4637cdb699e76006284f7f",
+      "commitAt": "2026-10-29T17:32:14Z",
+      "durationMs": 10108,
+      "quota": {
+        "requests": 0,
+        "tokens": 0,
+        "inputTokens": 0,
+        "outputTokens": 0
+      },
+      "models": [
+        "Groq · openai/gpt-oss-120b"
+      ]
     }
   ]
 }
