@@ -1,0 +1,33 @@
+/* Samsung application inspired CV: shared between browser preview and Hugo published pages. */
+:root{font-family:"Noto Sans KR","Be Vietnam Pro",system-ui,-apple-system,sans-serif;color:#15263d;background:#eaf0f6;--blue:#097bb6;--navy:#102746;--line:#aebccc;--head:#e5ebf2}
+*{box-sizing:border-box}body{margin:0;color:#15263d;background:#eaf0f6;line-height:1.48}
+.cv-utility{max-width:210mm;margin:18px auto 8px;display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13px}.cv-utility a{color:#175e9d}.cv-utility button{border:0;background:#1169ac;border-radius:8px;padding:9px 16px;color:white;cursor:pointer;font-weight:750}
+.cv-paper{width:210mm;max-width:100%;min-height:297mm;background:#fff;margin:0 auto 22px;padding:15mm 15mm 18mm;box-shadow:0 15px 42px #15345425}
+.cv-head{display:flex;justify-content:space-between;align-items:end;gap:16px;margin-bottom:18px;border-bottom:3px solid var(--blue);padding-bottom:10px}
+.cv-brand{font-weight:900;color:#2684b8;font-size:13px;letter-spacing:.12em}.cv-head h1{color:#125f95;font-size:24px;letter-spacing:.01em;margin:3px 0}.cv-head p{margin:0;color:#698096;font-size:11px}
+.cv-meta{text-align:right;color:#34455b;font-size:10px;line-height:1.8}
+.cv-section{margin:17px 0 21px;break-inside:auto}.cv-section h2{color:#105b8b;font-size:16px;line-height:1.3;font-weight:850;margin:0 0 8px;border-bottom:2px solid #178cc8;padding:0 0 8px}
+.cv-section .cv-section-sub{font-size:10px;margin:0 0 10px;color:#66778a}
+.cv-table{width:100%;border:1px solid #8698ac;border-collapse:collapse;table-layout:fixed;font-size:11px;line-height:1.4}
+.cv-table th,.cv-table td{border:1px solid #acb9c7;padding:9px 8px;vertical-align:top;overflow-wrap:anywhere}
+.cv-table th{background:#e8edf3;color:#293c53;font-weight:800;text-align:left}
+.cv-table thead th{background:#dce4ed;color:#233951}
+.cv-table tbody tr{break-inside:avoid}
+.cv-pair-label{background:#eaf0f5;font-weight:780;width:17%}.cv-pair-value{width:33%}
+.cv-photo-cell{width:108px;vertical-align:middle!important;text-align:center;background:#f3f7fb}
+.cv-photo{display:block;width:94px;height:118px;object-fit:cover;border:1px solid #bbcad7;border-radius:2px;margin:auto}
+.cv-photo-placeholder{display:flex;align-items:center;justify-content:center;width:94px;height:118px;border:1px dashed #aab9c8;color:#7e90a2;font-size:10px;margin:auto}
+.cv-essay{border:1px solid #93a7bc;margin:11px 0 13px;break-inside:avoid}
+.cv-essay-title{background:#122c4d;color:#fff;padding:8px 10px;font-size:11px;font-weight:850}
+.cv-essay-body{min-height:62px;padding:11px 12px;white-space:pre-wrap;font-size:11px;line-height:1.7;color:#233448}
+.cv-timeline{border:1px solid #a3b0c0;margin-bottom:12px;break-inside:avoid}
+.cv-timeline-header{background:#d9eafa;color:#173a5c;padding:8px 12px;font-size:11px;font-weight:800}
+.cv-timeline-body{white-space:pre-wrap;padding:11px 12px;font-size:11px;line-height:1.7;min-height:58px}
+.cv-split{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.cv-notice{font-size:10px;color:#718093;margin:18px 0 3px;border-top:1px solid #d8e0e9;padding-top:10px}
+.cv-list{white-space:pre-wrap;line-height:1.7;font-size:11px}
+.cv-stat{margin:12px 0;color:#566a7e;font-size:11px}
+.cv-paper a{color:inherit;text-decoration:none}
+@media(max-width:850px){.cv-paper{width:100%;padding:18px 14px;min-height:0}.cv-utility{padding:0 12px}.cv-split{grid-template-columns:1fr}.cv-table{font-size:10px}.cv-table th,.cv-table td{padding:6px}.cv-photo-cell{width:85px}.cv-photo,.cv-photo-placeholder{width:70px;height:90px}}
+@page{size:A4;margin:11mm 11mm 13mm}
+@media print{html,body{background:#fff!important;color:#111!important}.cv-paper{width:auto;max-width:none;min-height:0;padding:0;box-shadow:none;margin:0}.cv-utility{display:none!important}.cv-section{margin:13px 0 16px}.cv-table th,.cv-table td{padding:6px;font-size:9.5px}.cv-essay{break-inside:avoid}.cv-essay-body{min-height:48px}.cv-head{margin-bottom:11px}a[href]:after{content:none!important}}
