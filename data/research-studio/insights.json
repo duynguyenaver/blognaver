@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-29T22:08:11.381Z",
+  "updatedAt": "2026-10-29T22:11:31.981Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -468,7 +468,8 @@
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
-      ]
+      ],
+      "live": true
     },
     {
       "slug": "ota-travel-chien-luoc-quan-tri-du-lieu-trong-nganh-ota-tu-nen-tang-cu-den-ky-nguyen-ai-2026-10-29",
@@ -485,7 +486,8 @@
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
-      ]
+      ],
+      "live": true
     },
     {
       "slug": "cold-fusion-su-tien-hoa-cua-bao-tri-cong-nghiep-tu-bao-tri-dinh-ky-den-du-doan-thong-mi-2026-10-29",
@@ -499,6 +501,23 @@
         "tokens": 25049,
         "inputTokens": 18860,
         "outputTokens": 6189
+      },
+      "models": [
+        "Gemini · models/gemini-3.5-flash-lite"
+      ]
+    },
+    {
+      "slug": "cold-fusion-su-mo-dan-ranh-gioi-giua-hang-hang-khong-truyen-thong-va-chi-phi-thap-2026-10-29",
+      "title": "Sự mờ dần ranh giới giữa hãng hàng không truyền thống và chi phí thấp",
+      "series": "cold-fusion",
+      "sha": "4c35cd28afce29ac0069e466ed42237397536158",
+      "commitAt": "2026-10-29T22:11:02Z",
+      "durationMs": 31731,
+      "quota": {
+        "requests": 8,
+        "tokens": 23148,
+        "inputTokens": 16336,
+        "outputTokens": 6812
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
