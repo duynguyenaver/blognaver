@@ -7,8 +7,8 @@ a:hover { color: var(--blognaver-accent); }
 .page.archive .archive-item,
 .page.archive .summary {
   position: relative;
-  background: rgba(90, 139, 198, .065);
-  border: 1px solid rgba(116, 156, 207, .18);
+  background: rgba(90, 139, 198, .14);
+  border: 1px solid rgba(116, 156, 207, .31);
   border-radius: 14px;
   padding: 22px 26px;
   margin-bottom: 26px;
@@ -21,8 +21,8 @@ a:hover { color: var(--blognaver-accent); }
   .home .summary,
   .page.archive .archive-item,
   .page.archive .summary {
-    background: rgba(105, 155, 219, .09);
-    border-color: rgba(147, 185, 231, .20);
+    background: rgba(105, 155, 219, .17);
+    border-color: rgba(147, 185, 231, .32);
   }
 }
 @media (max-width: 680px) {
@@ -37,3 +37,21 @@ a:hover { color: var(--blognaver-accent); }
 
 /* Commit Status now lives in Smart Insights, not the public homepage footer. */
 [data-commit-status] { display: none !important; }
+
+/* Editorial navigation: uppercase and bold, inherit existing theme colors. */
+#header .header-title,
+#header .menu .menu-item a,
+#header .menu a,
+header .menu .menu-item a,
+header nav a,
+#footer a,
+#footer .footer-container,
+footer .footer-container a {
+  font-weight: 800;
+  text-transform: uppercase;
+}
+#header .menu .menu-item a,
+#header .menu a,
+header nav a { letter-spacing: .035em; }
+#footer .footer-container a,
+footer .footer-container a { letter-spacing: .025em; }
