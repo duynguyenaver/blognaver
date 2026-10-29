@@ -1,6 +1,7 @@
 ---
 title: "Từ một ô dán phụ đề đến hệ thống xuất bản AI tự động: Hành trình xây dựng Research Studio cho BlogNaver"
-date: 2026-10-30T00:00:00+07:00
+date: 2026-10-30T00:47:19+07:00
+publishDate: 2026-10-30T00:47:19+07:00
 draft: false
 slug: "hanh-trinh-xay-dung-research-studio-he-thong-xuat-ban-ai-tu-dong"
 description: "Nhật ký kỹ thuật xây dựng BlogNaver Research Studio: pipeline AI, phụ đề YouTube, checkpoint, hàng đợi FIFO, Gemini/Groq, Supadata, batch GitHub commit và Image Gallery."
