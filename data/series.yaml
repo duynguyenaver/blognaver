@@ -4,3 +4,9 @@
   total: 5
   category: "Hàng không · Công nghệ"
   accent: "#397bd4"
+- id: tech-blog
+  title: "Tech Blog · Đằng sau BlogNaver"
+  description: "Deployment Culture, Bug Checker/Auto Fixer, Knowledge Base và Auto Merge qua mã nguồn GitHub Actions."
+  total: 4
+  category: "Công nghệ · DevOps"
+  accent: "#397bd4"
