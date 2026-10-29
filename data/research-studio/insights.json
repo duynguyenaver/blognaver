@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-29T20:06:05.297Z",
+  "updatedAt": "2026-10-29T20:08:11.936Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -283,6 +283,26 @@
       "models": [
         "Groq · qwen/qwen3.8-27b",
         "Groq · openai/gpt-oss-20b",
+        "Groq · openai/gpt-oss-120b"
+      ],
+      "live": true
+    },
+    {
+      "slug": "cold-fusion-khi-ai-nuot-chung-nganh-du-lich-doanh-nghiep-bai-toan-song-con-cua-tmc-truy-2026-10-29",
+      "title": "Khi AI nuốt chửng ngành du lịch doanh nghiệp: Bài toán sống còn của TMC truyền thống",
+      "series": "cold-fusion",
+      "sha": "0c2c6717227e660ef8b98e9ff8483992f25ba939",
+      "commitAt": "2026-10-29T20:07:50Z",
+      "durationMs": 9182,
+      "quota": {
+        "requests": 0,
+        "tokens": 0,
+        "inputTokens": 0,
+        "outputTokens": 0
+      },
+      "models": [
+        "Groq · openai/gpt-oss-20b",
+        "Groq · qwen/qwen3.8-27b",
         "Groq · openai/gpt-oss-120b"
       ]
     }
