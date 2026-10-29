@@ -84,17 +84,25 @@
       <p>{{ .Description | default (.Summary | plainify | truncate 220) }}</p>
     </div>
 
-    {{- /* Footer */ -}}
-    <div class="post-footer">
-        <a href="{{ .RelPermalink }}">{{ T "readMore" }}</a>
+    {{- /* Editorial summary actions: clear, aligned Read more and flexible tag chips. */ -}}
+    <div class="post-footer bn-summary-actions">
+        <a class="bn-read-more" href="{{ .RelPermalink }}" aria-label="Đọc bài: {{ .Title }}">
+            <span>Đọc thêm</span><span aria-hidden="true">↗</span>
+        </a>
         {{- with .Params.tags -}}
-            <div class="post-tags">
-                {{- partial "plugin/fontawesome.html" (dict "Style" "solid" "Icon" "tags") -}}&nbsp;
-                {{- range $index, $value := . -}}
-                    {{- if gt $index 0 }},&nbsp;{{ end -}}
-                    {{- $tag := partialCached "function/path.html" $value $value | printf "/tags/%v" | $.Site.GetPage -}}
-                    <a href="{{ $tag.RelPermalink }}">{{ $tag.Title }}</a>
-                {{- end -}}
+            <div class="post-tags bn-summary-tags" aria-label="Thẻ chủ đề">
+                <span class="bn-tags-heading">
+                    {{- partial "plugin/fontawesome.html" (dict "Style" "solid" "Icon" "tags") -}}
+                    <span>Tags</span>
+                </span>
+                <div class="bn-tag-chips">
+                    {{- range . -}}
+                        {{- $tag := partialCached "function/path.html" . . | printf "/tags/%v" | $.Site.GetPage -}}
+                        {{- with $tag -}}
+                            <a class="bn-tag-chip" href="{{ .RelPermalink }}">{{ .Title }}</a>
+                        {{- end -}}
+                    {{- end -}}
+                </div>
             </div>
         {{- end -}}
     </div>
