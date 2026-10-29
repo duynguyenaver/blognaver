@@ -271,3 +271,7 @@
  #batchEditor .editor-collapse>summary strong,#imageWorkspace .editor-collapse>summary strong{font-size:17px}
  #batchEditor .editor-collapse-body,#imageWorkspace .editor-collapse-body{padding:12px}
 }
+
+/* Manual model switch beside the pending runtime status */
+.bn-model-switch{display:grid;grid-template-columns:minmax(0,1fr) minmax(190px,1.4fr) auto;align-items:center;gap:10px;margin:14px 0;padding:12px;background:#eaf3ff;border:1px solid #9bbfe8;border-radius:12px}
+.bn-model-switch[hidden]{display:none!important}.bn-model-switch label{font-size:12px;font-weight:800;color:#164e83}.bn-model-switch select{min-width:0;width:100%;background:#fff}.bn-model-switch small{grid-column:1/-1;color:#315d84;line-height:1.5}.bn-model-switch button{white-space:nowrap}@media(max-width:720px){.bn-model-switch{grid-template-columns:1fr}.bn-model-switch small{grid-column:auto}}
