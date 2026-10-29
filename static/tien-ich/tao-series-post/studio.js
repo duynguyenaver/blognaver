@@ -1242,7 +1242,7 @@ async function start(e,restore=false,queuedJob=null){
  }else{checkpoint({runStatus:"completed"});window.BNSeriesInsights?.record({slug:d.slug,title:d.title,series:d.series,state:"draft",durationMs:Date.now()-startedAt,live:false,quota:window.BNQuota?.runSummary()});progress(100,"Hoàn thành bản thảo; chưa đăng",4);state("Đã tạo bản thảo Markdown. Bạn có thể copy hoặc xuất file; chưa ghi lên GitHub.")}
  succeeded=true;
  }catch(e){
-  if(e.code==="YOUTUBE_PREFLIGHT_UNAVAILABLE"){
+  if(e.code==="YOUTUBE_PREFLIGHT_UNAVAILABLE"||(e instanceof TypeError&&/Failed to fetch|NetworkError/i.test(e.message))){
    emergencyStopped=true;
    try{sessionStorage.setItem(EMERGENCY_STOP,"1")}catch{}
    if(queueRetryTimer){clearTimeout(queueRetryTimer);queueRetryTimer=null}
@@ -1251,7 +1251,7 @@ async function start(e,restore=false,queuedJob=null){
    // This is a GitHub access/check error, NOT proof of a duplicate video.
    // Preserve the source and prevent any restart on the next page load.
    const held={...job,retryExhausted:true,retryAt:0,checkpoint:{...runData,source:job.source,sourceUrl:job.sourceUrl||"",runStatus:"paused",error:e.message}};
-   if(!queue.some(item=>sameQueueJob(item,held)))queue.push(held);
+   const oldHeld=queue.find(item=>sameQueueJob(item,held));if(oldHeld)Object.assign(oldHeld,held);else queue.push(held);
    await saveQueue();
    runtime("error",null,"Kiểm tra GitHub thất bại",e.message);
    state(e.message+" Trang sẽ tự tải lại sau 3 giây; auto retry đã dừng.",true);
