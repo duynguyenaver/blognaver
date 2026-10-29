@@ -75,3 +75,10 @@ The repository previously enforced full-length immutable commit SHAs for every `
 ## Theme migration DoIt and UI gate (2026-10-29)
 
 The active Hugo theme is `github.com/HEIGE-PCloud/DoIt`. Do not restore Blowfish, Stack, Prism or their styling. Preserve custom Resume template, independent Resume CMS and blog CMS. `layouts/baseof.html` integrates the UI-only PIN gate and Commit Status component into DoIt. Homepage, post listing and individual posts are publicly readable; other pages display a SHA-256 PIN prompt. This is not secure server-side authorization: all files remain publicly fetchable, and the four-digit PIN is brute-forceable. Never place private data on public GitHub Pages relying on this gate.
+
+
+## Live Codex quota source (2026-10-29)
+
+- The public `/tien-ich/ai-agents-quota/` frontend may read quota snapshots from a user-initiated local bridge on `127.0.0.1:19473`. The bridge source is `scripts/codex-quota-bridge.py` (Python stdlib), which spawns the already authenticated local `codex app-server --listen stdio://` and calls `account/rateLimits/read`. **It never reads auth.json or sends credentials to the website or GitHub.** API response is allowlisted to usage percentages, window durations, and reset timestamps. The bridge only accepts requests from approved origins, binds loopback, is read-only, and does not launch automatically.
+- Preserve existing <link> tags for access-gate.css/access-gate.js, DoIt, and manual quota import; the live source is an additive enhancement, not replacement. Browser requests can be blocked by local-network policies; show a failed-connection state rather than claiming live data.
+- NEVER embed authenticated ChatGPT requests, browser cookies, or session tokens in public JavaScript or GitHub Actions. The Usage page at chatgpt.com is not a public cross-origin browser API.
