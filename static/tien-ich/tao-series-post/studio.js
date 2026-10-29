@@ -4,24 +4,61 @@ const SERIES={"cold-fusion":{name:"ColdFusion Research",tag:"cold fusion",catego
 const KEYSTORE="bn_series_research_gemini_session",GROQ_STORE="bn_series_groq_key_session_v1",DRAFT="bn_series_research_checkpoint_v1";
 
 const GEMINI_DEVICE="bn_series_gemini_device_v1",GROQ_DEVICE="bn_series_groq_device_v1";
+// Device-local key vault uses IndexedDB (larger quota) with localStorage fallback.
+// Keys never leave this device except when sent to their respective API endpoints.
+const DEVICE_DB="blognaver_research_device_keys_v1";
+function deviceDB(operation,name,value){
+ return new Promise((resolve,reject)=>{
+  if(!window.indexedDB)return reject(Error("Trình duyệt không hỗ trợ IndexedDB"));
+  const open=indexedDB.open(DEVICE_DB,1);
+  open.onupgradeneeded=()=>{if(!open.result.objectStoreNames.contains("keys"))open.result.createObjectStore("keys")};
+  open.onerror=()=>reject(open.error||Error("Không mở được kho lưu key"));
+  open.onsuccess=()=>{
+   const db=open.result,tx=db.transaction("keys",operation==="read"?"readonly":"readwrite"),store=tx.objectStore("keys");
+   const req=operation==="read"?store.get(name):operation==="delete"?store.delete(name):store.put(value,name);
+   req.onsuccess=()=>resolve(req.result);
+   req.onerror=()=>reject(req.error||Error("Không lưu được API key"));
+   tx.oncomplete=()=>db.close();tx.onabort=()=>db.close();
+  };
+ });
+}
 function deviceKey(sessionName,deviceName,field,remember){
  const value=clean($(field).value)||sessionStorage.getItem(sessionName)||localStorage.getItem(deviceName)||"";
- if(value){sessionStorage.setItem(sessionName,value);if($(remember).checked)localStorage.setItem(deviceName,value)}
+ if(value){try{sessionStorage.setItem(sessionName,value)}catch{}}
  return value;
 }
-function rememberAIKey(sessionName,deviceName,field,checkbox){
- const value=clean($(field).value)||sessionStorage.getItem(sessionName)||localStorage.getItem(deviceName)||"";
- try{
-  if($(checkbox).checked){if(value)localStorage.setItem(deviceName,value)}
-  else localStorage.removeItem(deviceName);
- }catch{}
+function keyNotice(text,isError=false){
+ const node=$("#deviceKeyStatus");if(node){node.textContent=text;node.dataset.status=isError?"error":"ok"}
 }
-function loadRememberedAIKeys(){
+async function rememberAIKey(sessionName,deviceName,field,checkbox){
+ const value=clean($(field).value)||sessionStorage.getItem(sessionName)||localStorage.getItem(deviceName)||"";
+ if(!$(checkbox).checked){
+  try{localStorage.removeItem(deviceName)}catch{}
+  try{await deviceDB("delete",deviceName)}catch{}
+  keyNotice("Đã tắt lưu trên thiết bị cho "+(deviceName===GEMINI_DEVICE?"Gemini.":"Groq."));
+  return;
+ }
+ if(!value){keyNotice("Nhập API key trước khi bật lưu trên thiết bị.",true);return}
+ try{sessionStorage.setItem(sessionName,value)}catch{}
+ // Prefer durable IndexedDB: avoids localStorage quota used by long transcripts.
+ let saved=false;
+ try{await deviceDB("write",deviceName,value);saved=true}catch{}
+ if(!saved){
+  try{localStorage.setItem(deviceName,value);saved=localStorage.getItem(deviceName)===value}catch{}
+ }
+ if(!saved){keyNotice("Không thể lưu API key trên thiết bị. Kiểm tra chế độ riêng tư hoặc dung lượng trình duyệt.",true);return}
+ // Remove stale localStorage copy once IndexedDB is confirmed, freeing quota.
+ try{if(await deviceDB("read",deviceName)===value)localStorage.removeItem(deviceName)}catch{}
+ keyNotice("✓ Đã lưu "+(deviceName===GEMINI_DEVICE?"Gemini":"Groq")+" API key trên trình duyệt này. Sẽ tự khôi phục sau khi mở lại.");
+}
+async function loadRememberedAIKeys(){
  for(const [sessionName,deviceName,field,checkbox] of [[KEYSTORE,GEMINI_DEVICE,"#geminiKey","#rememberGemini"],[GROQ_STORE,GROQ_DEVICE,"#groqKey","#rememberGroq"]]){
-  const persisted=localStorage.getItem(deviceName)||"";
+  let persisted="";
+  try{persisted=await deviceDB("read",deviceName)||""}catch{}
+  if(!persisted)try{persisted=localStorage.getItem(deviceName)||""}catch{}
   $(checkbox).checked=Boolean(persisted);
-  const value=sessionStorage.getItem(sessionName)||persisted;
-  if(value){$(field).value=value;sessionStorage.setItem(sessionName,value)}
+  const value=persisted||sessionStorage.getItem(sessionName)||"";
+  if(value){$(field).value=value;try{sessionStorage.setItem(sessionName,value)}catch{}}
  }
  $("#rememberGithub").checked=Boolean(localStorage.getItem("blognaver_github_auth_v1"));
 }
@@ -394,7 +431,7 @@ async function verifyGroq(){
  const ids=[...preferred.filter(x=>availableModels.includes(x)),...availableModels.filter(x=>!preferred.includes(x))];
  if(!ids.length)throw Error("Groq API key hoạt động nhưng không có model khả dụng.");
  const list=$("#groqModel");list.replaceChildren(...ids.map(id=>new Option(id,id)));
- groqModel=list.value;groqVerified=true;sessionStorage.setItem(GROQ_STORE,token);rememberAIKey(GROQ_STORE,GROQ_DEVICE,"#groqKey","#rememberGroq");
+ groqModel=list.value;groqVerified=true;sessionStorage.setItem(GROQ_STORE,token);await rememberAIKey(GROQ_STORE,GROQ_DEVICE,"#groqKey","#rememberGroq");
  $("#groqStatus").textContent="Đã kết nối";$("#groqStatus").dataset.status="ok";
  provider("Gemini ưu tiên · Groq "+groqModel+" sẵn sàng khi Gemini bị giới hạn");
  foldCredentials();if(queue.length&&!working)dispatchNext();
@@ -532,6 +569,7 @@ async function models(){
   window.BNQuota?.refresh();
   $("#geminiConnectionFeedback").textContent="✓ Kết nối Gemini thành công · "+list.length+" model khả dụng";
   $("#geminiConnectionFeedback").dataset.status="ok";
+  if($("#rememberGemini").checked)await rememberAIKey(KEYSTORE,GEMINI_DEVICE,"#geminiKey","#rememberGemini");
   state("Đã kết nối Gemini · "+currentModel);
   if(queue.length&&!working)dispatchNext();
   return currentModel;
@@ -923,9 +961,10 @@ async function verifyExistingConnections(){
 }
 
 
-$("#rememberGemini").onchange=()=>rememberAIKey(KEYSTORE,GEMINI_DEVICE,"#geminiKey","#rememberGemini");
-$("#rememberGroq").onchange=()=>rememberAIKey(GROQ_STORE,GROQ_DEVICE,"#groqKey","#rememberGroq");
-$("#clearDeviceKeys").onclick=()=>{
+$("#rememberGemini").onchange=()=>{rememberAIKey(KEYSTORE,GEMINI_DEVICE,"#geminiKey","#rememberGemini")};
+$("#rememberGroq").onchange=()=>{rememberAIKey(GROQ_STORE,GROQ_DEVICE,"#groqKey","#rememberGroq")};
+$("#clearDeviceKeys").onclick=async()=>{
+ await Promise.all([deviceDB("delete",GEMINI_DEVICE).catch(()=>{}),deviceDB("delete",GROQ_DEVICE).catch(()=>{})]);
  for(const key of [GEMINI_DEVICE,GROQ_DEVICE,KEYSTORE,GROQ_STORE]){localStorage.removeItem(key);sessionStorage.removeItem(key)}
  window.BNAuth?.forget?.();
  $("#geminiKey").value="";$("#groqKey").value="";$("#githubManual").value="";
@@ -947,8 +986,8 @@ $("#geminiKey").addEventListener("input",()=>{
 $("#copyDraft").onclick=()=>navigator.clipboard.writeText(rawMarkdown).then(()=>state("Đã copy Markdown.")).catch(e=>state(e.message,true));
 $("#downloadDraft").onclick=saveMarkdown;
 $("#connectGithub").onclick=async()=>{try{const value=clean($("#githubManual").value);if(value){await window.BNAuth.validate(value);window.BNAuth.save(value,$("#rememberGithub").checked);$("#githubManual").value=""}else{const t=window.BNAuth?.read();if(!t)throw Error("Chưa có token CMS. Hãy nhập token phía dưới.");await window.BNAuth.validate(t)}$("#githubState").textContent="● Đã kết nối GitHub (token CMS chung)";githubVerified=true;window.BNSeriesInsights?.setConnection(true);foldCredentials();window.BNSeriesInsights?.sync().catch(()=>{});if(queue.length&&!working)dispatchNext();}catch(e){githubVerified=false;window.BNSeriesInsights?.setConnection(false);openCredentials("Kiểm tra lại GitHub");state("Không thể kết nối GitHub: "+e.message,true)}};
-try{loadRememberedAIKeys();const t=window.BNAuth?.read?.();$("#githubState").textContent=t?"● Đã có GitHub token chung từ CMS":"○ Chưa có token CMS — cần kết nối trước khi đăng";pruneCommittedStorage();const old=JSON.parse(localStorage.getItem(DRAFT)||"null");if(old&&(old.source||old.commitProof)&&Date.now()-old.at<86400000){$("#series").value=SERIES[old.series]&&["cold-fusion","lex-fridman"].includes(old.series)?old.series:"cold-fusion";$("#customSeries").value=!["cold-fusion","lex-fridman"].includes(old.series)?SERIES[old.series]?.name||old.series||"":"";$("#transcript").value=old.source;$("#sourceUrl").value=old.sourceUrl||"";$("#angle").value=old.angle||"";rawMarkdown=old.markdown||"";runData={...old};setPublishEvidence(old.commitProof);$("#preview").textContent=rawMarkdown;$("#copyDraft").disabled=!rawMarkdown;$("#downloadDraft").disabled=!rawMarkdown;$("#transcript").dispatchEvent(new Event("input"));state(old.source?"Đã khôi phục bản nháp từ phiên viết trước.":"Biểu mẫu nguồn đã sẵn sàng cho bài mới. Kết quả xuất bản trước vẫn có thể kiểm tra bên phải.");}}catch{}
-const connectionReady=verifyExistingConnections().catch(e=>state("Không thể xác thực kết nối: "+e.message,true));
+try{const t=window.BNAuth?.read?.();$("#githubState").textContent=t?"● Đã có GitHub token chung từ CMS":"○ Chưa có token CMS — cần kết nối trước khi đăng";pruneCommittedStorage();const old=JSON.parse(localStorage.getItem(DRAFT)||"null");if(old&&(old.source||old.commitProof)&&Date.now()-old.at<86400000){$("#series").value=SERIES[old.series]&&["cold-fusion","lex-fridman"].includes(old.series)?old.series:"cold-fusion";$("#customSeries").value=!["cold-fusion","lex-fridman"].includes(old.series)?SERIES[old.series]?.name||old.series||"":"";$("#transcript").value=old.source;$("#sourceUrl").value=old.sourceUrl||"";$("#angle").value=old.angle||"";rawMarkdown=old.markdown||"";runData={...old};setPublishEvidence(old.commitProof);$("#preview").textContent=rawMarkdown;$("#copyDraft").disabled=!rawMarkdown;$("#downloadDraft").disabled=!rawMarkdown;$("#transcript").dispatchEvent(new Event("input"));state(old.source?"Đã khôi phục bản nháp từ phiên viết trước.":"Biểu mẫu nguồn đã sẵn sàng cho bài mới. Kết quả xuất bản trước vẫn có thể kiểm tra bên phải.");}}catch{}
+const connectionReady=loadRememberedAIKeys().then(()=>verifyExistingConnections()).catch(e=>state("Không thể khôi phục key / xác thực kết nối: "+e.message,true));
 try{
  const old=JSON.parse(localStorage.getItem(DRAFT)||"null");
  if(old?.source&&["waiting","running","failed","stopped"].includes(old.runStatus)&&!old.commitProof?.sha){
