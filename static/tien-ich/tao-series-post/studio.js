@@ -258,6 +258,7 @@ async function generate(prompt,signal,maxTokens=6500){
   catch(e){if([400,401,403].includes(e.code))throw e;provider("Groq không khả dụng. Giữ checkpoint và chờ Gemini tự retry.",true)}
  }
  if(!currentModel){
+  if(!availableKey()&&canUseGroq())return groqGenerate(prompt,signal,maxTokens);
   try{await models()}catch(e){
    if(canUseGroq()&&([429,500,502,503,504].includes(e.code)||/giới hạn|quota/i.test(e.message))){
     return groqGenerate(prompt,signal,maxTokens);
