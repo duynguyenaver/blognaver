@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-29T18:24:44.770Z",
+  "updatedAt": "2026-10-29T18:26:09.508Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -78,7 +78,8 @@
       "models": [
         "Groq · openai/gpt-oss-120b",
         "Gemini · models/gemini-3.6-flash"
-      ]
+      ],
+      "live": true
     },
     {
       "slug": "cold-fusion-hanh-trinh-doc-quyen-va-nhung-goc-khuat-phap-ly-xung-quanh-di-san-hoa-chat--2026-10-29",
