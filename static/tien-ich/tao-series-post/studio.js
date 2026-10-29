@@ -124,7 +124,7 @@ function selectedSeries(){
  return id;
 }
 const QUEUE_STORE="bn_series_research_fifo_queue_v1";
-let activeSource=null,queue=[],queueBusy=false,checkpointStorageFailed=false;
+let activeSource=null,queue=[],queueBusy=false,checkpointStorageFailed=false,queueRetryTimer=null;
 let stallTimer=null,lastProgressAt=0,lastProgressValue=-1,rotationRequested=false,publishingCommit=false;
 const STALL_MS=60000,MAX_ROTATIONS=3;
 function stopStallWatch(){if(stallTimer){clearInterval(stallTimer);stallTimer=null}}
@@ -154,7 +154,25 @@ try{
  // Persist pruning so completed jobs no longer consume browser quota.
  if(Array.isArray(saved)&&saved.length!==queue.length)try{localStorage.setItem(QUEUE_STORE,JSON.stringify(queue))}catch{};
 }catch{}
+function failedFirst(){
+ queue.sort((a,b)=>Number(Boolean(b.failed))-Number(Boolean(a.failed))||(a.failed&&b.failed?(a.failedAt||a.at||0)-(b.failedAt||b.at||0):0));
+}
+function scheduleQueueRetry(at){
+ if(queueRetryTimer)clearTimeout(queueRetryTimer);
+ const ms=Math.max(1000,Math.min(60000,(Number(at)||Date.now()+60000)-Date.now()));
+ queueRetryTimer=setTimeout(()=>{queueRetryTimer=null;dispatchNext()},ms);
+}
+function restoreFailedFromDraft(){
+ try{
+  const d=JSON.parse(localStorage.getItem(DRAFT)||"null");
+  if(!d?.source||d.commitProof?.sha||isCommittedCheckpoint(d)||!["failed","waiting","stopped","running"].includes(d.runStatus))return;
+  if(queue.some(x=>x.sourceUrl&&d.sourceUrl&&x.sourceUrl===d.sourceUrl||x.source===d.source))return;
+  const job={id:"recovered-"+(d.at||Date.now()),at:d.at||Date.now(),failedAt:d.at||Date.now(),failed:true,retryAt:Number(d.retryAt)||0,source:d.source,sourceUrl:d.sourceUrl||"",series:d.series,angle:d.angle||"",autoPublish:d.autoPublish!==false,checkpoint:{...d}};
+  if(SERIES[job.series]){queue.unshift(job);failedFirst();saveQueue()}
+ }catch{}
+}
 function saveQueue(){
+ failedFirst();
  try{localStorage.setItem(QUEUE_STORE,JSON.stringify(queue))}catch{
   state("Không thể lưu hàng đợi. Kiểm tra dung lượng bộ nhớ trình duyệt.",true);
   return false;
@@ -204,6 +222,7 @@ function renderQueue(){
   const label=document.createElement("div"),title=document.createElement("strong"),detail=document.createElement("span");
   title.textContent="#"+(index+1)+" · "+describeJob(job);
   detail.textContent=(job.sourceUrl||"Phụ đề tiếng Anh")+" · "+job.source.length.toLocaleString("vi-VN")+" ký tự · "+new Date(job.at).toLocaleTimeString("vi-VN");
+  if(job.failed){const badge=document.createElement("span");badge.className="queue-paused-badge";badge.textContent="LỖI · ƯU TIÊN CHẠY LẠI";label.append(badge)}
   label.append(title,detail);
   if(job.checkpoint){const status=document.createElement("span");status.className="queue-paused-badge";status.textContent="TẠM DỪNG · CHỜ CHẠY LẠI";label.append(status)}
   if(job.rotations){const stats=document.createElement("span");stats.textContent="Đã luân phiên "+job.rotations+"/"+MAX_ROTATIONS+" lần";label.append(stats)}
@@ -251,7 +270,9 @@ function populateJob(job){
 }
 function dispatchNext(){
  if(working||queueBusy||!queue.length)return;
+ failedFirst();
  const upcoming=queue[0];
+ if(upcoming.retryAt&&upcoming.retryAt>Date.now()){$("#queueMessage").textContent="Bài lỗi được ưu tiên · tự thử lại khi API sẵn sàng.";scheduleQueueRetry(upcoming.retryAt);renderQueue();return}
  if((!availableKey()&&!canUseGroq())||(upcoming.autoPublish!==false&&!window.BNAuth?.read?.()&&!clean($("#githubManual").value))){
   $("#queueMessage").textContent="Hàng đợi đã lưu an toàn. Kết nối lại Gemini"+(upcoming.autoPublish!==false?" và GitHub":"")+" để tiếp tục; bài chờ chưa bị lấy ra.";
   openCredentials("Cần kết nối để chạy hàng đợi");renderQueue();return;
@@ -820,7 +841,7 @@ async function start(e,restore=false,queuedJob=null){
  $("#startBtn").disabled=false;$("#cancelBtn").disabled=false;
  if(!restore){$("#resultLinks").replaceChildren();setPublishEvidence(null)}
  renderQueue();
- let succeeded=false,skippedShortResearch=false;
+ let succeeded=false,skippedShortResearch=false,queuedForRetry=false;
  try{
  checkpoint({runStatus:restore&&(window.BNQuota?.retryAt?.()||0)>Date.now()?"waiting":"running",autoPublish:job.autoPublish});
  if(resumedQuotaRun){quotaResumedNotice=true;renderQueue()}
@@ -892,9 +913,20 @@ async function start(e,restore=false,queuedJob=null){
    runData={runStatus:"completed"};setPublishEvidence(null);
    state("Đã tạm dừng an toàn bài "+describeJob(job)+" và chuyển sang bài kế tiếp.");
   }else{
+  if(!lastCommitProof?.sha){
+   const snapshot={...runData,source:job.source,sourceUrl:job.sourceUrl||"",series:job.series,angle:job.angle||"",autoPublish:job.autoPublish!==false,markdown:rawMarkdown,runStatus:"failed",error:e.message,commitProof:null};
+   const previous=Number(job.retryCount)||0;
+   const pause=Math.min(1800000,60000*Math.pow(2,Math.min(previous,4)));
+   const retryAt=Math.max(Date.now()+pause,window.BNQuota?.retryAt?.()||0);
+   const failedJob={...job,failed:true,failedAt:job.failedAt||Date.now(),retryCount:previous+1,retryAt,checkpoint:snapshot};
+   if(!queue.some(item=>item.id===failedJob.id)){queue.unshift(failedJob);saveQueue()}
+   queuedForRetry=true;
+   try{localStorage.removeItem(DRAFT)}catch{}
+   runData={runStatus:"completed"};setPublishEvidence(null);
+  }
   runtime("error",null,"Đã dừng do lỗi",e.message);
   state("Không hoàn tất: "+e.message,true);
-  if(!checkpointStorageFailed)checkpoint({runStatus:abort?.signal.aborted?"stopped":"failed",error:e.message,retryAt:window.BNQuota?.retryAt?.()||0})
+  if(!checkpointStorageFailed&&!queuedForRetry)checkpoint({runStatus:abort?.signal.aborted?"stopped":"failed",error:e.message,retryAt:window.BNQuota?.retryAt?.()||0})
   }
  }
  finally{
@@ -903,6 +935,7 @@ async function start(e,restore=false,queuedJob=null){
   renderQueue();
   if(checkpointStorageFailed){$("#queueMessage").textContent="ĐÃ DỪNG AN TOÀN · bộ nhớ checkpoint đầy. Hàng đợi giữ nguyên; cần giải phóng dung lượng trước khi tiếp tục."}
   else if(succeeded){runtime("idle",null,"Hoàn thành","Bài đã xử lý xong. Xem thông tin model trong metadata bài viết.");$("#queueMessage").textContent="Đã hoàn tất phiên vừa chạy. "+queue.length+" bài còn lại sẽ tự tiếp tục.";dispatchNext()}
+  else if(queuedForRetry){$("#queueMessage").textContent="Đã giữ bài lỗi trong hàng chờ ưu tiên; tự thử lại khi API sẵn sàng.";dispatchNext()}
   else if(skippedShortResearch){$("#queueMessage").textContent="Đã bỏ qua bài không đạt chuẩn độ dài; "+queue.length+" bài còn lại trong hàng đợi sẽ tự chạy.";dispatchNext()}
   else if(rotationRequested){rotationRequested=false;dispatchNext()}
   else $("#queueMessage").textContent="Phiên hiện tại dừng vì lỗi. Bài đang chờ vẫn được lưu; hãy tiếp tục phiên trước để xử lý hàng đợi.";
@@ -1075,6 +1108,6 @@ try{
   connectionReady.then(()=>{if(!working&&runData.source)start(new Event("submit"),true)});
  }
 }catch{}
-renderQueue();
-if(!resumePending&&queue.length)connectionReady.then(()=>dispatchNext());
+restoreFailedFromDraft();failedFirst();renderQueue();
+if(queue.length)connectionReady.then(()=>{if(!working)dispatchNext()});
 })();
