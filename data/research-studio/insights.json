@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-29T17:32:23.997Z",
+  "updatedAt": "2026-10-29T17:34:59.341Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -33,6 +33,24 @@
       "sha": "edcd80507104e8f8cb4637cdb699e76006284f7f",
       "commitAt": "2026-10-29T17:32:14Z",
       "durationMs": 10108,
+      "quota": {
+        "requests": 0,
+        "tokens": 0,
+        "inputTokens": 0,
+        "outputTokens": 0
+      },
+      "models": [
+        "Groq · openai/gpt-oss-120b"
+      ],
+      "live": true
+    },
+    {
+      "slug": "cold-fusion-cuoc-cach-mang-soi-quang-tu-thi-nghiem-1887-toi-mang-luoi-toan-cau-2026-10-29",
+      "title": "Cuộc cách mạng sợi quang: Từ thí nghiệm 1887 tới mạng lưới toàn cầu",
+      "series": "cold-fusion",
+      "sha": "9cc3cb8ef5c0e744e410d7d62c198c3f0532ea51",
+      "commitAt": "2026-10-29T17:34:49Z",
+      "durationMs": 10087,
       "quota": {
         "requests": 0,
         "tokens": 0,
