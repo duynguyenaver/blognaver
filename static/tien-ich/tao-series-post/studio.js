@@ -193,7 +193,7 @@ async function start(e,restore=false){
  else if(lastCommitProof?.sha)return;
  abort=new AbortController();startedAt=Date.now();window.BNQuota?.beginRun();working=true;$("#startBtn").disabled=true;$("#cancelBtn").disabled=false;
  if(!restore){$("#resultLinks").replaceChildren();setPublishEvidence(null)}
- checkpoint({runStatus:"running",autoPublish:restore?runData.autoPublish:$("#autoPublish").checked});
+ checkpoint({runStatus:restore&&(window.BNQuota?.retryAt?.()||0)>Date.now()?"waiting":"running",autoPublish:restore?runData.autoPublish:$("#autoPublish").checked});
  try{
  const src=rawSource($("#transcript").value),url=clean($("#sourceUrl").value),series=$("#series").value,angle=clean($("#angle").value);
  if(!SERIES[series])throw Error("Series không hợp lệ.");
