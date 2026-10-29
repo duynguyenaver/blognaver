@@ -153,3 +153,9 @@
 .youtube-extract-config>summary{font-size:12px;font-weight:750;color:#286c9b}
 .youtube-extract-config label{display:block;margin-top:10px}
 @media(max-width:650px){.youtube-extract{padding:12px}.youtube-extract-actions{align-items:stretch;flex-direction:column}#extractYoutube{width:100%}}
+
+/* Show precise Gemini connectivity independently from generation cooldown. */
+.bn-gemini-feedback{margin:9px 0 13px;padding:9px 11px;background:#eff6fe;border:1px solid #c8dff3;color:#396990;border-radius:9px;font-size:12px;line-height:1.5}
+.bn-gemini-feedback[data-status=ok]{background:#e7f7ed;color:#207249;border-color:#a7d8b7}
+.bn-gemini-feedback[data-status=warning]{background:#fff5dd;color:#8b641d;border-color:#e5ce95}
+.bn-gemini-feedback[data-status=error]{background:#ffeded;color:#a6364c;border-color:#e8b7c1}
