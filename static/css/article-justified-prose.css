@@ -1,0 +1,25 @@
+/* Editorial reading column: justify prose without disturbing headings, UI, code, figures or data tables. */
+article.page.single #content p,
+article.page.single #content li,
+article.page.single .content p,
+article.page.single .content li,
+main article.single:not(.summary) .content p,
+main article.single:not(.summary) .content li{
+  text-align:justify;
+  text-justify:inter-word;
+  overflow-wrap:break-word;
+  hyphens:auto;
+}
+article.page.single #content :is(pre,code,table,figcaption,h1,h2,h3,h4,h5,h6),
+article.page.single .content :is(pre,code,table,figcaption,h1,h2,h3,h4,h5,h6){
+  text-align:initial;
+  hyphens:manual;
+}
+@media(max-width:420px){
+  article.page.single #content p,
+  article.page.single #content li,
+  article.page.single .content p,
+  article.page.single .content li{
+    word-spacing:normal;
+  }
+}
