@@ -206,3 +206,68 @@
 .editor-save-top{display:flex;justify-content:flex-end;margin:0 0 15px}
 .editor-save-top button{width:auto}
 @media(max-width:600px){.editor-collapse>summary strong{font-size:16px}.editor-save-top button{width:100%}}
+
+
+/* Research Studio 06–07: full-width disclosure header, readable contrast.
+   Avoid .step > span (the legacy badge rule) affecting nested title copy. */
+#batchEditor,#imageWorkspace{
+  background:#f0f6ff;
+  border:2px solid #9abce3;
+  box-shadow:0 9px 28px rgba(20,71,120,.10);
+  overflow:hidden;
+}
+#batchEditor .editor-collapse,#imageWorkspace .editor-collapse{width:100%;min-width:0}
+#batchEditor .editor-collapse>summary,#imageWorkspace .editor-collapse>summary{
+  width:100%;box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;
+  padding:18px 20px;border-radius:12px;gap:20px;
+  background:linear-gradient(110deg,#dcecff 0%,#ebf5ff 74%,#f5faff 100%);
+  border:1px solid #b2cfee;
+}
+#batchEditor .editor-collapse>summary .step,#imageWorkspace .editor-collapse>summary .step{
+  width:100%;min-width:0;flex:1 1 auto;display:flex;flex-direction:row;
+  align-items:center;gap:16px;margin:0;
+}
+#batchEditor .editor-collapse>summary .step>span:first-child,
+#imageWorkspace .editor-collapse>summary .step>span:first-child{
+  display:flex;align-items:center;justify-content:center;
+  flex:0 0 54px;width:54px;height:54px;border-radius:14px;
+  background:#b5dafa;color:#084b83;font-size:23px;font-weight:850;
+}
+#batchEditor .editor-collapse>summary .step>span:nth-child(2),
+#imageWorkspace .editor-collapse>summary .step>span:nth-child(2){
+  display:block;flex:1 1 auto;min-width:0;width:auto;height:auto;
+  background:transparent;color:#123957;border:0;border-radius:0;
+  font-size:inherit;font-weight:inherit;place-items:unset;text-align:left;
+}
+#batchEditor .editor-collapse>summary strong,#imageWorkspace .editor-collapse>summary strong{
+  font-size:clamp(19px,2.1vw,26px);line-height:1.25;
+  display:block;white-space:normal;overflow-wrap:normal;word-break:normal;
+  color:#0e3459;
+}
+#batchEditor .editor-collapse>summary small,#imageWorkspace .editor-collapse>summary small{
+  display:block;margin-top:6px;font-size:13px;line-height:1.5;
+  color:#315b7c;font-weight:500;
+}
+#batchEditor .editor-collapse>summary::after,#imageWorkspace .editor-collapse>summary::after{
+  flex:0 0 auto;color:#075691;font-weight:800;
+}
+#batchEditor .editor-collapse-body,#imageWorkspace .editor-collapse-body{
+  margin-top:14px;padding:20px;background:#fff;border:1px solid #c5d9ef;
+  border-radius:12px;color:#193b5a;
+}
+#batchEditor .editor-save-top{margin:0 0 16px;display:flex;justify-content:flex-end;align-items:center}
+#batchEditor .editor-save-top button:not(:disabled){background:#1260a6;color:#fff;border-color:#1260a6}
+#batchEditor .editor-search,#imageWorkspace .image-section{
+  background:#f0f7ff;border:1px solid #b7d1eb;border-radius:12px;padding:14px;
+}
+#batchEditor .editor-items .editor-card,#imageWorkspace .image-post-row{
+  border:1px solid #b3cde7;background:#fff;
+}
+@media(max-width:580px){
+ #batchEditor .editor-collapse>summary,#imageWorkspace .editor-collapse>summary{padding:14px 12px;gap:9px}
+ #batchEditor .editor-collapse>summary .step,#imageWorkspace .editor-collapse>summary .step{gap:10px}
+ #batchEditor .editor-collapse>summary .step>span:first-child,
+ #imageWorkspace .editor-collapse>summary .step>span:first-child{flex-basis:43px;width:43px;height:43px;font-size:19px}
+ #batchEditor .editor-collapse>summary strong,#imageWorkspace .editor-collapse>summary strong{font-size:17px}
+ #batchEditor .editor-collapse-body,#imageWorkspace .editor-collapse-body{padding:12px}
+}
