@@ -77,6 +77,22 @@ async function load(){
   status.textContent="Không thể làm mới: "+e.message+(lastLoaded?" · Giữ dữ liệu lần tải "+lastLoaded.toLocaleTimeString("vi-VN"):"");
  }finally{busy=false;button.disabled=false}
 }
+// A verified commit updates Section 08 without a full-page reload or API scan.
+window.addEventListener("bn:research-article-committed",event=>{
+ const proof=event.detail||{};
+ const file=String(proof.path||"");
+ if(!file.startsWith("content/posts/")||!file.endsWith(".md")||!(/^[a-f0-9]{40}$/i).test(String(proof.sha||"")))return;
+ runId++;
+ details.open=true;
+ const wrap=node("article","recent-commit-entry");
+ wrap.append(node("strong","", "Bài vừa commit thành công"));
+ const row=node("div","recent-article-links");
+ row.append(link("Đọc bài · URL dự kiến",predictedUrl(file)));
+ wrap.append(row);
+ list.replaceChildren(wrap);
+ status.textContent="Commit "+proof.sha.slice(0,10)+" đã ghi trên main. Chỉ hiển thị URL bài vừa tạo; cần đợi Hugo deploy thành công để đọc.";
+ lastLoaded=new Date();
+});
 // Deliberately no automatic fetch on open, focus, visibility or timer.
 button.addEventListener("click",load);
 })();
