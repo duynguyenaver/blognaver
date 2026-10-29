@@ -1,5 +1,18 @@
 # BlogNaver Agent Guidelines
 
+## MANDATORY: Pull request first (project owner policy, 2026-10-30)
+
+All changes to this repository MUST be made on a dedicated branch and submitted via a Pull Request targeting `main`. This includes UI/UX, application code, blog content, documentation, workflows, configuration, and hotfixes.
+
+- **NEVER push or commit directly to `main`**, even for small edits, emergencies, or blog publishing.
+- Create a new branch from the latest `main`, commit changes to that branch, then open a Pull Request.
+- **Do not merge the Pull Request until the owner explicitly authorizes the merge.** Creating the PR is not merge authorization.
+- Keep PRs scoped and include a clear explanation, changed files, checks, and any deployment impact.
+- If unable to create a branch or PR, report the blocker and do not substitute a direct push.
+- When work is complete, provide the PR URL and honestly state that production remains unchanged until approved and merged.
+- Never infer ongoing authorization to bypass this process from earlier direct-push requests.
+
+
 Before modifying UI/UX or building a new page, consult [BRANDING.md](BRANDING.md) for reference and update it when design decisions change. The project owner may redesign, replace, or remove theme UI and theme-switching controls without being blocked by legacy branding rules.
 
 Required: follow the design tokens, typography, responsive standards, accessibility and CMS behavior constraints there. Preserve existing functionality unless specifically requested. Update design docs alongside deliberate changes to brand rules. Check Hugo build and GitHub Pages deploy after changes; report real status without guessing.
