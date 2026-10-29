@@ -201,6 +201,7 @@ async function pushQueueCloud(){
  catch(e){if(e.status!==404)throw e}
  await cloudQueueRequest("contents/"+CLOUD_QUEUE_FILE,"PUT",{message:"backup: encrypted Research Studio pending queue",branch:CLOUD_QUEUE_BRANCH,content,...(sha?{sha}:{})});
  cloudSynced=new Set(items.map(x=>x.id));cloudSyncError="";queueCloudStatus();
+ $("#queueMessage").textContent="✓ Hàng đợi và checkpoint đã sync lên GitHub (mã hóa).";
 }
 function scheduleCloudQueueSync(){
  if(!cloudInitialized)return;
@@ -1182,6 +1183,7 @@ $("#runQueueBtn").addEventListener("click",async()=>{
  if(working||queueBusy){$("#queueMessage").textContent="Có bài đang chạy; hàng đợi sẽ tự tiếp tục sau khi bài hiện tại kết thúc.";return}
  if(!queue.length){$("#queueMessage").textContent="Đang khôi phục hàng đợi từ GitHub…";await pullQueueCloud(false);if(!queue.length){$("#queueMessage").textContent="Không có bài chờ trong bộ nhớ hoặc bản sao GitHub.";return}}
  $("#queueMessage").textContent="Đã yêu cầu chạy bài kế tiếp trong hàng đợi.";
+ if(runData.source&&queue.some(x=>x.source===runData.source))runData={runStatus:"completed"};
  dispatchNext();
 });
 $("#cancelBtn").onclick=()=>{abort?.abort();runData.runStatus="stopped";checkpoint({runStatus:"stopped"});state("Đã yêu cầu dừng tự retry. Bản thảo vẫn được lưu.")};
