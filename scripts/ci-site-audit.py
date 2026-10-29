@@ -2,6 +2,7 @@
 """Read-only Hugo/Blowfish build audit. No source modifications or AI-generated patches."""
 import json, os, pathlib, re, subprocess, sys, urllib.parse
 from collections import Counter
+from datetime import datetime
 ROOT=pathlib.Path(".")
 OUT=ROOT/"public"
 BASE="/blognaver/"
@@ -44,7 +45,8 @@ home_file=OUT/"index.html"
 if home_file.is_file():
     home_html=home_file.read_text(encoding="utf-8",errors="replace")
     dated=re.findall(r'<article\\b[^>]*\\bclass="single summary"[^>]*\\bdata-post-date="([^"]+)"',home_html,re.I)
-    if len(dated)>1 and dated!=sorted(dated,reverse=True):
+    date_times=[datetime.fromisoformat(d).timestamp() for d in dated]
+    if len(date_times)>1 and date_times!=sorted(date_times,reverse=True):
         fail("homepage-order","Homepage article dates must be newest first")
     if "bn-midarticle-card" in home_html or "article-recommendations.js" in home_html:
         fail("old-recommendations","Retired random post UI must not appear on home")
