@@ -3,8 +3,10 @@
 const root=document.querySelector("#quotaWidget");if(!root)return;
 const $=s=>document.querySelector(s),STORE="bn_gemini_quota_estimate_v1",LIMITS="bn_gemini_quota_limits_v1";
 let entries=[],until=0,timer=null,activeRun=null;
+const WAIT_KEY="bn_series_gemini_retry_deadline_v1";
 const HISTORY="bn_series_quota_article_samples_v1";
 try{const data=JSON.parse(sessionStorage.getItem(STORE)||"{}");entries=Array.isArray(data.entries)?data.entries:[];until=Number(data.until)||0}catch{}
+try{until=Math.max(until,Number(localStorage.getItem(WAIT_KEY))||0)}catch{}
 const day=86400000,minute=60000,now=()=>Date.now(),wait=()=>Math.max(0,Math.ceil((until-now())/1000));
 function persist(){try{sessionStorage.setItem(STORE,JSON.stringify({entries:entries.slice(-800),until}))}catch{}}
 function limits(){return ["rpm","tpm","rpd"].map(k=>Number($("#"+k+"Limit").value)||0)}
@@ -30,7 +32,7 @@ function draw(){
  if(!s.blocked&&timer){clearInterval(timer);timer=null}
 }
 function refreshCountdown(){if(!timer)timer=setInterval(draw,1000);draw()}
-function set429(retrySeconds){until=now()+Math.max(1,Math.min(3600,Number(retrySeconds)||60))*1000;refreshCountdown()}
+function set429(retrySeconds){until=now()+Math.max(1,Math.min(86400,Number(retrySeconds)||60))*1000;try{localStorage.setItem(WAIT_KEY,String(until))}catch{}refreshCountdown()}
 function samples(){try{const v=JSON.parse(localStorage.getItem(HISTORY)||"[]");return Array.isArray(v)?v:[]}catch{return []}}
 function beginRun(){activeRun={requests:0,tokens:0,inputTokens:0,outputTokens:0,started:now()};draw()}
 function runSummary(){return activeRun?{...activeRun}:null}
@@ -70,6 +72,6 @@ $("#quotaBadge").onclick=()=>{const open=$("#quotaDetails").hidden;$("#quotaDeta
 $("#quotaRefresh").onclick=()=>{document.querySelector("#testAI")?.click()};
 try{const v=JSON.parse(localStorage.getItem(LIMITS)||"{}");for(const name of ["rpm","tpm","rpd"])if(v[name])$("#"+name+"Limit").value=v[name]}catch{}
 for(const name of ["rpm","tpm","rpd"])$("#"+name+"Limit").addEventListener("change",()=>{const v=Object.fromEntries(["rpm","tpm","rpd"].map(k=>[k,Number($("#"+k+"Limit").value)||0]));localStorage.setItem(LIMITS,JSON.stringify(v));draw()});
-window.BNQuota={canSend,record,estimateError,countTokens,beginRun,finishRun,runSummary,refresh:draw};
+window.BNQuota={canSend,record,estimateError,countTokens,beginRun,finishRun,runSummary,refresh:draw,retryAt:()=>until,remainingSeconds:wait};
 if(until>now())refreshCountdown();draw();
 })();
