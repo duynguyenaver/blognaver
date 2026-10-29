@@ -375,3 +375,15 @@
 #restoreQueueGithubBtn{border:1px solid #327eb6;background:#e0efff;color:#174e7e;font-weight:800}
 #restoreQueueGithubBtn:disabled{opacity:.55;cursor:wait}
 .queue-cloud-status{display:inline-block;margin-left:7px;padding:3px 7px;border-radius:7px;background:#e4f3fd;color:#176092;font-size:11px;font-weight:800}
+
+/* Section 08: focused latest-article summary */
+#recentCommitsPanel .recent-commits-actions{margin-bottom:8px}
+#recentCommitsPanel .recent-commits-actions p{margin:0;font-size:14px}
+#recentCommitsPanel .recent-latest-card{background:#fff;padding:24px;border:1px solid #bfd6ed;border-radius:18px;box-shadow:0 8px 22px rgba(15,61,110,.055)}
+#recentCommitsPanel .recent-latest-eyebrow{font-size:11px;font-weight:800;letter-spacing:.1em;color:#3775af}
+#recentCommitsPanel .recent-latest-title{font-size:clamp(19px,2vw,26px);line-height:1.35;color:#173b60;margin:10px 0 18px;overflow-wrap:anywhere}
+#recentCommitsPanel .recent-latest-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+#recentCommitsPanel .recent-latest-primary{display:inline-flex;align-items:center;padding:11px 18px;background:#2075bc;color:#fff;border-radius:10px;text-decoration:none;font-weight:750}
+#recentCommitsPanel .recent-latest-primary:hover{background:#155f9d}
+#recentCommitsPanel .recent-latest-meta{font-size:12px;color:#617b94;margin:15px 0 0}
+#recentCommitsPanel #recentCommitsStatus{font-size:12px;font-weight:500;color:#65829a}

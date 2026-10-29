@@ -28,13 +28,37 @@ function predictedUrl(path){
  const short=path.slice("content/posts/".length).replace(/\.md$/i,"").replace(/\/index$/i,"");
  return BASE+"/bai-viet/"+short.split("/").map(encodeURIComponent).join("/")+"/";
 }
+function prettyTitle(file){
+ const raw=file.slice("content/posts/".length).replace(/\\.md$/i,"").replace(/^(?:cold-fusion|ota-travel|lex-fridman)-/,"").replace(/-20\\d{2}-\\d{2}-\\d{2}$/,"");
+ return raw.split("-").filter(Boolean).join(" ").replace(/^./,c=>c.toUpperCase());
+}
+function renderLatest(file,sha,title="",deploy=null){
+ if(!file.startsWith("content/posts/")||!file.endsWith(".md"))return;
+ details.open=true;
+ const wrap=node("article","recent-commit-entry recent-latest-card");
+ const eyebrow=node("div","recent-latest-eyebrow","BÀI VIẾT MỚI NHẤT");
+ wrap.append(eyebrow,node("h3","recent-latest-title",title||prettyTitle(file)));
+ const actions=node("div","recent-latest-actions");
+ const articleLink=link("Đọc bài viết ↗",predictedUrl(file));
+ articleLink.className="recent-latest-primary";
+ actions.append(articleLink);
+ const deployStatus=deploy?runState(deploy):{label:"Đã commit · Chờ xác nhận deploy",cls:"pending"};
+ const label=node("span","recent-deploy-pill "+deployStatus.cls,deployStatus.label);
+ actions.append(label);
+ wrap.append(actions);
+ const meta=node("p","recent-latest-meta","Commit "+sha.slice(0,10)+" · GitHub main");
+ wrap.append(meta);
+ list.replaceChildren(wrap);
+ status.textContent="Đường dẫn dự kiến · Bài có thể chưa truy cập được trước khi Hugo deploy hoàn tất.";
+ lastLoaded=new Date();
+}
 async function load(){
  if(busy)return;
  busy=true;button.disabled=true;
  const call=++runId;
- status.textContent="Đang tìm bài commit gần nhất trên GitHub…";
+ status.textContent="Đang kiểm tra bài viết gần nhất…";
  try{
-  const commits=await request("/commits?sha=main&path=content%2Fposts&per_page=12");
+  const commits=await request("/commits?sha=main&path=content%2Fposts&per_page=8");
   let latest=null;
   for(const commit of commits){
    const detail=await request("/commits/"+encodeURIComponent(commit.sha));
@@ -42,22 +66,21 @@ async function load(){
    if(files.length){latest={commit,file:files[0]};break}
   }
   if(call!==runId)return;
-  if(!latest){list.replaceChildren();status.textContent="Chưa tìm thấy bài viết đã commit.";return}
-  renderLatest(latest.file,latest.commit.sha);
- }catch(e){
-  if(call===runId)status.textContent="Không tải được bài gần nhất: "+e.message;
- }finally{busy=false;button.disabled=false}
-}
-function renderLatest(file,sha){
- if(!file.startsWith("content/posts/")||!file.endsWith(".md"))return;
- details.open=true;
- const wrap=node("article","recent-commit-entry");
- wrap.append(node("strong","", "Bài vừa commit thành công"));
- const row=node("div","recent-article-links");
- row.append(link("Đọc bài · URL dự kiến",predictedUrl(file)));
- wrap.append(row);list.replaceChildren(wrap);
- status.textContent="Commit "+sha.slice(0,10)+" · Đã ghi trên GitHub main. Chờ Hugo deploy hoàn tất để truy cập URL.";
- lastLoaded=new Date();
+  if(!latest){list.replaceChildren();status.textContent="Chưa tìm thấy bài được commit.";return}
+  let title="",deploy=null;
+  try{
+   const file=await request("/contents/"+latest.file+"?ref=main");
+   const decoded=decodeURIComponent(Array.from(atob(String(file.content||"").replace(/\\s/g,"")),c=>"%"+c.charCodeAt(0).toString(16).padStart(2,"0")).join(""));
+   const match=decoded.match(/^title:\\s*["']?([^\\r\\n"']+)/m);
+   title=match?.[1]||"";
+  }catch{}
+  try{
+   const runs=await request("/actions/workflows/hugo.yml/runs?branch=main&per_page=15");
+   deploy=(runs.workflow_runs||[]).find(run=>run.head_sha===latest.commit.sha)||null;
+  }catch{}
+  if(call===runId)renderLatest(latest.file,latest.commit.sha,title,deploy);
+ }catch(e){if(call===runId)status.textContent="Không thể kiểm tra bài gần nhất: "+e.message;}
+ finally{busy=false;button.disabled=false}
 }
 // A verified commit updates Section 08 without a full-page reload or API scan.
 window.addEventListener("bn:research-article-committed",event=>{
