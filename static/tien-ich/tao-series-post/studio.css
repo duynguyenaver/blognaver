@@ -344,3 +344,27 @@
 #studioMiniCms .mini-cms-edit textarea{width:100%;resize:vertical;min-height:180px;font-family:ui-monospace,monospace;font-size:12px}
 #studioMiniCms .mini-cms-edit[hidden]{display:none}
 #studioMiniCms .editor-card{min-width:0}
+
+
+/* Section 06 – clearer, colorful series-management cards */
+#batchEditor{background:#e7f2ff;border:2px solid #8eb6e3;box-shadow:0 10px 30px rgba(28,80,132,.12)}
+#batchEditor .editor-collapse>summary{background:linear-gradient(110deg,#cfe5ff,#eff7ff);border:1px solid #99bfe9}
+#batchEditor .editor-collapse-body{background:#fff;border:1px solid #b9d1eb;border-radius:14px;padding:20px;margin-top:14px}
+#batchEditor .editor-toolbar{padding:13px 15px;background:#e9f4ff;border:1px solid #bad4ef;border-radius:12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+#batchEditor .editor-card.series-edit-card{display:grid;gap:14px;background:#f5faff;border:1px solid #a9c7e8;border-left:5px solid #3881c8;border-radius:16px;padding:19px;box-shadow:0 4px 12px rgba(33,85,144,.06)}
+#batchEditor .series-edit-card.series-edit-latest{background:linear-gradient(120deg,#e0efff,#f5faff 75%);border:2px solid #2b74bd;border-left-width:6px;box-shadow:0 8px 22px rgba(27,104,185,.14)}
+#batchEditor .series-edit-heading{display:flex;align-items:flex-start;gap:11px;flex-wrap:wrap}
+#batchEditor .series-edit-badge{display:inline-flex;align-items:center;white-space:nowrap;background:#d3e8ff;color:#15528f;font-size:11px;font-weight:850;letter-spacing:.045em;padding:6px 10px;border-radius:100px}
+#batchEditor .series-edit-latest .series-edit-badge{background:#115b9e;color:#fff}
+#batchEditor .series-edit-title{flex:1;min-width:190px;font-size:17px;line-height:1.5;color:#123b66;overflow-wrap:anywhere}
+#batchEditor .series-edit-meta{display:flex;gap:10px;flex-wrap:wrap;color:#365c80;font-size:12px}
+#batchEditor .series-edit-meta span{background:#e5f1ff;border:1px solid #ccdef2;padding:5px 9px;border-radius:7px}
+#batchEditor .series-edit-field{background:#fff;border:1px solid #bbd2eb;border-radius:11px;padding:12px;display:grid;gap:8px}
+#batchEditor .series-edit-field label{font-weight:800;color:#164b80}
+#batchEditor .series-edit-field input{background:#fff;border:2px solid #a4c5e8;border-radius:9px;font-size:15px;padding:12px}
+#batchEditor .series-edit-field input:focus{outline:3px solid #b3dafa;border-color:#1b70bd}
+#batchEditor .series-edit-hint{font-family:ui-monospace,monospace;overflow-wrap:anywhere;color:#457093}
+#batchEditor .series-edit-live-link{justify-self:start;color:#0d62a9;text-decoration:underline;text-underline-offset:4px;font-size:13px;font-weight:750}
+#batchEditor #editorSearch{background:white;border:2px solid #bbd2ea;border-radius:10px;padding:12px}
+#batchEditor #editorSearchCount{color:#305f8c;font-weight:650}
+@media(max-width:620px){#batchEditor .editor-collapse-body{padding:12px}#batchEditor .editor-card.series-edit-card{padding:13px}#batchEditor .series-edit-title{min-width:0;flex-basis:100%}}
