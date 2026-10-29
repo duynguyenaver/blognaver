@@ -356,9 +356,10 @@ try{
 // Preserve FIFO order within each round. A failed job moves to the tail after
 // ONE attempt; it must not jump ahead of older jobs on every save.
 function failedFirst(){return queue}
+let manualQueueSession=false;
 function nextRunnableIndex(){
  const now=Date.now();
- return queue.findIndex(x=>Number(x.retryCount||0)<3&&!x.retryExhausted&&!(Number(x.retryAt)>now));
+ return queue.findIndex(x=>(manualQueueSession||!x.manualOnly)&&Number(x.retryCount||0)<3&&!x.retryExhausted&&!(Number(x.retryAt)>now));
 }
 function scheduleQueueRetry(at){
  if(queueRetryTimer)clearTimeout(queueRetryTimer);
@@ -452,7 +453,7 @@ function renderQueue(){
  queue.forEach((job,index)=>{
   const li=document.createElement("li");li.className="queue-entry";
   const label=document.createElement("div"),title=document.createElement("strong"),detail=document.createElement("span");
-  title.textContent="#"+(index+1)+" · "+describeJob(job);
+  title.textContent="#"+(index+1)+" · "+describeJob(job)+(job.manualOnly?" · CHỜ CHẠY THỦ CÔNG":"");
   detail.textContent=(job.sourceUrl||"Phụ đề tiếng Anh")+" · "+job.source.length.toLocaleString("vi-VN")+" ký tự · "+new Date(job.at).toLocaleTimeString("vi-VN");
   if(job.failed){const badge=document.createElement("span");badge.className="queue-paused-badge";badge.textContent="LỖI · ƯU TIÊN CHẠY LẠI";label.append(badge)}
   label.append(title,detail);
@@ -505,8 +506,8 @@ function formJob(){
  if(job.sourceUrl&&!/^https:\/\//i.test(job.sourceUrl))throw Error("URL nguồn phải dùng HTTPS.");
  return job
 }
-async function enqueue(){
- const job=formJob();
+async function enqueue(manualOnly=false){
+ const job={...formJob(),manualOnly};
  if(checkDuplicateYoutube(job))return;
  if(queue.length>=30)throw Error("Hàng đợi tối đa 30 bài. Hãy xóa bài chưa cần thiết.");
  queue.push(job);
@@ -518,7 +519,7 @@ async function enqueue(){
  renderQueue();queueCloudStatus();
  $("#queueMessage").removeAttribute("data-duplicate");
  $("#queueMessage").textContent="Đã thêm bài #"+queue.length+" · "+describeJob(job)+" vào hàng đợi. Tiếp tục nhập phụ đề khác nếu muốn.";
- state("Bài hiện tại tiếp tục chạy; "+queue.length+" bài được lưu trong hàng đợi.");
+ state(manualOnly?"Đã xếp bài thủ công vào Section 05. Bài sẽ không tự chạy; bấm Chạy bài ở hàng đợi khi sẵn sàng.":"Bài hiện tại tiếp tục chạy; "+queue.length+" bài được lưu trong hàng đợi.");
 }
 function populateJob(job){
  $("#series").value=SERIES[job.series]&&["cold-fusion","lex-fridman"].includes(job.series)?job.series:"cold-fusion";$("#customSeries").value=["cold-fusion","lex-fridman"].includes(job.series)?"":SERIES[job.series]?.name||job.series;
@@ -533,8 +534,8 @@ function dispatchNext(force=false){
  if(working||queueBusy||!queue.length)return;
  const index=force?0:nextRunnableIndex();
  if(index<0){
-  const eligible=queue.filter(x=>!x.retryExhausted&&Number(x.retryCount||0)<3);
-  if(!eligible.length){$("#queueMessage").textContent="Đã duyệt hết hàng đợi: mỗi bài lỗi tối đa 3 lần. Chủ động dừng auto retry; bài lỗi và checkpoint vẫn lưu.";renderQueue();return}
+  const eligible=queue.filter(x=>(manualQueueSession||!x.manualOnly)&&!x.retryExhausted&&Number(x.retryCount||0)<3);
+  if(!eligible.length){manualQueueSession=false;$("#queueMessage").textContent="Hàng đợi đã xử lý hết các bài đủ điều kiện. Bài xếp thủ công còn lại chỉ chạy khi bấm Chạy bài ở hàng đợi.";renderQueue();return}
   const earliest=Math.min(...eligible.map(x=>Number(x.retryAt)||Date.now()+60000));
   $("#queueMessage").textContent="Các bài lỗi sẽ luân phiên thử model lại tự động; không chờ cooldown API.";
   scheduleQueueRetry(earliest);renderQueue();return;
@@ -1356,13 +1357,18 @@ async function start(e,restore=false,queuedJob=null){
 function saveMarkdown(){const blob=new Blob([rawMarkdown],{type:"text/markdown;charset=utf-8"}),u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download=(lastSlug||"series-research")+".md";a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
 $("#studioForm").addEventListener("submit",start);
 $("#restoreQueueGithubBtn").addEventListener("click",pullQueueCloud);
+$("#enqueueOnlyBtn").addEventListener("click",async()=>{
+ const btn=$("#enqueueOnlyBtn");btn.disabled=true;
+ try{await enqueue(true)}catch(e){$("#queueMessage").textContent="Không thể xếp hàng thủ công: "+e.message;state(e.message,true)}finally{btn.disabled=false}
+});
 $("#runQueueBtn").addEventListener("click",async()=>{
+ manualQueueSession=true;
  emergencyStopped=false;try{sessionStorage.removeItem(EMERGENCY_STOP)}catch{}
  const btn=$("#runQueueBtn");btn.disabled=true;
  try{
   if(working||queueBusy){$("#queueMessage").textContent="Bài hiện tại đang chạy; sẽ tự chạy bài tiếp theo sau khi hoàn thành.";return}
   if(!queue.length){$("#queueMessage").textContent="Đang khôi phục hàng đợi từ GitHub…";await pullQueueCloud(false)}
-  if(!queue.length){$("#queueMessage").textContent="Không tìm thấy bài nào trong hàng đợi cục bộ/GitHub.";return}
+  if(!queue.length){manualQueueSession=false;$("#queueMessage").textContent="Không tìm thấy bài nào trong hàng đợi cục bộ/GitHub.";return}
   // Manual action explicitly bypasses queued job cooldown and a stale
   // previous-draft status. A separate active job is never interrupted.
   runData={runStatus:"completed"};resumePending=false;
