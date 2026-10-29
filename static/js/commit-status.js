@@ -92,12 +92,20 @@
     if(busy||document.hidden||!details.open)return;
     busy=true;const button=$("[data-refresh]");button.disabled=true;
     try{
-      const response=await fetch(endpoint,{headers:{Accept:"application/vnd.github+json"},cache:"no-store"});
-      if(!response.ok)throw new Error(response.status===403||response.status===429?"GitHub API bị giới hạn. Giữ lại dữ liệu gần nhất.":"Không thể tải GitHub Actions (HTTP "+response.status+").");
-      const data=await response.json();if(!Array.isArray(data.workflow_runs))throw new Error("Dữ liệu GitHub không hợp lệ.");
-      render(data.workflow_runs);
+      let runs=null,stale=false;
+      try{
+        const response=await fetch(endpoint,{headers:{Accept:"application/vnd.github+json",...(window.BNAuth?.header?.()||{})},cache:"no-store"});
+        if(!response.ok)throw Error("GitHub API HTTP "+response.status);
+        const data=await response.json();if(!Array.isArray(data.workflow_runs))throw Error("Dữ liệu không hợp lệ");
+        runs=data.workflow_runs;try{localStorage.setItem("bn_commit_chart_last20_v2",JSON.stringify(runs))}catch{}
+      }catch(error){
+        stale=true;try{runs=JSON.parse(localStorage.getItem("bn_commit_chart_last20_v2")||"null")}catch{}
+        if(!runs){try{const response=await fetch("../workflows-snapshot.json",{cache:"no-store"});if(response.ok){const j=await response.json();runs=j.workflow_runs}}catch{}}
+        if(!runs)throw error;
+      }
+      render(runs);
       lastSuccess=Date.now();
-      $("[data-updated]").textContent="Cập nhật: "+new Date(lastSuccess).toLocaleString("vi-VN")+" · Tự đồng bộ khi dashboard đang mở.";
+      $("[data-updated]").textContent=(stale?"Dữ liệu cache/snapshot, có thể đã cũ. ":"Cập nhật "+new Date(lastSuccess).toLocaleString("vi-VN")+" · ")+"Tự đồng bộ mỗi 90 giây khi dashboard đang mở.";
     }catch(e){$("[data-feedback]").textContent=e instanceof Error?e.message:"Lỗi kết nối GitHub."}
     finally{busy=false;button.disabled=false}
   }
