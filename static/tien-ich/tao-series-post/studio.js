@@ -387,7 +387,7 @@ async function findPublishedYoutube(job){
   Authorization:"Bearer "+token,Accept:"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"
  }});
  const result=await response.json().catch(()=>({}));
- if(!response.ok||result.incomplete_results)throw Error("Không kiểm chứng được nguồn YouTube đã đăng (GitHub HTTP "+response.status+"). Dừng để tránh đăng trùng.");
+ if(!response.ok||result.incomplete_results){const error=Error("Không kiểm chứng được nguồn YouTube đã đăng (GitHub HTTP "+response.status+"). Dừng để tránh đăng trùng.");error.code="YOUTUBE_PREFLIGHT_UNAVAILABLE";error.status=response.status;throw error;}
  for(const match of result.items||[]){
   if(!String(match.path||"").startsWith("content/posts/")||!String(match.path).endsWith(".md"))continue;
   const file=await github("contents/"+match.path+"?ref=main");
@@ -1206,7 +1206,21 @@ async function start(e,restore=false,queuedJob=null){
  }else{checkpoint({runStatus:"completed"});window.BNSeriesInsights?.record({slug:d.slug,title:d.title,series:d.series,state:"draft",durationMs:Date.now()-startedAt,live:false,quota:window.BNQuota?.runSummary()});progress(100,"Hoàn thành bản thảo; chưa đăng",4);state("Đã tạo bản thảo Markdown. Bạn có thể copy hoặc xuất file; chưa ghi lên GitHub.")}
  succeeded=true;
  }catch(e){
-  if(e.code==="CHECKPOINT_STORAGE_FULL"||checkpointStorageFailed){
+  if(e.code==="YOUTUBE_PREFLIGHT_UNAVAILABLE"){
+   emergencyStopped=true;
+   try{sessionStorage.setItem(EMERGENCY_STOP,"1")}catch{}
+   if(queueRetryTimer){clearTimeout(queueRetryTimer);queueRetryTimer=null}
+   if(cloudSyncTimer){clearTimeout(cloudSyncTimer);cloudSyncTimer=null}
+   stopStallWatch();
+   // This is a GitHub access/check error, NOT proof of a duplicate video.
+   // Preserve the source and prevent any restart on the next page load.
+   const held={...job,retryExhausted:true,retryAt:0,checkpoint:{...runData,source:job.source,sourceUrl:job.sourceUrl||"",runStatus:"paused",error:e.message}};
+   if(!queue.some(item=>sameQueueJob(item,held)))queue.push(held);
+   await saveQueue();
+   runtime("error",null,"Kiểm tra GitHub thất bại",e.message);
+   state(e.message+" Trang sẽ tự tải lại sau 3 giây; auto retry đã dừng.",true);
+   setTimeout(()=>window.location.reload(),3000);
+  }else if(e.code==="CHECKPOINT_STORAGE_FULL"||checkpointStorageFailed){
    checkpointStorageFailed=true;
    runtime("error",null,"Dừng an toàn: bộ nhớ đầy",e.message);
    state("Đã ngừng tạo thêm nội dung vì checkpoint chưa được lưu. Hãy tải bản thảo Markdown và giải phóng bộ nhớ. Hàng đợi không tự chạy.",true);
