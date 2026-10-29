@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-29T22:00:13.167Z",
+  "updatedAt": "2026-10-29T22:01:40.106Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -414,6 +414,25 @@
         "Gemini · models/gemini-3.5-flash-lite"
       ],
       "live": true
+    },
+    {
+      "slug": "cold-fusion-gds-va-ndc-thach-thuc-co-hoi-trong-phan-phoi-ve-hang-khong-2026-10-29",
+      "title": "GDS và NDC: Thách Thức, Cơ Hội trong Phân Phối Vé Hàng Không",
+      "series": "cold-fusion",
+      "sha": "f865a9477d1ab1f41a781f56009cd8dc79a3f4dd",
+      "commitAt": "2026-10-29T22:01:12Z",
+      "durationMs": 10375,
+      "quota": {
+        "requests": 1,
+        "tokens": 5505,
+        "inputTokens": 3864,
+        "outputTokens": 1641
+      },
+      "models": [
+        "Groq · qwen/qwen3.8-27b",
+        "Groq · allam-2-7b",
+        "Gemini · models/gemini-3.5-flash-lite"
+      ]
     }
   ]
 }
