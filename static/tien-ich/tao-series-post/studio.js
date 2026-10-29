@@ -324,7 +324,7 @@ async function hydrateQueue(){
 
 let activeSource=null,queue=[],queueBusy=false,checkpointStorageFailed=false,queueRetryTimer=null;
 let stallTimer=null,lastProgressAt=0,lastProgressValue=-1,rotationRequested=false,publishingCommit=false;
-const STALL_MS=60000,MAX_ROTATIONS=3;
+const STALL_MS=180000,MAX_ROTATIONS=3;
 function stopStallWatch(){if(stallTimer){clearInterval(stallTimer);stallTimer=null}}
 function monitorProgress(){
  stopStallWatch();lastProgressAt=Date.now();lastProgressValue=Number($("#percent").textContent.replace("%",""))||0;
@@ -333,6 +333,9 @@ function monitorProgress(){
   const pct=Number($("#percent").textContent.replace("%",""))||0;
   if(pct!==lastProgressValue){lastProgressValue=pct;lastProgressAt=Date.now();return}
   if(Date.now()-lastProgressAt<STALL_MS)return;
+  // Model fallback works inside a single H2 step; a static percentage alone
+  // must not cancel an otherwise active model rotation.
+  if(modelAttemptActive){lastProgressAt=Date.now();return}
   // Do not cancel a GitHub write: it could already have committed a post.
   if(!queue.length){$("#queueMessage").textContent="Bài đang đứng ở "+pct+"% quá 60 giây, nhưng chưa có bài khác để luân phiên. Vẫn giữ phiên và tự retry API.";lastProgressAt=Date.now();return}
   // Rotating after a stalled request does not erase its checkpoint. After
@@ -692,7 +695,10 @@ function recordModel(providerName,modelName){
  if(!runData.models.includes(name))runData.models.push(name);
  checkpoint({models:runData.models});
 }
+let modelAttemptActive=false;
 function runtime(providerName,modelName,stateName,note=""){
+ if(providerName==="gemini"||providerName==="groq"){modelAttemptActive=true;lastProgressAt=Date.now()}
+ else if(providerName==="idle"||providerName==="error")modelAttemptActive=false;
  const panel=$("#aiRuntime");if(!panel)return;
  const valid=["gemini","groq","waiting","error","idle"];
  panel.dataset.provider=valid.includes(providerName)?providerName:"idle";
@@ -955,6 +961,7 @@ async function autoGeminiGenerate(model,prompt,signal,maxTokens){
  }finally{clearTimeout(timeout);signal?.removeEventListener("abort",stop)}
 }
 async function generate(prompt,signal,maxTokens=6500){
+ modelAttemptActive=true;lastProgressAt=Date.now();
  if(signal?.aborted)throw Error("Đã dừng theo yêu cầu.");
  await refreshWritingModels();
  if(signal?.aborted)throw Error("Đã dừng theo yêu cầu.");
@@ -979,6 +986,7 @@ async function generate(prompt,signal,maxTokens=6500){
   }catch(e){
    if(signal?.aborted)throw e;
    failures.push(item.provider+"/"+item.model+": "+e.message);
+   lastProgressAt=Date.now();
    state("Model "+item.model+" không khả dụng; đang tự thử model kế tiếp ("+failures.length+"/"+choices.length+").");
   }
  }
