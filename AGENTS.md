@@ -86,3 +86,12 @@ The active Hugo theme is `github.com/HEIGE-PCloud/DoIt`. Do not restore Blowfish
 ## Theme customization freedom (2026-10-29)
 
 The owner explicitly authorizes changes to theme appearance, navbar typography, light-only presentation, and theme UI controls. Historical Blowfish/dark-first policies are obsolete after DoIt migration. Do not prevent or roll back requested theme redesigns on the basis of legacy design guidance. Keep security, credential safety, content preservation, and PR/CI safeguards intact. `layouts/baseof.html` is the active base template; do not assume `layouts/partials/extend-head.html` is included unless verified.
+
+
+## Automated Fix Bug 2026 incident publishing (2026-10-29)
+
+When a same-repository Pull Request to main **has merged**, and GitHub PR Bug Checker history provides a **failed run on an earlier tested SHA** plus a **later passing run on a different SHA**, `.github/workflows/publish-fixbug-2026.yml` invokes `scripts/publish-fixbug-postmortem.mjs`. Automatic merges call that workflow through `workflow_dispatch` explicitly, because `GITHUB_TOKEN` merges do not normally trigger a nested `pull_request.closed` workflow. Manually merged PRs can use the `pull_request.closed` event.
+
+The publisher checks the real PR, CI runs, failed job logs, rule signatures in `data/ci/bug-knowledge.json`, changed files and PR commits. It skips unverifiable incidents and transient retries, writes an idempotent post at `content/posts/fixbug-2026-pr-<number>.md`, tags it `fixbug` and `series`, attaches `series: ["fix-bug-2026"]`, and dispatches `hugo.yml` after a successful write. The repository is public, so NEVER include raw job logs, secrets, private paths, extracted user data or unverified root-cause claims. Log snippets are only used for signature matching, not reproduced.
+
+This publisher is **deterministic technical reporting, not an autonomous LLM**. It records what is verified and carefully labels what cannot be inferred. A passing CI on a different SHA does not itself prove which line fixed the root cause. Idempotency is enforced by the PR-number filename and existing-file check. Do not change the workflow to trigger on every PR failure, every generic CI success, or CI retries on unchanged code. Neither the code nor CI logs should be executed as arbitrary commands.
