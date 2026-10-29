@@ -13,7 +13,7 @@ import sys
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-HOST, PORT = "127.0.0.1", 19473
+HOST, PORT = "127.0.0.1", 19474
 ALLOWED_ORIGINS = {
     "https://duynguyenaver.github.io",
     "http://localhost:1313",
@@ -135,7 +135,7 @@ class Handler(BaseHTTPRequestHandler):
             self.send_json(503, {"error": str(exc)[:220]})
 
 if __name__ == "__main__":
-    print("BlogNaver Codex Quota Bridge listening on http://127.0.0.1:19473")
+    print(f"BlogNaver Codex Quota Bridge listening on http://{HOST}:{PORT}")
     print("Local only. Browser origins allowed:", ", ".join(sorted(ALLOWED_ORIGINS)))
     print("Press Ctrl+C to stop.")
     ThreadingHTTPServer((HOST, PORT), Handler).serve_forever()
