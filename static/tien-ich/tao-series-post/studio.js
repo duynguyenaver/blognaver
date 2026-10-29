@@ -23,7 +23,7 @@ function loadRememberedAIKeys(){
   const value=sessionStorage.getItem(sessionName)||persisted;
   if(value){$(field).value=value;sessionStorage.setItem(sessionName,value)}
  }
- $("#rememberGithub").checked=Boolean(localStorage.getItem("bn_cms_github_token")||localStorage.getItem("bn_github_token"));
+ $("#rememberGithub").checked=Boolean(localStorage.getItem("blognaver_github_auth_v1"));
 }
 
 let abort=null,working=false,rawMarkdown="",currentModel="",key="",lastSlug="",lastCommitProof=null,startedAt=0,geminiVerified=false,githubVerified=false,groqVerified=false,groqModel="openai/gpt-oss-120b",runData={},resumePending=false;
