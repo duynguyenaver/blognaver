@@ -2,6 +2,30 @@
 const $=s=>document.querySelector(s),REPO="duynguyenaver/blognaver",API="https://api.github.com/repos/"+REPO,SITE="https://duynguyenaver.github.io/blognaver/";
 const SERIES={"cold-fusion":{name:"ColdFusion Research",tag:"cold fusion",category:"Công nghệ"},"lex-fridman":{name:"Lex Fridman Podcast Research",tag:"Lex Fridman",category:"Công nghệ"}};
 const KEYSTORE="bn_series_research_gemini_session",GROQ_STORE="bn_series_groq_key_session_v1",DRAFT="bn_series_research_checkpoint_v1";
+
+const GEMINI_DEVICE="bn_series_gemini_device_v1",GROQ_DEVICE="bn_series_groq_device_v1";
+function deviceKey(sessionName,deviceName,field,remember){
+ const value=clean($(field).value)||sessionStorage.getItem(sessionName)||localStorage.getItem(deviceName)||"";
+ if(value){sessionStorage.setItem(sessionName,value);if($(remember).checked)localStorage.setItem(deviceName,value)}
+ return value;
+}
+function rememberAIKey(sessionName,deviceName,field,checkbox){
+ const value=clean($(field).value)||sessionStorage.getItem(sessionName)||localStorage.getItem(deviceName)||"";
+ try{
+  if($(checkbox).checked){if(value)localStorage.setItem(deviceName,value)}
+  else localStorage.removeItem(deviceName);
+ }catch{}
+}
+function loadRememberedAIKeys(){
+ for(const [sessionName,deviceName,field,checkbox] of [[KEYSTORE,GEMINI_DEVICE,"#geminiKey","#rememberGemini"],[GROQ_STORE,GROQ_DEVICE,"#groqKey","#rememberGroq"]]){
+  const persisted=localStorage.getItem(deviceName)||"";
+  $(checkbox).checked=Boolean(persisted);
+  const value=sessionStorage.getItem(sessionName)||persisted;
+  if(value){$(field).value=value;sessionStorage.setItem(sessionName,value)}
+ }
+ $("#rememberGithub").checked=Boolean(localStorage.getItem("bn_cms_github_token")||localStorage.getItem("bn_github_token"));
+}
+
 let abort=null,working=false,rawMarkdown="",currentModel="",key="",lastSlug="",lastCommitProof=null,startedAt=0,geminiVerified=false,githubVerified=false,groqVerified=false,groqModel="openai/gpt-oss-120b",runData={},resumePending=false;
 const CUSTOM_SERIES_STORE="bn_series_custom_names_v1";
 try{const saved=JSON.parse(localStorage.getItem(CUSTOM_SERIES_STORE)||"{}");for(const [id,name] of Object.entries(saved)){if(/^[a-z0-9-]{2,75}$/.test(id)&&typeof name==="string"&&name.trim())SERIES[id]={name:name.trim(),tag:name.trim(),category:"Nghiên cứu"}}}catch{}
@@ -222,8 +246,8 @@ async function coolDown(signal){
 }
 function openCredentials(message){$("#credentialsDetails").open=true;$("#credentialsStatus").textContent=message||"Cần xác thực";$("#credentialsStatus").dataset.status="error"}
 function foldCredentials(){if((geminiVerified||groqVerified)&&githubVerified){$("#credentialsDetails").open=false;$("#credentialsStatus").textContent="Đã xác thực · "+(geminiVerified&&groqVerified?"3":"2")+" kết nối";$("#credentialsStatus").dataset.status="ok"}}
-function available(){key=clean($("#geminiKey").value)||sessionStorage.getItem(KEYSTORE)||"";if(!key)throw Error("Bạn cần nhập Gemini API key mới. Key chỉ dùng trong phiên này.");sessionStorage.setItem(KEYSTORE,key);return key}
-function groqKey(){return clean($("#groqKey").value)||sessionStorage.getItem(GROQ_STORE)||""}
+function available(){key=deviceKey(KEYSTORE,GEMINI_DEVICE,"#geminiKey","#rememberGemini");if(!key)throw Error("Bạn cần nhập Gemini API key mới. Key chỉ dùng trong phiên này.");sessionStorage.setItem(KEYSTORE,key);return key}
+function groqKey(){return deviceKey(GROQ_STORE,GROQ_DEVICE,"#groqKey","#rememberGroq")}
 function canUseGroq(){return $("#groqFallback").checked&&Boolean(groqKey())&&groqVerified}
 const RETIRED_MODELS="bn_gemini_unavailable_models_v1";
 function retiredModels(){try{return new Set(JSON.parse(sessionStorage.getItem(RETIRED_MODELS)||"[]"))}catch{return new Set()}}
@@ -262,7 +286,7 @@ async function verifyGroq(){
  const ids=[...preferred.filter(x=>availableModels.includes(x)),...availableModels.filter(x=>!preferred.includes(x))];
  if(!ids.length)throw Error("Groq API key hoạt động nhưng không có model khả dụng.");
  const list=$("#groqModel");list.replaceChildren(...ids.map(id=>new Option(id,id)));
- groqModel=list.value;groqVerified=true;sessionStorage.setItem(GROQ_STORE,token);
+ groqModel=list.value;groqVerified=true;sessionStorage.setItem(GROQ_STORE,token);rememberAIKey(GROQ_STORE,GROQ_DEVICE,"#groqKey","#rememberGroq");
  $("#groqStatus").textContent="Đã kết nối";$("#groqStatus").dataset.status="ok";
  provider("Gemini ưu tiên · Groq "+groqModel+" sẵn sàng khi Gemini bị giới hạn");
  foldCredentials();if(queue.length&&!working)dispatchNext();
@@ -349,11 +373,11 @@ async function geminiRequest(url,body=null,signal=null){
   }finally{clearTimeout(timeout)}
  }
 }
-function availableKey(){return key||clean($("#geminiKey").value)||sessionStorage.getItem(KEYSTORE)||""}
+function availableKey(){return key||deviceKey(KEYSTORE,GEMINI_DEVICE,"#geminiKey","#rememberGemini")}
 async function models(){
  // Model discovery is a connection test, NOT generation: do not apply 429
  // cooldown left over from another key/model. Never silently wait for hours.
- const token=clean($("#geminiKey").value)||sessionStorage.getItem(KEYSTORE)||"";
+ const token=deviceKey(KEYSTORE,GEMINI_DEVICE,"#geminiKey","#rememberGemini");
  if(!token)throw Error("Hãy nhập Gemini API key trước khi kiểm tra model.");
  const button=$("#testAI"),select=$("#model");
  button.disabled=true;button.textContent="Đang xác thực Gemini…";
@@ -754,16 +778,32 @@ async function verifyExistingConnections(){
  const savedGroq=sessionStorage.getItem(GROQ_STORE);if(savedGroq){$("#groqKey").value=savedGroq;try{await verifyGroq()}catch{groqVerified=false}}
 }
 
+
+$("#rememberGemini").onchange=()=>rememberAIKey(KEYSTORE,GEMINI_DEVICE,"#geminiKey","#rememberGemini");
+$("#rememberGroq").onchange=()=>rememberAIKey(GROQ_STORE,GROQ_DEVICE,"#groqKey","#rememberGroq");
+$("#clearDeviceKeys").onclick=()=>{
+ for(const key of [GEMINI_DEVICE,GROQ_DEVICE,KEYSTORE,GROQ_STORE]){localStorage.removeItem(key);sessionStorage.removeItem(key)}
+ window.BNAuth?.forget?.();
+ $("#geminiKey").value="";$("#groqKey").value="";$("#githubManual").value="";
+ $("#rememberGemini").checked=false;$("#rememberGroq").checked=false;$("#rememberGithub").checked=false;
+ geminiVerified=false;groqVerified=false;githubVerified=false;key="";currentModel="";
+ $("#geminiConnectionFeedback").textContent="Đã xóa key; cần kết nối lại.";
+ $("#groqStatus").textContent="Chưa kết nối";$("#githubState").textContent="Chưa kết nối GitHub";
+ $("#deviceKeyStatus").textContent="Đã xóa Gemini, Groq và GitHub token đã lưu trên thiết bị.";
+ openCredentials("Cần kết nối lại sau khi xóa key");
+};
+
 $("#model").onchange=()=>{currentModel=$("#model").value;state("Model đã chọn: "+currentModel)};
 $("#geminiKey").addEventListener("input",()=>{
  geminiVerified=false;currentModel="";
  $("#geminiConnectionFeedback").textContent="API key thay đổi · bấm Kiểm tra Gemini để tải model mới";
  $("#geminiConnectionFeedback").dataset.status="warning";
+ rememberAIKey(KEYSTORE,GEMINI_DEVICE,"#geminiKey","#rememberGemini");
 });
 $("#copyDraft").onclick=()=>navigator.clipboard.writeText(rawMarkdown).then(()=>state("Đã copy Markdown.")).catch(e=>state(e.message,true));
 $("#downloadDraft").onclick=saveMarkdown;
 $("#connectGithub").onclick=async()=>{try{const value=clean($("#githubManual").value);if(value){await window.BNAuth.validate(value);window.BNAuth.save(value,$("#rememberGithub").checked);$("#githubManual").value=""}else{const t=window.BNAuth?.read();if(!t)throw Error("Chưa có token CMS. Hãy nhập token phía dưới.");await window.BNAuth.validate(t)}$("#githubState").textContent="● Đã kết nối GitHub (token CMS chung)";githubVerified=true;window.BNSeriesInsights?.setConnection(true);foldCredentials();window.BNSeriesInsights?.sync().catch(()=>{});if(queue.length&&!working)dispatchNext();}catch(e){githubVerified=false;window.BNSeriesInsights?.setConnection(false);openCredentials("Kiểm tra lại GitHub");state("Không thể kết nối GitHub: "+e.message,true)}};
-try{const k=sessionStorage.getItem(KEYSTORE);if(k)$("#geminiKey").value=k;const g=sessionStorage.getItem(GROQ_STORE);if(g)$("#groqKey").value=g;const t=window.BNAuth?.read?.();$("#githubState").textContent=t?"● Đã có GitHub token chung từ CMS":"○ Chưa có token CMS — cần kết nối trước khi đăng";const old=JSON.parse(localStorage.getItem(DRAFT)||"null");if(old&&(old.source||old.commitProof)&&Date.now()-old.at<86400000){$("#series").value=SERIES[old.series]&&["cold-fusion","lex-fridman"].includes(old.series)?old.series:"cold-fusion";$("#customSeries").value=!["cold-fusion","lex-fridman"].includes(old.series)?SERIES[old.series]?.name||old.series||"":"";$("#transcript").value=old.source;$("#sourceUrl").value=old.sourceUrl||"";$("#angle").value=old.angle||"";rawMarkdown=old.markdown||"";runData={...old};setPublishEvidence(old.commitProof);$("#preview").textContent=rawMarkdown;$("#copyDraft").disabled=!rawMarkdown;$("#downloadDraft").disabled=!rawMarkdown;$("#transcript").dispatchEvent(new Event("input"));state(old.source?"Đã khôi phục bản nháp từ phiên viết trước.":"Biểu mẫu nguồn đã sẵn sàng cho bài mới. Kết quả xuất bản trước vẫn có thể kiểm tra bên phải.");}}catch{}
+try{loadRememberedAIKeys();const t=window.BNAuth?.read?.();$("#githubState").textContent=t?"● Đã có GitHub token chung từ CMS":"○ Chưa có token CMS — cần kết nối trước khi đăng";const old=JSON.parse(localStorage.getItem(DRAFT)||"null");if(old&&(old.source||old.commitProof)&&Date.now()-old.at<86400000){$("#series").value=SERIES[old.series]&&["cold-fusion","lex-fridman"].includes(old.series)?old.series:"cold-fusion";$("#customSeries").value=!["cold-fusion","lex-fridman"].includes(old.series)?SERIES[old.series]?.name||old.series||"":"";$("#transcript").value=old.source;$("#sourceUrl").value=old.sourceUrl||"";$("#angle").value=old.angle||"";rawMarkdown=old.markdown||"";runData={...old};setPublishEvidence(old.commitProof);$("#preview").textContent=rawMarkdown;$("#copyDraft").disabled=!rawMarkdown;$("#downloadDraft").disabled=!rawMarkdown;$("#transcript").dispatchEvent(new Event("input"));state(old.source?"Đã khôi phục bản nháp từ phiên viết trước.":"Biểu mẫu nguồn đã sẵn sàng cho bài mới. Kết quả xuất bản trước vẫn có thể kiểm tra bên phải.");}}catch{}
 const connectionReady=verifyExistingConnections().catch(e=>state("Không thể xác thực kết nối: "+e.message,true));
 try{
  const old=JSON.parse(localStorage.getItem(DRAFT)||"null");
