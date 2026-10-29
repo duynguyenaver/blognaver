@@ -96,3 +96,10 @@
 .quota-article-grid b{font-size:13px;color:#245e91;overflow-wrap:anywhere}
 @media(max-width:560px){#steps>li.active:after{margin-left:0}#steps>li{padding:12px}#steps>li.bn-deploy-step .bn-actions-check{margin-left:0}}
 @media(prefers-reduced-motion:reduce){#steps>li{transition:none;transform:none!important}}
+
+/* GitHub-backed insights: actionable connection notice and refresh status. */
+.insights-connect-note{font-size:12px;line-height:1.65;color:#216397;background:#eaf5ff;border:1px solid #b8d8f2;padding:11px 14px;border-radius:10px;margin:14px 0 0}
+.insights-connect-note.error{background:#fff7e8;border-color:#e9c98a;color:#885c22}
+#refreshInsights[hidden]{display:none!important}
+#refreshInsights:disabled{opacity:.58;cursor:wait}
+.insights-table td:first-child a{display:inline-block;margin-top:7px}
