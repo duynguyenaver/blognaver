@@ -75,7 +75,7 @@ async function github(path,method="GET",payload=null){
  const response=await fetch(API+"/"+path,{method,headers:{Authorization:"Bearer "+token,Accept:"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28",...(payload?{"Content-Type":"application/json"}:{})},body:payload?JSON.stringify(payload):undefined,cache:"no-store"});
  if(response.status===204)return {};
  const d=await response.json().catch(()=>({}));
- if(!response.ok){const err=Error("GitHub HTTP "+response.status+": "+String(d.message||"Không thể ghi dữ liệu"));err.status=response.status;if([401,403].includes(response.status)){githubVerified=false;openCredentials("GitHub token cần kiểm tra");}throw err}return d
+ if(!response.ok){const err=Error("GitHub HTTP "+response.status+": "+String(d.message||"Không thể ghi dữ liệu"));err.status=response.status;if([401,403].includes(response.status)){githubVerified=false;window.BNSeriesInsights?.setConnection(false);openCredentials("GitHub token cần kiểm tra");}throw err}return d
 }
 function rawSource(input){return clean(input).replace(/^\uFEFF/,"").replace(/^WEBVTT.*$/gm,"").replace(/^\s*\d+\s*$/gm,"").replace(/^\d\d:\d\d:\d\d[.,]\d+\s*-->\s*\d\d:\d\d:\d\d[.,]\d+.*$/gm,"").replace(/<\/?[^>]+>/g,"").replace(/\n{3,}/g,"\n\n")}
 function chunkSource(src,size=22000){let chunks=[],index=0;while(index<src.length){let end=Math.min(src.length,index+size);if(end<src.length){const newline=src.lastIndexOf("\n",end);if(newline>index+size/2)end=newline}chunks.push(src.slice(index,end));index=end}return chunks}
@@ -174,7 +174,15 @@ async function start(e){
  rawMarkdown=makeArticle(d);lastSlug=d.slug;$("#preview").textContent=rawMarkdown;$("#resultTitle").textContent=title;
  progress(88,"Đã hoàn thiện bản nghiên cứu",2);checkpoint({outline,published:false,slug:d.slug});
  if($("#autoPublish").checked){
-  progress(92,"Commit bài lên GitHub",3);await publish(d);progress(100,"Đã commit (kiểm tra Pages deploy riêng)",4);checkpoint({published:true,slug:d.slug});
+  progress(92,"Commit bài lên GitHub",3);await publish(d);progress(100,"Đã commit (kiểm tra Pages deploy riêng)",4);// Keep the publish proof and draft preview but clear the English source for a NEW job.
+  $("#transcript").value="";
+  $("#sourceFile").value="";
+  $("#sourceUrl").value="";
+  $("#angle").value="";
+  $("#sourceStats").textContent="0 ký tự";
+  checkpoint({published:true,slug:d.slug,source:"",sourceUrl:"",angle:"",commitProof:lastCommitProof});
+  state($("#status").textContent+"\nĐã làm mới biểu mẫu nguồn. Bạn có thể dán phụ đề mới ngay.");
+  if(githubVerified)window.BNSeriesInsights?.sync().catch(()=>{});
  }else{window.BNSeriesInsights?.record({slug:d.slug,title:d.title,series:d.series,state:"draft",durationMs:Date.now()-startedAt,live:false,quota:window.BNQuota?.runSummary()});progress(100,"Hoàn thành bản thảo; chưa đăng",4);state("Đã tạo bản thảo Markdown. Bạn có thể copy hoặc xuất file; chưa ghi lên GitHub.")}
  }catch(e){state("Không hoàn tất: "+e.message,true);checkpoint({error:e.message})}
  finally{window.BNQuota?.finishRun(Boolean(lastCommitProof?.sha));working=false;$("#startBtn").disabled=false;$("#cancelBtn").disabled=true;abort=null}
@@ -188,14 +196,22 @@ $("#testAI").onclick=()=>models().catch(e=>{openCredentials("Kiểm tra lại Ge
 /* Verify previously connected credentials once on reload; never collapse solely on a stored key. */
 async function verifyExistingConnections(){
  const saved=window.BNAuth?.read?.(),gemini=availableKey();
- if(saved){try{await window.BNAuth.validate(saved);githubVerified=true;$("#githubState").textContent="● Đã xác thực GitHub token chung";foldCredentials()}catch{githubVerified=false;openCredentials("GitHub token cần kiểm tra")}}
+ if(saved){try{
+  await window.BNAuth.validate(saved);
+  githubVerified=true;
+  $("#githubState").textContent="● Đã xác thực GitHub token chung";
+  window.BNSeriesInsights?.setConnection(true);
+  foldCredentials();
+  window.BNSeriesInsights?.sync().catch(()=>{});
+ }catch{githubVerified=false;window.BNSeriesInsights?.setConnection(false);openCredentials("GitHub token cần kiểm tra")}}
+ else{window.BNSeriesInsights?.setConnection(false)}
  if(gemini){try{await models()}catch{geminiVerified=false;openCredentials("Gemini key cần kiểm tra")}}
 }
 
 $("#model").onchange=()=>{currentModel=$("#model").value;state("Model đã chọn: "+currentModel)};
 $("#copyDraft").onclick=()=>navigator.clipboard.writeText(rawMarkdown).then(()=>state("Đã copy Markdown.")).catch(e=>state(e.message,true));
 $("#downloadDraft").onclick=saveMarkdown;
-$("#connectGithub").onclick=async()=>{try{const value=clean($("#githubManual").value);if(value){await window.BNAuth.validate(value);window.BNAuth.save(value,$("#rememberGithub").checked);$("#githubManual").value=""}else{const t=window.BNAuth?.read();if(!t)throw Error("Chưa có token CMS. Hãy nhập token phía dưới.");await window.BNAuth.validate(t)}$("#githubState").textContent="● Đã kết nối GitHub (token CMS chung)";githubVerified=true;foldCredentials();}catch(e){githubVerified=false;openCredentials("Kiểm tra lại GitHub");state("Không thể kết nối GitHub: "+e.message,true)}};
-try{const k=sessionStorage.getItem(KEYSTORE);if(k)$("#geminiKey").value=k;const t=window.BNAuth?.read?.();$("#githubState").textContent=t?"● Đã có GitHub token chung từ CMS":"○ Chưa có token CMS — cần kết nối trước khi đăng";const old=JSON.parse(localStorage.getItem(DRAFT)||"null");if(old?.source&&Date.now()-old.at<86400000){$("#series").value=old.series||"cold-fusion";$("#transcript").value=old.source;$("#sourceUrl").value=old.sourceUrl||"";$("#angle").value=old.angle||"";rawMarkdown=old.markdown||"";setPublishEvidence(old.commitProof);$("#preview").textContent=rawMarkdown;$("#copyDraft").disabled=!rawMarkdown;$("#downloadDraft").disabled=!rawMarkdown;$("#transcript").dispatchEvent(new Event("input"));state("Đã khôi phục checkpoint của phiên viết trước. Có thể bắt đầu lại hoặc tải bản thảo.");}}catch{}
+$("#connectGithub").onclick=async()=>{try{const value=clean($("#githubManual").value);if(value){await window.BNAuth.validate(value);window.BNAuth.save(value,$("#rememberGithub").checked);$("#githubManual").value=""}else{const t=window.BNAuth?.read();if(!t)throw Error("Chưa có token CMS. Hãy nhập token phía dưới.");await window.BNAuth.validate(t)}$("#githubState").textContent="● Đã kết nối GitHub (token CMS chung)";githubVerified=true;window.BNSeriesInsights?.setConnection(true);foldCredentials();window.BNSeriesInsights?.sync().catch(()=>{});}catch(e){githubVerified=false;window.BNSeriesInsights?.setConnection(false);openCredentials("Kiểm tra lại GitHub");state("Không thể kết nối GitHub: "+e.message,true)}};
+try{const k=sessionStorage.getItem(KEYSTORE);if(k)$("#geminiKey").value=k;const t=window.BNAuth?.read?.();$("#githubState").textContent=t?"● Đã có GitHub token chung từ CMS":"○ Chưa có token CMS — cần kết nối trước khi đăng";const old=JSON.parse(localStorage.getItem(DRAFT)||"null");if(old&&(old.source||old.commitProof)&&Date.now()-old.at<86400000){$("#series").value=old.series||"cold-fusion";$("#transcript").value=old.source;$("#sourceUrl").value=old.sourceUrl||"";$("#angle").value=old.angle||"";rawMarkdown=old.markdown||"";setPublishEvidence(old.commitProof);$("#preview").textContent=rawMarkdown;$("#copyDraft").disabled=!rawMarkdown;$("#downloadDraft").disabled=!rawMarkdown;$("#transcript").dispatchEvent(new Event("input"));state(old.source?"Đã khôi phục bản nháp từ phiên viết trước.":"Biểu mẫu nguồn đã sẵn sàng cho bài mới. Kết quả xuất bản trước vẫn có thể kiểm tra bên phải.");}}catch{}
 verifyExistingConnections().catch(()=>{});
 })();
