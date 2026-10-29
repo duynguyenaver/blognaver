@@ -383,9 +383,10 @@ async function findPublishedYoutube(job){
  const token=githubQueueToken();
  if(!token)throw Error("Không thể kiểm tra bài đã đăng: thiếu GitHub token.");
  const query=new URLSearchParams({q:"repo:"+REPO+" "+videoId+" path:content/posts",per_page:"30"});
- const response=await fetch("https://api.github.com/search/code?"+query,{cache:"no-store",headers:{
+ let response;
+ try{response=await fetch("https://api.github.com/search/code?"+query,{cache:"no-store",headers:{
   Authorization:"Bearer "+token,Accept:"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"
- }});
+ }})}catch(cause){const error=Error("Không kết nối được GitHub để kiểm tra video YouTube (Failed to fetch). Đã tạm dừng để tránh đăng trùng.");error.code="YOUTUBE_PREFLIGHT_UNAVAILABLE";error.cause=cause;throw error;}
  const result=await response.json().catch(()=>({}));
  if(!response.ok||result.incomplete_results){const error=Error("Không kiểm chứng được nguồn YouTube đã đăng (GitHub HTTP "+response.status+"). Dừng để tránh đăng trùng.");error.code="YOUTUBE_PREFLIGHT_UNAVAILABLE";error.status=response.status;throw error;}
  for(const match of result.items||[]){
