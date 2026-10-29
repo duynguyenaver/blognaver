@@ -146,6 +146,12 @@ function foldCredentials(){if((geminiVerified||groqVerified)&&githubVerified){$(
 function available(){key=clean($("#geminiKey").value)||sessionStorage.getItem(KEYSTORE)||"";if(!key)throw Error("Bạn cần nhập Gemini API key mới. Key chỉ dùng trong phiên này.");sessionStorage.setItem(KEYSTORE,key);return key}
 function groqKey(){return clean($("#groqKey").value)||sessionStorage.getItem(GROQ_STORE)||""}
 function canUseGroq(){return $("#groqFallback").checked&&Boolean(groqKey())&&groqVerified}
+function recordModel(providerName,modelName){
+ const name=(providerName==="Groq"?"Groq · ":"Gemini · ")+modelName;
+ if(!Array.isArray(runData.models))runData.models=[];
+ if(!runData.models.includes(name))runData.models.push(name);
+ checkpoint({models:runData.models});
+}
 function provider(text,isError=false){$("#providerStatus").textContent=text;$("#providerStatus").classList.toggle("error",isError)}
 async function verifyGroq(){
  const token=groqKey();if(!token)throw Error("Nhập Groq API key mới để kiểm tra kết nối.");
@@ -185,6 +191,7 @@ async function groqGenerate(prompt,signal,maxTokens){
   const output=(data.choices?.[0]?.message?.content||"").trim();
   if(!output)throw Error("Groq không trả về nội dung văn bản.");
   // Gemini quota widget remains Gemini-only; Groq usage is not added to Gemini RPM/TPM.
+  recordModel("Groq",groqModel);
   runData.groqRequests=(runData.groqRequests||0)+1;runData.groqTokens=(runData.groqTokens||0)+(Number(data.usage?.total_tokens)||0);
   checkpoint({groqRequests:runData.groqRequests,groqTokens:runData.groqTokens});
   provider("Đang dùng Groq · "+groqModel+" · đã dự phòng "+runData.groqRequests+" request");
@@ -274,6 +281,7 @@ async function generate(prompt,signal,maxTokens=6500){
   },signal);
   const result=(data.candidates?.[0]?.content?.parts||[]).map(p=>p.text||"").join("").trim();
   if(!result)throw Error("Gemini trả về nội dung trống"+(data.candidates?.[0]?.finishReason?" ("+data.candidates[0].finishReason+")":""));
+  recordModel("Gemini",currentModel);
   provider("Gemini · "+currentModel+" · hoạt động bình thường");
   return result
  }catch(e){
@@ -349,7 +357,7 @@ async function publish(d){
  // restore exact values after reload, on the same device or a new browser.
  // This is elapsed generation time BEFORE the GitHub write (not deploy time).
  const usage=window.BNQuota?.runSummary?.()||{};
- const metrics={durationMs:Math.max(0,Date.now()-startedAt),geminiRequests:Number(usage.requests)||0,geminiTokens:Number(usage.tokens)||0,inputTokens:Number(usage.inputTokens)||0,outputTokens:Number(usage.outputTokens)||0};
+ const metrics={durationMs:Math.max(0,Date.now()-startedAt),geminiRequests:Number(usage.requests)||0,geminiTokens:Number(usage.tokens)||0,inputTokens:Number(usage.inputTokens)||0,outputTokens:Number(usage.outputTokens)||0,models:Array.isArray(runData.models)?runData.models.slice(0,10):[]};
  if(!rawMarkdown.startsWith("---\n"))throw Error("Bản thảo thiếu YAML frontmatter, không thể lưu metadata.");
  rawMarkdown=rawMarkdown.replace(/^---\n/,"---\nresearchStudio: "+JSON.stringify(metrics)+"\n");
  $("#preview").textContent=rawMarkdown;
@@ -357,7 +365,7 @@ async function publish(d){
  const created=await github("contents/"+file,"PUT",{message:"content(series-ai): publish "+d.series+" research "+d.slug,branch:"main",content:encode(rawMarkdown)});
  const proof={sha:created.commit.sha,path:file,deployDispatched:false};
  setPublishEvidence(proof);
- checkpoint({published:false,commitProof:proof,slug:d.slug});window.BNSeriesInsights?.record({slug:d.slug,title:d.title,series:d.series,state:"committed",sha:proof.sha,durationMs:metrics.durationMs,live:false,quota:{requests:metrics.geminiRequests,tokens:metrics.geminiTokens,inputTokens:metrics.inputTokens,outputTokens:metrics.outputTokens}});
+ checkpoint({published:false,commitProof:proof,slug:d.slug});window.BNSeriesInsights?.record({slug:d.slug,title:d.title,series:d.series,state:"committed",sha:proof.sha,commitAt:created.commit?.committer?.date||new Date().toISOString(),models:metrics.models,durationMs:metrics.durationMs,live:false,quota:{requests:metrics.geminiRequests,tokens:metrics.geminiTokens,inputTokens:metrics.inputTokens,outputTokens:metrics.outputTokens}});
  addLink("Xem commit GitHub ↗",created.commit.html_url||"https://github.com/"+REPO+"/commit/"+created.commit.sha);
  addLink("Mở bài trên blog sau khi deploy ↗",SITE+"bai-viet/"+d.slug+"/");
  try{await github("actions/workflows/hugo.yml/dispatches","POST",{ref:"main"});proof.deployDispatched=true;setPublishEvidence(proof);checkpoint({published:true,commitProof:proof,slug:d.slug});window.BNSeriesInsights?.record({slug:d.slug,title:d.title,series:d.series,state:"committed",sha:proof.sha,durationMs:metrics.durationMs,live:false,quota:{requests:metrics.geminiRequests,tokens:metrics.geminiTokens,inputTokens:metrics.inputTokens,outputTokens:metrics.outputTokens}});state("Đã commit bài "+created.commit.sha.slice(0,9)+" và kích hoạt GitHub Pages. Đợi trạng thái deploy thành công trước khi coi là đã xuất bản trên website.");}
@@ -446,6 +454,53 @@ $("#cancelBtn").onclick=()=>{abort?.abort();runData.runStatus="stopped";checkpoi
 $("#sourceFile").onchange=async e=>{const f=e.target.files?.[0];if(!f)return;if(f.size>750000){state("File trên 750 KB: hãy chia thành nhiều phần.",true);return}$("#transcript").value=await f.text();$("#transcript").dispatchEvent(new Event("input"));checkpoint()};
 $("#transcript").addEventListener("input",()=>{$("#sourceStats").textContent=$("#transcript").value.length.toLocaleString("vi-VN")+" ký tự"});
 $("#testAI").onclick=()=>models().catch(e=>{openCredentials("Kiểm tra lại Gemini");state(e.message,true)});
+const SUPADATA_STORE="bn_series_supadata_session_v1";
+function youtubeId(url){
+ try{
+  const u=new URL(url);
+  const host=u.hostname.toLowerCase().replace(/^www\./,"");
+  const id=host==="youtu.be"?u.pathname.slice(1):["youtube.com","m.youtube.com","music.youtube.com"].includes(host)?(u.searchParams.get("v")||u.pathname.match(/^\/(?:shorts|live|embed)\/([\w-]{11})/)?.[1]):"";
+  return /^[\w-]{11}$/.test(id||"")?id:null;
+ }catch{return null}
+}
+async function extractYoutube(){
+ const btn=$("#extractYoutube"),display=$("#extractYoutubeStatus");
+ const id=youtubeId(clean($("#sourceUrl").value));
+ if(!id){display.textContent="URL YouTube chưa hợp lệ. Hãy nhập link youtube.com hoặc youtu.be.";return}
+ const token=clean($("#supadataKey").value)||sessionStorage.getItem(SUPADATA_STORE)||"";
+ if(!token){$("#youtubeExtractConfig").open=true;display.textContent="Cần Supadata API key để đọc phụ đề YouTube. Có thể dùng gói miễn phí.";return}
+ btn.disabled=true;display.textContent="Đang tìm captions tiếng Anh của video…";
+ const signal=new AbortController(),timeout=setTimeout(()=>signal.abort(),90000);
+ try{
+  const headers={"x-api-key":token,Accept:"application/json"};
+  async function get(url){const response=await fetch(url,{headers,signal:signal.signal,cache:"no-store"});const data=await response.json().catch(()=>({}));if(!response.ok)throw Error("Transcript API "+response.status+": "+(data.message||data.error?.message||"Không thể tải phụ đề"));return data}
+  const base="https://api.supadata.ai/v1/transcript";
+  let data=await get(base+"?url="+encodeURIComponent("https://www.youtube.com/watch?v="+id)+"&lang=en&mode=native");
+  if(data.jobId&&!data.content){
+   for(let i=0;i<30;i++){
+    await waitForRetry(2000,signal.signal);
+    display.textContent="Phụ đề đang xử lý · kiểm tra "+(i+1)+"/30";
+    data=await get(base+"/"+encodeURIComponent(data.jobId));
+    if(data.status==="failed")throw Error("Video không có phụ đề tiếng Anh hoặc dịch vụ không thể truy xuất.");
+    if(data.status==="completed"||data.content)break;
+   }
+  }
+  let parts=Array.isArray(data.content)?data.content.map(x=>({offset:Number(x.offset)||0,text:clean(x.text)})).filter(x=>x.text):[];
+  let transcript=parts.length?parts.map(x=>{
+    const seconds=Math.floor(x.offset/1000),time=[Math.floor(seconds/3600),Math.floor(seconds/60)%60,seconds%60].map(n=>String(n).padStart(2,"0")).join(":");
+    return "["+time+"] "+x.text;
+   }).join("\n"):typeof data.content==="string"?data.content:"";
+  if(transcript.length<70)throw Error("Không tìm thấy phụ đề tiếng Anh đủ nội dung. Hãy thử tải file SRT/VTT hoặc dán thủ công.");
+  if(transcript.length>350000)throw Error("Phụ đề quá dài, hơn giới hạn 350.000 ký tự. Hãy tải và chia nhỏ phụ đề.");
+  $("#transcript").value=transcript;$("#sourceFile").value="";
+  $("#sourceStats").textContent=transcript.length.toLocaleString("vi-VN")+" ký tự";
+  sessionStorage.setItem(SUPADATA_STORE,token);
+  display.textContent="Đã trích xuất "+(parts.length||"nhiều")+" đoạn phụ đề tiếng Anh. Có thể bấm Viết nghiên cứu hoặc thêm vào hàng đợi.";
+  if(!working)checkpoint({source:transcript,sourceUrl:$("#sourceUrl").value});
+ }catch(e){display.textContent="Không thể trích xuất: "+(e.name==="TypeError"?"Trình duyệt chặn API/CORS hoặc lỗi mạng":e.message)+". Bạn vẫn có thể dán hoặc tải file phụ đề."}
+ finally{clearTimeout(timeout);btn.disabled=false}
+}
+$("#extractYoutube").onclick=extractYoutube;
 $("#testGroq").onclick=()=>verifyGroq().catch(e=>{provider("Groq: "+e.message,true);$("#groqStatus").textContent="Lỗi kết nối"});
 $("#groqModel").onchange=()=>{groqModel=$("#groqModel").value};
 $("#groqFallback").onchange=()=>provider($("#groqFallback").checked?"Tự chuyển sang Groq khi Gemini bị 429":"Đã tắt tự chuyển Groq");
