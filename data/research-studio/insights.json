@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-29T18:40:01.038Z",
+  "updatedAt": "2026-10-29T18:43:16.727Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -117,6 +117,26 @@
         "Gemini · models/gemini-3.1-flash-lite-preview"
       ],
       "live": true
+    },
+    {
+      "slug": "cold-fusion-giai-ma-mo-hinh-tai-san-nhe-khi-thuong-hieu-khach-san-tach-roi-bat-dong-san-2026-10-29",
+      "title": "Giải mã mô hình 'Tài sản nhẹ': Khi thương hiệu khách sạn tách rời bất động sản",
+      "series": "cold-fusion",
+      "sha": "afb10c0b2891f4d46155cc7157204527aff55950",
+      "commitAt": "2026-10-29T18:43:03Z",
+      "durationMs": 28947,
+      "quota": {
+        "requests": 2,
+        "tokens": 6672,
+        "inputTokens": 4709,
+        "outputTokens": 1963
+      },
+      "models": [
+        "Gemini · models/gemini-3.1-flash-lite-preview",
+        "Groq · openai/gpt-oss-120b",
+        "Gemini · models/gemini-3.5-flash",
+        "Gemini · models/gemini-3.1-flash-lite"
+      ]
     }
   ]
 }
