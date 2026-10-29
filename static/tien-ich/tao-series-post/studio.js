@@ -1194,6 +1194,14 @@ async function start(e,restore=false,queuedJob=null){
  if(src.length<700)throw Error("Phụ đề quá ngắn. Hãy dán ít nhất 700 ký tự tiếng Anh.");
  if(src.length>350000)throw Error("Nguồn quá dài. Chia phụ đề thành file nhỏ hơn 350.000 ký tự.");
  if(url&&!/^https:\/\//i.test(url))throw Error("Đường dẫn nguồn phải là HTTPS.");
+ // A restored checkpoint knows its planned slug. Check this exact file
+ // through the regular GitHub Contents API (not Code Search) before spending AI.
+ if(job.autoPublish&&runData.slug){
+  try{
+   const oldPost=await github("contents/content/posts/"+encodeURIComponent(runData.slug)+".md?ref=main");
+   if(oldPost?.sha){alreadyPublished=true;succeeded=true;progress(100,"Slug đã tồn tại trên main · bỏ qua AI",4);state("Bài đã có trên main; không viết lại: "+runData.slug);return}
+  }catch(error){if(error.status!==404)throw error}
+ }
  const existingPost=await findPublishedYoutube(job);
  if(existingPost){
   alreadyPublished=true;succeeded=true;
