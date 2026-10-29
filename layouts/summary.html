@@ -4,9 +4,9 @@
     {{- /* No full .Content rendering or three huge resized variants per post card. */ -}}
     {{- $image := $params.featuredImagePreview | default $params.featuredImage | default $params.cover | default "" -}}
     {{- if not $image -}}
-      {{- $matches := findRE `!\\[[^]]*\\]\\([^ )]+` .RawContent 1 -}}
+      {{- $matches := findRE `!\[[^]]*\]\([^ )]+` .RawContent 1 -}}
       {{- with $matches -}}
-        {{- $image = replaceRE `^!\\[[^]]*\\]\\(([^ )]+)$` "$1" (index . 0) -}}
+        {{- $image = replaceRE `^!\[[^]]*\]\(([^ )]+)$` "$1" (index . 0) -}}
       {{- end -}}
     {{- end -}}
     {{- if and $image ($.Site.Params.home.posts.imagePreview | default true) -}}
