@@ -1079,6 +1079,10 @@ async function publish(d){
 }
 async function start(e,restore=false,queuedJob=null){
  e.preventDefault();
+ if(!restore&&!queuedJob&&stopIsArmed()){
+  emergencyStopped=false;
+  try{sessionStorage.removeItem(EMERGENCY_STOP)}catch{}
+ }
  // Any user submission while a run is active, being dispatched, or already
  // queued MUST join FIFO. Never let a new submission preempt queued work.
  if(!restore&&!queuedJob&&(working||queueBusy||queue.length>0)){
