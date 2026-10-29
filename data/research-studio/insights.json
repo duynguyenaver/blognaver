@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-29T18:43:16.727Z",
+  "updatedAt": "2026-10-29T18:50:56.704Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -136,7 +136,8 @@
         "Groq · openai/gpt-oss-120b",
         "Gemini · models/gemini-3.5-flash",
         "Gemini · models/gemini-3.1-flash-lite"
-      ]
+      ],
+      "live": true
     }
   ]
 }
