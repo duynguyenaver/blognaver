@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-29T18:50:56.704Z",
+  "updatedAt": "2026-10-29T18:57:50.111Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -138,6 +138,23 @@
         "Gemini · models/gemini-3.1-flash-lite"
       ],
       "live": true
+    },
+    {
+      "slug": "cold-fusion-tu-song-bac-den-pho-wall-cuoc-cach-mang-toan-hoc-trong-tai-chinh-hien-dai-2026-10-29",
+      "title": "Từ Sòng bạc đến Phố Wall: Cuộc cách mạng toán học trong tài chính hiện đại",
+      "series": "cold-fusion",
+      "sha": "af29899b556d24336e507a7feafb72780b7d905c",
+      "commitAt": "2026-10-29T18:57:35Z",
+      "durationMs": 53761,
+      "quota": {
+        "requests": 8,
+        "tokens": 22028,
+        "inputTokens": 16553,
+        "outputTokens": 5475
+      },
+      "models": [
+        "Gemini · models/gemini-3.1-flash-lite-preview"
+      ]
     }
   ]
 }
