@@ -1,0 +1,128 @@
+{{- $params := .Scratch.Get "params" -}}
+
+<div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>
+                    {{- with .Site.Params.dateformat | default "2006-01-02" | .Lastmod.Format -}}
+                        {{- dict "Date" . | T "updatedOnDate" -}}
+                        {{- if $.Site.Params.gitRepo -}}
+                            {{- with $.GitInfo -}}
+                                &nbsp;<a class="git-hash" href="{{ printf `%v/commit/%v` $.Site.Params.gitRepo .Hash }}" target="_blank" title="commit by {{ .AuthorName }}({{ .AuthorEmail }}) {{ .Hash }}: {{ .Subject }}" rel="noopener noreferrer">
+                                    {{ partial "plugin/fontawesome.html" (dict "Style" "solid" "Icon" "hashtag") }}{{- .AbbreviatedHash -}}
+                                </a>
+                            {{- end -}}
+                        {{- end -}}
+                    {{- end -}}
+                </span>
+            </div>
+            <div class="post-info-license">
+                {{- with $params.license | string -}}
+                    <span>
+                        {{- . | safeHTML -}}
+                    </span>
+                {{- end -}}
+            </div>
+        </div>
+        <div class="post-info-line print:!tw-hidden">
+            <div class="post-info-md">
+                {{- if  .IsPage -}}
+                    {{- $post_info := slice -}}
+                    {{- if $params.linktomarkdown -}}
+                        {{- with .OutputFormats.Get "markdown" -}}
+                            {{- $d := dict "class" "link-to-mardown" "link" .RelPermalink "text" "readMarkdown" -}}
+                            {{- $post_info = $post_info | append $d -}}
+                        {{- end -}}
+                    {{- end -}}
+                    {{- with $params.linktosource -}}
+                        {{- $link := replace . "{path}" $.File.Path -}}
+                        {{- $d := dict "class" "link-to-source" "link" $link "text" "viewSource" -}}
+                        {{- $post_info = $post_info | append $d -}}
+                    {{- end -}}
+                    {{- with $params.linktoedit -}}
+                        {{- $link := replace . "{path}" $.File.Path -}}
+                        {{- $d := dict "class" "link-to-edit" "link" $link "text" "editThisPage" -}}
+                        {{- $post_info = $post_info | append $d -}}
+                    {{- end -}}
+                    {{- with $params.linktoreport -}}
+                        {{- $link := replace . "{title}" ($.Title | urlquery) -}}
+                        {{- $link := replace $link "{url}" $.Permalink -}}
+                        {{- $link := replace $link "{path}" $.File.Path -}}
+                        {{- $d := dict "class" "link-to-report" "link" $link "text" "reportThisPage" -}}
+                        {{- $post_info = $post_info | append $d -}}
+                    {{- end -}}
+                    {{- range $index, $value := $post_info -}}
+                    <span>
+                        {{- if gt $index 0 -}}
+                            |&nbsp;
+                        {{- end -}}
+                        <a class="{{ $value.class }}" {{ printf "href=%v" $value.link | safeHTMLAttr }} target="_blank" rel="noopener noreferrer">
+                            {{- T $value.text -}}
+                        </a>
+                    </span>
+                    {{- end -}}
+                {{- end -}}
+            </div>
+            <div class="post-info-share">
+                {{- partial "plugin/share.html" . -}}
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags">
+            {{- with .Params.tags -}}
+                {{ partial "plugin/fontawesome.html" (dict "Style" "solid" "Icon" "tags") }}&nbsp;
+                {{- range $index, $value := . -}}
+                    {{- if gt $index 0 }},&nbsp;{{ end -}}
+                    {{- $tag := partialCached "function/path.html" $value $value | printf "/tags/%v" | $.Site.GetPage -}}
+                    <a href="{{ $tag.RelPermalink }}">{{ $tag.Title }}</a>
+                {{- end -}}
+            {{- end -}}
+        </section>
+        <section class="print:!tw-hidden">
+            <span><button class="tw-text-fgColor-link-muted hover:tw-text-fgColor-link-muted-hover" onclick="window.history.back();">{{ T "back" }}</button></span>&nbsp;|&nbsp;<span><a href="{{ .Site.Home.RelPermalink }}">{{ T "home" }}</a></span>
+        </section>
+    </div>
+
+    {{- /* BlogNaver: thumbnail navigation, while preserving DoIt Prev/Next semantics. */ -}}
+    <nav class="post-nav bn-thumbnail-nav print:tw-hidden" aria-label="Bài viết trước và tiếp theo">
+      {{- with .PrevInSection -}}
+        {{- $thumb := .Params.featuredImagePreview | default .Params.featuredImage | default .Params.cover -}}
+        <a href="{{ .RelPermalink }}" class="bn-nav-card bn-nav-previous" rel="prev" aria-label="Bài viết trước: {{ .Title }}">
+          <span class="bn-nav-thumb">
+            {{- with $thumb -}}<img src="{{ . | safeURL }}" loading="lazy" decoding="async" alt="" onerror="this.remove()">{{- end -}}
+          </span>
+          <span class="bn-nav-copy">
+            <span class="bn-nav-label">‹ BÀI VIẾT TRƯỚC</span>
+            <strong>{{ .Title }}</strong>
+          </span>
+        </a>
+      {{- end -}}
+      {{- with .NextInSection -}}
+        {{- $thumb := .Params.featuredImagePreview | default .Params.featuredImage | default .Params.cover -}}
+        <a href="{{ .RelPermalink }}" class="bn-nav-card bn-nav-next" rel="next" aria-label="Bài viết tiếp theo: {{ .Title }}">
+          <span class="bn-nav-thumb">
+            {{- with $thumb -}}<img src="{{ . | safeURL }}" loading="lazy" decoding="async" alt="" onerror="this.remove()">{{- end -}}
+          </span>
+          <span class="bn-nav-copy">
+            <span class="bn-nav-label">BÀI VIẾT TIẾP THEO ›</span>
+            <strong>{{ .Title }}</strong>
+          </span>
+        </a>
+      {{- end -}}
+    </nav>
+    <style>
+      .bn-thumbnail-nav.post-nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:22px 0 10px;align-items:stretch}
+      .bn-thumbnail-nav .bn-nav-card{display:flex!important;flex-direction:column;text-align:left!important;min-width:0;border:1px solid #d7e7f6;background:#f6faff;border-radius:14px;overflow:hidden;color:#1b3858!important;text-decoration:none!important;transition:background .18s,border-color .18s,transform .18s}
+      .bn-thumbnail-nav .bn-nav-card:hover,.bn-thumbnail-nav .bn-nav-card:focus-visible{background:#e9f4ff;border-color:#88b9e7;transform:translateY(-2px)}
+      .bn-thumbnail-nav .bn-nav-thumb{display:block;aspect-ratio:16/7;width:100%;overflow:hidden;background:linear-gradient(135deg,#d5e9fb,#83b5e4)}
+      .bn-thumbnail-nav .bn-nav-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+      .bn-thumbnail-nav .bn-nav-copy{display:block;padding:15px 16px 18px}
+      .bn-thumbnail-nav .bn-nav-label{font-size:.71rem;letter-spacing:.07em;font-weight:800;color:#3678b7;display:block;margin-bottom:8px}
+      .bn-thumbnail-nav .bn-nav-copy strong{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;font-size:1rem;line-height:1.45;font-weight:800;color:#1a3655}
+      @media(max-width:620px){.bn-thumbnail-nav.post-nav{grid-template-columns:1fr;gap:12px}.bn-thumbnail-nav .bn-nav-card{flex-direction:row}.bn-thumbnail-nav .bn-nav-thumb{width:105px;flex:0 0 105px;aspect-ratio:1/1}.bn-thumbnail-nav .bn-nav-copy{padding:12px}}
+      @media(prefers-reduced-motion:reduce){.bn-thumbnail-nav .bn-nav-card{transition:none}}
+    </style>
+</div>
