@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-29T20:04:21.804Z",
+  "updatedAt": "2026-10-29T20:06:05.297Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -264,7 +264,8 @@
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
-      ]
+      ],
+      "live": true
     },
     {
       "slug": "cold-fusion-agentic-ai-ot-pha-moi-trong-nganh-khach-san-2026-10-29",
