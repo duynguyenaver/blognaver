@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-# Single attempt; the GitHub workflow controls up to two retries.
+# Single attempt; the GitHub workflow controls bounded retries and deterministic early exit.
 BASE="https://duynguyenaver.github.io/blognaver/"
 rm -rf public
 hugo --gc --minify --baseURL "$BASE"
