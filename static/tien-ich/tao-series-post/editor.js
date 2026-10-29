@@ -30,7 +30,16 @@ function setFront(src,key,value){
  return src.replace(fm[0],"---\n"+lines.join("\n")+"\n---");
 }
 function postTitle(p){return String(fmValue(p.source,"title")||p.path.split("/").pop())}
-function isResearch(p){return /^researchStudio:\s*/m.test(p.source.split("---").slice(1,2).join("---"))}
+function isResearch(source){
+ const front=(source.match(/^---\r?\n([\s\S]*?)\r?\n---/)||[])[1]||"";
+ if(/^researchStudio:\s*/m.test(front))return true;
+ // Older Research Studio posts used series/seriesOrder/tags before provenance metadata
+ // was introduced. This also includes the original Lex Fridman research article.
+ const series=fmValue(source,"series"),order=fmValue(source,"seriesOrder"),tags=fmValue(source,"tags");
+ return Array.isArray(series)&&series.length>0
+  &&Number.isFinite(Number(order))&&Number(order)>=1
+  &&Array.isArray(tags)&&tags.some(t=>String(t).toLowerCase()==="series");
+}
 function clear(elm){elm.replaceChildren()}
 async function load(){
  if(active)return;active=true;$("#editorLoad").disabled=true;$("#miniCmsReload").disabled=true;
@@ -42,14 +51,14 @@ async function load(){
   for(let i=0;i<paths.length;i+=5){
    const batch=await Promise.all(paths.slice(i,i+5).map(async path=>{
     try{const file=await req("/contents/"+path+"?ref=main");const source=dec(file.content);
-     return /^researchStudio:\s*/m.test((source.match(/^---\r?\n([\s\S]*?)\r?\n---/)||[])[1]||"")?{path,source,sha:file.sha,seriesName:String(fmValue(source,"seriesName")||(fmValue(source,"series")||[])[0]||""),title:String(fmValue(source,"title")||""),date:String(fmValue(source,"date")||"")}:null
+     return isResearch(source)?{path,source,sha:file.sha,seriesName:String(fmValue(source,"seriesName")||(fmValue(source,"series")||[])[0]||""),title:String(fmValue(source,"title")||""),date:String(fmValue(source,"date")||"")}:null
     }catch{return null}
    }));
    found.push(...batch.filter(Boolean));
   }
   posts=found.sort((a,b)=>Date.parse(b.date||0)-Date.parse(a.date||0)||b.path.localeCompare(a.path));loaded=true;
   editorStatus.textContent="Đã tải "+posts.length+" bài Research Studio. Nhập tên series rồi tạo PR.";
-  miniStatus.textContent=posts.length?"Đã tải "+posts.length+" bài Research Studio · mới nhất trước. Chỉnh sửa hoặc xóa sẽ tạo Pull Request.":"Không tìm thấy bài có metadata researchStudio. Bài đăng trước đây thiếu metadata có thể vẫn nằm trong Tất cả bài viết CMS.";
+  miniStatus.textContent=posts.length?"Đã tải "+posts.length+" bài Research Studio · mới nhất trước. Chỉnh sửa hoặc xóa sẽ tạo Pull Request.":"Không tìm thấy bài Research Studio có metadata hiện đại hoặc dấu hiệu series cũ. Vui lòng kiểm tra GitHub token và nguồn bài viết.";
   drawEditor();drawMini();
  }catch(e){editorStatus.textContent="Không tải được: "+e.message;miniStatus.textContent=editorStatus.textContent}
  finally{active=false;$("#editorLoad").disabled=false;$("#miniCmsReload").disabled=false}
