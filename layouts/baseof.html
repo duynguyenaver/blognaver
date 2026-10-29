@@ -43,6 +43,7 @@
     {{- partial "site-commit-dashboard.html" . -}}
     {{- partial "footer.html" . -}}
     {{- partial "controls.html" . -}}
+    {{- .Scratch.Set "this" (dict "script" (slice) "style" (slice) "commentScript" (slice)) -}}
     {{- partial "assets.html" . -}}
     {{- partial "speculationrules.html" . -}}
 </body>
