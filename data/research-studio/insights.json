@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-29T19:59:32.712Z",
+  "updatedAt": "2026-10-29T19:59:53.617Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -246,7 +246,8 @@
       "models": [
         "Groq · openai/gpt-oss-20b",
         "Groq · qwen/qwen3.8-27b"
-      ]
+      ],
+      "live": true
     },
     {
       "slug": "cold-fusion-agentic-ai-trong-nganh-khach-san-tu-chatbot-den-tu-dong-hoa-van-hanh-toan-d-2026-10-29",
