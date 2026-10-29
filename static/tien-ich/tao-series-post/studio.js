@@ -148,7 +148,7 @@ const QUEUE_DONE="bn_series_queue_completed_ids_v1";
 function doneQueueIds(){try{return new Set(JSON.parse(localStorage.getItem(QUEUE_DONE)||"[]"))}catch{return new Set()}}
 function markQueueDone(job){
  if(!job?.id)return;
- const ids=doneQueueIds();ids.add(job.id);
+ const ids=doneQueueIds();ids.add(job.id);ids.add(jobIdentity(job));
  try{localStorage.setItem(QUEUE_DONE,JSON.stringify([...ids].slice(-1500)))}catch{}
 }
 function jobIdentity(job){
@@ -158,7 +158,7 @@ function jobIdentity(job){
  return url?"url:"+url:"source:"+source.slice(0,1400)+":"+source.length;
 }
 function sameQueueJob(a,b){return Boolean(a&&b&&(a.id&&a.id===b.id||jobIdentity(a)&&jobIdentity(a)===jobIdentity(b)))}
-function isQueueDone(job){return Boolean(job?.id&&doneQueueIds().has(job.id)||isCommittedCheckpoint(job?.checkpoint))}
+function isQueueDone(job){const done=doneQueueIds();return Boolean(job&&(job.id&&done.has(job.id)||done.has(jobIdentity(job))||isCommittedCheckpoint(job.checkpoint)))}
 
 function githubQueueToken(){return window.BNAuth?.read?.()||clean($("#githubManual")?.value)}
 function b64(bytes){let result="";for(let i=0;i<bytes.length;i+=32768)result+=String.fromCharCode(...bytes.subarray(i,i+32768));return btoa(result)}
