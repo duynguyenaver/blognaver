@@ -296,3 +296,29 @@
 .model-insights-table td{color:#20425f}
 .model-insights-best{padding:12px 14px;border-left:4px solid #2676ba;background:#f1f7ff;color:#204c79;border-radius:6px}
 @media(max-width:580px){#modelInsightsPanel .editor-collapse>summary{padding:12px}#modelInsightsPanel .editor-collapse-body{padding:12px}#modelInsightsPanel .editor-collapse>summary .step>span:first-child{flex-basis:42px;width:42px;height:42px}}
+
+
+/* Section 08: recent post commits and GitHub Pages workflow status */
+#recentCommitsPanel{background:#eef6ff;border:2px solid #9abce3;box-shadow:0 9px 28px rgba(20,71,120,.1)}
+#recentCommitsPanel .editor-collapse>summary{display:flex;align-items:center;gap:14px;padding:16px;background:linear-gradient(110deg,#dcecff,#f5faff);border:1px solid #b2cfee;border-radius:12px}
+#recentCommitsPanel .editor-collapse>summary .step{display:flex;align-items:center;gap:14px;margin:0;flex:1;min-width:0}
+#recentCommitsPanel .editor-collapse>summary .step>span:first-child{flex:0 0 50px;width:50px;height:50px;display:flex;align-items:center;justify-content:center;background:#b5dafa;color:#084b83;border-radius:12px;font-weight:800}
+#recentCommitsPanel .editor-collapse>summary .step>span:nth-child(2){display:block;flex:1;min-width:0;width:auto;height:auto;background:none;place-items:unset;color:#173c60}
+#recentCommitsPanel .editor-collapse>summary strong{font-size:clamp(18px,2.1vw,26px);line-height:1.25;word-break:normal;display:block}
+#recentCommitsPanel .editor-collapse>summary small{display:block;font-size:13px;line-height:1.5;margin-top:5px;color:#315b7c}
+#recentCommitsPanel .editor-collapse-body{background:#fff;border:1px solid #c5d9ef;border-radius:12px;margin-top:14px;padding:20px}
+.recent-commits-actions{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.recent-commits-actions p{flex:1;min-width:220px;line-height:1.6;color:#355b7a}
+.recent-commits-actions button{width:auto}
+#recentCommitsStatus{font-size:13px;color:#365b7f;font-weight:650}
+.recent-commits-list{display:grid;gap:12px;margin:14px 0}
+.recent-commit-entry{border:1px solid #bbd3ec;background:#f7fbff;border-radius:12px;padding:16px;min-width:0}
+.recent-commit-top{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.recent-commit-top strong{font-size:15px;overflow-wrap:anywhere;color:#143b61}
+.recent-commit-date{color:#55718b;font-size:12px}
+.recent-commit-links,.recent-article-links{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:10px}
+.recent-commit-links a,.recent-article-links a{color:#135ea7;font-weight:750;text-decoration:underline;text-underline-offset:3px}
+.recent-source-name{overflow-wrap:anywhere;font-size:13px;color:#47637e;min-width:0}
+.recent-deploy-pill{border-radius:99px;padding:5px 10px;font-size:12px;font-weight:800;background:#e8edf2;color:#42566b}
+.recent-deploy-pill.success{background:#d9f5e5;color:#146143}.recent-deploy-pill.pending{background:#fff0c8;color:#795307}.recent-deploy-pill.error{background:#ffe0e0;color:#982c2c}
+@media(max-width:580px){#recentCommitsPanel .editor-collapse>summary{padding:12px}#recentCommitsPanel .editor-collapse>summary .step>span:first-child{flex-basis:42px;width:42px;height:42px}#recentCommitsPanel .editor-collapse-body{padding:12px}}
