@@ -9,21 +9,25 @@ function value(fm,key){
 async function main(){
  const entries=await readdir(root,{withFileTypes:true}), posts=[];
  for(const entry of entries){
-   if(!entry.isDirectory())continue;
+   if(!entry.isDirectory()&&!(entry.isFile()&&entry.name.endsWith(".md")))continue;
+   if(entry.name==="_index.md")continue;
+   const isFolder=entry.isDirectory();
+   const filename=isFolder?join(root,entry.name,"index.md"):join(root,entry.name);
+   const slug=isFolder?entry.name:entry.name.replace(/\\.md$/,"");
    let source;
-   try{source=await readFile(join(root,entry.name,"index.md"),"utf8")}catch{continue}
+   try{source=await readFile(filename,"utf8")}catch{continue}
    const match=source.match(/^---\s*\r?\n([\s\S]*?)\r?\n---/);
    if(!match)continue;
    const fm=match[1], body=source.slice(match[0].length).trim();
    const rawCategories=value(fm,"categories"),rawTags=value(fm,"tags");
    posts.push({
-     slug:entry.name,title:value(fm,"title")||entry.name,
+     slug,title:value(fm,"title")||slug,
      draft:String(value(fm,"draft")).toLowerCase()==="true",
      category:Array.isArray(rawCategories)?rawCategories:(rawCategories?[rawCategories]:[]),
      tags:Array.isArray(rawTags)?rawTags:(rawTags?[rawTags]:[]),
      cover:value(fm,"featureimage")||value(fm,"featureImage")||"",
      date:value(fm,"date")||"",words:body.split(/\s+/u).filter(Boolean).length,
-     source:"content/posts/"+entry.name+"/index.md"
+     source:filename.replace(/\\\\/g,"/")
    });
  }
  posts.sort((a,b)=>String(b.date).localeCompare(String(a.date)));
