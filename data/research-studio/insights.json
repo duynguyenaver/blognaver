@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-29T18:19:03.454Z",
+  "updatedAt": "2026-10-29T18:24:44.770Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -78,6 +78,24 @@
       "models": [
         "Groq · openai/gpt-oss-120b",
         "Gemini · models/gemini-3.6-flash"
+      ]
+    },
+    {
+      "slug": "cold-fusion-hanh-trinh-doc-quyen-va-nhung-goc-khuat-phap-ly-xung-quanh-di-san-hoa-chat--2026-10-29",
+      "title": "Hành trình độc quyền và những góc khuất pháp lý xung quanh di sản hóa chất nông nghiệp của Monsanto",
+      "series": "cold-fusion",
+      "sha": "8ee9753d48d8f7f2851d65820e25148fabc2f47c",
+      "commitAt": "2026-10-29T18:24:31Z",
+      "durationMs": 187089,
+      "quota": {
+        "requests": 9,
+        "tokens": 47241,
+        "inputTokens": 39026,
+        "outputTokens": 8215
+      },
+      "models": [
+        "Groq · openai/gpt-oss-120b",
+        "Gemini · models/gemini-3.5-flash-lite"
       ]
     }
   ]
