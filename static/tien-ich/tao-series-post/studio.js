@@ -325,7 +325,7 @@ try{
 function failedFirst(){return queue}
 function nextRunnableIndex(){
  const now=Date.now();
- return queue.findIndex(x=>!(Number(x.retryAt)>now));
+ return queue.findIndex(x=>!x.retryExhausted&&!(Number(x.retryAt)>now));
 }
 function scheduleQueueRetry(at){
  if(queueRetryTimer)clearTimeout(queueRetryTimer);
@@ -391,7 +391,7 @@ function renderQueue(){
   detail.textContent=(job.sourceUrl||"Phụ đề tiếng Anh")+" · "+job.source.length.toLocaleString("vi-VN")+" ký tự · "+new Date(job.at).toLocaleTimeString("vi-VN");
   if(job.failed){const badge=document.createElement("span");badge.className="queue-paused-badge";badge.textContent="LỖI · ƯU TIÊN CHẠY LẠI";label.append(badge)}
   label.append(title,detail);
-  if(job.checkpoint){const status=document.createElement("span");status.className="queue-paused-badge";status.textContent="CHỜ THỬ LẠI · "+(Number(job.retryCount)||0)+"/3 lượt"+(Number(job.retryAt)>Date.now()?" · chờ lượt":"");label.append(status)}
+  if(job.checkpoint){const status=document.createElement("span");status.className="queue-paused-badge";status.textContent=job.retryExhausted?"ĐÃ THỬ 3/3 · DỪNG TỰ ĐỘNG":"CHỜ THỬ LẠI · "+(Number(job.retryCount)||0)+"/3 lượt";label.append(status)}
   if(job.rotations){const stats=document.createElement("span");stats.textContent="Đã luân phiên "+job.rotations+"/"+MAX_ROTATIONS+" lần";label.append(stats)}
 
   const remove=document.createElement("button");remove.type="button";remove.textContent="Xóa";remove.className="queue-remove";remove.setAttribute("aria-label","Xóa bài chờ số "+(index+1));
@@ -440,7 +440,9 @@ function dispatchNext(force=false){
  if(working||queueBusy||!queue.length)return;
  const index=force?0:nextRunnableIndex();
  if(index<0){
-  const earliest=Math.min(...queue.map(x=>Number(x.retryAt)||Date.now()+60000));
+  const eligible=queue.filter(x=>!x.retryExhausted);
+  if(!eligible.length){$("#queueMessage").textContent="Các bài chờ đều đã thử 3 lần. Đã tạm dừng auto retry; bấm Chạy bài ở hàng đợi để thử thủ công.";renderQueue();return}
+  const earliest=Math.min(...eligible.map(x=>Number(x.retryAt)||Date.now()+60000));
   $("#queueMessage").textContent="Các bài lỗi sẽ luân phiên thử model lại tự động; không chờ cooldown API.";
   scheduleQueueRetry(earliest);renderQueue();return;
  }
@@ -1154,7 +1156,7 @@ async function start(e,restore=false,queuedJob=null){
    runData={runStatus:"completed"};rawMarkdown="";setPublishEvidence(null);
   }else if(rotationRequested){
    const saved={...runData,source:job.source,sourceUrl:job.sourceUrl||"",series:job.series,angle:job.angle||"",autoPublish:job.autoPublish!==false,markdown:rawMarkdown,runStatus:"paused",commitProof:null};
-   const paused={...job,rotations:(job.rotations||0)+1,retryCount:((Number(job.retryCount)||0)+1)%3,
+   const paused={...job,rotations:(job.rotations||0)+1,retryCount:(Number(job.retryCount)||0)+1,retryExhausted:(Number(job.retryCount)||0)+1>=3,
     retryAt:0,
     failed:true,failedAt:job.failedAt||Date.now(),checkpoint:saved};
    // Enqueue behind currently waiting articles. Do not lose checkpoints on reload.
@@ -1170,8 +1172,8 @@ async function start(e,restore=false,queuedJob=null){
    const attempts=previous+1;
    // One attempt per turn. After 3 unsuccessful turns, park for 60 seconds,
    // then begin a fresh round while other queued jobs continue immediately.
-   const retryAt=0; // Immediately eligible for the next FIFO turn; model router handles provider failures.
-   const failedJob={...job,failed:true,failedAt:job.failedAt||Date.now(),retryCount:attempts>=3?0:attempts,retryAt,checkpoint:snapshot};
+   const retryAt=0; // No provider cooldown; capped per-job to prevent infinite retries.
+   const failedJob={...job,failed:true,failedAt:job.failedAt||Date.now(),retryCount:attempts,retryExhausted:attempts>=3,retryAt,checkpoint:snapshot};
    if(!queue.some(item=>item.id===failedJob.id)){queue.push(failedJob);await saveQueue()}
    queuedForRetry=true;
    try{localStorage.removeItem(DRAFT)}catch{}
@@ -1186,7 +1188,7 @@ async function start(e,restore=false,queuedJob=null){
   stopStallWatch();window.BNQuota?.finishRun(Boolean(lastCommitProof?.sha));working=false;manualModelOverride=null;quotaResumedNotice=false;
   $("#cancelBtn").disabled=true;abort=null;activeSource=null;
   // After an item is safely requeued or successfully committed, retire its crash backup.
-  if(succeeded){markQueueDone(job);scheduleCloudQueueSync()}
+  if(succeeded){markQueueDone(job);await checkpointWrite.catch(()=>{});await queueDisk("checkpoint",null,"delete").catch(()=>{});try{localStorage.removeItem(DRAFT)}catch{};scheduleCloudQueueSync()}
   if(queuedJob&&(succeeded||queuedForRetry||rotationRequested))queueDisk("active",null,"delete").catch(()=>{});
   renderQueue();
   if(checkpointStorageFailed){$("#queueMessage").textContent="Bộ nhớ checkpoint đầy · đang giữ hàng đợi và bản thảo trong tab. Hãy sao lưu JSON.";dispatchNext()}
@@ -1209,6 +1211,7 @@ $("#runQueueBtn").addEventListener("click",async()=>{
   // Manual action explicitly bypasses queued job cooldown and a stale
   // previous-draft status. A separate active job is never interrupted.
   runData={runStatus:"completed"};resumePending=false;
+  if(queue[0]?.retryExhausted){queue[0].retryExhausted=false;queue[0].retryCount=0;await saveQueue()}
   setPublishEvidence(null);
   $("#queueMessage").textContent="Đang khởi chạy bài #1 ở Section 05…";
   dispatchNext(true);
