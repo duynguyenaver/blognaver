@@ -39,6 +39,34 @@ function saveQueue(){
  }
  return true;
 }
+function youtubeVideoId(value){
+ try{
+  const u=new URL(String(value||"").trim());
+  if(u.protocol!=="https:"&&u.protocol!=="http:")return "";
+  const host=u.hostname.toLowerCase().replace(/^www\./,"").replace(/^m\./,"");
+  let id="";
+  if(host==="youtu.be")id=u.pathname.split("/").filter(Boolean)[0]||"";
+  else if(host==="youtube.com"||host==="youtube-nocookie.com"||host==="music.youtube.com"){
+   const parts=u.pathname.split("/").filter(Boolean);
+   id=parts[0]==="watch"?u.searchParams.get("v")||"":(["shorts","live","embed","v"].includes(parts[0])?parts[1]||"":"");
+  }
+  return /^[a-zA-Z0-9_-]{11}$/.test(id)?id:"";
+ }catch{return ""}
+}
+function checkDuplicateYoutube(job){
+ const id=youtubeVideoId(job.sourceUrl);
+ if(!id)return false;
+ const isActive=working&&activeSource&&youtubeVideoId(activeSource.sourceUrl)===id;
+ const queuedIndex=queue.findIndex(item=>youtubeVideoId(item.sourceUrl)===id);
+ if(!isActive&&queuedIndex<0)return false;
+ const where=isActive?"bài đang xử lý":"bài #"+(queuedIndex+1)+" trong hàng đợi";
+ const message="TRÙNG YOUTUBE URL · Video này đã có ở "+where+". Không thêm task trùng; hãy dùng video khác.";
+ $("#queueMessage").textContent=message;
+ $("#queueMessage").setAttribute("data-duplicate","true");
+ state(message,true);
+ document.querySelector("#queuePanel")?.scrollIntoView({behavior:"smooth",block:"nearest"});
+ return true;
+}
 function describeJob(job){return job.series==="lex-fridman"?"Lex Fridman":"ColdFusion"}
 function renderQueue(){
  const target=$("#queueItems");if(!target)return;
@@ -82,11 +110,13 @@ function formJob(){
 }
 function enqueue(){
  const job=formJob();
+ if(checkDuplicateYoutube(job))return;
  if(queue.length>=30)throw Error("Hàng đợi tối đa 30 bài. Hãy xóa bài chưa cần thiết.");
  queue.push(job);
  if(!saveQueue()){queue.pop();throw Error("Hàng đợi chưa được lưu; vui lòng giải phóng bộ nhớ trình duyệt.");}
  clearSourceForm();
  renderQueue();
+ $("#queueMessage").removeAttribute("data-duplicate");
  $("#queueMessage").textContent="Đã thêm bài #"+queue.length+" · "+describeJob(job)+" vào hàng đợi. Tiếp tục nhập phụ đề khác nếu muốn.";
  state("Bài hiện tại tiếp tục chạy; "+queue.length+" bài được lưu trong hàng đợi.");
 }
@@ -503,7 +533,7 @@ async function publish(d){
 async function start(e,restore=false,queuedJob=null){
  e.preventDefault();
  if(working){
-  try{enqueue()}catch(err){state("Không thể xếp hàng: "+err.message,true)}
+  try{enqueue()}catch(err){$("#queueMessage").textContent="Không thể xếp hàng: "+err.message;state("Không thể xếp hàng: "+err.message,true)}
   return;
  }
  let job;
@@ -513,6 +543,7 @@ async function start(e,restore=false,queuedJob=null){
    job=queuedJob?{...queuedJob}:{source:runData.source,sourceUrl:runData.sourceUrl||"",series:runData.series||$("#series").value,angle:runData.angle||"",autoPublish:runData.autoPublish!==false};
   }else job=queuedJob?{...queuedJob}:formJob();
  }catch(err){state("Không thể bắt đầu: "+err.message,true);return}
+ if(!restore&&!queuedJob&&checkDuplicateYoutube(job))return;
  activeSource={...job};rotationRequested=false;publishingCommit=false;
  if(!restore){runData={};rawMarkdown="";resumePending=false;clearSourceForm()}
  else{runData={...runData,source:job.source,sourceUrl:job.sourceUrl,series:job.series,angle:job.angle,autoPublish:job.autoPublish}}
