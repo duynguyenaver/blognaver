@@ -1,6 +1,6 @@
 {{- $params := .Params | merge .Site.Params.page -}}
 
-<article class="single summary">
+<article class="single summary" data-post-date="{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}">
     {{- /* No full .Content rendering or three huge resized variants per post card. */ -}}
     {{- $image := $params.featuredImagePreview | default $params.featuredImage | default $params.cover | default "" -}}
     {{- if not $image -}}
