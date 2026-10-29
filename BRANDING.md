@@ -3,7 +3,7 @@ Last reviewed: 2026-10-28
 Public guide: https://duynguyenaver.github.io/blognaver/branding/
 
 ## Non-negotiable standards
-- Use Blowfish 3, dark-first navy-blue editorial visual language. Inspired by n9o.xyz; preserve BlogNaver's distinct brand.
+- Current owner preference: DoIt theme, always-light public blog, bold uppercase editorial navigation, existing blue accents. Theme UI may be changed freely on request.
 - Brand palette: background #10172F, card #1C2747, primary text #EDF3FF, muted text #A9B8D7, accent blue #397BE0, link blue #70B6F8.
 - Border rgba(150,177,223,.22), surface #1C2747. Colors are BlogNaver design decisions, not claimed pixel-exact N9O extraction.
 - Typography: Inter, Be Vietnam Pro, system UI; Vietnamese support; body 16px, line-height 1.7–1.85; editorial headings bold.
@@ -31,3 +31,7 @@ Header/nav text and icons must remain #F8FBFF on dark/navy/blue hero and transpa
 - Do not use the N9O SVG itself. Keep this original BlogNaver asset and the approved blue color palette.
 - Preserve reduced-motion preferences: SVG animations are disabled when `prefers-reduced-motion: reduce`.
 - Confirm background renders on homepage and article pages after GitHub Pages deployment.
+
+## Current owner override — 2026-10-29
+
+The current Hugo theme is DoIt, not Blowfish. The site should remain in light mode with no visible public theme switch; main navigation should be uppercase and bold while retaining its existing text colors. Previous dark-first/Blowfish requirements above are retained for historical context only and are not blocking requirements. Owner-requested theme and layout changes are permitted. Validate the active `layouts/baseof.html` integration and production rendering before claiming completion.

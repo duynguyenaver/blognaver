@@ -1,6 +1,6 @@
 # BlogNaver Agent Guidelines
 
-Before modifying UI/UX or building a new page, read [BRANDING.md](BRANDING.md) and the published /branding/ style guide.
+Before modifying UI/UX or building a new page, consult [BRANDING.md](BRANDING.md) for reference and update it when design decisions change. The project owner may redesign, replace, or remove theme UI and theme-switching controls without being blocked by legacy branding rules.
 
 Required: follow the design tokens, typography, responsive standards, accessibility and CMS behavior constraints there. Preserve existing functionality unless specifically requested. Update design docs alongside deliberate changes to brand rules. Check Hugo build and GitHub Pages deploy after changes; report real status without guessing.
 
@@ -82,3 +82,7 @@ The active Hugo theme is `github.com/HEIGE-PCloud/DoIt`. Do not restore Blowfish
 - The public `/tien-ich/ai-agents-quota/` frontend may read quota snapshots from a user-initiated local bridge on `127.0.0.1:19473`. The bridge source is `scripts/codex-quota-bridge.py` (Python stdlib), which spawns the already authenticated local `codex app-server --listen stdio://` and calls `account/rateLimits/read`. **It never reads auth.json or sends credentials to the website or GitHub.** API response is allowlisted to usage percentages, window durations, and reset timestamps. The bridge only accepts requests from approved origins, binds loopback, is read-only, and does not launch automatically.
 - Preserve existing <link> tags for access-gate.css/access-gate.js, DoIt, and manual quota import; the live source is an additive enhancement, not replacement. Browser requests can be blocked by local-network policies; show a failed-connection state rather than claiming live data.
 - NEVER embed authenticated ChatGPT requests, browser cookies, or session tokens in public JavaScript or GitHub Actions. The Usage page at chatgpt.com is not a public cross-origin browser API.
+
+## Theme customization freedom (2026-10-29)
+
+The owner explicitly authorizes changes to theme appearance, navbar typography, light-only presentation, and theme UI controls. Historical Blowfish/dark-first policies are obsolete after DoIt migration. Do not prevent or roll back requested theme redesigns on the basis of legacy design guidance. Keep security, credential safety, content preservation, and PR/CI safeguards intact. `layouts/baseof.html` is the active base template; do not assume `layouts/partials/extend-head.html` is included unless verified.
