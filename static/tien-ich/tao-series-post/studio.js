@@ -284,6 +284,20 @@ function pruneCommittedStorage(){
  }catch{}
  return removed;
 }
+function downloadRecoveryCheckpoint(){
+ const payload={savedAt:new Date().toISOString(),source:activeSource?.source||runData.source||$("#transcript").value,sourceUrl:activeSource?.sourceUrl||runData.sourceUrl||"",series:activeSource?.series||runData.series||$("#series").value,runData:{...runData},markdown:rawMarkdown};
+ const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
+ const link=document.createElement("a"),url=URL.createObjectURL(blob);
+ link.href=url;link.download="research-studio-checkpoint-backup-"+Date.now()+".json";link.click();
+ setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+function showRecoveryDownload(){
+ let button=$("#downloadRecoveryCheckpoint");
+ if(!button){button=document.createElement("button");button.type="button";button.id="downloadRecoveryCheckpoint";button.className="ghost";button.textContent="Tải bản sao checkpoint (JSON)";
+  const parent=$("#queueMessage")?.parentElement||$("#status")?.parentElement;parent?.append(button);
+ }
+ button.hidden=false;button.onclick=downloadRecoveryCheckpoint;
+}
 function checkpoint(extra={}){
  runData={...runData,...extra};
  const data={at:Date.now(),series:activeSource?.series||$("#series").value,source:activeSource?.source??$("#transcript").value,sourceUrl:activeSource?.sourceUrl??$("#sourceUrl").value,angle:activeSource?.angle??$("#angle").value,markdown:rawMarkdown,commitProof:lastCommitProof,...runData};
@@ -300,7 +314,7 @@ function checkpoint(extra={}){
   const compact={...data,markdown:""};
   try{localStorage.setItem(DRAFT,JSON.stringify(compact));return}catch{}
  }
- checkpointStorageFailed=true;
+ checkpointStorageFailed=true;showRecoveryDownload();
  const message="Bộ nhớ trình duyệt đã đầy: không thể lưu checkpoint an toàn. Đã dừng tác vụ; KHÔNG tự chạy bài kế tiếp. Hãy xuất bản thảo Markdown và giải phóng dung lượng trước khi tiếp tục.";
  state(message,true);
  if(working&&!publishingCommit){const error=Error(message);error.code="CHECKPOINT_STORAGE_FULL";throw error}
