@@ -1022,6 +1022,12 @@ async function start(e,restore=false,queuedJob=null){
 }
 function saveMarkdown(){const blob=new Blob([rawMarkdown],{type:"text/markdown;charset=utf-8"}),u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download=(lastSlug||"series-research")+".md";a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
 $("#studioForm").addEventListener("submit",start);
+$("#runQueueBtn").addEventListener("click",()=>{
+ if(working||queueBusy){$("#queueMessage").textContent="Có bài đang chạy; hàng đợi sẽ tự tiếp tục sau khi bài hiện tại kết thúc.";return}
+ if(!queue.length){$("#queueMessage").textContent="Hàng đợi đang trống. Hãy thêm bài bằng nút Viết và xuất bản khi đang có phiên chạy.";return}
+ $("#queueMessage").textContent="Đã yêu cầu chạy bài kế tiếp trong hàng đợi.";
+ dispatchNext();
+});
 $("#cancelBtn").onclick=()=>{abort?.abort();runData.runStatus="stopped";checkpoint({runStatus:"stopped"});state("Đã yêu cầu dừng tự retry. Bản thảo vẫn được lưu.")};
 $("#sourceFile").onchange=async e=>{const f=e.target.files?.[0];if(!f)return;if(f.size>750000){state("File trên 750 KB: hãy chia thành nhiều phần.",true);return}$("#transcript").value=await f.text();$("#transcript").dispatchEvent(new Event("input"));checkpoint()};
 $("#transcript").addEventListener("input",()=>{$("#sourceStats").textContent=$("#transcript").value.length.toLocaleString("vi-VN")+" ký tự"});

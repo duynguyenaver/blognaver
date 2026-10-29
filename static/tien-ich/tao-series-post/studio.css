@@ -366,3 +366,8 @@
 #studioMiniCms #miniCmsList{min-width:0;display:grid;gap:12px}
 #studioMiniCms #miniCmsList .editor-card{background:#f2f8ff;border:1px solid #b6cfe6;border-left:5px solid #2875bb;padding:15px;border-radius:12px}
 @media(max-width:600px){#studioMiniCms .editor-collapse>summary{padding:12px;gap:10px}#studioMiniCms .editor-collapse>summary .step{gap:10px}#studioMiniCms .editor-collapse>summary .step>span:first-child{min-width:44px;width:44px;height:44px;flex-basis:44px}#studioMiniCms .editor-collapse>summary .step>span:nth-child(2)>strong{font-size:18px}#studioMiniCms .editor-collapse-body{padding:12px}#studioMiniCms .editor-toolbar{padding:10px}}
+
+/* Manual queue action beside the primary publishing button */
+#runQueueBtn{border:1px solid #79abd9;background:#e9f4ff;color:#154f83;font-weight:800}
+#runQueueBtn:hover{background:#d4eaff;border-color:#337dbd}
+#runQueueBtn span{margin-left:6px}
