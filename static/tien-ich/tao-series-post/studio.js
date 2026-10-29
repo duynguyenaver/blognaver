@@ -638,6 +638,55 @@ $("#sourceFile").onchange=async e=>{const f=e.target.files?.[0];if(!f)return;if(
 $("#transcript").addEventListener("input",()=>{$("#sourceStats").textContent=$("#transcript").value.length.toLocaleString("vi-VN")+" ký tự"});
 $("#testAI").onclick=()=>models().catch(e=>state(e.name==="AbortError"?"Gemini không phản hồi trong 15 giây, vui lòng thử lại.":e.message,true));
 const SUPADATA_STORE="bn_series_supadata_session_v1";
+
+const SUPADATA_USAGE_PREFIX="bn_supadata_usage_v2_";
+let supadataVerified=false;
+function supadataToken(){return clean($("#supadataKey").value)||sessionStorage.getItem(SUPADATA_STORE)||""}
+function supadataFingerprint(token){let n=2166136261;for(const char of token){n^=char.charCodeAt(0);n=Math.imul(n,16777619)}return(n>>>0).toString(36)}
+function supadataUsageKey(token){return SUPADATA_USAGE_PREFIX+new Date().toISOString().slice(0,7)+"_"+supadataFingerprint(token)}
+function supadataUsage(token){
+ try{const data=JSON.parse(localStorage.getItem(supadataUsageKey(token))||"{}");return {calls:Number(data.calls)||0,credits:Number(data.credits)||0}}catch{return {calls:0,credits:0}}
+}
+function renderSupadataUsage(){
+ const token=supadataToken(),u=token?supadataUsage(token):{calls:0,credits:0};
+ $("#supadataCalls").textContent=u.calls;
+ $("#supadataCredits").textContent=u.credits;
+ $("#supadataRemaining").textContent="· còn khoảng "+Math.max(0,100-u.credits)+"/100 credits";
+ $("#supadataRemaining").dataset.level=u.credits>=100?"limit":u.credits>=80?"warning":"ok";
+}
+function recordSupadataRequest(token,credits=0){
+ const u=supadataUsage(token);u.calls++;u.credits+=credits;
+ try{localStorage.setItem(supadataUsageKey(token),JSON.stringify(u))}catch{}
+ renderSupadataUsage();
+}
+async function supadataFetch(url,token,signal,estimatedCredits=0){
+ const response=await fetch(url,{headers:{"x-api-key":token,Accept:"application/json"},signal,cache:"no-store"});
+ // This is local accounting, not Supadata's authoritative billing statement.
+ recordSupadataRequest(token,response.ok?estimatedCredits:0);
+ const data=await response.json().catch(()=>({}));
+ if(!response.ok)throw Error("Supadata HTTP "+response.status+": "+String(data.message||data.error?.message||data.error||"Không thể kết nối").slice(0,160));
+ return data;
+}
+async function connectSupadata(){
+ const btn=$("#supadataConnect"),message=$("#supadataConnection"),token=clean($("#supadataKey").value);
+ if(!token){message.textContent="Vui lòng nhập API key.";message.dataset.status="error";return}
+ const id=youtubeId(clean($("#sourceUrl").value));
+ if(!id){message.textContent="Nhập URL YouTube hợp lệ ở bước 01 để xác thực không tốn request thử với video khác.";message.dataset.status="error";return}
+ btn.disabled=true;message.textContent="Đang xác thực Supadata…";message.dataset.status="pending";
+ const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),15000);
+ try{
+  await supadataFetch("https://api.supadata.ai/v1/metadata?url="+encodeURIComponent("https://www.youtube.com/watch?v="+id),token,controller.signal,1);
+  sessionStorage.setItem(SUPADATA_STORE,token);supadataVerified=true;
+  message.textContent="✓ Kết nối thành công · API key hợp lệ";message.dataset.status="success";
+ }catch(e){
+  supadataVerified=false;message.textContent="Không thể xác thực: "+(e.name==="AbortError"?"Hết thời gian kết nối":e.message);message.dataset.status="error";
+ }finally{clearTimeout(timeout);btn.disabled=false;renderSupadataUsage()}
+}
+$("#supadataConnect").addEventListener("click",connectSupadata);
+$("#supadataKey").addEventListener("input",()=>{supadataVerified=false;$("#supadataConnection").textContent="Chưa xác thực key mới";$("#supadataConnection").dataset.status="pending";renderSupadataUsage()});
+try{const stored=sessionStorage.getItem(SUPADATA_STORE);if(stored){$("#supadataKey").value=stored;$("#supadataConnection").textContent="Đã lưu key trong phiên · bấm Connect để xác thực"}}catch{}
+renderSupadataUsage();
+
 function youtubeId(url){
  try{
   const u=new URL(url);
@@ -655,10 +704,9 @@ async function extractYoutube(){
  btn.disabled=true;display.textContent="Đang tìm captions tiếng Anh của video…";
  const signal=new AbortController(),timeout=setTimeout(()=>signal.abort(),90000);
  try{
-  const headers={"x-api-key":token,Accept:"application/json"};
-  async function get(url){const response=await fetch(url,{headers,signal:signal.signal,cache:"no-store"});const data=await response.json().catch(()=>({}));if(!response.ok)throw Error("Transcript API "+response.status+": "+(data.message||data.error?.message||"Không thể tải phụ đề"));return data}
+  async function get(url,credits=0){return supadataFetch(url,token,signal.signal,credits)}
   const base="https://api.supadata.ai/v1/transcript";
-  let data=await get(base+"?url="+encodeURIComponent("https://www.youtube.com/watch?v="+id)+"&lang=en&mode=native");
+  let data=await get(base+"?url="+encodeURIComponent("https://www.youtube.com/watch?v="+id)+"&lang=en&mode=native",1);
   if(data.jobId&&!data.content){
    for(let i=0;i<30;i++){
     await waitForRetry(2000,signal.signal);
