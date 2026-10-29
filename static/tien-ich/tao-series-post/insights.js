@@ -44,7 +44,7 @@ const encode=value=>{const bytes=new TextEncoder().encode(value);let binary="";f
 async function pushHistory(token,entries,sha){
  const response=await fetch(API+"/contents/"+CLOUD_FILE,{
   method:"PUT",headers:{Authorization:"Bearer "+token,Accept:"application/vnd.github+json","Content-Type":"application/json"},
-  body:JSON.stringify({branch:"main",message:"chore(series): sync Research Studio publishing insights",content:encode(JSON.stringify({version:1,updatedAt:new Date().toISOString(),entries},null,2)+"\\n"),...(sha?{sha}:{})})
+  body:JSON.stringify({branch:"main",message:"chore(series): sync Research Studio publishing insights",content:encode(JSON.stringify({version:1,updatedAt:new Date().toISOString(),entries},null,2)+"\n"),...(sha?{sha}:{})})
  });
  if(!response.ok)throw Error("Không thể lưu Insights lên GitHub: HTTP "+response.status);
 }
