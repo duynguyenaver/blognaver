@@ -191,6 +191,14 @@ async function ensureCloudQueueBranch(){
  try{await cloudQueueRequest("git/refs","POST",{ref:"refs/heads/"+CLOUD_QUEUE_BRANCH,sha:main.object.sha})}
  catch(e){if(e.status!==422)throw e}
 }
+const QUEUE_DELETED="bn_series_deleted_job_ids_v1";
+function deletedQueueIds(){try{return new Set(JSON.parse(localStorage.getItem(QUEUE_DELETED)||"[]"))}catch{return new Set()}}
+function rememberQueueDeletion(job){
+ if(!job?.id)return;
+ const ids=deletedQueueIds();ids.add(job.id);
+ try{localStorage.setItem(QUEUE_DELETED,JSON.stringify([...ids].slice(-3000)))}catch{}
+}
+function isQueueDeleted(job){return Boolean(job?.id&&deletedQueueIds().has(job.id))}
 function cloudQueueItems(){
  const items=[...queue];
  if(working&&activeSource?.source&&!lastCommitProof?.sha){
@@ -198,7 +206,7 @@ function cloudQueueItems(){
    series:activeSource.series,angle:activeSource.angle||"",markdown:rawMarkdown,commitProof:null};
   if(!items.some(x=>sameQueueJob(x,activeSource)))items.unshift({...activeSource,checkpoint:data});
  }
- return items.filter(x=>x?.source&&!isQueueDone(x));
+ return items.filter(x=>x?.source&&!isQueueDone(x)&&!isQueueDeleted(x));
 }
 function queueCloudStatus(){
  const target=$("#queueItems");if(!target)return;
@@ -212,7 +220,7 @@ function queueCloudStatus(){
 async function pushQueueCloud(){
  const token=githubQueueToken();if(!token){cloudSyncError="Thiếu token";queueCloudStatus();return}
  const items=cloudQueueItems(),key=await queueCipherKey(),iv=crypto.getRandomValues(new Uint8Array(12));
- const plaintext=new TextEncoder().encode(JSON.stringify({version:1,at:Date.now(),items}));
+ const plaintext=new TextEncoder().encode(JSON.stringify({version:1,at:Date.now(),items,deletedIds:[...deletedQueueIds()]}));
  const encrypted=new Uint8Array(await crypto.subtle.encrypt({name:"AES-GCM",iv},key,plaintext));
  const content=b64(new TextEncoder().encode(JSON.stringify({version:1,algorithm:"AES-256-GCM",iv:b64(iv),data:b64(encrypted)})));
  await ensureCloudQueueBranch();
@@ -249,9 +257,14 @@ async function pullQueueCloud(autoRun=true){
   const plain=await crypto.subtle.decrypt({name:"AES-GCM",iv:unb64(encrypted.iv)},await queueCipherKey(),unb64(encrypted.data));
   const parsed=JSON.parse(new TextDecoder().decode(plain));
   if(!Array.isArray(parsed.items))throw Error("Bản sao GitHub không chứa hàng đợi hợp lệ.");
+  if(Array.isArray(parsed.deletedIds)){
+   const deleted=deletedQueueIds();for(const id of parsed.deletedIds){if(typeof id==="string"&&id.length<150)deleted.add(id)}
+   try{localStorage.setItem(QUEUE_DELETED,JSON.stringify([...deleted].slice(-3000)))}catch{}
+   queue=queue.filter(item=>!isQueueDeleted(item));
+  }
   const seen=new Set(queue.map(x=>jobIdentity(x))),added=[];
   for(const item of parsed.items){
-   if(!item?.id||typeof item.source!=="string"||item.source.length<700||isQueueDone(item)||seen.has(jobIdentity(item))||sameQueueJob(activeSource,item)||queue.some(x=>youtubeVideoId(x.sourceUrl)&&youtubeVideoId(x.sourceUrl)===youtubeVideoId(item.sourceUrl)))continue;
+   if(!item?.id||typeof item.source!=="string"||item.source.length<700||isQueueDone(item)||isQueueDeleted(item)||seen.has(jobIdentity(item))||sameQueueJob(activeSource,item)||queue.some(x=>youtubeVideoId(x.sourceUrl)&&youtubeVideoId(x.sourceUrl)===youtubeVideoId(item.sourceUrl)))continue;
    if(!SERIES[item.series])SERIES[item.series]={name:item.series,tag:item.series,category:"Nghiên cứu"};
    seen.add(jobIdentity(item));added.push(item);
   }
@@ -283,11 +296,11 @@ async function hydrateQueue(){
   const storedDraft=await queueDisk("checkpoint",null,"get");
   const legacy=(()=>{try{return JSON.parse(localStorage.getItem(QUEUE_STORE)||"[]")}catch{return []}})();
   const combined=[...(Array.isArray(disk)?disk:[]),...(Array.isArray(legacy)?legacy:[])];
-  if(active?.source&&!isQueueDone(active))combined.unshift({...active,checkpoint:active.checkpoint||null});
-  if(storedDraft?.source&&!hasCommitProof(storedDraft.commitProof)&&!isCommittedCheckpoint(storedDraft))combined.unshift({id:"checkpoint-"+(storedDraft.at||Date.now()),at:storedDraft.at||Date.now(),source:storedDraft.source,sourceUrl:storedDraft.sourceUrl||"",angle:storedDraft.angle||"",series:storedDraft.series,autoPublish:storedDraft.autoPublish!==false,checkpoint:storedDraft});
+  if(active?.source&&!isQueueDone(active)&&!isQueueDeleted(active))combined.unshift({...active,checkpoint:active.checkpoint||null});
+  if(storedDraft?.source&&!isQueueDeleted({id:storedDraft.jobId})&&!hasCommitProof(storedDraft.commitProof)&&!isCommittedCheckpoint(storedDraft))combined.unshift({id:"checkpoint-"+(storedDraft.at||Date.now()),at:storedDraft.at||Date.now(),source:storedDraft.source,sourceUrl:storedDraft.sourceUrl||"",angle:storedDraft.angle||"",series:storedDraft.series,autoPublish:storedDraft.autoPublish!==false,checkpoint:storedDraft});
   const seen=new Set();
   queue=combined.filter(job=>{
-   if(!job||typeof job.source!=="string"||job.source.length<700||isQueueDone(job))return false;
+   if(!job||typeof job.source!=="string"||job.source.length<700||isQueueDone(job)||isQueueDeleted(job))return false;
    const video=youtubeVideoId(job.sourceUrl);
    if(video&&seen.has("youtube:"+video))return false;
    if(video)seen.add("youtube:"+video);
@@ -432,7 +445,29 @@ function renderQueue(){
   if(job.rotations){const stats=document.createElement("span");stats.textContent="Đã luân phiên "+job.rotations+"/"+MAX_ROTATIONS+" lần";label.append(stats)}
 
   const remove=document.createElement("button");remove.type="button";remove.textContent="Xóa";remove.className="queue-remove";remove.setAttribute("aria-label","Xóa bài chờ số "+(index+1));
-  remove.onclick=async()=>{const previous=queue;queue=queue.filter(x=>x.id!==job.id);if(!await saveQueue())queue=previous;renderQueue()};
+  remove.onclick=async()=>{
+  remove.disabled=true;
+  const previous=[...queue];queue=queue.filter(x=>x.id!==job.id);
+  rememberQueueDeletion(job);
+  if(!await saveQueue()){queue=previous;renderQueue();return}
+  // Remove stale local crash records only when they belong to the deleted job.
+  for(const key of ["active","checkpoint"]){
+   try{const saved=await queueDisk(key,null,"get");
+    if(saved&&((saved.id&&saved.id===job.id)||(saved.jobId&&saved.jobId===job.id)||(saved.source&&saved.source===job.source&&(!saved.sourceUrl||saved.sourceUrl===job.sourceUrl))))await queueDisk(key,null,"delete");
+   }catch{}
+  }
+  renderQueue();
+  try{
+   if(!cloudInitialized)await pullQueueCloud(false);
+   if(cloudSyncTimer){clearTimeout(cloudSyncTimer);cloudSyncTimer=null}
+   cloudWrite=cloudWrite.catch(()=>{}).then(()=>pushQueueCloud());
+   await cloudWrite;
+   $("#queueMessage").textContent="Đã xóa bài chờ trên thiết bị và đồng bộ trạng thái xóa lên GitHub. URL chưa đăng có thể tạo lại tiến trình mới.";
+  }catch(e){
+   $("#queueMessage").textContent="Đã xóa cục bộ, nhưng chưa xác nhận xóa trên GitHub: "+e.message+". Sẽ thử đồng bộ lại.";
+   scheduleCloudQueueSync();
+  }
+ };
   li.append(label,remove);target.append(li);
  });
  queueCloudStatus();
