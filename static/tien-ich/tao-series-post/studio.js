@@ -270,7 +270,7 @@ function renderQueue(){
   detail.textContent=(job.sourceUrl||"Phụ đề tiếng Anh")+" · "+job.source.length.toLocaleString("vi-VN")+" ký tự · "+new Date(job.at).toLocaleTimeString("vi-VN");
   if(job.failed){const badge=document.createElement("span");badge.className="queue-paused-badge";badge.textContent="LỖI · ƯU TIÊN CHẠY LẠI";label.append(badge)}
   label.append(title,detail);
-  if(job.checkpoint){const status=document.createElement("span");status.className="queue-paused-badge";status.textContent="CHỜ THỬ LẠI · "+(Number(job.retryCount)||0)+"/3 lượt"+(Number(job.retryAt)>Date.now()?" · cooldown":"");label.append(status)}
+  if(job.checkpoint){const status=document.createElement("span");status.className="queue-paused-badge";status.textContent="CHỜ THỬ LẠI · "+(Number(job.retryCount)||0)+"/3 lượt"+(Number(job.retryAt)>Date.now()?" · chờ lượt":"");label.append(status)}
   if(job.rotations){const stats=document.createElement("span");stats.textContent="Đã luân phiên "+job.rotations+"/"+MAX_ROTATIONS+" lần";label.append(stats)}
 
   const remove=document.createElement("button");remove.type="button";remove.textContent="Xóa";remove.className="queue-remove";remove.setAttribute("aria-label","Xóa bài chờ số "+(index+1));
@@ -319,7 +319,7 @@ function dispatchNext(){
  const index=nextRunnableIndex();
  if(index<0){
   const earliest=Math.min(...queue.map(x=>Number(x.retryAt)||Date.now()+60000));
-  $("#queueMessage").textContent="Tất cả bài đang chờ retry. Tự kiểm tra lại khi hết thời gian chờ, không bỏ qua bài nào.";
+  $("#queueMessage").textContent="Các bài lỗi sẽ luân phiên thử model lại tự động; không chờ cooldown API.";
   scheduleQueueRetry(earliest);renderQueue();return;
  }
  const upcoming=queue[index];
@@ -1026,7 +1026,7 @@ async function start(e,restore=false,queuedJob=null){
   }else if(rotationRequested){
    const saved={...runData,source:job.source,sourceUrl:job.sourceUrl||"",series:job.series,angle:job.angle||"",autoPublish:job.autoPublish!==false,markdown:rawMarkdown,runStatus:"paused",commitProof:null};
    const paused={...job,rotations:(job.rotations||0)+1,retryCount:((Number(job.retryCount)||0)+1)%3,
-    retryAt:Math.max(Date.now()+60000,window.BNQuota?.retryAt?.()||0),
+    retryAt:Date.now()+1000,
     failed:true,failedAt:job.failedAt||Date.now(),checkpoint:saved};
    // Enqueue behind currently waiting articles. Do not lose checkpoints on reload.
    queue.push(paused);
@@ -1041,7 +1041,7 @@ async function start(e,restore=false,queuedJob=null){
    const attempts=previous+1;
    // One attempt per turn. After 3 unsuccessful turns, park for 60 seconds,
    // then begin a fresh round while other queued jobs continue immediately.
-   const retryAt=Math.max(Date.now()+60000,window.BNQuota?.retryAt?.()||0);
+   const retryAt=Date.now()+Math.min(60000,Math.max(1000,attempts>=3?60000:1000));
    const failedJob={...job,failed:true,failedAt:job.failedAt||Date.now(),retryCount:attempts>=3?0:attempts,retryAt,checkpoint:snapshot};
    if(!queue.some(item=>item.id===failedJob.id)){queue.push(failedJob);await saveQueue()}
    queuedForRetry=true;
