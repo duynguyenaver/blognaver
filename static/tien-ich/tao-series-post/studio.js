@@ -87,7 +87,7 @@ function selectedSeries(){
  return id;
 }
 const QUEUE_STORE="bn_series_research_fifo_queue_v1";
-let activeSource=null,queue=[],queueBusy=false;
+let activeSource=null,queue=[],queueBusy=false,checkpointStorageFailed=false;
 let stallTimer=null,lastProgressAt=0,lastProgressValue=-1,rotationRequested=false,publishingCommit=false;
 const STALL_MS=60000,MAX_ROTATIONS=3;
 function stopStallWatch(){if(stallTimer){clearInterval(stallTimer);stallTimer=null}}
@@ -300,7 +300,10 @@ function checkpoint(extra={}){
   const compact={...data,markdown:""};
   try{localStorage.setItem(DRAFT,JSON.stringify(compact));return}catch{}
  }
- state("Không đủ bộ nhớ lưu checkpoint ngay cả sau khi dọn bài đã xuất bản. Giữ tab mở hoặc tải bản thảo Markdown để tránh mất dữ liệu.",true);
+ checkpointStorageFailed=true;
+ const message="Bộ nhớ trình duyệt đã đầy: không thể lưu checkpoint an toàn. Đã dừng tác vụ; KHÔNG tự chạy bài kế tiếp. Hãy xuất bản thảo Markdown và giải phóng dung lượng trước khi tiếp tục.";
+ state(message,true);
+ if(working&&!publishingCommit){const error=Error(message);error.code="CHECKPOINT_STORAGE_FULL";throw error}
 }
 function waitForRetry(ms,signal){
  return new Promise((resolve,reject)=>{
@@ -688,17 +691,17 @@ async function start(e,restore=false,queuedJob=null){
  const resumedQuotaRun=restore&&runData.runStatus==="waiting"&&(runData.retryAt||window.BNQuota?.retryAt?.()||0)<=Date.now();
  quotaResumedNotice=false;
  manualModelOverride=null;
- activeSource={...job};rotationRequested=false;publishingCommit=false;
+ activeSource={...job};rotationRequested=false;publishingCommit=false;checkpointStorageFailed=false;
  if(!restore){runData={};rawMarkdown="";resumePending=false;clearSourceForm()}
  else{runData={...runData,source:job.source,sourceUrl:job.sourceUrl,series:job.series,angle:job.angle,autoPublish:job.autoPublish}}
  abort=new AbortController();startedAt=Date.now();window.BNQuota?.beginRun();working=true;monitorProgress();
  $("#startBtn").disabled=false;$("#cancelBtn").disabled=false;
  if(!restore){$("#resultLinks").replaceChildren();setPublishEvidence(null)}
  renderQueue();
- checkpoint({runStatus:restore&&(window.BNQuota?.retryAt?.()||0)>Date.now()?"waiting":"running",autoPublish:job.autoPublish});
- if(resumedQuotaRun){quotaResumedNotice=true;renderQueue()}
  let succeeded=false,skippedShortResearch=false;
  try{
+ checkpoint({runStatus:restore&&(window.BNQuota?.retryAt?.()||0)>Date.now()?"waiting":"running",autoPublish:job.autoPublish});
+ if(resumedQuotaRun){quotaResumedNotice=true;renderQueue()}
  const src=rawSource(job.source),url=clean(job.sourceUrl),series=job.series,angle=clean(job.angle);
  if(!SERIES[series])throw Error("Series không hợp lệ.");
  if(src.length<700)throw Error("Phụ đề quá ngắn. Hãy dán ít nhất 700 ký tự tiếng Anh.");
@@ -741,6 +744,11 @@ async function start(e,restore=false,queuedJob=null){
  }else{checkpoint({runStatus:"completed"});window.BNSeriesInsights?.record({slug:d.slug,title:d.title,series:d.series,state:"draft",durationMs:Date.now()-startedAt,live:false,quota:window.BNQuota?.runSummary()});progress(100,"Hoàn thành bản thảo; chưa đăng",4);state("Đã tạo bản thảo Markdown. Bạn có thể copy hoặc xuất file; chưa ghi lên GitHub.")}
  succeeded=true;
  }catch(e){
+  if(e.code==="CHECKPOINT_STORAGE_FULL"||checkpointStorageFailed){
+   checkpointStorageFailed=true;
+   runtime("error",null,"Dừng an toàn: bộ nhớ đầy",e.message);
+   state("Đã ngừng tạo thêm nội dung vì checkpoint chưa được lưu. Hãy tải bản thảo Markdown và giải phóng bộ nhớ. Hàng đợi không tự chạy.",true);
+  }else
   // A structurally short article is terminal for this job: do not publish or
   // block FIFO behind a permanently failed checkpoint. Preserve a small audit
   // record, clear the active draft, and immediately allow the next queued job.
@@ -764,14 +772,15 @@ async function start(e,restore=false,queuedJob=null){
   }else{
   runtime("error",null,"Đã dừng do lỗi",e.message);
   state("Không hoàn tất: "+e.message,true);
-  checkpoint({runStatus:abort?.signal.aborted?"stopped":"failed",error:e.message,retryAt:window.BNQuota?.retryAt?.()||0})
+  if(!checkpointStorageFailed)checkpoint({runStatus:abort?.signal.aborted?"stopped":"failed",error:e.message,retryAt:window.BNQuota?.retryAt?.()||0})
   }
  }
  finally{
   stopStallWatch();window.BNQuota?.finishRun(Boolean(lastCommitProof?.sha));working=false;manualModelOverride=null;quotaResumedNotice=false;
   $("#cancelBtn").disabled=true;abort=null;activeSource=null;
   renderQueue();
-  if(succeeded){runtime("idle",null,"Hoàn thành","Bài đã xử lý xong. Xem thông tin model trong metadata bài viết.");$("#queueMessage").textContent="Đã hoàn tất phiên vừa chạy. "+queue.length+" bài còn lại sẽ tự tiếp tục.";dispatchNext()}
+  if(checkpointStorageFailed){$("#queueMessage").textContent="ĐÃ DỪNG AN TOÀN · bộ nhớ checkpoint đầy. Hàng đợi giữ nguyên; cần giải phóng dung lượng trước khi tiếp tục."}
+  else if(succeeded){runtime("idle",null,"Hoàn thành","Bài đã xử lý xong. Xem thông tin model trong metadata bài viết.");$("#queueMessage").textContent="Đã hoàn tất phiên vừa chạy. "+queue.length+" bài còn lại sẽ tự tiếp tục.";dispatchNext()}
   else if(skippedShortResearch){$("#queueMessage").textContent="Đã bỏ qua bài không đạt chuẩn độ dài; "+queue.length+" bài còn lại trong hàng đợi sẽ tự chạy.";dispatchNext()}
   else if(rotationRequested){rotationRequested=false;dispatchNext()}
   else $("#queueMessage").textContent="Phiên hiện tại dừng vì lỗi. Bài đang chờ vẫn được lưu; hãy tiếp tục phiên trước để xử lý hàng đợi.";
