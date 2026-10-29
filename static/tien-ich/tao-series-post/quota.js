@@ -2,7 +2,8 @@
 /* Lightweight browser-side estimates. Official Google per-project quota is NOT exposed here. */
 const root=document.querySelector("#quotaWidget");if(!root)return;
 const $=s=>document.querySelector(s),STORE="bn_gemini_quota_estimate_v1",LIMITS="bn_gemini_quota_limits_v1";
-let entries=[],until=0,timer=null;
+let entries=[],until=0,timer=null,activeRun=null;
+const HISTORY="bn_series_quota_article_samples_v1";
 try{const data=JSON.parse(sessionStorage.getItem(STORE)||"{}");entries=Array.isArray(data.entries)?data.entries:[];until=Number(data.until)||0}catch{}
 const day=86400000,minute=60000,now=()=>Date.now(),wait=()=>Math.max(0,Math.ceil((until-now())/1000));
 function persist(){try{sessionStorage.setItem(STORE,JSON.stringify({entries:entries.slice(-800),until}))}catch{}}
@@ -19,12 +20,34 @@ function draw(){
  });
  const cd=$("#quotaCountdown");cd.hidden=!s.blocked;
  cd.textContent=s.blocked?"Gemini đang giới hạn request. Thử lại sau "+wait()+" giây.":"";
+ const current=activeRun;
+ $("#quotaRunRequests").textContent=String(current?.requests||0)+" requests";
+ $("#quotaRunTokens").textContent=(current?.tokens||0).toLocaleString("vi-VN");
+ const history=samples(),average=history.length?Math.round(history.reduce((sum,x)=>sum+x.tokens,0)/history.length):0;
+ $("#quotaAverageTokens").textContent=history.length?average.toLocaleString("vi-VN")+" tokens ("+history.length+" bài)":"Chưa có bài thành công";
+ $("#quotaForecast").textContent=history.length?Math.round(average*.9).toLocaleString("vi-VN")+"–"+Math.round(average*1.1).toLocaleString("vi-VN")+" tokens":"Chưa đủ dữ liệu";
  persist();
  if(!s.blocked&&timer){clearInterval(timer);timer=null}
 }
 function refreshCountdown(){if(!timer)timer=setInterval(draw,1000);draw()}
 function set429(retrySeconds){until=now()+Math.max(1,Math.min(3600,Number(retrySeconds)||60))*1000;refreshCountdown()}
-function record(tokens=0){entries.push({at:now(),tokens:Math.max(0,Number(tokens)||0)});draw()}
+function samples(){try{const v=JSON.parse(localStorage.getItem(HISTORY)||"[]");return Array.isArray(v)?v:[]}catch{return []}}
+function beginRun(){activeRun={requests:0,tokens:0,inputTokens:0,outputTokens:0,started:now()};draw()}
+function runSummary(){return activeRun?{...activeRun}:null}
+function finishRun(success=false){
+ const snapshot=runSummary();
+ if(success&&snapshot&&snapshot.requests){
+  const arr=samples();arr.unshift({at:now(),requests:snapshot.requests,tokens:snapshot.tokens,inputTokens:snapshot.inputTokens,outputTokens:snapshot.outputTokens});
+  try{localStorage.setItem(HISTORY,JSON.stringify(arr.slice(0,100)))}catch{}
+ }
+ activeRun=null;draw();return snapshot;
+}
+function record(tokens=0,usage=null){
+ const total=Math.max(0,Number(usage?.totalTokenCount)||Number(tokens)||0);
+ entries.push({at:now(),tokens:total});
+ if(activeRun){activeRun.requests++;activeRun.tokens+=total;activeRun.inputTokens+=Math.max(0,Number(usage?.promptTokenCount)||0);activeRun.outputTokens+=Math.max(0,Number(usage?.candidatesTokenCount)||0)}
+ draw()
+}
 function canSend(estimated=0){
  const s=status();if(s.blocked)throw Error("Gemini đang giới hạn request. Chờ "+wait()+" giây rồi thử lại.");
  if(s.ls[0]&&s.cs[0]>=s.ls[0])throw Error("Đã chạm mức RPM ước lượng do bạn cấu hình. Chờ một phút.");
@@ -47,6 +70,6 @@ $("#quotaBadge").onclick=()=>{const open=$("#quotaDetails").hidden;$("#quotaDeta
 $("#quotaRefresh").onclick=()=>{document.querySelector("#testAI")?.click()};
 try{const v=JSON.parse(localStorage.getItem(LIMITS)||"{}");for(const name of ["rpm","tpm","rpd"])if(v[name])$("#"+name+"Limit").value=v[name]}catch{}
 for(const name of ["rpm","tpm","rpd"])$("#"+name+"Limit").addEventListener("change",()=>{const v=Object.fromEntries(["rpm","tpm","rpd"].map(k=>[k,Number($("#"+k+"Limit").value)||0]));localStorage.setItem(LIMITS,JSON.stringify(v));draw()});
-window.BNQuota={canSend,record,estimateError,countTokens,refresh:draw};
+window.BNQuota={canSend,record,estimateError,countTokens,beginRun,finishRun,runSummary,refresh:draw};
 if(until>now())refreshCountdown();draw();
 })();

@@ -57,3 +57,42 @@
 .insights-table td{font-size:13px}
 .insights-table a{font-size:12px;color:#276ea8}
 @media(max-width:750px){.insights-cards{grid-template-columns:repeat(2,minmax(0,1fr))}.insights-header{flex-direction:column}.insights{padding:17px}}
+
+/* Four distinctly recognizable stages: indigo, teal, amber, emerald. */
+#steps{gap:10px}
+#steps>li{
+ position:relative;min-height:53px;padding:13px 15px 13px 19px;
+ border:1px solid #d8e2ee;border-left:5px solid #becbda;border-radius:12px;
+ background:#f4f7fb;color:#728199;transition:background .18s,border-color .18s,box-shadow .18s,transform .18s;
+}
+#steps>li:before{display:inline-grid;place-items:center;min-width:26px;min-height:26px;margin-right:10px;border-radius:7px;background:#e5ebf4;color:#53657d}
+#steps>li[data-step="1"]{--phase:#6246d5;--phase-bg:#eeeaff;--phase-border:#bcb0f2}
+#steps>li[data-step="2"]{--phase:#008c9b;--phase-bg:#ddf7f8;--phase-border:#76cdd3}
+#steps>li[data-step="3"]{--phase:#b56a08;--phase-bg:#fff0d5;--phase-border:#efbb66}
+#steps>li[data-step="4"]{--phase:#16804e;--phase-bg:#dcf7e8;--phase-border:#82d0a5}
+#steps>li.active{
+ background:var(--phase-bg)!important;border:2px solid var(--phase-border);
+ border-left:7px solid var(--phase);color:var(--phase)!important;
+ box-shadow:0 5px 17px #254e7318;transform:translateX(2px);font-weight:850;
+}
+#steps>li.active:before{background:var(--phase);color:white}
+#steps>li.done{background:#eff9f5;color:#34705a;border:1px solid #b6dec7;border-left:5px solid #26a167}
+#steps>li.done:before{content:"✓";background:#218354;color:white;font-weight:800}
+#steps>li.pending{opacity:.75}
+#steps>li.active:after{content:"ĐANG CHẠY";font-size:10px;font-weight:850;letter-spacing:.08em;border-radius:6px;background:var(--phase);color:white;padding:4px 7px;margin-left:auto}
+#steps>li.bn-deploy-step{display:flex;justify-content:flex-start;flex-wrap:wrap;align-items:center;gap:8px}
+#steps>li.bn-deploy-step .bn-actions-check{margin-left:auto}
+#progressFill{background:#6246d5!important;box-shadow:0 1px 8px #6246d555}
+#progressFill[data-step="1"]{background:linear-gradient(90deg,#5043cc,#8871eb)!important}
+#progressFill[data-step="2"]{background:linear-gradient(90deg,#007b90,#1bb4bc)!important}
+#progressFill[data-step="3"]{background:linear-gradient(90deg,#a76106,#edaa29)!important}
+#progressFill[data-step="0"]{background:linear-gradient(90deg,#5945d0,#8b75eb)!important}
+#progressFill[data-step="4"]{background:linear-gradient(90deg,#16804e,#31ad76)!important}
+#phase{font-weight:750;color:#385d81}
+.quota-article-stats{margin:16px 0;padding:13px;background:#eaf4ff;border:1px solid #c2daf1;border-radius:10px}
+.quota-article-stats>strong{font-size:12px;color:#255e96}
+.quota-article-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}
+.quota-article-grid span{display:flex;flex-direction:column;gap:2px;background:white;border:1px solid #d5e5f3;border-radius:8px;padding:9px;font-size:11px;color:#607d98}
+.quota-article-grid b{font-size:13px;color:#245e91;overflow-wrap:anywhere}
+@media(max-width:560px){#steps>li.active:after{margin-left:0}#steps>li{padding:12px}#steps>li.bn-deploy-step .bn-actions-check{margin-left:0}}
+@media(prefers-reduced-motion:reduce){#steps>li{transition:none;transform:none!important}}
