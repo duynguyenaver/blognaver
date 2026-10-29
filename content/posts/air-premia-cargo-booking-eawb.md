@@ -2,10 +2,12 @@
 title: "Từ Freight Forwarder đến e-AWB: một lô hàng được đặt chỗ trên Air Premia ra sao?"
 date: 2026-10-29T14:36:00+07:00
 draft: false
+series: "air-premia-cargo"
+seriesOrder: 2
 slug: "air-premia-cargo-booking-eawb"
 description: "Quy trình cargo booking, tải cung ứng, chargeable weight, AWB và cổng đặt chỗ số Air Premia."
 categories: ["Hàng không", "Air Cargo"]
-tags: ["Air Premia", "iCargo", "Logistics", "Air Cargo", "Nghiên cứu"]
+tags: ["Air Premia", "iCargo", "Logistics", "Air Cargo", "Nghiên cứu", "series"]
 author: "Duy Nguyen"
 featuredImage: "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=1600&q=85"
 featuredImagePreview: "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=1600&q=85"
