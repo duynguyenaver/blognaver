@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-29T19:10:23.094Z",
+  "updatedAt": "2026-10-29T19:16:30.445Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -190,6 +190,24 @@
       },
       "models": [
         "Gemini · models/gemini-3.1-flash-lite"
+      ],
+      "live": true
+    },
+    {
+      "slug": "cold-fusion-giai-ma-su-sup-do-cua-spirit-airlines-va-tuong-lai-mo-hinh-hang-khong-sieu--2026-10-29",
+      "title": "Giải mã sự sụp đổ của Spirit Airlines và tương lai mô hình hàng không siêu giá rẻ",
+      "series": "cold-fusion",
+      "sha": "de02d92eb6634f99f983a7d9951be1e201c6825c",
+      "commitAt": "2026-10-29T19:16:11Z",
+      "durationMs": 71038,
+      "quota": {
+        "requests": 9,
+        "tokens": 26709,
+        "inputTokens": 19595,
+        "outputTokens": 7114
+      },
+      "models": [
+        "Gemini · models/gemini-3.5-flash-lite"
       ]
     }
   ]
