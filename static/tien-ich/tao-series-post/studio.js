@@ -168,7 +168,7 @@ function restoreFailedFromDraft(){
   if(!d?.source||d.commitProof?.sha||isCommittedCheckpoint(d)||!["failed","waiting","stopped","running"].includes(d.runStatus))return;
   if(queue.some(x=>x.sourceUrl&&d.sourceUrl&&x.sourceUrl===d.sourceUrl||x.source===d.source))return;
   const job={id:"recovered-"+(d.at||Date.now()),at:d.at||Date.now(),failedAt:d.at||Date.now(),failed:true,retryAt:Number(d.retryAt)||0,source:d.source,sourceUrl:d.sourceUrl||"",series:d.series,angle:d.angle||"",autoPublish:d.autoPublish!==false,checkpoint:{...d}};
-  if(SERIES[job.series]){queue.unshift(job);failedFirst();saveQueue()}
+  if(SERIES[job.series]){queue.unshift(job);failedFirst();if(saveQueue()){runData={runStatus:"completed"};try{localStorage.removeItem(DRAFT)}catch{}}}
  }catch{}
 }
 function saveQueue(){
@@ -288,7 +288,7 @@ function dispatchNext(){
  setTimeout(()=>{
   if(working){queueBusy=false;return}
   // A paused job restores its exact outline/section checkpoint.
-  queue.shift();saveQueue();queueBusy=false;
+  queue.shift();if(!saveQueue()){queue.unshift(item);queueBusy=false;renderQueue();return}queueBusy=false;
   if(item.checkpoint){
    runData={...item.checkpoint};rawMarkdown=item.checkpoint.markdown||"";
    setPublishEvidence(null);
