@@ -39,7 +39,18 @@ function render(){
  const best=all.filter(x=>x.yes+x.no>=5)[0];
  $("#modelInsightsBest").textContent=best?"Gợi ý dựa trên ≥5 request: "+best.name+" ("+Math.round(100*best.yes/(best.yes+best.no))+"% thành công). Hãy đối chiếu thêm quota và loại công việc trước khi chọn.":"Chưa đủ dữ liệu (ít nhất 5 request/model) để gợi ý model.";
 }
-window.BNModelInsights={record,render};
+function ranked(provider,modelIds){
+ const cutoff=Date.now()-30*86400000,stats=new Map();
+ for(const row of read()){
+  if(row.at<cutoff||row.provider!==provider)continue;
+  const cur=stats.get(row.model)||{ok:0,total:0};cur.total++;if(row.success)cur.ok++;stats.set(row.model,cur);
+ }
+ return [...new Set(modelIds)].filter(Boolean).sort((a,b)=>{
+  const x=stats.get(a)||{ok:0,total:0},y=stats.get(b)||{ok:0,total:0};
+  return ((y.total?y.ok/y.total:0)-(x.total?x.ok/x.total:0))||(y.total-x.total)||a.localeCompare(b);
+ });
+}
+window.BNModelInsights={record,render,ranked};
 $("#modelInsightsPeriod")?.addEventListener("change",render);
 $("#modelInsightsRefresh")?.addEventListener("click",render);
 render();
