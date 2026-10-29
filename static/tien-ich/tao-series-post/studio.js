@@ -895,7 +895,7 @@ async function start(e,restore=false,queuedJob=null){
   // A structurally short article is terminal for this job: do not publish or
   // block FIFO behind a permanently failed checkpoint. Preserve a small audit
   // record, clear the active draft, and immediately allow the next queued job.
-  if(e.message==="Bài nghiên cứu quá ngắn; chưa đạt chuẩn xuất bản."&&!publishingCommit&&!lastCommitProof?.sha){
+  if(false&&e.message==="Bài nghiên cứu quá ngắn; chưa đạt chuẩn xuất bản."&&!publishingCommit&&!lastCommitProof?.sha){
    skippedShortResearch=true;rotationRequested=false;
    const skipped={at:new Date().toISOString(),series:job.series,sourceUrl:job.sourceUrl||"",reason:e.message};
    try{const history=JSON.parse(localStorage.getItem("bn_series_skipped_research_v1")||"[]");history.unshift(skipped);localStorage.setItem("bn_series_skipped_research_v1",JSON.stringify(history.slice(0,30)))}catch{}
@@ -1105,7 +1105,7 @@ try{
   if(old.model&&!retiredModels().has(old.model))currentModel=old.model;else currentModel="";
   state("Đã khôi phục phiên đang chờ Gemini 429. Sẽ tự tiếp tục khi thời gian giới hạn kết thúc, nếu tab này vẫn mở.");
   // Defer until validation completes; start() itself waits for the saved Retry-After.
-  connectionReady.then(()=>{if(!working&&runData.source)start(new Event("submit"),true)});
+  // Recovered into the priority FIFO below; do not also start a duplicate run.
  }
 }catch{}
 restoreFailedFromDraft();failedFirst();renderQueue();
