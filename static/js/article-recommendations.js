@@ -5,7 +5,13 @@
   let data;
   try { data = JSON.parse(node.textContent); } catch (_) { return; }
   const articles = (data.articles || []).filter(item => item.url && item.url !== data.current);
-  const body = document.querySelector("article .content, .page.single .content, main article .content, main .content");
+  // DoIt can wrap rendered Markdown in nested divs: do not depend on direct children.
+  const candidates = [
+    ".page.single .content", ".single .content", "article .content",
+    "main .content", ".post-content", ".post-body", "article"
+  ];
+  const body = candidates.map(selector => document.querySelector(selector))
+    .find(element => element && element.querySelector("p, h2, h3"));
   if (!body || !articles.length) return;
   function card(item) {
     const link = document.createElement("a");
@@ -32,16 +38,24 @@
     link.append(visual, copy);
     return link;
   }
-  const eligible = [...body.children].filter(el => ["P","UL","OL","BLOCKQUOTE","TABLE"].includes(el.tagName));
-  if (eligible.length >= 4) {
+  // Insert a single suggestion within the rendered article body, not at the footer.
+  // Select an actual text paragraph; nested Markdown wrappers are supported.
+  const paragraphs = [...body.querySelectorAll("p")]
+    .filter(p => !p.closest(".bn-rec-section, aside, nav, footer, header")
+      && (p.textContent || "").trim().length >= 40);
+  const anchors = paragraphs.length
+    ? paragraphs
+    : [...body.querySelectorAll("h2,h3,blockquote,ul,ol")].filter(el => !el.closest(".bn-rec-section"));
+  if (anchors.length) {
     const choice = articles[Math.floor(Math.random() * articles.length)];
-    const section = document.createElement("aside");
-    section.className = "bn-rec-section bn-rec-inline";
-    section.setAttribute("aria-label", "Có thể bạn sẽ thích");
-    const heading = document.createElement("h2");
-    heading.textContent = "CÓ THỂ BẠN SẼ THÍCH";
-    section.append(heading, card(choice));
-    eligible[Math.floor(eligible.length / 2)].insertAdjacentElement("afterend", section);
+    const inline = document.createElement("aside");
+    inline.className = "bn-rec-section bn-rec-inline";
+    inline.setAttribute("aria-label", "Có thể bạn sẽ thích");
+    const title = document.createElement("h2");
+    title.textContent = "CÓ THỂ BẠN SẼ THÍCH";
+    inline.append(title, card(choice));
+    const at = anchors[Math.max(0, Math.floor((anchors.length - 1) / 2))];
+    at.insertAdjacentElement("afterend", inline);
   }
   const series = Array.isArray(data.series) ? data.series : [];
   const same = articles.filter(a => Array.isArray(a.series) && a.series.some(v => series.includes(v))).sort((a,b) => Number(a.order)-Number(b.order));
