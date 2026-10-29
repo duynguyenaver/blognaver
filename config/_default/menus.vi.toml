@@ -4,6 +4,11 @@ name = "Bài viết"
 url = "/posts/"
 weight = 10
 [[main]]
+identifier = "series"
+name = "Series"
+url = "/series/"
+weight = 15
+[[main]]
 identifier = "about"
 name = "Giới thiệu"
 url = "/about/"
