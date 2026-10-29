@@ -1,62 +1,43 @@
+{{- /* Lightweight server-rendered related articles. No mid-body random card or JS. */ -}}
 {{- if and .IsPage (eq .Section "posts") -}}
-  {{- $articles := slice -}}
-  {{- range where site.RegularPages "Section" "posts" -}}
+  {{- $all := (where site.RegularPages "Section" "posts").ByDate.Reverse -}}
+  {{- $same := slice -}}
+  {{- $other := slice -}}
+  {{- $ids := .Params.series | default (slice) -}}
+  {{- range $all -}}
     {{- if ne .RelPermalink $.RelPermalink -}}
-      {{- $image := .Params.featuredImagePreview | default .Params.featuredImage | default .Params.cover -}}
-      {{- $series := .Params.series | default "" -}}
-      {{- $articles = $articles | append (dict "title" .Title "url" .RelPermalink "image" $image "description" (.Description | default .Summary | plainify | truncate 125) "series" $series "order" (.Params.seriesOrder | default 0) "date" (.Date.Unix)) -}}
+      {{- $related := false -}}
+      {{- range .Params.series | default (slice) -}}
+        {{- if in $ids . -}}{{- $related = true -}}{{- end -}}
+      {{- end -}}
+      {{- if $related -}}{{- $same = $same | append . -}}{{- else -}}{{- $other = $other | append . -}}{{- end -}}
     {{- end -}}
   {{- end -}}
-  {{- $data := dict "articles" $articles "series" (.Params.series | default "") "order" (.Params.seriesOrder | default 0) "current" .RelPermalink -}}
-  {{- $candidates := slice -}}
-  {{- range where site.RegularPages "Section" "posts" -}}
-    {{- if ne .RelPermalink $.RelPermalink -}}
-      {{- $candidates = $candidates | append . -}}
-    {{- end -}}
-  {{- end -}}
-  {{- if gt (len $candidates) 0 -}}
-  {{- with (index (shuffle $candidates) 0) -}}
-  {{- $thumb := .Params.featuredImagePreview | default .Params.featuredImage | default .Params.cover -}}
-  <aside id="bn-midarticle-card" class="bn-rec-section bn-rec-inline" aria-label="Có thể bạn sẽ thích">
-    <h2>CÓ THỂ BẠN SẼ THÍCH</h2>
-    <a class="bn-rec-card" href="{{ .RelPermalink }}">
-      <span class="bn-rec-image">
-        {{- with $thumb -}}<img src="{{ . | safeURL }}" loading="lazy" decoding="async" alt="Ảnh minh họa: {{ $.Title }}" onerror="this.remove()">{{- end -}}
-      </span>
-      <span class="bn-rec-copy">
-        <strong>{{ .Title }}</strong>
-        <small>{{ .Description | default (.Summary | plainify | truncate 125) }}</small>
-      </span>
-    </a>
-  </aside>
-  {{- end -}}
-  {{- end -}}
-  <script id="bn-article-recommendations-data" type="application/json">{{ $data | jsonify | safeHTML }}</script>
+  {{- $choices := first 3 (append $same $other) -}}
+  {{- with $choices -}}
+  <section class="bn-rec-section bn-rec-bottom" aria-label="Bài viết liên quan">
+    <h2>BÀI VIẾT TIẾP THEO &amp; LIÊN QUAN</h2>
+    <div class="bn-rec-grid">
+      {{- range . -}}
+        {{- $thumb := .Params.featuredImagePreview | default .Params.featuredImage | default .Params.cover | default "" -}}
+        {{- if not $thumb -}}
+          {{- with (findRE `!\[[^]]*\]\([^ )]+` .RawContent 1) -}}
+            {{- $thumb = replaceRE `^!\[[^]]*\]\(([^ )]+)$` "$1" (index . 0) -}}
+          {{- end -}}
+        {{- end -}}
+        <a class="bn-rec-card" href="{{ .RelPermalink }}">
+          <span class="bn-rec-image">
+            {{- with $thumb -}}
+              {{- $src := . -}}
+              {{- if not (or (hasPrefix $src "https://") (hasPrefix $src "http://") (hasPrefix $src "data:")) -}}{{- $src = $src | relURL -}}{{- end -}}
+              <img src="{{ $src | safeURL }}" alt="" loading="lazy" decoding="async" width="320" height="180">
+            {{- end -}}
+          </span>
+          <span class="bn-rec-copy"><strong>{{ .Title }}</strong><small>{{ .Description | default (.Summary | plainify | truncate 115) }}</small></span>
+        </a>
+      {{- end -}}
+    </div>
+  </section>
   <link rel="stylesheet" href="{{ "css/article-recommendations.css" | relURL }}">
-  <script src="{{ "js/article-recommendations.js" | relURL }}" defer></script>
-  <script>
-  (function () {
-    function placeSuggestion() {
-      var block = document.getElementById("bn-midarticle-card");
-      var body = document.querySelector("article.page.single #content");
-      if (!block || !body || body.contains(block)) return;
-      var paragraphs = Array.from(body.querySelectorAll("p")).filter(function (el) {
-        return (el.textContent || "").trim().length > 30 &&
-          !el.closest("aside, .bn-rec-section, nav, blockquote");
-      });
-      var anchors = paragraphs.length ? paragraphs :
-        Array.from(body.querySelectorAll("h2, h3, ul, ol, blockquote"));
-      if (anchors.length) {
-        anchors[Math.floor((anchors.length - 1) / 2)].insertAdjacentElement("afterend", block);
-      } else {
-        body.appendChild(block);
-      }
-    }
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", placeSuggestion, { once: true });
-    } else {
-      placeSuggestion();
-    }
-  })();
-  </script>
+  {{- end -}}
 {{- end -}}
