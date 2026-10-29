@@ -377,6 +377,25 @@ function youtubeVideoId(value){
   return /^[a-zA-Z0-9_-]{11}$/.test(id)?id:"";
  }catch{return ""}
 }
+async function findPublishedYoutube(job){
+ const videoId=youtubeVideoId(job.sourceUrl);
+ if(!videoId||!job.autoPublish)return null;
+ const token=githubQueueToken();
+ if(!token)throw Error("Không thể kiểm tra bài đã đăng: thiếu GitHub token.");
+ const query=new URLSearchParams({q:"repo:"+REPO+" "+videoId+" path:content/posts",per_page:"30"});
+ const response=await fetch("https://api.github.com/search/code?"+query,{cache:"no-store",headers:{
+  Authorization:"Bearer "+token,Accept:"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"
+ }});
+ const result=await response.json().catch(()=>({}));
+ if(!response.ok||result.incomplete_results)throw Error("Không kiểm chứng được nguồn YouTube đã đăng (GitHub HTTP "+response.status+"). Dừng để tránh đăng trùng.");
+ for(const match of result.items||[]){
+  if(!String(match.path||"").startsWith("content/posts/")||!String(match.path).endsWith(".md"))continue;
+  const file=await github("contents/"+match.path+"?ref=main");
+  const body=decode(file.content||"");
+  if(body.includes("i.ytimg.com/vi/"+videoId+"/")||body.includes("youtu.be/"+videoId)||body.includes("watch?v="+videoId)||body.includes("youtube.com/embed/"+videoId)||body.includes("youtube.com/shorts/"+videoId))return {path:match.path,sha:file.sha};
+ }
+ return null;
+}
 function checkDuplicateYoutube(job){
  const id=youtubeVideoId(job.sourceUrl);
  if(!id)return false;
@@ -1118,7 +1137,7 @@ async function start(e,restore=false,queuedJob=null){
  $("#startBtn").disabled=false;$("#cancelBtn").disabled=false;
  if(!restore){$("#resultLinks").replaceChildren();setPublishEvidence(null)}
  renderQueue();
- let succeeded=false,skippedShortResearch=false,queuedForRetry=false;
+ let succeeded=false,skippedShortResearch=false,queuedForRetry=false,alreadyPublished=false;
  try{
  checkpoint({runStatus:restore&&(window.BNQuota?.retryAt?.()||0)>Date.now()?"waiting":"running",autoPublish:job.autoPublish});
  if(resumedQuotaRun){quotaResumedNotice=true;renderQueue()}
@@ -1127,6 +1146,13 @@ async function start(e,restore=false,queuedJob=null){
  if(src.length<700)throw Error("Phụ đề quá ngắn. Hãy dán ít nhất 700 ký tự tiếng Anh.");
  if(src.length>350000)throw Error("Nguồn quá dài. Chia phụ đề thành file nhỏ hơn 350.000 ký tự.");
  if(url&&!/^https:\/\//i.test(url))throw Error("Đường dẫn nguồn phải là HTTPS.");
+ const existingPost=await findPublishedYoutube(job);
+ if(existingPost){
+  alreadyPublished=true;succeeded=true;
+  state("Đã có bài từ YouTube này: "+existingPost.path+". Bỏ qua AI và chuyển bài tiếp theo.");
+  progress(100,"YouTube đã có bài trên main · bỏ qua",4);
+  return;
+ }
  if(!availableKey()&&!canUseGroq())throw Error("Hãy kết nối Gemini hoặc Groq trước khi viết.");if(job.autoPublish&&!window.BNAuth?.read?.()&&!clean($("#githubManual").value))throw Error("Để tự đăng, hãy kết nối GitHub token chung của CMS trước.");resetInvalidModel();if(!currentModel&&availableKey()&&(window.BNQuota?.retryAt?.()||0)<=Date.now()){try{await models()}catch(e){if(!canUseGroq())throw e}}
  progress(4,"Đọc nguồn và lập dàn ý",0);
  const chunks=chunkSource(src),briefs=restore&&Array.isArray(runData.briefs)?runData.briefs.slice():[];
@@ -1240,7 +1266,7 @@ async function start(e,restore=false,queuedJob=null){
   if(queuedJob&&(succeeded||hasCommitProof(lastCommitProof)||queuedForRetry||rotationRequested))queueDisk("active",null,"delete").catch(()=>{});
   renderQueue();
   if(checkpointStorageFailed){$("#queueMessage").textContent="Bộ nhớ checkpoint đầy · đang giữ hàng đợi và bản thảo trong tab. Hãy sao lưu JSON.";dispatchNext()}
-  else if(succeeded){runtime("idle",null,"Hoàn thành","Bài đã xử lý xong. Xem thông tin model trong metadata bài viết.");$("#queueMessage").textContent="Đã hoàn tất phiên vừa chạy. "+queue.length+" bài còn lại sẽ tự tiếp tục.";dispatchNext()}
+  else if(succeeded){runtime("idle",null,alreadyPublished?"Đã đăng từ trước":"Hoàn thành",alreadyPublished?"Video đã có bài trên main; không gọi AI.":"Bài đã xử lý xong. Xem thông tin model trong metadata bài viết.");$("#queueMessage").textContent="Đã hoàn tất phiên vừa chạy. "+queue.length+" bài còn lại sẽ tự tiếp tục.";dispatchNext()}
   else if(hasCommitProof(lastCommitProof)){$("#queueMessage").textContent="Bài đã commit lên main. Không retry tạo trùng; tiếp tục bài khác.";dispatchNext()}
   else if(queuedForRetry){$("#queueMessage").textContent="Đã giữ bài lỗi trong hàng chờ ưu tiên; tự thử lại khi API sẵn sàng.";dispatchNext()}
   else if(skippedShortResearch){$("#queueMessage").textContent="Đã bỏ qua bài không đạt chuẩn độ dài; "+queue.length+" bài còn lại trong hàng đợi sẽ tự chạy.";dispatchNext()}
