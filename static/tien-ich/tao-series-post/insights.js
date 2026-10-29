@@ -23,8 +23,8 @@ function render(){
    const a=document.createElement("a");a.href=SITE+"bai-viet/"+encodeURIComponent(slug)+"/";a.textContent=x.live?"Mở bài đã xác nhận live ↗":"URL dự kiến · chưa xác nhận live ↗";a.target="_blank";a.rel="noopener noreferrer";first.append(document.createElement("br"),a)
   }
   cell(tr,x.series==="lex-fridman"?"Lex Fridman":x.series==="cold-fusion"?"ColdFusion":x.series||"—");
-  cell(tr,Number.isFinite(x.durationMs)?fmtTime(x.durationMs):"— (GitHub không lưu)");
-  cell(tr,x.quota?.requests?Number(x.quota.tokens||0).toLocaleString("vi-VN")+" tokens · "+x.quota.requests+" requests":"— (chỉ có ở thiết bị tạo)");
+  cell(tr,Number.isFinite(x.durationMs)?fmtTime(x.durationMs):"Chưa ghi nhận (bài cũ)");
+  cell(tr,Number.isFinite(x.quota?.requests)?Number(x.quota.tokens||0).toLocaleString("vi-VN")+" tokens · "+x.quota.requests+" requests":"Chưa ghi nhận (bài cũ)");
   const status=cell(tr,x.live?"Live ✓":x.sha?"Đã commit · Chờ xác nhận live":"Bản thảo");
   if(x.sha){const a=document.createElement("a");a.href="https://github.com/"+REPO+"/commit/"+x.sha;a.target="_blank";a.rel="noopener noreferrer";a.textContent=" · Commit ↗";status.append(a)}
   tbody.append(tr)
@@ -91,9 +91,19 @@ async function sync(){
     const title=frontValue(md,"title")||entry.slug.replace(/-/g," ");
     const realSlug=frontValue(md,"slug")||entry.slug;
     const realSeries=frontValue(md,"series");
+    const publishedMetrics=frontValue(md,"researchStudio");
+    // Older posts may not contain metrics. Never manufacture exact time or token
+    // values from GitHub timestamps or a different article's quota samples.
+    const recovered=publishedMetrics&&typeof publishedMetrics==="object"?publishedMetrics:null;
     if(Array.isArray(realSeries)&&!realSeries.includes(entry.series))continue;
     const previous=rows.find(x=>x.slug===realSlug||x.slug===entry.slug);
     const item={...(previous||{}),slug:realSlug,title,series:entry.series,sha:entry.sha,at:entry.at||Date.now(),state:"committed",fromGitHub:true};
+    if(recovered){
+      if(Number.isFinite(Number(recovered.durationMs))&&Number(recovered.durationMs)>=0)item.durationMs=Number(recovered.durationMs);
+      if(Number.isFinite(Number(recovered.geminiRequests))&&Number(recovered.geminiRequests)>=0){
+        item.quota={requests:Number(recovered.geminiRequests),tokens:Number(recovered.geminiTokens)||0,inputTokens:Number(recovered.inputTokens)||0,outputTokens:Number(recovered.outputTokens)||0};
+      }
+    }
     if(previous)Object.assign(previous,item);else rows.push(item);
    }catch{failedDetails++}
   }
