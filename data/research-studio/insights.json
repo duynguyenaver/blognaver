@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-29T20:47:59.837Z",
+  "updatedAt": "2026-10-29T20:50:49.803Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -319,6 +319,23 @@
         "tokens": 26263,
         "inputTokens": 19932,
         "outputTokens": 6331
+      },
+      "models": [
+        "Gemini · models/gemini-3.5-flash-lite"
+      ]
+    },
+    {
+      "slug": "ota-travel-su-tien-hoa-cua-ota-travel-va-the-tien-thoai-luong-nan-cua-nganh-khach-san-2026-10-29",
+      "title": "Sự tiến hóa của OTA Travel và thế tiến thoái lưỡng nan của ngành khách sạn",
+      "series": "ota-travel",
+      "sha": "7451ab5f68bf3712dc60d1338c51c8fc433ef749",
+      "commitAt": "2026-10-29T20:50:30Z",
+      "durationMs": 90250,
+      "quota": {
+        "requests": 8,
+        "tokens": 22356,
+        "inputTokens": 16370,
+        "outputTokens": 5986
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
