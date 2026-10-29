@@ -39,6 +39,26 @@ for path in ["index.html","posts/index.html"]:
         else:local=urllib.parse.urljoin("/"+str(path),local).lstrip("/")
         if not (OUT/urllib.parse.unquote(local)).is_file():
             fail("missing-asset",str(path)+": "+raw)
+# Regression guards for BlogNaver homepage ordering and removed heavy features.
+home_file=OUT/"index.html"
+if home_file.is_file():
+    home_html=home_file.read_text(encoding="utf-8",errors="replace")
+    dated=re.findall(r'<article\\b[^>]*\\bclass="single summary"[^>]*\\bdata-post-date="([^"]+)"',home_html,re.I)
+    if len(dated)>1 and dated!=sorted(dated,reverse=True):
+        fail("homepage-order","Homepage article dates must be newest first")
+    if "bn-midarticle-card" in home_html or "article-recommendations.js" in home_html:
+        fail("old-recommendations","Retired random post UI must not appear on home")
+    if 'gemini-quota/' in home_html:
+        fail("removed-feature","Gemini Quota must not be linked from home")
+utility=OUT/"tien-ich/index.html"
+if utility.is_file() and "gemini-quota/" in utility.read_text(encoding="utf-8",errors="replace"):
+    fail("removed-feature","Gemini Quota must not be linked from utility index")
+if (OUT/"tien-ich/gemini-quota/index.html").exists():
+    fail("removed-feature","Gemini Quota obsolete output still exists")
+if articles:
+    example=articles[0].read_text(encoding="utf-8",errors="replace")
+    if "bn-midarticle-card" in example or "article-recommendations.js" in example:
+        fail("old-recommendations","Retired random post UI still found inside article")
 # Check JS syntax of changed first-party scripts only. No external npm dependency needed.
 try:
     base=subprocess.run(["git","merge-base","origin/main","HEAD"],capture_output=True,text=True,check=True).stdout.strip()
