@@ -17,7 +17,7 @@
 <div class="quota-metric"><span>Requests / phút <b id="rpmValue">0 / ?</b></span><div class="quota-track"><i id="rpmBar"></i></div></div>
 <div class="quota-metric"><span>Tokens / phút <b id="tpmValue">0 / ?</b></span><div class="quota-track"><i id="tpmBar"></i></div></div>
 <div class="quota-metric"><span>Requests / ngày <b id="rpdValue">0 / ?</b></span><div class="quota-track"><i id="rpdBar"></i></div></div>
-<p id="quotaCountdown" class="quota-countdown" hidden></p>
+<p id="quotaCountdown" class="quota-countdown" hidden></p><div class="quota-article-stats"><strong>Quota cho từng bài</strong><div class="quota-article-grid"><span>Lượt Gemini bài đang viết <b id="quotaRunRequests">0</b></span><span>Token bài đang viết <b id="quotaRunTokens">0</b></span><span>Token trung bình / bài <b id="quotaAverageTokens">—</b></span><span>Ước lượng bài tiếp theo <b id="quotaForecast">—</b></span></div><p class="tip">Số liệu dựa trên các request thành công và token usage Gemini trả về. Không phải hạn mức chính thức của Google.</p></div>
 <button type="button" id="quotaRefresh" class="ghost">Refresh Status</button>
 </div></section></section><section class="panel output"><h2>Bản thảo / kết quả</h2><p id="outputHint">Tiêu đề và bài viết sẽ xuất hiện tại đây trong quá trình tạo.</p><h3 id="resultTitle"></h3><div id="resultMeta"></div><div class="actions"><button type="button" class="ghost" id="copyDraft" disabled>Copy Markdown</button><button type="button" class="ghost" id="downloadDraft" disabled>Xuất .md</button></div><div id="resultLinks"></div><details><summary>Xem nội dung Markdown</summary><pre id="preview"></pre></details></section></aside></div></form>
 <section id="seriesSmartInsights" class="panel insights" aria-labelledby="insightsHeading">
