@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-29T22:01:40.106Z",
+  "updatedAt": "2026-10-29T22:02:17.269Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -431,6 +431,23 @@
       "models": [
         "Groq · qwen/qwen3.8-27b",
         "Groq · allam-2-7b",
+        "Gemini · models/gemini-3.5-flash-lite"
+      ]
+    },
+    {
+      "slug": "cold-fusion-hanh-trinh-cua-uber-tu-cuoc-cach-mang-goi-xe-den-bai-toan-sieu-ung-dung-va--2026-10-29",
+      "title": "Hành trình của Uber: Từ cuộc cách mạng gọi xe đến bài toán siêu ứng dụng và xe tự lái",
+      "series": "cold-fusion",
+      "sha": "075aff140496e89ef1cdfabe7959871c114a6b59",
+      "commitAt": "2026-10-29T22:01:51Z",
+      "durationMs": 29262,
+      "quota": {
+        "requests": 8,
+        "tokens": 23181,
+        "inputTokens": 17544,
+        "outputTokens": 5637
+      },
+      "models": [
         "Gemini · models/gemini-3.5-flash-lite"
       ]
     }
