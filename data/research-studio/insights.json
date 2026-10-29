@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-29T20:57:54.741Z",
+  "updatedAt": "2026-10-29T20:58:32.376Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -390,6 +390,23 @@
         "tokens": 25614,
         "inputTokens": 19442,
         "outputTokens": 6172
+      },
+      "models": [
+        "Gemini · models/gemini-3.5-flash-lite"
+      ]
+    },
+    {
+      "slug": "cold-fusion-giai-ma-dong-tien-dang-sau-mot-dem-khach-san-tu-doanh-thu-ao-den-loi-nhuan--2026-10-29",
+      "title": "Giải mã dòng tiền đằng sau một đêm khách sạn: Từ doanh thu ảo đến lợi nhuận thực tế",
+      "series": "cold-fusion",
+      "sha": "a102a51354d75bf0de33f1e89dc47424862082cf",
+      "commitAt": "2026-10-29T20:58:05Z",
+      "durationMs": 24098,
+      "quota": {
+        "requests": 8,
+        "tokens": 17972,
+        "inputTokens": 12913,
+        "outputTokens": 5059
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
