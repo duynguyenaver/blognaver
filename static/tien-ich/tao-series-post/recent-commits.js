@@ -79,7 +79,7 @@ async function load(){
 }
 function manage(){
  clearInterval(timer);timer=null;
- if(details.open){load();timer=setInterval(load,30000)}
+ if(details.open){load();timer=setInterval(load,500000)}
 }
 details.addEventListener("toggle",manage);
 document.addEventListener("visibilitychange",()=>{if(!document.hidden&&details.open)load()});
