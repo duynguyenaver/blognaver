@@ -316,10 +316,10 @@ function checkpoint(extra={}){
  }
  checkpointStorageFailed=true;showRecoveryDownload();
  // Cancel the in-flight AI fetch immediately; prevent stale success UI and further steps.
- if(working&&!publishingCommit&&!abort?.signal.aborted)abort?.abort();
- const message="Bộ nhớ trình duyệt đã đầy: không thể lưu checkpoint an toàn. Đã dừng tác vụ; KHÔNG tự chạy bài kế tiếp. Hãy xuất bản thảo Markdown và giải phóng dung lượng trước khi tiếp tục.";
+ // Keep AI processing: storage errors must never abort a valid generation request.
+ const message="Bộ nhớ checkpoint đã đầy nhưng AI vẫn tiếp tục xử lý trong tab hiện tại. Hãy tải bản sao checkpoint JSON hoặc bản thảo Markdown trước khi tải lại trang.";
  state(message,true);
- if(working&&!publishingCommit){const error=Error(message);error.code="CHECKPOINT_STORAGE_FULL";throw error}
+ // Keep running in memory; warn that reload recovery is not guaranteed.
 }
 function waitForRetry(ms,signal){
  return new Promise((resolve,reject)=>{
@@ -440,7 +440,7 @@ async function geminiRequest(url,body=null,signal=null){
  const token=availableKey();
  let transientAttempt=0,quotaWaits=0;
  while(true){
-  if(checkpointStorageFailed)throw Object.assign(Error("Checkpoint chưa được lưu; tác vụ đã dừng."),{code:"CHECKPOINT_STORAGE_FULL"});
+  
   if(signal?.aborted)throw Error("Đã dừng theo yêu cầu.");
   if(manualModelOverride?.provider==="groq")throw Object.assign(Error("Manual model switch"),{code:"MANUAL_SWITCH"});
   if(manualModelOverride?.provider!=="gemini")await coolDown(signal);
@@ -762,7 +762,7 @@ async function start(e,restore=false,queuedJob=null){
  }else{checkpoint({runStatus:"completed"});window.BNSeriesInsights?.record({slug:d.slug,title:d.title,series:d.series,state:"draft",durationMs:Date.now()-startedAt,live:false,quota:window.BNQuota?.runSummary()});progress(100,"Hoàn thành bản thảo; chưa đăng",4);state("Đã tạo bản thảo Markdown. Bạn có thể copy hoặc xuất file; chưa ghi lên GitHub.")}
  succeeded=true;
  }catch(e){
-  if(e.code==="CHECKPOINT_STORAGE_FULL"||checkpointStorageFailed){
+  if(e.code==="CHECKPOINT_STORAGE_FULL"){
    checkpointStorageFailed=true;
    runtime("error",null,"Dừng an toàn: bộ nhớ đầy",e.message);
    state("Đã ngừng tạo thêm nội dung vì checkpoint chưa được lưu. Hãy tải bản thảo Markdown và giải phóng bộ nhớ. Hàng đợi không tự chạy.",true);
@@ -797,8 +797,7 @@ async function start(e,restore=false,queuedJob=null){
   stopStallWatch();window.BNQuota?.finishRun(Boolean(lastCommitProof?.sha));working=false;manualModelOverride=null;quotaResumedNotice=false;
   $("#cancelBtn").disabled=true;abort=null;activeSource=null;
   renderQueue();
-  if(checkpointStorageFailed){$("#queueMessage").textContent="ĐÃ DỪNG AN TOÀN · bộ nhớ checkpoint đầy. Hàng đợi giữ nguyên; cần giải phóng dung lượng trước khi tiếp tục."}
-  else if(succeeded){runtime("idle",null,"Hoàn thành","Bài đã xử lý xong. Xem thông tin model trong metadata bài viết.");$("#queueMessage").textContent="Đã hoàn tất phiên vừa chạy. "+queue.length+" bài còn lại sẽ tự tiếp tục.";dispatchNext()}
+  if(succeeded){runtime("idle",null,"Hoàn thành","Bài đã xử lý xong. Xem thông tin model trong metadata bài viết.");$("#queueMessage").textContent="Đã hoàn tất phiên vừa chạy. "+queue.length+" bài còn lại sẽ tự tiếp tục.";dispatchNext()}
   else if(skippedShortResearch){$("#queueMessage").textContent="Đã bỏ qua bài không đạt chuẩn độ dài; "+queue.length+" bài còn lại trong hàng đợi sẽ tự chạy.";dispatchNext()}
   else if(rotationRequested){rotationRequested=false;dispatchNext()}
   else $("#queueMessage").textContent="Phiên hiện tại dừng vì lỗi. Bài đang chờ vẫn được lưu; hãy tiếp tục phiên trước để xử lý hàng đợi.";
