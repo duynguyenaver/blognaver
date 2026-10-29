@@ -655,7 +655,7 @@ async function start(e,restore=false,queuedJob=null){
  renderQueue();
  checkpoint({runStatus:restore&&(window.BNQuota?.retryAt?.()||0)>Date.now()?"waiting":"running",autoPublish:job.autoPublish});
  if(resumedQuotaRun){quotaResumedNotice=true;renderQueue()}
- let succeeded=false;
+ let succeeded=false,skippedShortResearch=false;
  try{
  const src=rawSource(job.source),url=clean(job.sourceUrl),series=job.series,angle=clean(job.angle);
  if(!SERIES[series])throw Error("Series không hợp lệ.");
@@ -699,7 +699,18 @@ async function start(e,restore=false,queuedJob=null){
  }else{checkpoint({runStatus:"completed"});window.BNSeriesInsights?.record({slug:d.slug,title:d.title,series:d.series,state:"draft",durationMs:Date.now()-startedAt,live:false,quota:window.BNQuota?.runSummary()});progress(100,"Hoàn thành bản thảo; chưa đăng",4);state("Đã tạo bản thảo Markdown. Bạn có thể copy hoặc xuất file; chưa ghi lên GitHub.")}
  succeeded=true;
  }catch(e){
-  if(rotationRequested){
+  // A structurally short article is terminal for this job: do not publish or
+  // block FIFO behind a permanently failed checkpoint. Preserve a small audit
+  // record, clear the active draft, and immediately allow the next queued job.
+  if(e.message==="Bài nghiên cứu quá ngắn; chưa đạt chuẩn xuất bản."&&!publishingCommit&&!lastCommitProof?.sha){
+   skippedShortResearch=true;rotationRequested=false;
+   const skipped={at:new Date().toISOString(),series:job.series,sourceUrl:job.sourceUrl||"",reason:e.message};
+   try{const history=JSON.parse(localStorage.getItem("bn_series_skipped_research_v1")||"[]");history.unshift(skipped);localStorage.setItem("bn_series_skipped_research_v1",JSON.stringify(history.slice(0,30)))}catch{}
+   state("Đã bỏ qua bài không đạt chuẩn độ dài (không commit). "+queue.length+" bài trong hàng đợi sẽ được chạy tiếp.",true);
+   runtime("error",null,"Bỏ qua bài không đạt chuẩn",e.message);
+   try{localStorage.removeItem(DRAFT)}catch{}
+   runData={runStatus:"completed"};rawMarkdown="";setPublishEvidence(null);
+  }else if(rotationRequested){
    const saved={...runData,source:job.source,sourceUrl:job.sourceUrl||"",series:job.series,angle:job.angle||"",autoPublish:job.autoPublish!==false,markdown:rawMarkdown,runStatus:"paused",commitProof:null};
    const paused={...job,rotations:(job.rotations||0)+1,checkpoint:saved};
    // Enqueue behind currently waiting articles. Do not lose checkpoints on reload.
@@ -719,6 +730,7 @@ async function start(e,restore=false,queuedJob=null){
   $("#cancelBtn").disabled=true;abort=null;activeSource=null;
   renderQueue();
   if(succeeded){runtime("idle",null,"Hoàn thành","Bài đã xử lý xong. Xem thông tin model trong metadata bài viết.");$("#queueMessage").textContent="Đã hoàn tất phiên vừa chạy. "+queue.length+" bài còn lại sẽ tự tiếp tục.";dispatchNext()}
+  else if(skippedShortResearch){$("#queueMessage").textContent="Đã bỏ qua bài không đạt chuẩn độ dài; "+queue.length+" bài còn lại trong hàng đợi sẽ tự chạy.";dispatchNext()}
   else if(rotationRequested){rotationRequested=false;dispatchNext()}
   else $("#queueMessage").textContent="Phiên hiện tại dừng vì lỗi. Bài đang chờ vẫn được lưu; hãy tiếp tục phiên trước để xử lý hàng đợi.";
 }
