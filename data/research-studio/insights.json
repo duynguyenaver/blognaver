@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-29T22:02:17.269Z",
+  "updatedAt": "2026-10-29T22:05:43.895Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -446,6 +446,23 @@
         "tokens": 23181,
         "inputTokens": 17544,
         "outputTokens": 5637
+      },
+      "models": [
+        "Gemini · models/gemini-3.5-flash-lite"
+      ]
+    },
+    {
+      "slug": "cold-fusion-ung-dung-ai-va-khoa-hoc-du-lieu-trong-hang-khong-thuong-mai-thuc-te-toi-uu--2026-10-29",
+      "title": "Ứng dụng AI và khoa học dữ liệu trong hàng không thương mại: Thực tế tối ưu hóa",
+      "series": "cold-fusion",
+      "sha": "25a6d9795b8b8dbd31973a81edc3b55f308557f6",
+      "commitAt": "2026-10-29T22:05:02Z",
+      "durationMs": 34517,
+      "quota": {
+        "requests": 8,
+        "tokens": 26016,
+        "inputTokens": 18785,
+        "outputTokens": 7231
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
