@@ -442,12 +442,66 @@ function runtime(providerName,modelName,stateName,note=""){
  syncManualModelSwitch();
 }
 function provider(text,isError=false){$("#providerStatus").textContent=text;$("#providerStatus").classList.toggle("error",isError)}
+function isWritingGroqModel(m){
+ const id=String(m.id||"").toLowerCase();
+ if(/whisper|speech|transcri|playai|tts|audio|safeguard|guardrail|moderation|embedding|stt/.test(id))return false;
+ const endpoints=m.supported_endpoints||m.endpoints;
+ if(Array.isArray(endpoints)&&endpoints.length&&!endpoints.some(e=>/chat\/completions/i.test(String(e))))return false;
+ if(m.capabilities?.chat_completion===false||m.capabilities?.chat===false)return false;
+ return true;
+}
+let modelsRefreshedAt=0,modelsRefreshPromise=null;
+async function refreshWritingModels(force=false){
+ if(modelsRefreshPromise)return modelsRefreshPromise;
+ if(!force&&Date.now()-modelsRefreshedAt<300000)return;
+ modelsRefreshPromise=(async()=>{
+  const tasks=[];
+  const geminiToken=availableKey();
+  if(geminiToken)tasks.push((async()=>{
+   const all=[];let next="";
+   for(let page=0;page<20;page++){
+    const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),15000);
+    let response,data;
+    try{response=await fetch("https://generativelanguage.googleapis.com/v1beta/models?pageSize=100"+(next?"&pageToken="+encodeURIComponent(next):""),{headers:{"x-goog-api-key":geminiToken},signal:ctl.signal,cache:"no-store"});data=await response.json().catch(()=>({}))}
+    finally{clearTimeout(timer)}
+    if(!response.ok)throw Error("Gemini model discovery HTTP "+response.status);
+    all.push(...(data.models||[]));next=data.nextPageToken||"";if(!next)break;
+   }
+   const supported=all.filter(m=>m.name&&(m.supportedGenerationMethods||[]).includes("generateContent")&&!retiredModels().has(m.name));
+   if(supported.length){
+    const select=$("#model"),selected=select.value;
+    select.replaceChildren(...supported.map(m=>new Option((m.displayName||m.name)+" · "+m.name,m.name)));
+    if(supported.some(m=>m.name===selected))select.value=selected;
+    currentModel=select.value;geminiVerified=true;
+   }
+  })());
+  const groqToken=groqKey();
+  if(groqToken)tasks.push((async()=>{
+   const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),15000);
+   let response,data;
+   try{response=await fetch("https://api.groq.com/openai/v1/models",{headers:{Authorization:"Bearer "+groqToken},signal:ctl.signal,cache:"no-store"});data=await response.json().catch(()=>({}))}
+   finally{clearTimeout(timer)}
+   if(!response.ok)throw Error("Groq model discovery HTTP "+response.status);
+   const ids=(data.data||[]).filter(m=>m.id&&m.active!==false&&isWritingGroqModel(m)).map(m=>m.id);
+   if(ids.length){
+    const select=$("#groqModel"),selected=select.value;
+    select.replaceChildren(...ids.map(id=>new Option(id,id)));
+    if(ids.includes(selected))select.value=selected;
+    groqModel=select.value;groqVerified=true;
+   }
+  })());
+  const results=await Promise.allSettled(tasks);
+  if(results.some(x=>x.status==="fulfilled"))modelsRefreshedAt=Date.now();
+  for(const r of results)if(r.status==="rejected")provider("Không làm mới được một danh sách model: "+r.reason.message+". Tiếp tục dùng danh sách cũ.",true);
+ })();
+ try{return await modelsRefreshPromise}finally{modelsRefreshPromise=null}
+}
 async function verifyGroq(){
  const token=groqKey();if(!token)throw Error("Nhập Groq API key mới để kiểm tra kết nối.");
  const response=await fetch("https://api.groq.com/openai/v1/models",{headers:{Authorization:"Bearer "+token,Accept:"application/json"},cache:"no-store"});
  const data=await response.json().catch(()=>({}));
  if(!response.ok){groqVerified=false;openCredentials("Groq key cần kiểm tra");throw Error("Groq HTTP "+response.status+": "+String(data.error?.message||"Không thể kết nối").slice(0,100))}
- const availableModels=(data.data||[]).filter(x=>x.id&&x.active!==false).map(x=>x.id);
+ const availableModels=(data.data||[]).filter(x=>x.id&&x.active!==false&&isWritingGroqModel(x)).map(x=>x.id);
  const preferred=["openai/gpt-oss-120b","qwen/qwen3.8-27b","openai/gpt-oss-20b"];
  const ids=[...preferred.filter(x=>availableModels.includes(x)),...availableModels.filter(x=>!preferred.includes(x))];
  if(!ids.length)throw Error("Groq API key hoạt động nhưng không có model khả dụng.");
@@ -644,6 +698,8 @@ async function autoGeminiGenerate(model,prompt,signal,maxTokens){
 }
 async function generate(prompt,signal,maxTokens=6500){
  if(signal?.aborted)throw Error("Đã dừng theo yêu cầu.");
+ await refreshWritingModels();
+ if(signal?.aborted)throw Error("Đã dừng theo yêu cầu.");
  let choices=autoModelCandidates();
  if(!choices.length&&availableKey()){
   try{await models()}catch(e){provider("Không tải được danh sách Gemini: "+e.message,true)}
@@ -670,7 +726,17 @@ async function generate(prompt,signal,maxTokens=6500){
  }
  // Never invent success or spin endlessly when every credential/model is blocked.
  // Preserve completed sections through the existing checkpoint/failure handler.
- throw Error("Tất cả "+choices.length+" model đã thử đều không khả dụng. Checkpoint được giữ để khôi phục. "+failures.slice(-3).join(" | "));
+ await refreshWritingModels(true);
+ const attempted=new Set(choices.map(x=>x.provider+":"+x.model));
+ const additional=autoModelCandidates().filter(x=>!attempted.has(x.provider+":"+x.model));
+ for(const item of additional){
+  if(signal?.aborted)throw Error("Đã dừng theo yêu cầu.");
+  try{
+   if(item.provider==="gemini")return await autoGeminiGenerate(item.model,prompt,signal,maxTokens);
+   groqModel=item.model;return await groqGenerate(prompt,signal,maxTokens);
+  }catch(e){if(signal?.aborted)throw e;failures.push(item.provider+"/"+item.model+": "+e.message)}
+ }
+ throw Error("Tất cả "+(choices.length+additional.length)+" model hỗ trợ viết văn bản đã thử đều không khả dụng. Checkpoint được giữ. "+failures.slice(-3).join(" | "));
 }
 async function legacyGenerate(prompt,signal,maxTokens=6500){
  const useGroq=canUseGroq();
@@ -835,6 +901,7 @@ async function start(e,restore=false,queuedJob=null){
  quotaResumedNotice=false;
  manualModelOverride=null;
  activeSource={...job};rotationRequested=false;publishingCommit=false;checkpointStorageFailed=false;
+ modelsRefreshedAt=0;
  if(!restore){runData={};rawMarkdown="";resumePending=false;clearSourceForm()}
  else{runData={...runData,source:job.source,sourceUrl:job.sourceUrl,series:job.series,angle:job.angle,autoPublish:job.autoPublish}}
  abort=new AbortController();startedAt=Date.now();window.BNQuota?.beginRun();working=true;monitorProgress();
