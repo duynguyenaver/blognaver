@@ -42,12 +42,12 @@ async function load(){
   for(let i=0;i<paths.length;i+=5){
    const batch=await Promise.all(paths.slice(i,i+5).map(async path=>{
     try{const file=await req("/contents/"+path+"?ref=main");const source=dec(file.content);
-     return /^researchStudio:\s*/m.test((source.match(/^---\r?\n([\s\S]*?)\r?\n---/)||[])[1]||"")?{path,source,sha:file.sha,seriesName:String(fmValue(source,"seriesName")||(fmValue(source,"series")||[])[0]||""),title:String(fmValue(source,"title")||"")}:null
+     return /^researchStudio:\s*/m.test((source.match(/^---\r?\n([\s\S]*?)\r?\n---/)||[])[1]||"")?{path,source,sha:file.sha,seriesName:String(fmValue(source,"seriesName")||(fmValue(source,"series")||[])[0]||""),title:String(fmValue(source,"title")||""),date:String(fmValue(source,"date")||"")}:null
     }catch{return null}
    }));
    found.push(...batch.filter(Boolean));
   }
-  posts=found;loaded=true;
+  posts=found.sort((a,b)=>Date.parse(b.date||0)-Date.parse(a.date||0)||b.path.localeCompare(a.path));loaded=true;
   editorStatus.textContent="Đã tải "+posts.length+" bài Research Studio. Nhập tên series rồi tạo PR.";
   miniStatus.textContent="Đã tải "+posts.length+" bài. Chỉnh sửa hoặc xóa sẽ mở Pull Request, không thay đổi main ngay.";
   drawEditor();drawMini();
@@ -56,16 +56,32 @@ async function load(){
 }
 function drawEditor(){
  clear(editor);const query=normalize($("#editorSearch").value);let count=0;
- posts.forEach(p=>{
-  if(query&&!normalize(p.title+" "+p.seriesName+" "+p.path).includes(query))return;count++;
-  const card=el("article",undefined,"editor-card");
-  const name=el("strong",p.title);const label=el("label","Tên series");
-  const input=el("input");input.type="text";input.placeholder="Ví dụ: Công nghệ tương lai";input.value=p.editSeries??p.seriesName;
-  const hint=el("small");const update=()=>{p.editSeries=input.value;hint.textContent="Slug tự động: "+(slugify(input.value)||"—");updateSave()};update();
-  input.addEventListener("input",update);
-  label.append(input);card.append(name,label,hint);editor.append(card);
+ posts.forEach((p,index)=>{
+  if(query&&!normalize(p.title+" "+p.seriesName+" "+p.path).includes(query))return;
+  count++;
+  const card=el("article",undefined,"editor-card series-edit-card");
+  if(index===0)card.classList.add("series-edit-latest");
+  const heading=el("div",undefined,"series-edit-heading");
+  const badge=el("span",index===0?"MỚI NHẤT":"BÀI #"+(index+1),"series-edit-badge");
+  const title=el("strong",p.title,"series-edit-title");
+  heading.append(badge,title);
+  const details=el("div",undefined,"series-edit-meta");
+  const date=Date.parse(p.date),dateLabel=Number.isFinite(date)?new Date(date).toLocaleString("vi-VN"):"Chưa có ngày";
+  details.append(el("span",dateLabel),el("span","Series hiện tại: "+(p.seriesName||"Chưa đặt")));
+  const field=el("div",undefined,"series-edit-field");
+  const label=el("label","Đổi tên series");label.htmlFor="seriesEdit-"+index;
+  const input=el("input");input.id=label.htmlFor;input.type="text";input.placeholder="Nhập tên series bằng tiếng Việt…";input.value=p.editSeries??p.seriesName;
+  const hint=el("small",undefined,"series-edit-hint");
+  const update=()=>{p.editSeries=input.value;hint.textContent="Slug tự động: "+(slugify(input.value)||"—");updateSave()};
+  input.addEventListener("input",update);update();
+  field.append(label,input,hint);
+  const link=el("a","Xem bài viết ↗","series-edit-live-link");
+  const slug=String(fmValue(p.source,"slug")||p.path.split("/").pop().replace(/\.md$/,""));
+  link.href="https://duynguyenaver.github.io/blognaver/bai-viet/"+encodeURIComponent(slug)+"/";
+  link.target="_blank";link.rel="noopener noreferrer";
+  card.append(heading,details,field,link);editor.append(card);
  });
- $("#editorSearchCount").textContent=count+" bài phù hợp";updateSave();
+ $("#editorSearchCount").textContent=count+" bài phù hợp · sắp xếp mới nhất trước";updateSave();
 }
 function updateSave(){
  const changed=posts.filter(p=>p.editSeries?.trim()&&p.editSeries.trim()!==p.seriesName);
