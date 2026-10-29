@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   bug-checker:
-    name: Bug Checker — Blowfish (3 attempts max)
+    name: Bug Checker — Hugo (3 attempts max)
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -34,6 +34,13 @@ jobs:
         with:
           hugo-version: '0.162.0'
           extended: true
+      - name: Cache Hugo module downloads
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-hugo-pr-v2-${{ hashFiles('go.mod', 'go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-hugo-pr-v2-
       - name: Validate bug knowledge classifier fixtures
         run: python3 scripts/test-ci-knowledge.py
       - name: Bug checks, known-fix guidance and 2 retries
