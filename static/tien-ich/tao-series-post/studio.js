@@ -315,6 +315,8 @@ function checkpoint(extra={}){
   try{localStorage.setItem(DRAFT,JSON.stringify(compact));return}catch{}
  }
  checkpointStorageFailed=true;showRecoveryDownload();
+ // Cancel the in-flight AI fetch immediately; prevent stale success UI and further steps.
+ if(working&&!publishingCommit&&!abort?.signal.aborted)abort?.abort();
  const message="Bộ nhớ trình duyệt đã đầy: không thể lưu checkpoint an toàn. Đã dừng tác vụ; KHÔNG tự chạy bài kế tiếp. Hãy xuất bản thảo Markdown và giải phóng dung lượng trước khi tiếp tục.";
  state(message,true);
  if(working&&!publishingCommit){const error=Error(message);error.code="CHECKPOINT_STORAGE_FULL";throw error}
@@ -438,6 +440,7 @@ async function geminiRequest(url,body=null,signal=null){
  const token=availableKey();
  let transientAttempt=0,quotaWaits=0;
  while(true){
+  if(checkpointStorageFailed)throw Object.assign(Error("Checkpoint chưa được lưu; tác vụ đã dừng."),{code:"CHECKPOINT_STORAGE_FULL"});
   if(signal?.aborted)throw Error("Đã dừng theo yêu cầu.");
   if(manualModelOverride?.provider==="groq")throw Object.assign(Error("Manual model switch"),{code:"MANUAL_SWITCH"});
   if(manualModelOverride?.provider!=="gemini")await coolDown(signal);
@@ -544,6 +547,7 @@ async function models(){
  }finally{button.disabled=false;button.textContent="Kiểm tra Gemini / chọn model"}
 }
 async function generate(prompt,signal,maxTokens=6500){
+ if(checkpointStorageFailed)throw Object.assign(Error("Checkpoint chưa được lưu; tác vụ đã dừng."),{code:"CHECKPOINT_STORAGE_FULL"});
  const useGroq=canUseGroq();
  if(manualModelOverride?.provider==="groq")return groqGenerate(prompt,signal,maxTokens);
  if(manualModelOverride?.provider==="gemini")currentModel=manualModelOverride.model;
