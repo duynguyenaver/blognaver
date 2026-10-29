@@ -123,3 +123,19 @@
 #queueResume[hidden]{display:none}
 #queuePanel .tip{margin-bottom:0}
 @media(max-width:700px){.queue-overview{grid-template-columns:1fr}.queue-entry{align-items:flex-start}.queue-entry span{font-size:11px}}
+
+/* Source resets: visually distinct secondary affordances without destructive side effects. */
+.bn-field-with-reset{display:flex;align-items:center;gap:8px;min-width:0}
+.bn-field-with-reset input{flex:1;min-width:0}
+.bn-reset-field{display:inline-flex;align-items:center;justify-content:center;gap:5px;white-space:nowrap;background:#fff7f0;border:1px solid #e5bfa3;color:#97501f;padding:10px 12px;border-radius:9px;font-size:12px;font-weight:800}
+.bn-reset-field:hover,.bn-reset-field:focus-visible{background:#ffedda;border-color:#db9e6e}
+.file-row .bn-reset-field{margin-right:auto}
+.bn-groq-config{background:#f0f9f7;border:1px solid #b8ded2;border-left:4px solid #269577;border-radius:12px;padding:14px;margin:14px 0}
+.bn-groq-heading{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.bn-groq-heading strong{color:#176f5c;font-size:13px}
+.bn-groq-config .tip{margin:9px 0}
+.bn-groq-config label{margin-top:12px}
+.bn-groq-config .small-check{margin-top:12px}
+.bn-provider-status{border-radius:9px;background:white;border:1px solid #c4e3d9;color:#276a56;font-size:12px;line-height:1.55;padding:9px 10px}
+.bn-provider-status.error{color:#a53d42;border-color:#e8c2c4;background:#fff8f8}
+@media(max-width:600px){.bn-field-with-reset{align-items:stretch;flex-direction:column}.bn-field-with-reset input{width:100%}.bn-reset-field{width:max-content;max-width:100%}}
