@@ -6,7 +6,7 @@
 {{ range $catalog }}
   {{ $id := .id }}
   {{ range $pages }}
-    {{ if eq (.Params.series | default "") $id }}
+    {{ if in (.Params.series | default (slice)) $id }}
       {{ $totalArticles = add $totalArticles 1 }}
     {{ end }}
   {{ end }}
@@ -27,7 +27,7 @@
       {{ $entry := . }}
       {{ $id := .id }}
       {{ $matches := slice }}
-      {{ range $pages }}{{ if eq (.Params.series | default "") $id }}{{ $matches = $matches | append . }}{{ end }}{{ end }}
+      {{ range $pages }}{{ if in (.Params.series | default (slice)) $id }}{{ $matches = $matches | append . }}{{ end }}{{ end }}
       {{ $sorted := sort $matches "Params.seriesOrder" }}
       {{ $count := len $matches }}
       {{ $total := int (.total | default $count) }}
