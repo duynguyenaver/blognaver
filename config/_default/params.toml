@@ -9,6 +9,9 @@ link = "https://duynguyenaver.github.io/blognaver/"
 [header]
 desktopMode = "fixed"
 mobileMode = "auto"
+[header.title]
+name = "Duy Nguyen"
+typeit = false
 [footer]
 enable = true
 hugo = false
