@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-29T18:57:50.111Z",
+  "updatedAt": "2026-10-29T19:01:01.694Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -154,6 +154,23 @@
       },
       "models": [
         "Gemini · models/gemini-3.1-flash-lite-preview"
+      ]
+    },
+    {
+      "slug": "lex-fridman-nghien-cuu-toan-hoc-trong-ky-nguyen-ai-khung-hoang-ot-pha-va-tuong-lai-con--2026-10-29",
+      "title": "Nghiên cứu Toán học trong Kỷ nguyên AI: Khủng hoảng, Đột phá và Tương lai Con người",
+      "series": "lex-fridman",
+      "sha": "c879d4434a3c35c62bbd85543a20d58caf7933b2",
+      "commitAt": "2026-10-29T19:00:42Z",
+      "durationMs": 153520,
+      "quota": {
+        "requests": 19,
+        "tokens": 164215,
+        "inputTokens": 149876,
+        "outputTokens": 14339
+      },
+      "models": [
+        "Gemini · models/gemini-3.5-flash-lite"
       ]
     }
   ]
