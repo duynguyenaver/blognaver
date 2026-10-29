@@ -1,0 +1,13 @@
+/* UI-only soft gate. Static files are publicly readable. */
+html.bn-pin-protected body > :not(#bn-pin-gate){visibility:hidden!important}
+html.bn-pin-protected body{overflow:hidden!important}
+#bn-pin-gate{position:fixed;inset:0;z-index:2147483647;overflow:auto;background:#0b1529;color:#edf5ff;font:15px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif;display:grid;place-items:center;padding:20px}
+.bn-pin-box{width:min(430px,100%);background:#152743;border:1px solid #365477;box-shadow:0 30px 90px #0006;border-radius:17px;padding:32px}
+.bn-pin-brand{font-size:11px;letter-spacing:.14em;color:#8bc8ff;font-weight:750}
+.bn-pin-box h1{font-size:28px;margin:14px 0 8px;color:#fff}
+.bn-pin-box p{color:#b7cce4;font-size:14px}.bn-pin-box label{display:block;font-size:13px;margin-bottom:7px}
+.bn-pin-box input{width:100%;border:1px solid #6081a8;border-radius:8px;padding:13px;background:#0d1f36;color:#fff;font-size:20px;letter-spacing:.3em;box-sizing:border-box}
+.bn-pin-box button{margin-top:14px;width:100%;padding:12px;border:0;border-radius:8px;background:#397be0;color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+.bn-pin-box button:disabled{opacity:.5}.bn-pin-box a{display:block;color:#a8d9ff;text-decoration:none;margin:12px 0}
+.bn-pin-box small{font-size:11px;color:#a4bdd8;display:block;border-top:1px solid #35506d;padding-top:12px}
+#bn-pin-message{min-height:20px;color:#ffacb7;font-weight:650}

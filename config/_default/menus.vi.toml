@@ -1,28 +1,25 @@
 [[main]]
-name = "Giới thiệu"
-pageRef = "about"
-weight = 10
-
-[[main]]
+identifier = "posts"
 name = "Bài viết"
-pageRef = "posts"
+url = "/posts/"
+weight = 10
+[[main]]
+identifier = "about"
+name = "Giới thiệu"
+url = "/about/"
 weight = 20
-
 [[main]]
+identifier = "resume"
 name = "Resume"
-pageRef = "resume"
+url = "/resume/"
 weight = 30
-
 [[main]]
-name = "Branding"
-pageRef = "branding"
-weight = 40
-
-[[main]]
+identifier = "tools"
 name = "Tiện ích"
-url = "/blognaver/tien-ich/"
-weight = 45
-
+url = "/tien-ich/"
+weight = 40
 [[main]]
-identifier = "search"
+identifier = "cms"
+name = "Viết blog CMS"
+url = "/cms/"
 weight = 50
