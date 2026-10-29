@@ -7,7 +7,7 @@ seriesOrder: 1
 slug: "air-premia-icargo-he-thong-loi"
 description: "Phân tích triển khai iCargo tại Air Premia, kiến trúc quản trị hàng hóa và sự khác biệt với hệ thống hành khách."
 categories: ["Hàng không", "Air Cargo"]
-tags: ["Air Premia", "iCargo", "Logistics", "Air Cargo", "Nghiên cứu"]
+tags: ["Air Premia", "iCargo", "Logistics", "Air Cargo", "Nghiên cứu", "series"]
 author: "Duy Nguyen"
 featuredImage: "https://cdn.imweb.me/upload/S201810085bbafdbe98c6c/f423370909c9b.png"
 featuredImagePreview: "https://cdn.imweb.me/upload/S201810085bbafdbe98c6c/f423370909c9b.png"

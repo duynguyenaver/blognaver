@@ -7,7 +7,7 @@ seriesOrder: 4
 slug: "air-premia-cargo-edi-fwb-ffm-fsu-one-record"
 description: "Vai trò điện văn cargo, truyền dữ liệu hải quan và ranh giới giữa tiêu chuẩn IATA với mạng SITA."
 categories: ["Hàng không", "Air Cargo"]
-tags: ["Air Premia", "iCargo", "Logistics", "Air Cargo", "Nghiên cứu"]
+tags: ["Air Premia", "iCargo", "Logistics", "Air Cargo", "Nghiên cứu", "series"]
 author: "Duy Nguyen"
 featuredImage: "https://images.unsplash.com/photo-1494412519320-aa613dfb7738?w=1600&q=85"
 featuredImagePreview: "https://images.unsplash.com/photo-1494412519320-aa613dfb7738?w=1600&q=85"

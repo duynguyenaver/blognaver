@@ -7,7 +7,7 @@ seriesOrder: 5
 slug: "air-premia-cargo-revenue-digital-marketplaces"
 description: "Cơ chế định giá hàng hóa, tối ưu tải, hạch toán doanh thu và vai trò cargo marketplace so với GDS."
 categories: ["Hàng không", "Air Cargo"]
-tags: ["Air Premia", "iCargo", "Logistics", "Air Cargo", "Nghiên cứu"]
+tags: ["Air Premia", "iCargo", "Logistics", "Air Cargo", "Nghiên cứu", "series"]
 author: "Duy Nguyen"
 featuredImage: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1600&q=85"
 featuredImagePreview: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1600&q=85"

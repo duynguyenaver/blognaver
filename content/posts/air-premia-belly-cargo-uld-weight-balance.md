@@ -7,7 +7,7 @@ seriesOrder: 3
 slug: "air-premia-belly-cargo-uld-weight-balance"
 description: "Giải thích GHA, build-up ULD, giới hạn tải và liên kết dữ liệu cargo với load control."
 categories: ["Hàng không", "Air Cargo"]
-tags: ["Air Premia", "iCargo", "Logistics", "Air Cargo", "Nghiên cứu"]
+tags: ["Air Premia", "iCargo", "Logistics", "Air Cargo", "Nghiên cứu", "series"]
 author: "Duy Nguyen"
 featuredImage: "https://cdn.imweb.me/upload/S201810085bbafdbe98c6c/20a84695e8227.png"
 featuredImagePreview: "https://cdn.imweb.me/upload/S201810085bbafdbe98c6c/20a84695e8227.png"
