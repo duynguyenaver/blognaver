@@ -2,7 +2,7 @@
 const $=s=>document.querySelector(s),REPO="duynguyenaver/blognaver",API="https://api.github.com/repos/"+REPO,SITE="https://duynguyenaver.github.io/blognaver/";
 const SERIES={"cold-fusion":{name:"ColdFusion Research",tag:"cold fusion",category:"Công nghệ"},"lex-fridman":{name:"Lex Fridman Podcast Research",tag:"Lex Fridman",category:"Công nghệ"}};
 const KEYSTORE="bn_series_research_gemini_session",DRAFT="bn_series_research_checkpoint_v1";
-let abort=null,working=false,rawMarkdown="",currentModel="",key="",lastSlug="",lastCommitProof=null;
+let abort=null,working=false,rawMarkdown="",currentModel="",key="",lastSlug="",lastCommitProof=null,startedAt=0,geminiVerified=false,githubVerified=false;
 const clean=s=>String(s||"").trim(),slug=s=>clean(s).normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/đ/g,"d").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,75);
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const json=s=>{try{return JSON.parse(s)}catch{const first=s.indexOf("{"),last=s.lastIndexOf("}");if(first>=0&&last>first)return JSON.parse(s.slice(first,last+1));throw Error("Gemini không trả về JSON hợp lệ")}};
@@ -11,6 +11,8 @@ const decode=str=>new TextDecoder().decode(Uint8Array.from(atob(str.replace(/\s/
 const state=(message,error=false)=>{$("#status").textContent=message;$("#status").style.color=error?"#b33b52":"#52708b"};
 function progress(n,phase,step){$("#progressFill").style.width=n+"%";$("#percent").textContent=n+"%";$("#phase").textContent=phase;[...$("#steps").children].forEach((e,i)=>e.className=i<step?"done":i===step?"active":"")}
 function checkpoint(extra){try{localStorage.setItem(DRAFT,JSON.stringify({at:Date.now(),series:$("#series").value,source:$("#transcript").value,sourceUrl:$("#sourceUrl").value,angle:$("#angle").value,markdown:rawMarkdown,commitProof:lastCommitProof,...extra}))}catch{state("Bộ nhớ trình duyệt đầy. Bài vẫn trong trang; hãy tải Markdown để sao lưu.")}}
+function openCredentials(message){$("#credentialsDetails").open=true;$("#credentialsStatus").textContent=message||"Cần xác thực";$("#credentialsStatus").dataset.status="error"}
+function foldCredentials(){if(geminiVerified&&githubVerified){$("#credentialsDetails").open=false;$("#credentialsStatus").textContent="Đã xác thực · 2 kết nối";$("#credentialsStatus").dataset.status="ok"}}
 function available(){key=clean($("#geminiKey").value)||sessionStorage.getItem(KEYSTORE)||"";if(!key)throw Error("Bạn cần nhập Gemini API key mới. Key chỉ dùng trong phiên này.");sessionStorage.setItem(KEYSTORE,key);return key}
 async function geminiRequest(url,body=null,signal=null){
  const token=availableKey();let last;
@@ -20,11 +22,18 @@ async function geminiRequest(url,body=null,signal=null){
    const timeout=setTimeout(()=>controller.abort(),60000);
    if(signal)signal.addEventListener("abort",()=>controller.abort(),{once:true});
    let response;
+   const isGenerate=url.includes(":generateContent");
+   if(isGenerate){
+     const input=body?.contents||[];
+     const estimated=await window.BNQuota?.countTokens(currentModel,input,token,signal)||0;
+     window.BNQuota?.canSend(estimated);
+   }
    try{response=await fetch(url,{method:body?"POST":"GET",signal:controller.signal,cache:"no-store",headers:{"x-goog-api-key":token,"Content-Type":"application/json"},body:body?JSON.stringify(body):undefined})}finally{clearTimeout(timeout)}
    const data=await response.json().catch(()=>({}));
-   if(!response.ok){let err=Error("Gemini HTTP "+response.status+": "+String(data.error?.message||"API error").slice(0,180));err.code=response.status;throw err}
+   if(!response.ok){let err=Error("Gemini HTTP "+response.status+": "+String(data.error?.message||"API error").slice(0,180));err.code=response.status;window.BNQuota?.estimateError(err,response,data);if([400,401,403].includes(response.status)){geminiVerified=false;openCredentials("Gemini key không hợp lệ");}throw err}
+   if(isGenerate)window.BNQuota?.record(Number(data.usageMetadata?.totalTokenCount)||Math.ceil(JSON.stringify(body).length/4));
    return data;
-  }catch(e){if(signal?.aborted)throw Error("Đã dừng theo yêu cầu.");last=e;if(![429,500,502,503,504].includes(e.code)&&e.name!=="AbortError")throw e;if(attempt<2)await sleep(800*Math.pow(2,attempt))}
+  }catch(e){if(signal?.aborted)throw Error("Đã dừng theo yêu cầu.");last=e;if(![429,500,502,503,504].includes(e.code)&&e.name!=="AbortError")throw e;if(attempt<2&&e.code!==429)await sleep(800*Math.pow(2,attempt));else if(e.code===429)throw e}
  }throw last
 }
 function availableKey(){return key||clean($("#geminiKey").value)||sessionStorage.getItem(KEYSTORE)||""}
@@ -34,7 +43,7 @@ async function models(){
  const list=(data.models||[]).filter(m=>(m.supportedGenerationMethods||[]).includes("generateContent")).filter(m=>/flash/i.test(m.name)).sort((a,b)=>{const rank=x=>/3[.-]/.test(x.name)?0:/2[.-]5/.test(x.name)?1:2;return rank(a)-rank(b)});
  if(!list.length)throw Error("Không tìm thấy model Gemini Flash có thể tạo nội dung với API key này.");
  const select=$("#model");select.replaceChildren(...list.map(m=>new Option((m.displayName||m.name)+" · "+m.name,m.name)));
- currentModel=select.value;state("Gemini kết nối thành công · "+currentModel);return currentModel
+ currentModel=select.value;geminiVerified=true;foldCredentials();window.BNQuota?.refresh();state("Gemini kết nối thành công · "+currentModel);return currentModel
 }
 async function generate(prompt,signal,maxTokens=6500){
  if(!currentModel)await models();
@@ -49,11 +58,11 @@ async function generate(prompt,signal,maxTokens=6500){
 }
 async function github(path,method="GET",payload=null){
  const token=window.BNAuth?.read?.()||clean($("#githubManual").value);
- if(!token)throw Error("Chưa kết nối GitHub token chung. Hãy kết nối CMS hoặc nhập token.");
+ if(!token){openCredentials("Thiếu GitHub token");throw Error("Chưa kết nối GitHub token chung. Hãy kết nối CMS hoặc nhập token.");}
  const response=await fetch(API+"/"+path,{method,headers:{Authorization:"Bearer "+token,Accept:"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28",...(payload?{"Content-Type":"application/json"}:{})},body:payload?JSON.stringify(payload):undefined,cache:"no-store"});
  if(response.status===204)return {};
  const d=await response.json().catch(()=>({}));
- if(!response.ok){const err=Error("GitHub HTTP "+response.status+": "+String(d.message||"Không thể ghi dữ liệu"));err.status=response.status;throw err}return d
+ if(!response.ok){const err=Error("GitHub HTTP "+response.status+": "+String(d.message||"Không thể ghi dữ liệu"));err.status=response.status;if([401,403].includes(response.status)){githubVerified=false;openCredentials("GitHub token cần kiểm tra");}throw err}return d
 }
 function rawSource(input){return clean(input).replace(/^\uFEFF/,"").replace(/^WEBVTT.*$/gm,"").replace(/^\s*\d+\s*$/gm,"").replace(/^\d\d:\d\d:\d\d[.,]\d+\s*-->\s*\d\d:\d\d:\d\d[.,]\d+.*$/gm,"").replace(/<\/?[^>]+>/g,"").replace(/\n{3,}/g,"\n\n")}
 function chunkSource(src,size=22000){let chunks=[],index=0;while(index<src.length){let end=Math.min(src.length,index+size);if(end<src.length){const newline=src.lastIndexOf("\n",end);if(newline>index+size/2)end=newline}chunks.push(src.slice(index,end));index=end}return chunks}
@@ -106,16 +115,16 @@ async function publish(d){
  const created=await github("contents/"+file,"PUT",{message:"content(series-ai): publish "+d.series+" research "+d.slug,branch:"main",content:encode(rawMarkdown)});
  const proof={sha:created.commit.sha,path:file,deployDispatched:false};
  setPublishEvidence(proof);
- checkpoint({published:false,commitProof:proof,slug:d.slug});
+ checkpoint({published:false,commitProof:proof,slug:d.slug});window.BNSeriesInsights?.record({slug:d.slug,title:d.title,series:d.series,state:"committed",sha:proof.sha,durationMs:Date.now()-startedAt,live:false});
  addLink("Xem commit GitHub ↗",created.commit.html_url||"https://github.com/"+REPO+"/commit/"+created.commit.sha);
  addLink("Mở bài trên blog sau khi deploy ↗",SITE+"bai-viet/"+d.slug+"/");
- try{await github("actions/workflows/hugo.yml/dispatches","POST",{ref:"main"});proof.deployDispatched=true;setPublishEvidence(proof);checkpoint({published:true,commitProof:proof,slug:d.slug});state("Đã commit bài "+created.commit.sha.slice(0,9)+" và kích hoạt GitHub Pages. Đợi trạng thái deploy thành công trước khi coi là đã xuất bản trên website.");}
+ try{await github("actions/workflows/hugo.yml/dispatches","POST",{ref:"main"});proof.deployDispatched=true;setPublishEvidence(proof);checkpoint({published:true,commitProof:proof,slug:d.slug});window.BNSeriesInsights?.record({slug:d.slug,title:d.title,series:d.series,state:"committed",sha:proof.sha,durationMs:Date.now()-startedAt,live:false});state("Đã commit bài "+created.commit.sha.slice(0,9)+" và kích hoạt GitHub Pages. Đợi trạng thái deploy thành công trước khi coi là đã xuất bản trên website.");}
  catch(e){state("Bài đã commit lên main, nhưng chưa gọi được deploy: "+e.message+". Vào GitHub Actions để chạy Hugo Deploy bằng workflow_dispatch.",true)}
  return created
 }
 async function start(e){
  e.preventDefault();if(working)return;
- abort=new AbortController();working=true;$("#startBtn").disabled=true;$("#cancelBtn").disabled=false;$("#resultLinks").replaceChildren();setPublishEvidence(null);
+ abort=new AbortController();startedAt=Date.now();working=true;$("#startBtn").disabled=true;$("#cancelBtn").disabled=false;$("#resultLinks").replaceChildren();setPublishEvidence(null);
  try{
  const src=rawSource($("#transcript").value),url=clean($("#sourceUrl").value),series=$("#series").value,angle=clean($("#angle").value);
  if(!SERIES[series])throw Error("Series không hợp lệ.");
@@ -153,7 +162,7 @@ async function start(e){
  progress(88,"Đã hoàn thiện bản nghiên cứu",2);checkpoint({outline,published:false,slug:d.slug});
  if($("#autoPublish").checked){
   progress(92,"Commit bài lên GitHub",3);await publish(d);progress(100,"Đã commit (kiểm tra Pages deploy riêng)",4);checkpoint({published:true,slug:d.slug});
- }else{progress(100,"Hoàn thành bản thảo; chưa đăng",4);state("Đã tạo bản thảo Markdown. Bạn có thể copy hoặc xuất file; chưa ghi lên GitHub.")}
+ }else{window.BNSeriesInsights?.record({slug:d.slug,title:d.title,series:d.series,state:"draft",durationMs:Date.now()-startedAt,live:false});progress(100,"Hoàn thành bản thảo; chưa đăng",4);state("Đã tạo bản thảo Markdown. Bạn có thể copy hoặc xuất file; chưa ghi lên GitHub.")}
  }catch(e){state("Không hoàn tất: "+e.message,true);checkpoint({error:e.message})}
  finally{working=false;$("#startBtn").disabled=false;$("#cancelBtn").disabled=true;abort=null}
 }
@@ -162,10 +171,10 @@ $("#studioForm").addEventListener("submit",start);
 $("#cancelBtn").onclick=()=>{abort?.abort();state("Đang dừng các yêu cầu AI…")};
 $("#sourceFile").onchange=async e=>{const f=e.target.files?.[0];if(!f)return;if(f.size>750000){state("File trên 750 KB: hãy chia thành nhiều phần.",true);return}$("#transcript").value=await f.text();$("#transcript").dispatchEvent(new Event("input"));checkpoint()};
 $("#transcript").addEventListener("input",()=>{$("#sourceStats").textContent=$("#transcript").value.length.toLocaleString("vi-VN")+" ký tự"});
-$("#testAI").onclick=()=>models().catch(e=>state(e.message,true));
+$("#testAI").onclick=()=>models().catch(e=>{openCredentials("Kiểm tra lại Gemini");state(e.message,true)});
 $("#model").onchange=()=>{currentModel=$("#model").value;state("Model đã chọn: "+currentModel)};
 $("#copyDraft").onclick=()=>navigator.clipboard.writeText(rawMarkdown).then(()=>state("Đã copy Markdown.")).catch(e=>state(e.message,true));
 $("#downloadDraft").onclick=saveMarkdown;
-$("#connectGithub").onclick=async()=>{try{const value=clean($("#githubManual").value);if(value){await window.BNAuth.validate(value);window.BNAuth.save(value,$("#rememberGithub").checked);$("#githubManual").value=""}else{const t=window.BNAuth?.read();if(!t)throw Error("Chưa có token CMS. Hãy nhập token phía dưới.");await window.BNAuth.validate(t)}$("#githubState").textContent="● Đã kết nối GitHub (token CMS chung)";}catch(e){state("Không thể kết nối GitHub: "+e.message,true)}};
+$("#connectGithub").onclick=async()=>{try{const value=clean($("#githubManual").value);if(value){await window.BNAuth.validate(value);window.BNAuth.save(value,$("#rememberGithub").checked);$("#githubManual").value=""}else{const t=window.BNAuth?.read();if(!t)throw Error("Chưa có token CMS. Hãy nhập token phía dưới.");await window.BNAuth.validate(t)}$("#githubState").textContent="● Đã kết nối GitHub (token CMS chung)";githubVerified=true;foldCredentials();}catch(e){githubVerified=false;openCredentials("Kiểm tra lại GitHub");state("Không thể kết nối GitHub: "+e.message,true)}};
 try{const k=sessionStorage.getItem(KEYSTORE);if(k)$("#geminiKey").value=k;const t=window.BNAuth?.read?.();$("#githubState").textContent=t?"● Đã có GitHub token chung từ CMS":"○ Chưa có token CMS — cần kết nối trước khi đăng";const old=JSON.parse(localStorage.getItem(DRAFT)||"null");if(old?.source&&Date.now()-old.at<86400000){$("#series").value=old.series||"cold-fusion";$("#transcript").value=old.source;$("#sourceUrl").value=old.sourceUrl||"";$("#angle").value=old.angle||"";rawMarkdown=old.markdown||"";setPublishEvidence(old.commitProof);$("#preview").textContent=rawMarkdown;$("#copyDraft").disabled=!rawMarkdown;$("#downloadDraft").disabled=!rawMarkdown;$("#transcript").dispatchEvent(new Event("input"));state("Đã khôi phục checkpoint của phiên viết trước. Có thể bắt đầu lại hoặc tải bản thảo.");}}catch{}
 })();
