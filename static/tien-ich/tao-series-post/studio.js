@@ -72,7 +72,7 @@ async function nextOrder(id){
  // Existing series posts are read by the lightweight CMS index, falling back to count via GitHub metadata.
  try{const resp=await fetch("../../cms/posts-index.json?"+Date.now(),{cache:"no-store"});if(resp.ok){const doc=await resp.json();const rows=(doc.posts||[]).filter(p=>p.series?.includes(id));if(rows.length)return rows.length+1}}catch{}
  // Candidate count is intentionally not treated as series count: use sequence timestamp to avoid collision.
- return Math.max(1,Math.floor(Date.now()/1000))
+ return 2+candidates.filter(x=>x.path.startsWith("content/posts/"+id+"-")).length
 }
 function coverFromURL(url){try{const u=new URL(url);if(!/(^|\.)youtube\.com$|(^|\.)youtu\.be$/.test(u.hostname))return"";const id=u.hostname.endsWith("youtu.be")?u.pathname.slice(1):u.searchParams.get("v");return /^[a-zA-Z0-9_-]{11}$/.test(id||"")?"https://i.ytimg.com/vi/"+id+"/hqdefault.jpg":""}catch{return""}}
 function yaml(s){return JSON.stringify(String(s||""))}
@@ -129,7 +129,7 @@ async function start(e){
  const tags=Array.isArray(outline.tags)?outline.tags.filter(t=>typeof t==="string").slice(0,5):[];
  const id=slug(title)||"research-"+Date.now(),name=SERIES[series].name;
  // Prefix with date/time for collision resilience, and reserve the series in metadata.
- const d={series,title,description:description||title,slug:id+"-"+new Date().toISOString().slice(0,10),tags,body:rawMarkdown,sourceUrl:url,order:Date.now()};
+ const d={series,title,description:description||title,slug:series+"-"+id+"-"+new Date().toISOString().slice(0,10),tags,body:rawMarkdown,sourceUrl:url,order:await nextOrder(series)};
  const prefix="Research Studio · "+name+" · "+new Date().toLocaleDateString("vi-VN");
  d.body="*"+prefix+". Bài viết phân tích dựa trên phụ đề tiếng Anh cung cấp, không phải bản dịch nguyên văn.*\n\n"+d.body;
  rawMarkdown=makeArticle(d);lastSlug=d.slug;$("#preview").textContent=rawMarkdown;$("#resultTitle").textContent=title;
