@@ -85,3 +85,32 @@ document.documentElement.setAttribute("data-theme","light");
   else apply();
 })();
 </script>
+
+<style id="bn-light-nav-hotfix">
+/* Fixed typography for actual DoIt menu anchors, without affecting text color. */
+#header .menu a, #header .menu span, #header .menu-inner a,
+#header .menu-inner .menu-item, #header nav a,
+.header .menu a, .header .menu-inner a {
+  text-transform: uppercase !important;
+  font-weight: 800 !important;
+}
+/* Theme controls can be mounted as icons or links. */
+#theme-switch, #theme-select, .theme-switch, .theme-select,
+#header [title*="theme" i], #header [aria-label*="theme" i],
+#header [title*="dark" i], #header [aria-label*="dark" i] {
+  display: none !important;
+}
+</style>
+<script>
+window.addEventListener("DOMContentLoaded", function () {
+  var nav=document.querySelector("#header");
+  if (!nav) return;
+  nav.querySelectorAll("a").forEach(function(a) {
+    var label=(a.getAttribute("aria-label")||"")+" "+(a.getAttribute("title")||"");
+    if (/theme|dark.mode|light.mode|chế độ tối|giao diện tối/i.test(label)) {
+      (a.closest(".menu-item")||a).remove();
+    }
+  });
+  document.documentElement.setAttribute("data-theme","light");
+});
+</script>
