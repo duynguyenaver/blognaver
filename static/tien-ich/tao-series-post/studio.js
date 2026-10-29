@@ -144,6 +144,15 @@ function queueDisk(key,value,mode="put"){
 
 const CLOUD_QUEUE_BRANCH="research-studio-queue-backup",CLOUD_QUEUE_FILE="queue.encrypted.json";
 let cloudSynced=new Set(),cloudSyncTimer=null,cloudWrite=Promise.resolve(),cloudSyncError="",cloudInitialized=false;
+const QUEUE_DONE="bn_series_queue_completed_ids_v1";
+function doneQueueIds(){try{return new Set(JSON.parse(localStorage.getItem(QUEUE_DONE)||"[]"))}catch{return new Set()}}
+function markQueueDone(job){
+ if(!job?.id)return;
+ const ids=doneQueueIds();ids.add(job.id);
+ try{localStorage.setItem(QUEUE_DONE,JSON.stringify([...ids].slice(-1500)))}catch{}
+}
+function isQueueDone(job){return Boolean(job?.id&&doneQueueIds().has(job.id)||isCommittedCheckpoint(job?.checkpoint))}
+
 function githubQueueToken(){return window.BNAuth?.read?.()||clean($("#githubManual")?.value)}
 function b64(bytes){let result="";for(let i=0;i<bytes.length;i+=32768)result+=String.fromCharCode(...bytes.subarray(i,i+32768));return btoa(result)}
 function unb64(value){return Uint8Array.from(atob(value),c=>c.charCodeAt(0))}
@@ -178,7 +187,7 @@ function cloudQueueItems(){
    series:activeSource.series,angle:activeSource.angle||"",markdown:rawMarkdown,commitProof:null};
   if(!items.some(x=>x.id===activeSource.id))items.unshift({...activeSource,checkpoint:data});
  }
- return items.filter(x=>x?.source&&!isCommittedCheckpoint(x.checkpoint));
+ return items.filter(x=>x?.source&&!isQueueDone(x));
 }
 function queueCloudStatus(){
  const target=$("#queueItems");if(!target)return;
@@ -230,7 +239,7 @@ async function pullQueueCloud(autoRun=true){
   if(!Array.isArray(parsed.items))throw Error("Bản sao GitHub không chứa hàng đợi hợp lệ.");
   const seen=new Set(queue.map(x=>x.id)),added=[];
   for(const item of parsed.items){
-   if(!item?.id||typeof item.source!=="string"||item.source.length<700||isCommittedCheckpoint(item.checkpoint)||seen.has(item.id))continue;
+   if(!item?.id||typeof item.source!=="string"||item.source.length<700||isQueueDone(item)||seen.has(item.id)||activeSource?.id===item.id)continue;
    if(!SERIES[item.series])SERIES[item.series]={name:item.series,tag:item.series,category:"Nghiên cứu"};
    seen.add(item.id);added.push(item);
   }
@@ -239,7 +248,7 @@ async function pullQueueCloud(autoRun=true){
   if(!await saveQueue()){queue=previous;throw Error("Không lưu được hàng đợi đã tải vào IndexedDB.")}
   cloudInitialized=true;
   cloudSynced=new Set([...cloudSynced,...added.map(x=>x.id)]);
-  if(queue.length!==parsed.items.length||added.length)scheduleCloudQueueSync();
+  if(queue.length!==parsed.items.length||added.length||parsed.items.some(isQueueDone))scheduleCloudQueueSync();
   renderQueue();queueCloudStatus();
   $("#queueMessage").textContent="Đã tải "+added.length+" bài chưa có trên máy từ GitHub. Tự chạy bài chờ tiếp theo.";
   if(autoRun&&!working)dispatchNext();
@@ -265,7 +274,7 @@ async function hydrateQueue(){
   if(storedDraft?.source&&!isCommittedCheckpoint(storedDraft))combined.unshift({id:"checkpoint-"+(storedDraft.at||Date.now()),at:storedDraft.at||Date.now(),source:storedDraft.source,sourceUrl:storedDraft.sourceUrl||"",angle:storedDraft.angle||"",series:storedDraft.series,autoPublish:storedDraft.autoPublish!==false,checkpoint:storedDraft});
   const seen=new Set();
   queue=combined.filter(job=>{
-   if(!job||typeof job.source!=="string"||job.source.length<700||isCommittedCheckpoint(job.checkpoint))return false;
+   if(!job||typeof job.source!=="string"||job.source.length<700||isQueueDone(job))return false;
    if(job.series&&!SERIES[job.series])SERIES[job.series]={name:job.series,tag:job.series,category:"Nghiên cứu"};
    const id=job.id||job.sourceUrl||job.source;
    if(seen.has(id))return false;
@@ -1177,6 +1186,7 @@ async function start(e,restore=false,queuedJob=null){
   stopStallWatch();window.BNQuota?.finishRun(Boolean(lastCommitProof?.sha));working=false;manualModelOverride=null;quotaResumedNotice=false;
   $("#cancelBtn").disabled=true;abort=null;activeSource=null;
   // After an item is safely requeued or successfully committed, retire its crash backup.
+  if(succeeded){markQueueDone(job);scheduleCloudQueueSync()}
   if(queuedJob&&(succeeded||queuedForRetry||rotationRequested))queueDisk("active",null,"delete").catch(()=>{});
   renderQueue();
   if(checkpointStorageFailed){$("#queueMessage").textContent="Bộ nhớ checkpoint đầy · đang giữ hàng đợi và bản thảo trong tab. Hãy sao lưu JSON.";dispatchNext()}
@@ -1372,7 +1382,7 @@ try{
 }catch{}
 Promise.all([hydrateQueue(),connectionReady]).then(async()=>{
  restoreFailedFromDraft();
- if(githubQueueToken())await pullQueueCloud();
+ if(githubQueueToken())await pullQueueCloud(false);
  if(queue.length){
   // The previously running draft has been folded into the durable queue.
   // Never allow stale resumePending/runData to block the restored queue.
