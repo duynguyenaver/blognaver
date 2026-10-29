@@ -2,7 +2,7 @@
 const $=s=>document.querySelector(s),REPO="duynguyenaver/blognaver",API="https://api.github.com/repos/"+REPO,SITE="https://duynguyenaver.github.io/blognaver/";
 const SERIES={"cold-fusion":{name:"ColdFusion Research",tag:"cold fusion",category:"Công nghệ"},"lex-fridman":{name:"Lex Fridman Podcast Research",tag:"Lex Fridman",category:"Công nghệ"}};
 const KEYSTORE="bn_series_research_gemini_session",DRAFT="bn_series_research_checkpoint_v1";
-let abort=null,working=false,rawMarkdown="",currentModel="",key="",lastSlug="",lastCommitProof=null,startedAt=0,geminiVerified=false,githubVerified=false;
+let abort=null,working=false,rawMarkdown="",currentModel="",key="",lastSlug="",lastCommitProof=null,startedAt=0,geminiVerified=false,githubVerified=false,runData={},resumePending=false;
 const clean=s=>String(s||"").trim(),slug=s=>clean(s).normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/đ/g,"d").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,75);
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const json=s=>{try{return JSON.parse(s)}catch{const first=s.indexOf("{"),last=s.lastIndexOf("}");if(first>=0&&last>first)return JSON.parse(s.slice(first,last+1));throw Error("Gemini không trả về JSON hợp lệ")}};
@@ -23,31 +23,83 @@ function progress(n,phase,step){
   e.setAttribute("aria-current",i===step?"step":"false");
  });
 }
-function checkpoint(extra){try{localStorage.setItem(DRAFT,JSON.stringify({at:Date.now(),series:$("#series").value,source:$("#transcript").value,sourceUrl:$("#sourceUrl").value,angle:$("#angle").value,markdown:rawMarkdown,commitProof:lastCommitProof,...extra}))}catch{state("Bộ nhớ trình duyệt đầy. Bài vẫn trong trang; hãy tải Markdown để sao lưu.")}}
+function checkpoint(extra={}){
+ runData={...runData,...extra};
+ try{localStorage.setItem(DRAFT,JSON.stringify({at:Date.now(),series:$("#series").value,source:$("#transcript").value,sourceUrl:$("#sourceUrl").value,angle:$("#angle").value,markdown:rawMarkdown,commitProof:lastCommitProof,...runData}))}
+ catch{state("Không đủ bộ nhớ lưu checkpoint. Giữ tab mở hoặc tải bản thảo Markdown để tránh mất dữ liệu.",true)}
+}
+function waitForRetry(ms,signal){
+ return new Promise((resolve,reject)=>{
+  if(signal?.aborted)return reject(Error("Đã dừng theo yêu cầu."));
+  let settled=false;const end=Date.now()+Math.max(0,ms);
+  const finish=(err)=>{if(settled)return;settled=true;clearTimeout(handle);signal?.removeEventListener("abort",onAbort);err?reject(err):resolve()};
+  const onAbort=()=>finish(Error("Đã dừng theo yêu cầu."));
+  signal?.addEventListener("abort",onAbort,{once:true});
+  let handle;
+  const tick=()=>{if(Date.now()>=end)return finish();handle=setTimeout(tick,Math.min(10000,end-Date.now()))};
+  tick();
+ })
+}
+async function coolDown(signal){
+ const until=window.BNQuota?.retryAt?.()||0;
+ if(until<=Date.now())return;
+ checkpoint({runStatus:"waiting",retryAt:until});
+ const remaining=Math.ceil((until-Date.now())/1000);
+ state("Gemini 429 · đang tạm dừng "+remaining+" giây. Giữ tab mở (có thể chuyển sang tab khác), hệ thống tự tiếp tục sau khi hết thời gian. Nếu đóng tab, hãy mở lại trang để tự khôi phục.");
+ await waitForRetry(until-Date.now(),signal);
+ checkpoint({runStatus:"running",retryAt:0});
+ state("Đã hết thời gian chờ Gemini · tiếp tục đúng bước trước đó.");
+}
 function openCredentials(message){$("#credentialsDetails").open=true;$("#credentialsStatus").textContent=message||"Cần xác thực";$("#credentialsStatus").dataset.status="error"}
 function foldCredentials(){if(geminiVerified&&githubVerified){$("#credentialsDetails").open=false;$("#credentialsStatus").textContent="Đã xác thực · 2 kết nối";$("#credentialsStatus").dataset.status="ok"}}
 function available(){key=clean($("#geminiKey").value)||sessionStorage.getItem(KEYSTORE)||"";if(!key)throw Error("Bạn cần nhập Gemini API key mới. Key chỉ dùng trong phiên này.");sessionStorage.setItem(KEYSTORE,key);return key}
 async function geminiRequest(url,body=null,signal=null){
- const token=availableKey();let last;
- for(let attempt=0;attempt<3;attempt++){
+ const token=availableKey();
+ let transientAttempt=0,quotaWaits=0;
+ while(true){
+  if(signal?.aborted)throw Error("Đã dừng theo yêu cầu.");
+  await coolDown(signal);
+  let response,controller,timeout;
   try{
-   const controller=new AbortController();
-   const timeout=setTimeout(()=>controller.abort(),60000);
-   if(signal)signal.addEventListener("abort",()=>controller.abort(),{once:true});
-   let response;
-   const isGenerate=url.includes(":generateContent");
-   if(isGenerate){
+   controller=new AbortController();
+   timeout=setTimeout(()=>controller.abort(),60000);
+   const onAbort=()=>controller.abort();
+   if(signal?.aborted)throw Error("Đã dừng theo yêu cầu.");
+   signal?.addEventListener("abort",onAbort,{once:true});
+   try{
+    const isGenerate=url.includes(":generateContent");
+    if(isGenerate){
      const input=body?.contents||[];
-     const estimated=await window.BNQuota?.countTokens(currentModel,input,token,signal)||0;
+     const estimated=await window.BNQuota?.countTokens(currentModel,input,token,controller.signal)||0;
      window.BNQuota?.canSend(estimated);
+    }
+    response=await fetch(url,{method:body?"POST":"GET",signal:controller.signal,cache:"no-store",
+     headers:{"x-goog-api-key":token,"Content-Type":"application/json"},body:body?JSON.stringify(body):undefined});
+    const data=await response.json().catch(()=>({}));
+    if(!response.ok){
+     const err=Error("Gemini HTTP "+response.status+": "+String(data.error?.message||"API error").slice(0,180));
+     err.code=response.status;
+     window.BNQuota?.estimateError(err,response,data);
+     if([400,401,403].includes(response.status)){geminiVerified=false;openCredentials("Gemini key không hợp lệ")}
+     throw err;
+    }
+    if(isGenerate)window.BNQuota?.record(Number(data.usageMetadata?.totalTokenCount)||Math.ceil(JSON.stringify(body).length/4),data.usageMetadata);
+    return data;
+   }finally{signal?.removeEventListener("abort",onAbort)}
+  }catch(e){
+   if(signal?.aborted)throw Error("Đã dừng theo yêu cầu.");
+   if(e.code===429||((window.BNQuota?.retryAt?.()||0)>Date.now()&&/Gemini đang giới hạn request/.test(e.message))){
+    quotaWaits++;
+    if(quotaWaits>8)throw Error("Gemini liên tiếp trả về 429 sau 8 lượt chờ. Phiên đã lưu để thử lại sau.");
+    await coolDown(signal);
+    continue;
    }
-   try{response=await fetch(url,{method:body?"POST":"GET",signal:controller.signal,cache:"no-store",headers:{"x-goog-api-key":token,"Content-Type":"application/json"},body:body?JSON.stringify(body):undefined})}finally{clearTimeout(timeout)}
-   const data=await response.json().catch(()=>({}));
-   if(!response.ok){let err=Error("Gemini HTTP "+response.status+": "+String(data.error?.message||"API error").slice(0,180));err.code=response.status;window.BNQuota?.estimateError(err,response,data);if([400,401,403].includes(response.status)){geminiVerified=false;openCredentials("Gemini key không hợp lệ");}throw err}
-   if(isGenerate)window.BNQuota?.record(Number(data.usageMetadata?.totalTokenCount)||Math.ceil(JSON.stringify(body).length/4),data.usageMetadata);
-   return data;
-  }catch(e){if(signal?.aborted)throw Error("Đã dừng theo yêu cầu.");last=e;if(![429,500,502,503,504].includes(e.code)&&e.name!=="AbortError")throw e;if(attempt<2&&e.code!==429)await sleep(800*Math.pow(2,attempt));else if(e.code===429)throw e}
- }throw last
+   if([500,502,503,504].includes(e.code)||e.name==="AbortError"){
+    if(transientAttempt++<2){await waitForRetry(800*Math.pow(2,transientAttempt-1),signal);continue}
+   }
+   throw e;
+  }finally{clearTimeout(timeout)}
+ }
 }
 function availableKey(){return key||clean($("#geminiKey").value)||sessionStorage.getItem(KEYSTORE)||""}
 async function models(){
