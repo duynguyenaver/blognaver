@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-29T19:01:01.694Z",
+  "updatedAt": "2026-10-29T19:05:40.492Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -154,7 +154,8 @@
       },
       "models": [
         "Gemini · models/gemini-3.1-flash-lite-preview"
-      ]
+      ],
+      "live": true
     },
     {
       "slug": "lex-fridman-nghien-cuu-toan-hoc-trong-ky-nguyen-ai-khung-hoang-ot-pha-va-tuong-lai-con--2026-10-29",
