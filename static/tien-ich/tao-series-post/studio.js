@@ -210,12 +210,13 @@ function scheduleCloudQueueSync(){
   cloudWrite=cloudWrite.catch(()=>{}).then(()=>pushQueueCloud()).catch(e=>{
    cloudSyncError=e.message;queueCloudStatus();$("#queueMessage").textContent="Đồng bộ GitHub chưa thành công: "+e.message+" · hàng đợi cục bộ vẫn được giữ.";
   });
- },700);
+ },3000);
 }
 async function pullQueueCloud(autoRun=true){
  const button=$("#restoreQueueGithubBtn");button.disabled=true;
  try{
   // Finish queued local writes before merging cloud state.
+  await checkpointWrite.catch(()=>{});
   if(cloudSyncTimer){clearTimeout(cloudSyncTimer);cloudSyncTimer=null}
   await cloudWrite.catch(()=>{});
   let file;
@@ -256,9 +257,11 @@ async function hydrateQueue(){
  try{
   const disk=await queueDisk("queue",null,"get");
   const active=await queueDisk("active",null,"get");
+  const storedDraft=await queueDisk("checkpoint",null,"get");
   const legacy=(()=>{try{return JSON.parse(localStorage.getItem(QUEUE_STORE)||"[]")}catch{return []}})();
   const combined=[...(Array.isArray(disk)?disk:[]),...(Array.isArray(legacy)?legacy:[])];
   if(active?.source&&!isCommittedCheckpoint(active.checkpoint))combined.unshift({...active,checkpoint:active.checkpoint||null});
+  if(storedDraft?.source&&!isCommittedCheckpoint(storedDraft))combined.unshift({id:"checkpoint-"+(storedDraft.at||Date.now()),at:storedDraft.at||Date.now(),source:storedDraft.source,sourceUrl:storedDraft.sourceUrl||"",angle:storedDraft.angle||"",series:storedDraft.series,autoPublish:storedDraft.autoPublish!==false,checkpoint:storedDraft});
   const seen=new Set();
   queue=combined.filter(job=>{
    if(!job||typeof job.source!=="string"||job.source.length<700||isCommittedCheckpoint(job.checkpoint))return false;
@@ -271,6 +274,7 @@ async function hydrateQueue(){
   // Do not erase the crash-recovery record during hydration: a refresh during
   // migration must not destroy the only copy of the active article.
   if(active&&queue.some(job=>job.id===active.id))await queueDisk("active",null,"delete");
+  if(storedDraft&&queue.some(job=>job.source===storedDraft.source))await queueDisk("checkpoint",null,"delete");
   try{localStorage.removeItem(QUEUE_STORE)}catch{}
  }catch(e){
   $("#queueMessage").textContent="Không đọc được kho hàng đợi bền vững: "+e.message;
@@ -517,28 +521,22 @@ function showRecoveryDownload(){
  }
  button.hidden=false;button.onclick=downloadRecoveryCheckpoint;
 }
+let checkpointWrite=Promise.resolve();
 function checkpoint(extra={}){
  runData={...runData,...extra};
- // The remote snapshot is made from updated in-memory runData, not stale state.
- if(working) scheduleCloudQueueSync();
  const data={at:Date.now(),series:activeSource?.series||$("#series").value,source:activeSource?.source??$("#transcript").value,sourceUrl:activeSource?.sourceUrl??$("#sourceUrl").value,angle:activeSource?.angle??$("#angle").value,markdown:rawMarkdown,commitProof:lastCommitProof,...runData};
- // The article is already committed. Its source and generated body no longer need
- // a crash-recovery checkpoint (commit proof remains available in memory/UI).
- if(isCommittedCheckpoint(data)){pruneCommittedStorage();return}
- try{localStorage.setItem(DRAFT,JSON.stringify(data));return}catch{}
- // Free only confirmed published checkpoints, then retry once.
- pruneCommittedStorage();
- try{localStorage.setItem(DRAFT,JSON.stringify(data));return}catch{}
- // Large Markdown is reconstructible from section checkpoints; retain source,
- // outline and pieces, but do not remove active unfinished work or queued jobs.
- if(Array.isArray(data.pieces)&&data.pieces.length&&data.markdown){
-  const compact={...data,markdown:""};
-  try{localStorage.setItem(DRAFT,JSON.stringify(compact));return}catch{}
- }
- checkpointStorageFailed=true;showRecoveryDownload();
- const message="Bộ nhớ trình duyệt đã đầy: không thể lưu checkpoint an toàn. Đã dừng tác vụ; KHÔNG tự chạy bài kế tiếp. Hãy xuất bản thảo Markdown và giải phóng dung lượng trước khi tiếp tục.";
- state(message,true);
- if(working&&!publishingCommit){const error=Error(message);error.code="CHECKPOINT_STORAGE_FULL";throw error}
+ // IndexedDB is the primary durable checkpoint store. Do not copy long transcripts
+ // into localStorage; that quota is shared with provider credentials.
+ checkpointWrite=checkpointWrite.catch(()=>{}).then(async()=>{
+  if(isCommittedCheckpoint(data)){await queueDisk("checkpoint",null,"delete");try{localStorage.removeItem(DRAFT)}catch{};return}
+  await queueDisk("checkpoint",data);
+  // Remove obsolete localStorage only AFTER the successful IndexedDB write.
+  try{localStorage.removeItem(DRAFT)}catch{}
+ }).catch(e=>{
+  checkpointStorageFailed=true;showRecoveryDownload();
+  state("Không lưu được checkpoint vào IndexedDB: "+e.message+". AI vẫn chạy trong tab; hãy tải bản sao JSON.",true);
+ });
+ if(working)scheduleCloudQueueSync();
 }
 function waitForRetry(ms,signal){
  return new Promise((resolve,reject)=>{
