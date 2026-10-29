@@ -2,6 +2,8 @@
 title: "Bên trong iCargo của Air Premia: Hệ điều hành vô hình của mảng Air Cargo"
 date: 2026-10-29T10:00:00+07:00
 draft: false
+series: "air-premia-cargo"
+seriesOrder: 1
 slug: "air-premia-icargo-he-thong-loi"
 description: "Phân tích triển khai iCargo tại Air Premia, kiến trúc quản trị hàng hóa và sự khác biệt với hệ thống hành khách."
 categories: ["Hàng không", "Air Cargo"]
