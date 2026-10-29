@@ -604,14 +604,8 @@ function runtime(providerName,modelName,stateName,note=""){
  syncManualModelSwitch();
 }
 function provider(text,isError=false){$("#providerStatus").textContent=text;$("#providerStatus").classList.toggle("error",isError)}
-function isWritingGroqModel(m){
- const id=String(m.id||"").toLowerCase();
- if(/whisper|speech|transcri|playai|tts|audio|safeguard|guardrail|moderation|embedding|stt/.test(id))return false;
- const endpoints=m.supported_endpoints||m.endpoints;
- if(Array.isArray(endpoints)&&endpoints.length&&!endpoints.some(e=>/chat\/completions/i.test(String(e))))return false;
- if(m.capabilities?.chat_completion===false||m.capabilities?.chat===false)return false;
- return true;
-}
+// Include every active model listed by the provider; request failures drive fallback.
+function isWritingGroqModel(m){return Boolean(m?.id&&m.active!==false)}
 let modelsRefreshedAt=0,modelsRefreshPromise=null;
 async function refreshWritingModels(force=false){
  if(modelsRefreshPromise)return modelsRefreshPromise;
@@ -898,7 +892,7 @@ async function generate(prompt,signal,maxTokens=6500){
    groqModel=item.model;return await groqGenerate(prompt,signal,maxTokens);
   }catch(e){if(signal?.aborted)throw e;failures.push(item.provider+"/"+item.model+": "+e.message)}
  }
- throw Error("Tất cả "+(choices.length+additional.length)+" model hỗ trợ viết văn bản đã thử đều không khả dụng. Checkpoint được giữ. "+failures.slice(-3).join(" | "));
+ throw Error("Tất cả "+(choices.length+additional.length)+" model trong danh sách API đã thử đều không khả dụng. Checkpoint được giữ. "+failures.slice(-3).join(" | "));
 }
 async function legacyGenerate(prompt,signal,maxTokens=6500){
  const useGroq=canUseGroq();
