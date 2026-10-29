@@ -13,7 +13,7 @@ async function main(){
    if(entry.name==="_index.md")continue;
    const isFolder=entry.isDirectory();
    const filename=isFolder?join(root,entry.name,"index.md"):join(root,entry.name);
-   const slug=isFolder?entry.name:entry.name.replace(/\\.md$/,"");
+   const slug=isFolder?entry.name:entry.name.slice(0,-3);
    let source;
    try{source=await readFile(filename,"utf8")}catch{continue}
    const match=source.match(/^---\s*\r?\n([\s\S]*?)\r?\n---/);
@@ -27,7 +27,7 @@ async function main(){
      tags:Array.isArray(rawTags)?rawTags:(rawTags?[rawTags]:[]),
      cover:value(fm,"featureimage")||value(fm,"featureImage")||"",
      date:value(fm,"date")||"",words:body.split(/\s+/u).filter(Boolean).length,
-     source:filename.replace(/\\\\/g,"/")
+     source:filename
    });
  }
  posts.sort((a,b)=>String(b.date).localeCompare(String(a.date)));
