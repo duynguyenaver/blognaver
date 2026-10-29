@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-29T19:26:24.353Z",
+  "updatedAt": "2026-10-29T19:30:04.708Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -210,6 +210,24 @@
         "Gemini · models/gemini-3.5-flash-lite"
       ],
       "live": true
+    },
+    {
+      "slug": "cold-fusion-ban-tay-vo-hinh-cua-iata-khi-tieu-chuan-hoa-dinh-hinh-nganh-hang-khong-2026-10-29",
+      "title": "Bàn tay vô hình của IATA: Khi tiêu chuẩn hóa định hình ngành hàng không",
+      "series": "cold-fusion",
+      "sha": "ca755c24a51d5898886191b1814e527efc4a09f7",
+      "commitAt": "2026-10-29T19:29:44Z",
+      "durationMs": 12648,
+      "quota": {
+        "requests": 0,
+        "tokens": 0,
+        "inputTokens": 0,
+        "outputTokens": 0
+      },
+      "models": [
+        "Groq · openai/gpt-oss-20b",
+        "Groq · qwen/qwen3.8-27b"
+      ]
     }
   ]
 }
