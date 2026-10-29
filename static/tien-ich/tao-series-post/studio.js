@@ -144,6 +144,15 @@ function queueDisk(key,value,mode="put"){
 
 const CLOUD_QUEUE_BRANCH="research-studio-queue-backup",CLOUD_QUEUE_FILE="queue.encrypted.json";
 let cloudSynced=new Set(),cloudSyncTimer=null,cloudWrite=Promise.resolve(),cloudSyncError="",cloudInitialized=false;
+const QUEUE_DONE="bn_series_queue_completed_ids_v1";
+function doneQueueIds(){try{return new Set(JSON.parse(localStorage.getItem(QUEUE_DONE)||"[]"))}catch{return new Set()}}
+function markQueueDone(job){
+ if(!job?.id)return;
+ const ids=doneQueueIds();ids.add(job.id);
+ try{localStorage.setItem(QUEUE_DONE,JSON.stringify([...ids].slice(-1500)))}catch{}
+}
+function isQueueDone(job){return Boolean(job?.id&&doneQueueIds().has(job.id)||isCommittedCheckpoint(job?.checkpoint))}
+
 function githubQueueToken(){return window.BNAuth?.read?.()||clean($("#githubManual")?.value)}
 function b64(bytes){let result="";for(let i=0;i<bytes.length;i+=32768)result+=String.fromCharCode(...bytes.subarray(i,i+32768));return btoa(result)}
 function unb64(value){return Uint8Array.from(atob(value),c=>c.charCodeAt(0))}
@@ -178,7 +187,7 @@ function cloudQueueItems(){
    series:activeSource.series,angle:activeSource.angle||"",markdown:rawMarkdown,commitProof:null};
   if(!items.some(x=>x.id===activeSource.id))items.unshift({...activeSource,checkpoint:data});
  }
- return items.filter(x=>x?.source&&!isCommittedCheckpoint(x.checkpoint));
+ return items.filter(x=>x?.source&&!isQueueDone(x));
 }
 function queueCloudStatus(){
  const target=$("#queueItems");if(!target)return;
@@ -230,7 +239,7 @@ async function pullQueueCloud(autoRun=true){
   if(!Array.isArray(parsed.items))throw Error("Bản sao GitHub không chứa hàng đợi hợp lệ.");
   const seen=new Set(queue.map(x=>x.id)),added=[];
   for(const item of parsed.items){
-   if(!item?.id||typeof item.source!=="string"||item.source.length<700||isCommittedCheckpoint(item.checkpoint)||seen.has(item.id))continue;
+   if(!item?.id||typeof item.source!=="string"||item.source.length<700||isQueueDone(item)||seen.has(item.id)||activeSource?.id===item.id)continue;
    if(!SERIES[item.series])SERIES[item.series]={name:item.series,tag:item.series,category:"Nghiên cứu"};
    seen.add(item.id);added.push(item);
   }
@@ -239,7 +248,7 @@ async function pullQueueCloud(autoRun=true){
   if(!await saveQueue()){queue=previous;throw Error("Không lưu được hàng đợi đã tải vào IndexedDB.")}
   cloudInitialized=true;
   cloudSynced=new Set([...cloudSynced,...added.map(x=>x.id)]);
-  if(queue.length!==parsed.items.length||added.length)scheduleCloudQueueSync();
+  if(queue.length!==parsed.items.length||added.length||parsed.items.some(isQueueDone))scheduleCloudQueueSync();
   renderQueue();queueCloudStatus();
   $("#queueMessage").textContent="Đã tải "+added.length+" bài chưa có trên máy từ GitHub. Tự chạy bài chờ tiếp theo.";
   if(autoRun&&!working)dispatchNext();
@@ -265,7 +274,7 @@ async function hydrateQueue(){
   if(storedDraft?.source&&!isCommittedCheckpoint(storedDraft))combined.unshift({id:"checkpoint-"+(storedDraft.at||Date.now()),at:storedDraft.at||Date.now(),source:storedDraft.source,sourceUrl:storedDraft.sourceUrl||"",angle:storedDraft.angle||"",series:storedDraft.series,autoPublish:storedDraft.autoPublish!==false,checkpoint:storedDraft});
   const seen=new Set();
   queue=combined.filter(job=>{
-   if(!job||typeof job.source!=="string"||job.source.length<700||isCommittedCheckpoint(job.checkpoint))return false;
+   if(!job||typeof job.source!=="string"||job.source.length<700||isQueueDone(job))return false;
    if(job.series&&!SERIES[job.series])SERIES[job.series]={name:job.series,tag:job.series,category:"Nghiên cứu"};
    const id=job.id||job.sourceUrl||job.source;
    if(seen.has(id))return false;
@@ -316,7 +325,7 @@ try{
 function failedFirst(){return queue}
 function nextRunnableIndex(){
  const now=Date.now();
- return queue.findIndex(x=>!(Number(x.retryAt)>now));
+ return queue.findIndex(x=>!x.retryExhausted&&!(Number(x.retryAt)>now));
 }
 function scheduleQueueRetry(at){
  if(queueRetryTimer)clearTimeout(queueRetryTimer);
@@ -382,7 +391,7 @@ function renderQueue(){
   detail.textContent=(job.sourceUrl||"Phụ đề tiếng Anh")+" · "+job.source.length.toLocaleString("vi-VN")+" ký tự · "+new Date(job.at).toLocaleTimeString("vi-VN");
   if(job.failed){const badge=document.createElement("span");badge.className="queue-paused-badge";badge.textContent="LỖI · ƯU TIÊN CHẠY LẠI";label.append(badge)}
   label.append(title,detail);
-  if(job.checkpoint){const status=document.createElement("span");status.className="queue-paused-badge";status.textContent="CHỜ THỬ LẠI · "+(Number(job.retryCount)||0)+"/3 lượt"+(Number(job.retryAt)>Date.now()?" · chờ lượt":"");label.append(status)}
+  if(job.checkpoint){const status=document.createElement("span");status.className="queue-paused-badge";status.textContent=job.retryExhausted?"ĐÃ THỬ 3/3 · DỪNG TỰ ĐỘNG":"CHỜ THỬ LẠI · "+(Number(job.retryCount)||0)+"/3 lượt";label.append(status)}
   if(job.rotations){const stats=document.createElement("span");stats.textContent="Đã luân phiên "+job.rotations+"/"+MAX_ROTATIONS+" lần";label.append(stats)}
 
   const remove=document.createElement("button");remove.type="button";remove.textContent="Xóa";remove.className="queue-remove";remove.setAttribute("aria-label","Xóa bài chờ số "+(index+1));
@@ -431,7 +440,9 @@ function dispatchNext(force=false){
  if(working||queueBusy||!queue.length)return;
  const index=force?0:nextRunnableIndex();
  if(index<0){
-  const earliest=Math.min(...queue.map(x=>Number(x.retryAt)||Date.now()+60000));
+  const eligible=queue.filter(x=>!x.retryExhausted);
+  if(!eligible.length){$("#queueMessage").textContent="Các bài chờ đều đã thử 3 lần. Đã tạm dừng auto retry; bấm Chạy bài ở hàng đợi để thử thủ công.";renderQueue();return}
+  const earliest=Math.min(...eligible.map(x=>Number(x.retryAt)||Date.now()+60000));
   $("#queueMessage").textContent="Các bài lỗi sẽ luân phiên thử model lại tự động; không chờ cooldown API.";
   scheduleQueueRetry(earliest);renderQueue();return;
  }
@@ -1145,7 +1156,7 @@ async function start(e,restore=false,queuedJob=null){
    runData={runStatus:"completed"};rawMarkdown="";setPublishEvidence(null);
   }else if(rotationRequested){
    const saved={...runData,source:job.source,sourceUrl:job.sourceUrl||"",series:job.series,angle:job.angle||"",autoPublish:job.autoPublish!==false,markdown:rawMarkdown,runStatus:"paused",commitProof:null};
-   const paused={...job,rotations:(job.rotations||0)+1,retryCount:((Number(job.retryCount)||0)+1)%3,
+   const paused={...job,rotations:(job.rotations||0)+1,retryCount:(Number(job.retryCount)||0)+1,retryExhausted:(Number(job.retryCount)||0)+1>=3,
     retryAt:0,
     failed:true,failedAt:job.failedAt||Date.now(),checkpoint:saved};
    // Enqueue behind currently waiting articles. Do not lose checkpoints on reload.
@@ -1161,8 +1172,8 @@ async function start(e,restore=false,queuedJob=null){
    const attempts=previous+1;
    // One attempt per turn. After 3 unsuccessful turns, park for 60 seconds,
    // then begin a fresh round while other queued jobs continue immediately.
-   const retryAt=0; // Immediately eligible for the next FIFO turn; model router handles provider failures.
-   const failedJob={...job,failed:true,failedAt:job.failedAt||Date.now(),retryCount:attempts>=3?0:attempts,retryAt,checkpoint:snapshot};
+   const retryAt=0; // No provider cooldown; capped per-job to prevent infinite retries.
+   const failedJob={...job,failed:true,failedAt:job.failedAt||Date.now(),retryCount:attempts,retryExhausted:attempts>=3,retryAt,checkpoint:snapshot};
    if(!queue.some(item=>item.id===failedJob.id)){queue.push(failedJob);await saveQueue()}
    queuedForRetry=true;
    try{localStorage.removeItem(DRAFT)}catch{}
@@ -1177,6 +1188,7 @@ async function start(e,restore=false,queuedJob=null){
   stopStallWatch();window.BNQuota?.finishRun(Boolean(lastCommitProof?.sha));working=false;manualModelOverride=null;quotaResumedNotice=false;
   $("#cancelBtn").disabled=true;abort=null;activeSource=null;
   // After an item is safely requeued or successfully committed, retire its crash backup.
+  if(succeeded){markQueueDone(job);await checkpointWrite.catch(()=>{});await queueDisk("checkpoint",null,"delete").catch(()=>{});try{localStorage.removeItem(DRAFT)}catch{};scheduleCloudQueueSync()}
   if(queuedJob&&(succeeded||queuedForRetry||rotationRequested))queueDisk("active",null,"delete").catch(()=>{});
   renderQueue();
   if(checkpointStorageFailed){$("#queueMessage").textContent="Bộ nhớ checkpoint đầy · đang giữ hàng đợi và bản thảo trong tab. Hãy sao lưu JSON.";dispatchNext()}
@@ -1199,6 +1211,7 @@ $("#runQueueBtn").addEventListener("click",async()=>{
   // Manual action explicitly bypasses queued job cooldown and a stale
   // previous-draft status. A separate active job is never interrupted.
   runData={runStatus:"completed"};resumePending=false;
+  if(queue[0]?.retryExhausted){queue[0].retryExhausted=false;queue[0].retryCount=0;await saveQueue()}
   setPublishEvidence(null);
   $("#queueMessage").textContent="Đang khởi chạy bài #1 ở Section 05…";
   dispatchNext(true);
@@ -1372,7 +1385,7 @@ try{
 }catch{}
 Promise.all([hydrateQueue(),connectionReady]).then(async()=>{
  restoreFailedFromDraft();
- if(githubQueueToken())await pullQueueCloud();
+ if(githubQueueToken())await pullQueueCloud(false);
  if(queue.length){
   // The previously running draft has been folded into the durable queue.
   // Never allow stale resumePending/runData to block the restored queue.
