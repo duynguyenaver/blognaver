@@ -1,0 +1,18 @@
+(()=>{"use strict";
+const repo="duynguyenaver/blognaver",endpoint="https://api.github.com/repos/"+repo+"/pulls?state=closed&sort=updated&direction=desc&per_page=100",key="blognaver_recent_features_v2";
+const $=id=>document.getElementById(id);let items=[];
+const feature=x=>x&&Number.isInteger(x.number)&&x.merged_at&&typeof x.title==="string"&&typeof x.html_url==="string"&&!/^(?:ci|docs|chore|test|refactor)(?:[:(])/i.test(x.title)&&!/dependabot|renovate/i.test(x.user?.login||"")&&!/revert|rollback/i.test(x.title);
+const clean=s=>String(s||"").replace(/^(?:feat|fix|style|hotfix|ux|content)(?:\([^)]+\))?:?\s*/i,"").trim();
+const dest=x=>{const s=x.title.toLowerCase(),base="/blognaver/";
+if(/interview/.test(s))return base+"tien-ich/interview-tracking/";
+if(/resume|samsung/.test(s))return base+"resume-cms/";
+if(/insights.*actions|pr.*deploy.*insights/.test(s))return base+"cms/insights/";
+if(/series/.test(s))return base+"series/";
+if(/content.library|all.posts|tất cả bài viết/.test(s))return base+"cms/posts/";
+return x.html_url};
+function render(){const q=$("filter").value.toLocaleLowerCase("vi").trim(),filtered=items.filter(x=>(x.title+" #"+x.number).toLocaleLowerCase("vi").includes(q)),root=$("updates");root.replaceChildren();
+for(const [i,x] of filtered.entries()){const li=document.createElement("li"),a=document.createElement("a"),rank=document.createElement("span"),copy=document.createElement("span"),title=document.createElement("strong"),meta=document.createElement("small"),arrow=document.createElement("span");a.href=dest(x);if(a.href.startsWith("https://github.com")){a.target="_blank";a.rel="noopener noreferrer"}rank.className="rank";rank.textContent=String(i+1).padStart(2,"0");copy.className="copy";title.textContent=clean(x.title);meta.textContent="PR #"+x.number+" · "+new Date(x.merged_at).toLocaleDateString("vi-VN");arrow.className="arrow";arrow.textContent="↗";copy.append(title,meta);a.append(rank,copy,arrow);li.append(a);root.append(li)}
+$("empty").hidden=filtered.length!==0;$("count").textContent=items.length;$("latest").textContent=items[0]?new Date(items[0].merged_at).toLocaleDateString("vi-VN"):"—";}
+async function load(){const button=$("refresh");button.disabled=true;$("status").textContent="Đang đồng bộ từ GitHub…";try{const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),10000);let response;try{response=await fetch(endpoint,{signal:controller.signal,headers:{Accept:"application/vnd.github+json"},cache:"no-store"})}finally{clearTimeout(timeout)}if(!response.ok)throw Error("GitHub API HTTP "+response.status);const raw=await response.json();if(!Array.isArray(raw))throw Error("Dữ liệu không hợp lệ");items=raw.filter(feature).sort((a,b)=>new Date(b.merged_at)-new Date(a.merged_at)).slice(0,10);if(!items.length)throw Error("Không tìm thấy PR phù hợp");try{localStorage.setItem(key,JSON.stringify(items))}catch{}$("status").textContent="Dữ liệu GitHub thực tế · cập nhật khi mở trang";$("source").textContent="Live API"}catch(e){let old=[];try{old=JSON.parse(localStorage.getItem(key)||"[]")}catch{}items=old.filter(feature).slice(0,10);$("status").textContent=items.length?"Dữ liệu đã lưu có thể cũ · "+e.message:"Chưa tải được GitHub · "+e.message;$("status").classList.add("outdated");$("source").textContent=items.length?"Cache":"Chưa có"}finally{button.disabled=false;render()}}
+$("filter").addEventListener("input",render);$("refresh").addEventListener("click",load);load();
+})();
