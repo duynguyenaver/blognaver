@@ -23,6 +23,9 @@
     {{- partial "head/link.html" . -}}
     {{- partial "head/seo.html" . -}}
     <link rel="stylesheet" href="{{ "css/summary-actions.css" | relURL }}">
+    {{- if and .IsPage (eq .Section "posts") -}}
+    <link rel="stylesheet" href="{{ "css/article-justified-prose.css" | relURL }}">
+    {{- end -}}
     <style id="duy-editorial-nav">
       /* Applied in active layouts/baseof.html, not the unused extend-head hook. */
       body > header nav a, body > header nav span,
