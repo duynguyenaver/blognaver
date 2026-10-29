@@ -47,7 +47,7 @@ async function mark(status){
      if(!exists){try{await api("/labels","POST",{name:label,...spec})}catch(e){if(!String(e).includes("422"))throw e}}
    }
    await api("/issues/"+number+"/labels","POST",{labels:[status]});
-   for(const label of statuses.filter(x=>x!==status)){
+   for(const label of statuses.filter(x=>x!==status && !(status==="fixbug:published"&&x==="fixbug:evidence-confirmed"))){
      try{await api("/issues/"+number+"/labels/"+encodeURIComponent(label),"DELETE",null,true)}catch(e){console.warn("Could not clear old label:",e.message)}
    }
  }catch(e){console.warn("Could not update PR labels:",e.message)}
