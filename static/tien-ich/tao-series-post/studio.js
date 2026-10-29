@@ -3,6 +3,92 @@ const $=s=>document.querySelector(s),REPO="duynguyenaver/blognaver",API="https:/
 const SERIES={"cold-fusion":{name:"ColdFusion Research",tag:"cold fusion",category:"Công nghệ"},"lex-fridman":{name:"Lex Fridman Podcast Research",tag:"Lex Fridman",category:"Công nghệ"}};
 const KEYSTORE="bn_series_research_gemini_session",DRAFT="bn_series_research_checkpoint_v1";
 let abort=null,working=false,rawMarkdown="",currentModel="",key="",lastSlug="",lastCommitProof=null,startedAt=0,geminiVerified=false,githubVerified=false,runData={},resumePending=false;
+const QUEUE_STORE="bn_series_research_fifo_queue_v1";
+let activeSource=null,queue=[],queueBusy=false;
+try{
+ const saved=JSON.parse(localStorage.getItem(QUEUE_STORE)||"[]");
+ queue=Array.isArray(saved)?saved.filter(x=>x&&typeof x.source==="string"&&x.source.length>=700&&SERIES[x.series]).slice(0,30):[];
+}catch{}
+function saveQueue(){
+ try{localStorage.setItem(QUEUE_STORE,JSON.stringify(queue))}catch{
+  state("Không thể lưu hàng đợi. Kiểm tra dung lượng bộ nhớ trình duyệt.",true);
+  return false;
+ }
+ return true;
+}
+function describeJob(job){return job.series==="lex-fridman"?"Lex Fridman":"ColdFusion"}
+function renderQueue(){
+ const target=$("#queueItems");if(!target)return;
+ target.replaceChildren();
+ $("#queueCount").textContent=queue.length+" bài";
+ $("#queueActive").textContent=working?(activeSource?describeJob(activeSource):"Đang khôi phục"):"Chưa có";
+ $("#queueStatus").textContent=working?"Đang xử lý":queue.length?"Đang chờ":"Sẵn sàng";
+ if(!queue.length){const empty=document.createElement("li");empty.className="queue-empty";empty.textContent="Chưa có bài nào trong hàng đợi.";target.append(empty)}
+ queue.forEach((job,index)=>{
+  const li=document.createElement("li");li.className="queue-entry";
+  const label=document.createElement("div"),title=document.createElement("strong"),detail=document.createElement("span");
+  title.textContent="#"+(index+1)+" · "+describeJob(job);
+  detail.textContent=(job.sourceUrl||"Phụ đề tiếng Anh")+" · "+job.source.length.toLocaleString("vi-VN")+" ký tự · "+new Date(job.at).toLocaleTimeString("vi-VN");
+  label.append(title,detail);
+  const remove=document.createElement("button");remove.type="button";remove.textContent="Xóa";remove.className="queue-remove";remove.setAttribute("aria-label","Xóa bài chờ số "+(index+1));
+  remove.onclick=()=>{queue=queue.filter(x=>x.id!==job.id);saveQueue();renderQueue()};
+  li.append(label,remove);target.append(li);
+ });
+ $("#startBtn").disabled=false;
+ $("#startBtn").firstChild.textContent=working?"Thêm vào hàng đợi ":"Viết nghiên cứu & đăng bài ";
+ const savedRun=runData?.runStatus;
+ $("#queueResume").hidden=working||!["failed","stopped","waiting","running"].includes(savedRun)||!runData.source||Boolean(lastCommitProof?.sha);
+}
+function clearSourceForm(){
+ $("#transcript").value="";$("#transcript").defaultValue="";
+ $("#sourceFile").value="";$("#sourceUrl").value="";$("#sourceUrl").defaultValue="";
+ $("#angle").value="";$("#sourceStats").textContent="0 ký tự";
+}
+function formJob(){
+ const job={id:Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,8),at:Date.now(),series:$("#series").value,source:$("#transcript").value,sourceUrl:$("#sourceUrl").value,angle:$("#angle").value,autoPublish:$("#autoPublish").checked};
+ if(!SERIES[job.series])throw Error("Series không hợp lệ");
+ if(rawSource(job.source).length<700)throw Error("Phụ đề cần ít nhất 700 ký tự tiếng Anh.");
+ if(rawSource(job.source).length>350000)throw Error("Phụ đề dài quá 350.000 ký tự.");
+ if(job.sourceUrl&&!/^https:\/\//i.test(job.sourceUrl))throw Error("URL nguồn phải dùng HTTPS.");
+ return job
+}
+function enqueue(){
+ const job=formJob();
+ if(queue.length>=30)throw Error("Hàng đợi tối đa 30 bài. Hãy xóa bài chưa cần thiết.");
+ queue.push(job);
+ if(!saveQueue()){queue.pop();throw Error("Hàng đợi chưa được lưu; vui lòng giải phóng bộ nhớ trình duyệt.");}
+ clearSourceForm();
+ renderQueue();
+ $("#queueMessage").textContent="Đã thêm bài #"+queue.length+" · "+describeJob(job)+" vào hàng đợi. Tiếp tục nhập phụ đề khác nếu muốn.";
+ state("Bài hiện tại tiếp tục chạy; "+queue.length+" bài được lưu trong hàng đợi.");
+}
+function populateJob(job){
+ $("#series").value=job.series;
+ $("#transcript").value=job.source;$("#sourceUrl").value=job.sourceUrl||"";
+ $("#angle").value=job.angle||"";$("#autoPublish").checked=job.autoPublish!==false;
+ $("#sourceStats").textContent=job.source.length.toLocaleString("vi-VN")+" ký tự";
+}
+function dispatchNext(){
+ if(working||queueBusy||!queue.length)return;
+ const upcoming=queue[0];
+ if(!availableKey()||(upcoming.autoPublish!==false&&!window.BNAuth?.read?.()&&!clean($("#githubManual").value))){
+  $("#queueMessage").textContent="Hàng đợi đã lưu an toàn. Kết nối lại Gemini"+(upcoming.autoPublish!==false?" và GitHub":"")+" để tiếp tục; bài chờ chưa bị lấy ra.";
+  openCredentials("Cần kết nối để chạy hàng đợi");renderQueue();return;
+ }
+ if(["failed","stopped","waiting","running"].includes(runData.runStatus)&&runData.source&&!lastCommitProof?.sha){
+  $("#queueMessage").textContent="Phiên trước chưa hoàn thành; tiếp tục phiên này trước khi chạy hàng đợi.";
+  renderQueue();return;
+ }
+ queueBusy=true;
+ const item=queue[0];
+ populateJob(item);
+ $("#queueMessage").textContent="Đang chuyển bài tiếp theo từ hàng đợi vào quy trình viết.";
+ setTimeout(()=>{
+  queue.shift();saveQueue();queueBusy=false;renderQueue();
+  start(new Event("submit")).catch(e=>state("Không thể chạy bài trong hàng đợi: "+e.message,true));
+ },0);
+}
+
 const clean=s=>String(s||"").trim(),slug=s=>clean(s).normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/đ/g,"d").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,75);
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const json=s=>{try{return JSON.parse(s)}catch{const first=s.indexOf("{"),last=s.lastIndexOf("}");if(first>=0&&last>first)return JSON.parse(s.slice(first,last+1));throw Error("Gemini không trả về JSON hợp lệ")}};
@@ -25,7 +111,7 @@ function progress(n,phase,step){
 }
 function checkpoint(extra={}){
  runData={...runData,...extra};
- try{localStorage.setItem(DRAFT,JSON.stringify({at:Date.now(),series:$("#series").value,source:$("#transcript").value,sourceUrl:$("#sourceUrl").value,angle:$("#angle").value,markdown:rawMarkdown,commitProof:lastCommitProof,...runData}))}
+ try{localStorage.setItem(DRAFT,JSON.stringify({at:Date.now(),series:activeSource?.series||$("#series").value,source:activeSource?.source??$("#transcript").value,sourceUrl:activeSource?.sourceUrl??$("#sourceUrl").value,angle:activeSource?.angle??$("#angle").value,markdown:rawMarkdown,commitProof:lastCommitProof,...runData}))}
  catch{state("Không đủ bộ nhớ lưu checkpoint. Giữ tab mở hoặc tải bản thảo Markdown để tránh mất dữ liệu.",true)}
 }
 function waitForRetry(ms,signal){
@@ -113,7 +199,7 @@ async function models(){
  const list=(data.models||[]).filter(m=>(m.supportedGenerationMethods||[]).includes("generateContent")).filter(m=>/flash/i.test(m.name)).sort((a,b)=>{const rank=x=>/3[.-]/.test(x.name)?0:/2[.-]5/.test(x.name)?1:2;return rank(a)-rank(b)});
  if(!list.length)throw Error("Không tìm thấy model Gemini Flash có thể tạo nội dung với API key này.");
  const select=$("#model");select.replaceChildren(...list.map(m=>new Option((m.displayName||m.name)+" · "+m.name,m.name)));
- currentModel=select.value;geminiVerified=true;foldCredentials();window.BNQuota?.refresh();state("Gemini kết nối thành công · "+currentModel);return currentModel
+ currentModel=select.value;geminiVerified=true;foldCredentials();window.BNQuota?.refresh();state("Gemini kết nối thành công · "+currentModel);if(queue.length&&!working)dispatchNext();return currentModel
 }
 async function generate(prompt,signal,maxTokens=6500){
  if(!currentModel)await models();
@@ -202,19 +288,33 @@ async function publish(d){
  return created
 }
 async function start(e,restore=false){
- e.preventDefault();if(working)return;
- if(!restore){runData={};rawMarkdown="";resumePending=false}
- else if(lastCommitProof?.sha)return;
- abort=new AbortController();startedAt=Date.now();window.BNQuota?.beginRun();working=true;$("#startBtn").disabled=true;$("#cancelBtn").disabled=false;
- if(!restore){$("#resultLinks").replaceChildren();setPublishEvidence(null)}
- checkpoint({runStatus:restore&&(window.BNQuota?.retryAt?.()||0)>Date.now()?"waiting":"running",autoPublish:restore?runData.autoPublish:$("#autoPublish").checked});
+ e.preventDefault();
+ if(working){
+  try{enqueue()}catch(err){state("Không thể xếp hàng: "+err.message,true)}
+  return;
+ }
+ let job;
  try{
- const src=rawSource($("#transcript").value),url=clean($("#sourceUrl").value),series=$("#series").value,angle=clean($("#angle").value);
+  if(restore){
+   if(lastCommitProof?.sha)return;
+   job={source:runData.source,sourceUrl:runData.sourceUrl||"",series:runData.series||$("#series").value,angle:runData.angle||"",autoPublish:runData.autoPublish!==false};
+  }else job=formJob();
+ }catch(err){state("Không thể bắt đầu: "+err.message,true);return}
+ activeSource={...job};
+ if(!restore){runData={};rawMarkdown="";resumePending=false;clearSourceForm()}
+ abort=new AbortController();startedAt=Date.now();window.BNQuota?.beginRun();working=true;
+ $("#startBtn").disabled=false;$("#cancelBtn").disabled=false;
+ if(!restore){$("#resultLinks").replaceChildren();setPublishEvidence(null)}
+ renderQueue();
+ checkpoint({runStatus:restore&&(window.BNQuota?.retryAt?.()||0)>Date.now()?"waiting":"running",autoPublish:job.autoPublish});
+ let succeeded=false;
+ try{
+ const src=rawSource(job.source),url=clean(job.sourceUrl),series=job.series,angle=clean(job.angle);
  if(!SERIES[series])throw Error("Series không hợp lệ.");
  if(src.length<700)throw Error("Phụ đề quá ngắn. Hãy dán ít nhất 700 ký tự tiếng Anh.");
  if(src.length>350000)throw Error("Nguồn quá dài. Chia phụ đề thành file nhỏ hơn 350.000 ký tự.");
  if(url&&!/^https:\/\//i.test(url))throw Error("Đường dẫn nguồn phải là HTTPS.");
- available();if($("#autoPublish").checked&&!window.BNAuth?.read?.()&&!clean($("#githubManual").value))throw Error("Để tự đăng, hãy kết nối GitHub token chung của CMS trước.");if(!currentModel)await models();
+ available();if(job.autoPublish&&!window.BNAuth?.read?.()&&!clean($("#githubManual").value))throw Error("Để tự đăng, hãy kết nối GitHub token chung của CMS trước.");if(!currentModel)await models();
  progress(4,"Đọc nguồn và lập dàn ý",0);
  const chunks=chunkSource(src),briefs=restore&&Array.isArray(runData.briefs)?runData.briefs.slice():[];
  for(let i=briefs.length;i<chunks.length;i++){
@@ -242,29 +342,29 @@ async function start(e,restore=false){
  d.body="*"+prefix+". Bài viết phân tích dựa trên phụ đề tiếng Anh cung cấp, không phải bản dịch nguyên văn.*\n\n"+d.body;
  rawMarkdown=makeArticle(d);lastSlug=d.slug;$("#preview").textContent=rawMarkdown;$("#resultTitle").textContent=title;
  progress(88,"Đã hoàn thiện bản nghiên cứu",2);checkpoint({outline,published:false,slug:d.slug});
- if($("#autoPublish").checked){
+ if(job.autoPublish){
   progress(92,"Commit bài lên GitHub",3);await publish(d);progress(100,"Đã commit (kiểm tra Pages deploy riêng)",4);// Keep the publish proof and draft preview but clear the English source for a NEW job.
-  // Reset only the source inputs; keep series selection, API connections,
-  // generation result, GitHub commit links and Smart Insights intact.
-  $("#transcript").value="";
-  $("#transcript").defaultValue="";
-  $("#sourceFile").value="";
-  $("#sourceUrl").value="";
-  $("#sourceUrl").defaultValue="";
-  $("#angle").value="";
-  $("#sourceStats").textContent="0 ký tự";
+  // Source inputs were reset at the START of this run, so later incoming queue entries are never erased.
   checkpoint({published:true,runStatus:"completed",slug:d.slug,source:"",sourceUrl:"",angle:"",commitProof:lastCommitProof,productionMetrics:metrics,briefs:[],pieces:[],outline:null,retryAt:0});
-  state($("#status").textContent+"\nĐã làm mới biểu mẫu nguồn. Bạn có thể dán phụ đề mới ngay.");
+  state($("#status").textContent+"\nBiểu mẫu nguồn sẵn sàng cho bài mới. Hàng đợi sẽ chạy tiếp nếu có.");
   if(githubVerified)window.BNSeriesInsights?.sync().catch(()=>{});
  }else{checkpoint({runStatus:"completed"});window.BNSeriesInsights?.record({slug:d.slug,title:d.title,series:d.series,state:"draft",durationMs:Date.now()-startedAt,live:false,quota:window.BNQuota?.runSummary()});progress(100,"Hoàn thành bản thảo; chưa đăng",4);state("Đã tạo bản thảo Markdown. Bạn có thể copy hoặc xuất file; chưa ghi lên GitHub.")}
+ succeeded=true;
  }catch(e){
   state("Không hoàn tất: "+e.message,true);
   checkpoint({runStatus:abort?.signal.aborted?"stopped":"failed",error:e.message,retryAt:window.BNQuota?.retryAt?.()||0})
  }
- finally{window.BNQuota?.finishRun(Boolean(lastCommitProof?.sha));working=false;$("#startBtn").disabled=false;$("#cancelBtn").disabled=true;abort=null}
+ finally{
+  window.BNQuota?.finishRun(Boolean(lastCommitProof?.sha));working=false;
+  $("#cancelBtn").disabled=true;abort=null;activeSource=null;
+  renderQueue();
+  if(succeeded){$("#queueMessage").textContent="Đã hoàn tất phiên vừa chạy. "+queue.length+" bài còn lại sẽ tự tiếp tục.";dispatchNext()}
+  else $("#queueMessage").textContent="Phiên hiện tại dừng vì lỗi. Bài đang chờ vẫn được lưu; hãy tiếp tục phiên trước để xử lý hàng đợi.";
+}
 }
 function saveMarkdown(){const blob=new Blob([rawMarkdown],{type:"text/markdown;charset=utf-8"}),u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download=(lastSlug||"series-research")+".md";a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
 $("#studioForm").addEventListener("submit",start);
+$("#queueResume").onclick=()=>{if(working)return;const old=JSON.parse(localStorage.getItem(DRAFT)||"null");if(!old?.source)return;runData={...old};populateJob(old);start(new Event("submit"),true)};
 $("#cancelBtn").onclick=()=>{abort?.abort();runData.runStatus="stopped";checkpoint({runStatus:"stopped"});state("Đã yêu cầu dừng tự retry. Bản thảo vẫn được lưu.")};
 $("#sourceFile").onchange=async e=>{const f=e.target.files?.[0];if(!f)return;if(f.size>750000){state("File trên 750 KB: hãy chia thành nhiều phần.",true);return}$("#transcript").value=await f.text();$("#transcript").dispatchEvent(new Event("input"));checkpoint()};
 $("#transcript").addEventListener("input",()=>{$("#sourceStats").textContent=$("#transcript").value.length.toLocaleString("vi-VN")+" ký tự"});
@@ -287,12 +387,12 @@ async function verifyExistingConnections(){
 $("#model").onchange=()=>{currentModel=$("#model").value;state("Model đã chọn: "+currentModel)};
 $("#copyDraft").onclick=()=>navigator.clipboard.writeText(rawMarkdown).then(()=>state("Đã copy Markdown.")).catch(e=>state(e.message,true));
 $("#downloadDraft").onclick=saveMarkdown;
-$("#connectGithub").onclick=async()=>{try{const value=clean($("#githubManual").value);if(value){await window.BNAuth.validate(value);window.BNAuth.save(value,$("#rememberGithub").checked);$("#githubManual").value=""}else{const t=window.BNAuth?.read();if(!t)throw Error("Chưa có token CMS. Hãy nhập token phía dưới.");await window.BNAuth.validate(t)}$("#githubState").textContent="● Đã kết nối GitHub (token CMS chung)";githubVerified=true;window.BNSeriesInsights?.setConnection(true);foldCredentials();window.BNSeriesInsights?.sync().catch(()=>{});}catch(e){githubVerified=false;window.BNSeriesInsights?.setConnection(false);openCredentials("Kiểm tra lại GitHub");state("Không thể kết nối GitHub: "+e.message,true)}};
+$("#connectGithub").onclick=async()=>{try{const value=clean($("#githubManual").value);if(value){await window.BNAuth.validate(value);window.BNAuth.save(value,$("#rememberGithub").checked);$("#githubManual").value=""}else{const t=window.BNAuth?.read();if(!t)throw Error("Chưa có token CMS. Hãy nhập token phía dưới.");await window.BNAuth.validate(t)}$("#githubState").textContent="● Đã kết nối GitHub (token CMS chung)";githubVerified=true;window.BNSeriesInsights?.setConnection(true);foldCredentials();window.BNSeriesInsights?.sync().catch(()=>{});if(queue.length&&!working)dispatchNext();}catch(e){githubVerified=false;window.BNSeriesInsights?.setConnection(false);openCredentials("Kiểm tra lại GitHub");state("Không thể kết nối GitHub: "+e.message,true)}};
 try{const k=sessionStorage.getItem(KEYSTORE);if(k)$("#geminiKey").value=k;const t=window.BNAuth?.read?.();$("#githubState").textContent=t?"● Đã có GitHub token chung từ CMS":"○ Chưa có token CMS — cần kết nối trước khi đăng";const old=JSON.parse(localStorage.getItem(DRAFT)||"null");if(old&&(old.source||old.commitProof)&&Date.now()-old.at<86400000){$("#series").value=old.series||"cold-fusion";$("#transcript").value=old.source;$("#sourceUrl").value=old.sourceUrl||"";$("#angle").value=old.angle||"";rawMarkdown=old.markdown||"";runData={...old};setPublishEvidence(old.commitProof);$("#preview").textContent=rawMarkdown;$("#copyDraft").disabled=!rawMarkdown;$("#downloadDraft").disabled=!rawMarkdown;$("#transcript").dispatchEvent(new Event("input"));state(old.source?"Đã khôi phục bản nháp từ phiên viết trước.":"Biểu mẫu nguồn đã sẵn sàng cho bài mới. Kết quả xuất bản trước vẫn có thể kiểm tra bên phải.");}}catch{}
 verifyExistingConnections().catch(()=>{});
 try{
  const old=JSON.parse(localStorage.getItem(DRAFT)||"null");
- if(old?.source&&old.runStatus==="waiting"&&!old.commitProof?.sha){
+ if(old?.source&&["waiting","running"].includes(old.runStatus)&&!old.commitProof?.sha){
   runData={...old};resumePending=true;
   $("#series").value=old.series||"cold-fusion";
   $("#autoPublish").checked=old.autoPublish!==false;
@@ -307,4 +407,6 @@ try{
   setTimeout(()=>start(new Event("submit"),true),1500);
  }
 }catch{}
+renderQueue();
+if(!resumePending&&queue.length)dispatchNext();
 })();
