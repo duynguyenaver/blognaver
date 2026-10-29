@@ -334,7 +334,7 @@ try{
 function failedFirst(){return queue}
 function nextRunnableIndex(){
  const now=Date.now();
- return queue.findIndex(x=>!x.retryExhausted&&!(Number(x.retryAt)>now));
+ return queue.findIndex(x=>Number(x.retryCount||0)<3&&!x.retryExhausted&&!(Number(x.retryAt)>now));
 }
 function scheduleQueueRetry(at){
  if(queueRetryTimer)clearTimeout(queueRetryTimer);
@@ -454,8 +454,8 @@ function dispatchNext(force=false){
  if(working||queueBusy||!queue.length)return;
  const index=force?0:nextRunnableIndex();
  if(index<0){
-  const eligible=queue.filter(x=>!x.retryExhausted);
-  if(!eligible.length){$("#queueMessage").textContent="Các bài chờ đều đã thử 3 lần. Đã tạm dừng auto retry; bấm Chạy bài ở hàng đợi để thử thủ công.";renderQueue();return}
+  const eligible=queue.filter(x=>!x.retryExhausted&&Number(x.retryCount||0)<3);
+  if(!eligible.length){$("#queueMessage").textContent="Đã duyệt hết hàng đợi: mỗi bài lỗi tối đa 3 lần. Chủ động dừng auto retry; bài lỗi và checkpoint vẫn lưu.";renderQueue();return}
   const earliest=Math.min(...eligible.map(x=>Number(x.retryAt)||Date.now()+60000));
   $("#queueMessage").textContent="Các bài lỗi sẽ luân phiên thử model lại tự động; không chờ cooldown API.";
   scheduleQueueRetry(earliest);renderQueue();return;
@@ -1182,11 +1182,12 @@ async function start(e,restore=false,queuedJob=null){
    runData={runStatus:"completed"};rawMarkdown="";setPublishEvidence(null);
   }else if(rotationRequested){
    const saved={...runData,source:job.source,sourceUrl:job.sourceUrl||"",series:job.series,angle:job.angle||"",autoPublish:job.autoPublish!==false,markdown:rawMarkdown,runStatus:"paused",commitProof:null};
-   const paused={...job,rotations:(job.rotations||0)+1,retryCount:(Number(job.retryCount)||0)+1,retryExhausted:(Number(job.retryCount)||0)+1>=3,
+   const paused={...job,rotations:(job.rotations||0)+1,retryCount:Math.min(3,(Number(job.retryCount)||0)+1),retryExhausted:(Number(job.retryCount)||0)+1>=3,
     retryAt:0,
     failed:true,failedAt:job.failedAt||Date.now(),checkpoint:saved};
    // Enqueue behind currently waiting articles. Do not lose checkpoints on reload.
-   queue.push(paused);
+   const existingPaused=queue.find(item=>sameQueueJob(item,paused));
+   if(existingPaused)Object.assign(existingPaused,paused);else queue.push(paused);
    if(!await saveQueue())state("Bộ nhớ trình duyệt đầy; không thể bảo đảm lưu bài tạm dừng.",true);
    try{localStorage.removeItem(DRAFT)}catch{}
    runData={runStatus:"completed"};setPublishEvidence(null);
@@ -1199,8 +1200,10 @@ async function start(e,restore=false,queuedJob=null){
    // One attempt per turn. After 3 unsuccessful turns, park for 60 seconds,
    // then begin a fresh round while other queued jobs continue immediately.
    const retryAt=0; // No provider cooldown; capped per-job to prevent infinite retries.
-   const failedJob={...job,failed:true,failedAt:job.failedAt||Date.now(),retryCount:attempts,retryExhausted:attempts>=3,retryAt,checkpoint:snapshot};
-   if(!queue.some(item=>sameQueueJob(item,failedJob))){queue.push(failedJob);await saveQueue()}
+   const failedJob={...job,failed:true,failedAt:job.failedAt||Date.now(),retryCount:Math.min(3,attempts),retryExhausted:attempts>=3,retryAt,checkpoint:snapshot};
+   const existing=queue.find(item=>sameQueueJob(item,failedJob));
+   if(existing){Object.assign(existing,failedJob);await saveQueue()}
+   else{queue.push(failedJob);await saveQueue()}
    queuedForRetry=true;
    try{localStorage.removeItem(DRAFT)}catch{}
    runData={runStatus:"completed"};setPublishEvidence(null);
