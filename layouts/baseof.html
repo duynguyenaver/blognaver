@@ -55,6 +55,24 @@
         });
       });
     </script>
+    <style id="bn-nav-soft-background">
+      /* Editorial navigation highlights: light blue surfaces, original text colors. */
+      header nav a, header .menu a, header .menu-inner a, #header .menu a {
+        background-color: rgba(56,125,222,.09);
+        border-radius: 9px;
+        padding: 7px 12px;
+        transition: background-color .2s ease;
+      }
+      header nav a:hover, header .menu a:hover, header .menu-inner a:hover,
+      header nav a:focus-visible, header .menu a:focus-visible {
+        background-color: rgba(56,125,222,.17);
+      }
+      @media(max-width:680px) {
+        header nav a, header .menu a, header .menu-inner a, #header .menu a {
+          padding: 6px 9px;
+        }
+      }
+    </style>
     <link rel="stylesheet" href="{{ "access-gate.css" | relURL }}">
     <script src="{{ "access-gate.js" | relURL }}"></script>
 </head>
