@@ -432,7 +432,10 @@ async function enqueue(){
  if(checkDuplicateYoutube(job))return;
  if(queue.length>=30)throw Error("Hàng đợi tối đa 30 bài. Hãy xóa bài chưa cần thiết.");
  queue.push(job);
- if(!await saveQueue()){queue.pop();throw Error("Hàng đợi chưa được lưu; vui lòng giải phóng bộ nhớ trình duyệt.");}
+ if(!await saveQueue()){
+  queue=queue.filter(x=>x.id!==job.id);
+  throw Error("Hàng đợi chưa được lưu; vui lòng kiểm tra IndexedDB.");
+ }
  clearSourceForm();
  renderQueue();queueCloudStatus();
  $("#queueMessage").removeAttribute("data-duplicate");
@@ -1064,8 +1067,20 @@ async function publish(d){
 }
 async function start(e,restore=false,queuedJob=null){
  e.preventDefault();
- if(working){
-  try{await enqueue()}catch(err){$("#queueMessage").textContent="Không thể xếp hàng: "+err.message;state("Không thể xếp hàng: "+err.message,true)}
+ // Any user submission while a run is active, being dispatched, or already
+ // queued MUST join FIFO. Never let a new submission preempt queued work.
+ if(!restore&&!queuedJob&&(working||queueBusy||queue.length>0)){
+  try{
+   await enqueue();
+   // If a previous run just finished during the async IndexedDB write, wake
+   // the dispatcher; the new job must not remain stranded.
+   if(!working&&!queueBusy)dispatchNext();
+  }catch(err){$("#queueMessage").textContent="Không thể xếp hàng: "+err.message;state("Không thể xếp hàng: "+err.message,true)}
+  return;
+ }
+ if(working||queueBusy){
+  // Internal scheduler should never enqueue the form accidentally.
+  $("#queueMessage").textContent="Đang có phiên xử lý; công việc đã lưu trong hàng đợi sẽ chạy sau.";
   return;
  }
  let job;
