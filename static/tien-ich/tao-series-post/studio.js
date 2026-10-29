@@ -183,6 +183,14 @@ function foldCredentials(){if((geminiVerified||groqVerified)&&githubVerified){$(
 function available(){key=clean($("#geminiKey").value)||sessionStorage.getItem(KEYSTORE)||"";if(!key)throw Error("Bạn cần nhập Gemini API key mới. Key chỉ dùng trong phiên này.");sessionStorage.setItem(KEYSTORE,key);return key}
 function groqKey(){return clean($("#groqKey").value)||sessionStorage.getItem(GROQ_STORE)||""}
 function canUseGroq(){return $("#groqFallback").checked&&Boolean(groqKey())&&groqVerified}
+const RETIRED_MODELS="bn_gemini_unavailable_models_v1";
+function retiredModels(){try{return new Set(JSON.parse(sessionStorage.getItem(RETIRED_MODELS)||"[]"))}catch{return new Set()}}
+function markRetired(name){if(!name)return;const list=retiredModels();list.add(name);sessionStorage.setItem(RETIRED_MODELS,JSON.stringify([...list].slice(-40)));if(currentModel===name){currentModel="";$("#model").value=""}}
+function isRetired(e){return e.code===404||e.code===400&&/model.*(?:not found|no longer available|unsupported|deprecated)/i.test(e.message)}
+function resetInvalidModel(){
+ const candidate=currentModel||$("#model").value||"";
+ if(candidate&&retiredModels().has(candidate)){currentModel="";$("#model").value=""}
+}
 function recordModel(providerName,modelName){
  const name=(providerName==="Groq"?"Groq · ":"Gemini · ")+modelName;
  if(!Array.isArray(runData.models))runData.models=[];
@@ -327,13 +335,13 @@ async function models(){
    pageToken=payload.nextPageToken||"";
    if(!pageToken)break;
   }
-  const list=listed.filter(m=>(m.supportedGenerationMethods||[]).includes("generateContent")&&m.name)
+  const list=listed.filter(m=>(m.supportedGenerationMethods||[]).includes("generateContent")&&m.name&&!retiredModels().has(m.name))
    .sort((a,b)=>{
     const rank=m=>/flash/i.test(m.name)?0:/pro/i.test(m.name)?1:2;
     return rank(a)-rank(b);
    });
   if(!list.length)throw Error("Gemini kết nối được nhưng không tìm thấy model hỗ trợ generateContent. Hãy kiểm tra quyền API hoặc model của project.");
-  const previous=select.value;
+  const previous=retiredModels().has(select.value)?"":select.value;
   select.replaceChildren(...list.map(m=>new Option((m.displayName||m.name)+" · "+m.name,m.name)));
   if(list.some(m=>m.name===previous))select.value=previous;
   currentModel=select.value;
@@ -357,16 +365,18 @@ async function models(){
 }
 async function generate(prompt,signal,maxTokens=6500){
  const useGroq=canUseGroq();
+ resetInvalidModel();
  if(useGroq&&(window.BNQuota?.retryAt?.()||0)>Date.now()){
   state("Gemini đang cooldown · chuyển request hiện tại sang Groq.");
   runtime("groq",groqModel,"Đang chuyển dự phòng","Gemini còn trong thời gian chờ, đang chuyển request sang Groq.");
   try{return await groqGenerate(prompt,signal,maxTokens)}
   catch(e){if([400,401,403].includes(e.code))throw e;provider("Groq không khả dụng. Giữ checkpoint và chờ Gemini tự retry.",true)}
  }
+ resetInvalidModel();
  if(!currentModel){
   if(!availableKey()&&canUseGroq())return groqGenerate(prompt,signal,maxTokens);
   try{await models()}catch(e){
-   if(canUseGroq()&&([429,500,502,503,504].includes(e.code)||/giới hạn|quota/i.test(e.message))){
+   if(canUseGroq()&&([404,429,500,502,503,504].includes(e.code)||/giới hạn|quota|no longer available/i.test(e.message))){
     return groqGenerate(prompt,signal,maxTokens);
    }
    throw e
@@ -386,6 +396,22 @@ async function generate(prompt,signal,maxTokens=6500){
   provider("Gemini · "+currentModel+" · hoạt động bình thường");
   return result
  }catch(e){
+  if(isRetired(e)){
+   const retired=currentModel;
+   markRetired(retired);
+   provider("Model Gemini đã ngừng hoạt động: "+retired+". Không sử dụng lại model này.",true);
+   if(canUseGroq()){
+    runtime("groq",groqModel,"Thay model ngừng hỗ trợ","Gemini 404; chuyển request sang Groq đã xác thực.");
+    return groqGenerate(prompt,signal,maxTokens)
+   }
+   // Requery account-available models, excluding known retired candidates.
+   if(!runData.modelRefreshTried){
+    runData.modelRefreshTried=true;
+    await models();
+    if(currentModel&&currentModel!==retired)return generate(prompt,signal,maxTokens)
+   }
+   throw Error("Model Gemini không còn khả dụng. Hãy chọn model mới trong danh sách hoặc xác thực Groq.")
+  }
   if(!canUseGroq()||![429,500,502,503,504].includes(e.code)||signal?.aborted)throw e;
   runtime("groq",groqModel,"Đang chuyển dự phòng","Gemini "+e.code+"; thử request còn dở qua Groq.");
   state("Gemini "+e.code+" · chuyển đúng request đang dở sang Groq. Các phần đã viết được giữ nguyên.");
@@ -660,7 +686,7 @@ try{
   $("#angle").value=old.angle||"";
   rawMarkdown=old.markdown||"";
   $("#preview").textContent=rawMarkdown;
-  if(old.model)currentModel=old.model;
+  if(old.model&&!retiredModels().has(old.model))currentModel=old.model;else currentModel="";
   state("Đã khôi phục phiên đang chờ Gemini 429. Sẽ tự tiếp tục khi thời gian giới hạn kết thúc, nếu tab này vẫn mở.");
   // Defer until validation completes; start() itself waits for the saved Retry-After.
   setTimeout(()=>start(new Event("submit"),true),1500);
