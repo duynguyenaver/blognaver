@@ -1,7 +1,7 @@
 version = "0.4.X"
 description = "Duy Nguyen — Công nghệ, du lịch và những câu chuyện đáng kể."
 keywords = ["Duy Nguyen", "du lịch", "công nghệ"]
-defaultTheme = "auto"
+defaultTheme = "light"
 dateFormat = "02/01/2006"
 [author]
 name = "Duy Nguyen"
