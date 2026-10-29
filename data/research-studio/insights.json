@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-29T20:18:09.967Z",
+  "updatedAt": "2026-10-29T20:47:59.837Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -306,6 +306,23 @@
         "Groq · openai/gpt-oss-120b"
       ],
       "live": true
+    },
+    {
+      "slug": "cold-fusion-hanh-trinh-chien-luoc-cua-uber-tu-doi-moi-kinh-te-chia-se-den-bai-toan-toi--2026-10-29",
+      "title": "Hành trình chiến lược của Uber: Từ đổi mới kinh tế chia sẻ đến bài toán tối ưu hóa lợi nhuận",
+      "series": "cold-fusion",
+      "sha": "1d7aec91ba911b88a7cc2032b69f4431fd5301ec",
+      "commitAt": "2026-10-29T20:47:39Z",
+      "durationMs": 29420,
+      "quota": {
+        "requests": 8,
+        "tokens": 26263,
+        "inputTokens": 19932,
+        "outputTokens": 6331
+      },
+      "models": [
+        "Gemini · models/gemini-3.5-flash-lite"
+      ]
     }
   ]
 }
