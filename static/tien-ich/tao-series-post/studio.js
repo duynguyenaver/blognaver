@@ -113,7 +113,9 @@ function touchProgress(pct){if(pct!==lastProgressValue){lastProgressValue=pct;la
 
 try{
  const saved=JSON.parse(localStorage.getItem(QUEUE_STORE)||"[]");
- queue=Array.isArray(saved)?saved.filter(x=>x&&typeof x.source==="string"&&x.source.length>=700&&SERIES[x.series]).slice(0,30):[];
+ queue=Array.isArray(saved)?saved.filter(x=>x&&typeof x.source==="string"&&x.source.length>=700&&SERIES[x.series]&&!isCommittedCheckpoint(x.checkpoint)).slice(0,30):[];
+ // Persist pruning so completed jobs no longer consume browser quota.
+ if(Array.isArray(saved)&&saved.length!==queue.length)try{localStorage.setItem(QUEUE_STORE,JSON.stringify(queue))}catch{};
 }catch{}
 function saveQueue(){
  try{localStorage.setItem(QUEUE_STORE,JSON.stringify(queue))}catch{
@@ -259,10 +261,46 @@ function progress(n,phase,step){
   e.setAttribute("aria-current",i===step?"step":"false");
  });
 }
+// GitHub commit proof is the deletion guard. Never discard pending/unpublished drafts.
+function isCommittedCheckpoint(data){
+ return Boolean(data&&data.published===true&&/^[a-f0-9]{40}$/i.test(data.commitProof?.sha||""));
+}
+function pruneCommittedStorage(){
+ let removed=0;
+ try{
+  const previous=JSON.parse(localStorage.getItem(DRAFT)||"null");
+  if(isCommittedCheckpoint(previous)){localStorage.removeItem(DRAFT);removed++}
+ }catch{}
+ try{
+  const stored=JSON.parse(localStorage.getItem(QUEUE_STORE)||"[]");
+  if(Array.isArray(stored)){
+   const kept=stored.filter(item=>!isCommittedCheckpoint(item?.checkpoint));
+   if(kept.length<stored.length){
+    localStorage.setItem(QUEUE_STORE,JSON.stringify(kept));
+    queue=queue.filter(item=>!isCommittedCheckpoint(item?.checkpoint));
+    removed+=stored.length-kept.length;
+   }
+  }
+ }catch{}
+ return removed;
+}
 function checkpoint(extra={}){
  runData={...runData,...extra};
- try{localStorage.setItem(DRAFT,JSON.stringify({at:Date.now(),series:activeSource?.series||$("#series").value,source:activeSource?.source??$("#transcript").value,sourceUrl:activeSource?.sourceUrl??$("#sourceUrl").value,angle:activeSource?.angle??$("#angle").value,markdown:rawMarkdown,commitProof:lastCommitProof,...runData}))}
- catch{state("Không đủ bộ nhớ lưu checkpoint. Giữ tab mở hoặc tải bản thảo Markdown để tránh mất dữ liệu.",true)}
+ const data={at:Date.now(),series:activeSource?.series||$("#series").value,source:activeSource?.source??$("#transcript").value,sourceUrl:activeSource?.sourceUrl??$("#sourceUrl").value,angle:activeSource?.angle??$("#angle").value,markdown:rawMarkdown,commitProof:lastCommitProof,...runData};
+ // The article is already committed. Its source and generated body no longer need
+ // a crash-recovery checkpoint (commit proof remains available in memory/UI).
+ if(isCommittedCheckpoint(data)){pruneCommittedStorage();return}
+ try{localStorage.setItem(DRAFT,JSON.stringify(data));return}catch{}
+ // Free only confirmed published checkpoints, then retry once.
+ pruneCommittedStorage();
+ try{localStorage.setItem(DRAFT,JSON.stringify(data));return}catch{}
+ // Large Markdown is reconstructible from section checkpoints; retain source,
+ // outline and pieces, but do not remove active unfinished work or queued jobs.
+ if(Array.isArray(data.pieces)&&data.pieces.length&&data.markdown){
+  const compact={...data,markdown:""};
+  try{localStorage.setItem(DRAFT,JSON.stringify(compact));return}catch{}
+ }
+ state("Không đủ bộ nhớ lưu checkpoint ngay cả sau khi dọn bài đã xuất bản. Giữ tab mở hoặc tải bản thảo Markdown để tránh mất dữ liệu.",true);
 }
 function waitForRetry(ms,signal){
  return new Promise((resolve,reject)=>{
@@ -886,7 +924,7 @@ $("#geminiKey").addEventListener("input",()=>{
 $("#copyDraft").onclick=()=>navigator.clipboard.writeText(rawMarkdown).then(()=>state("Đã copy Markdown.")).catch(e=>state(e.message,true));
 $("#downloadDraft").onclick=saveMarkdown;
 $("#connectGithub").onclick=async()=>{try{const value=clean($("#githubManual").value);if(value){await window.BNAuth.validate(value);window.BNAuth.save(value,$("#rememberGithub").checked);$("#githubManual").value=""}else{const t=window.BNAuth?.read();if(!t)throw Error("Chưa có token CMS. Hãy nhập token phía dưới.");await window.BNAuth.validate(t)}$("#githubState").textContent="● Đã kết nối GitHub (token CMS chung)";githubVerified=true;window.BNSeriesInsights?.setConnection(true);foldCredentials();window.BNSeriesInsights?.sync().catch(()=>{});if(queue.length&&!working)dispatchNext();}catch(e){githubVerified=false;window.BNSeriesInsights?.setConnection(false);openCredentials("Kiểm tra lại GitHub");state("Không thể kết nối GitHub: "+e.message,true)}};
-try{loadRememberedAIKeys();const t=window.BNAuth?.read?.();$("#githubState").textContent=t?"● Đã có GitHub token chung từ CMS":"○ Chưa có token CMS — cần kết nối trước khi đăng";const old=JSON.parse(localStorage.getItem(DRAFT)||"null");if(old&&(old.source||old.commitProof)&&Date.now()-old.at<86400000){$("#series").value=SERIES[old.series]&&["cold-fusion","lex-fridman"].includes(old.series)?old.series:"cold-fusion";$("#customSeries").value=!["cold-fusion","lex-fridman"].includes(old.series)?SERIES[old.series]?.name||old.series||"":"";$("#transcript").value=old.source;$("#sourceUrl").value=old.sourceUrl||"";$("#angle").value=old.angle||"";rawMarkdown=old.markdown||"";runData={...old};setPublishEvidence(old.commitProof);$("#preview").textContent=rawMarkdown;$("#copyDraft").disabled=!rawMarkdown;$("#downloadDraft").disabled=!rawMarkdown;$("#transcript").dispatchEvent(new Event("input"));state(old.source?"Đã khôi phục bản nháp từ phiên viết trước.":"Biểu mẫu nguồn đã sẵn sàng cho bài mới. Kết quả xuất bản trước vẫn có thể kiểm tra bên phải.");}}catch{}
+try{loadRememberedAIKeys();const t=window.BNAuth?.read?.();$("#githubState").textContent=t?"● Đã có GitHub token chung từ CMS":"○ Chưa có token CMS — cần kết nối trước khi đăng";pruneCommittedStorage();const old=JSON.parse(localStorage.getItem(DRAFT)||"null");if(old&&(old.source||old.commitProof)&&Date.now()-old.at<86400000){$("#series").value=SERIES[old.series]&&["cold-fusion","lex-fridman"].includes(old.series)?old.series:"cold-fusion";$("#customSeries").value=!["cold-fusion","lex-fridman"].includes(old.series)?SERIES[old.series]?.name||old.series||"":"";$("#transcript").value=old.source;$("#sourceUrl").value=old.sourceUrl||"";$("#angle").value=old.angle||"";rawMarkdown=old.markdown||"";runData={...old};setPublishEvidence(old.commitProof);$("#preview").textContent=rawMarkdown;$("#copyDraft").disabled=!rawMarkdown;$("#downloadDraft").disabled=!rawMarkdown;$("#transcript").dispatchEvent(new Event("input"));state(old.source?"Đã khôi phục bản nháp từ phiên viết trước.":"Biểu mẫu nguồn đã sẵn sàng cho bài mới. Kết quả xuất bản trước vẫn có thể kiểm tra bên phải.");}}catch{}
 const connectionReady=verifyExistingConnections().catch(e=>state("Không thể xác thực kết nối: "+e.message,true));
 try{
  const old=JSON.parse(localStorage.getItem(DRAFT)||"null");
