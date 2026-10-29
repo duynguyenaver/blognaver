@@ -453,7 +453,7 @@ function renderQueue(){
   // Remove stale local crash records only when they belong to the deleted job.
   for(const key of ["active","checkpoint"]){
    try{const saved=await queueDisk(key,null,"get");
-    if(saved&&((saved.id&&saved.id===job.id)||(saved.jobId&&saved.jobId===job.id)))await queueDisk(key,null,"delete");
+    if(saved&&((saved.id&&saved.id===job.id)||(saved.jobId&&saved.jobId===job.id)||(saved.source&&saved.source===job.source&&(!saved.sourceUrl||saved.sourceUrl===job.sourceUrl))))await queueDisk(key,null,"delete");
    }catch{}
   }
   renderQueue();
