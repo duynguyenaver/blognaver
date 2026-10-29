@@ -1,0 +1,14 @@
+{{- if and .IsPage (eq .Section "posts") -}}
+  {{- $articles := slice -}}
+  {{- range where site.RegularPages "Section" "posts" -}}
+    {{- if ne .RelPermalink $.RelPermalink -}}
+      {{- $image := .Params.featuredImagePreview | default .Params.featuredImage | default .Params.cover -}}
+      {{- $series := .Params.series | default "" -}}
+      {{- $articles = $articles | append (dict "title" .Title "url" .RelPermalink "image" $image "description" (.Description | default .Summary | plainify | truncate 125) "series" $series "order" (.Params.seriesOrder | default 0) "date" (.Date.Unix)) -}}
+    {{- end -}}
+  {{- end -}}
+  {{- $data := dict "articles" $articles "series" (.Params.series | default "") "order" (.Params.seriesOrder | default 0) "current" .RelPermalink -}}
+  <script id="bn-article-recommendations-data" type="application/json">{{ $data | jsonify | safeHTML }}</script>
+  <link rel="stylesheet" href="{{ "css/article-recommendations.css" | relURL }}">
+  <script src="{{ "js/article-recommendations.js" | relURL }}" defer></script>
+{{- end -}}
