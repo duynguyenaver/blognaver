@@ -1,76 +1,133 @@
 {{ define "content" }}
 {{ $catalog := site.Data.series }}
 {{ $pages := where site.RegularPages "Section" "posts" }}
-{{ $totalArticles := 0 }}
-{{ $completed := 0 }}
+{{ $published := 0 }}
+{{ $planned := 0 }}
+{{ $finished := 0 }}
 {{ range $catalog }}
   {{ $id := .id }}
-  {{ range $pages }}
-    {{ if in (.Params.series | default (slice)) $id }}
-      {{ $totalArticles = add $totalArticles 1 }}
-    {{ end }}
-  {{ end }}
+  {{ $count := 0 }}
+  {{ range $pages }}{{ if in (.Params.series | default (slice)) $id }}{{ $count = add $count 1 }}{{ end }}{{ end }}
+  {{ $published = add $published $count }}
+  {{ $goal := int (.total | default $count) }}
+  {{ $planned = add $planned $goal }}
+  {{ if and (gt $goal 0) (ge $count $goal) }}{{ $finished = add $finished 1 }}{{ end }}
 {{ end }}
-<main class="series-insights" aria-labelledby="series-page-title">
-  <header class="series-hero">
-    <p class="series-overline">EDITORIAL INTELLIGENCE / COLLECTIONS</p>
-    <h1 id="series-page-title">SERIES <span>INSIGHTS</span></h1>
-    <p>Khám phá những chuỗi bài viết chuyên sâu. Theo dõi tiến độ từng series và đọc các kỳ theo đúng thứ tự.</p>
+<main class="series-library" aria-labelledby="series-title">
+  <header class="sl-hero">
+    <div class="sl-eyebrow">EDITORIAL INTELLIGENCE / COLLECTIONS</div>
+    <h1 id="series-title">SERIES <span>INSIGHTS</span></h1>
+    <p>Thư viện nghiên cứu có cấu trúc. Khám phá theo chủ đề, theo dõi tiến độ và mở từng kỳ khi cần.</p>
   </header>
-  <section class="series-kpis" aria-label="Tổng quan series">
-    <div class="series-kpi"><span>Series đang theo dõi</span><strong>{{ len $catalog }}</strong><small>Chủ đề nghiên cứu</small></div>
-    <div class="series-kpi"><span>Bài viết đã xuất bản</span><strong>{{ $totalArticles }}</strong><small>Chỉ tính bài công khai</small></div>
-    <div class="series-kpi"><span>Kỳ dự kiến</span><strong>{{ $planned := 0 }}{{ range $catalog }}{{ $planned = add $planned (.total | default 0) }}{{ end }}{{ $planned }}</strong><small>Tổng kỳ theo kế hoạch</small></div>
+  <section class="sl-kpis" aria-label="Thống kê thư viện">
+    <div><small>Tổng series</small><strong>{{ len $catalog }}</strong><span>Chủ đề nghiên cứu</span></div>
+    <div><small>Bài đã xuất bản</small><strong>{{ $published }}</strong><span>Trong các series</span></div>
+    <div><small>Tổng kỳ kế hoạch</small><strong>{{ $planned }}</strong><span>Theo danh mục biên tập</span></div>
+    <div><small>Series hoàn thành</small><strong>{{ $finished }}</strong><span>Đạt số kỳ dự kiến</span></div>
   </section>
-  <section class="series-collection" aria-label="Các series">
-    {{ range $catalog }}
-      {{ $entry := . }}
-      {{ $id := .id }}
-      {{ $matches := slice }}
-      {{ range $pages }}{{ if in (.Params.series | default (slice)) $id }}{{ $matches = $matches | append . }}{{ end }}{{ end }}
-      {{ $sorted := sort $matches "Params.seriesOrder" }}
-      {{ $count := len $matches }}
-      {{ $total := int (.total | default $count) }}
-      {{ $percent := 0 }}
-      {{ if gt $total 0 }}{{ $percent = div (mul (mul $count 100) 1) $total }}{{ end }}
-      {{ if gt $percent 100 }}{{ $percent = 100 }}{{ end }}
-      <article class="series-panel">
-        <div class="series-panel-head">
-          <div><span class="series-eyebrow">{{ .category }}</span><h2>{{ .title }}</h2><p>{{ .description }}</p></div>
-          <span class="series-count">{{ $count }}/{{ $total }} kỳ</span>
-        </div>
-        <div class="series-progress-line"><div class="series-progress-fill" style="width:{{ $percent }}%;"></div></div>
-        <div class="series-progress-caption"><span>Tiến độ xuất bản</span><strong>{{ $percent }}%</strong></div>
-        <ol class="series-episodes">
-          {{ range $sorted }}
-          <li><a href="{{ .RelPermalink }}"><span class="series-episode-index">{{ printf "%02d" (.Params.seriesOrder | default 0) }}</span><span class="series-episode-title">{{ .Title }}<small>{{ .Description | default "Đọc bài nghiên cứu" }}</small></span><span class="series-episode-arrow" aria-hidden="true">↗</span></a></li>
-          {{ end }}
-          {{ if eq $count 0 }}<li class="series-empty">Series chưa có bài công khai.</li>{{ end }}
+  <div class="sl-toolbar">
+    <label class="sl-search"><span class="sl-sr-only">Tìm series</span><input type="search" id="sl-search" placeholder="Tìm theo tên hoặc chủ đề..." autocomplete="off"></label>
+    <div class="sl-filters" role="group" aria-label="Lọc trạng thái">
+      <button type="button" data-filter="all" aria-pressed="true">Tất cả</button>
+      <button type="button" data-filter="active" aria-pressed="false">Đang viết</button>
+      <button type="button" data-filter="complete" aria-pressed="false">Hoàn thành</button>
+    </div>
+    <label class="sl-sort-label">Sắp xếp
+      <select id="sl-sort"><option value="latest">Mới cập nhật</option><option value="title">Tên A–Z</option><option value="progress">Tiến độ cao nhất</option></select>
+    </label>
+  </div>
+  <p class="sl-result" id="sl-result" aria-live="polite">Hiển thị {{ len $catalog }} series</p>
+  <section class="sl-grid" id="sl-grid" aria-label="Danh sách series">
+  {{ range $catalog }}
+    {{ $id := .id }}
+    {{ $matches := slice }}
+    {{ range $pages }}{{ if in (.Params.series | default (slice)) $id }}{{ $matches = $matches | append . }}{{ end }}{{ end }}
+    {{ $sorted := sort $matches "Params.seriesOrder" }}
+    {{ $count := len $sorted }}
+    {{ $total := int (.total | default $count) }}
+    {{ $percent := 0 }}
+    {{ if gt $total 0 }}{{ $percent = div (mul $count 100) $total }}{{ end }}
+    {{ if gt $percent 100 }}{{ $percent = 100 }}{{ end }}
+    {{ $complete := and (gt $total 0) (ge $count $total) }}
+    {{ $lastDate := 0 }}
+    {{ range $matches }}{{ if gt .Date.Unix $lastDate }}{{ $lastDate = .Date.Unix }}{{ end }}{{ end }}
+    <article class="sl-card" data-search="{{ printf "%s %s %s" .title .description .category | lower }}" data-status="{{ if $complete }}complete{{ else }}active{{ end }}" data-title="{{ .title | lower }}" data-progress="{{ $percent }}" data-date="{{ $lastDate }}">
+      <div class="sl-card-head"><span class="sl-category">{{ .category }}</span><span class="sl-status">{{ if $complete }}Hoàn thành{{ else }}Đang viết{{ end }}</span></div>
+      <h2>{{ .title }}</h2><p class="sl-desc">{{ .description }}</p>
+      <div class="sl-stats"><span><b>{{ $count }}</b> / {{ $total }} kỳ</span><strong>{{ $percent }}%</strong></div>
+      <div class="sl-track" role="progressbar" aria-label="Tiến độ {{ .title }}" aria-valuenow="{{ $percent }}" aria-valuemin="0" aria-valuemax="100"><span style="width:{{ $percent }}%"></span></div>
+      <details class="sl-details">
+        <summary><span>Xem {{ $count }} bài trong series</span><span aria-hidden="true">⌄</span></summary>
+        <ol>
+        {{ range $sorted }}
+          <li><a href="{{ .RelPermalink }}"><span class="sl-num">{{ printf "%02d" (.Params.seriesOrder | default 0) }}</span><span class="sl-article-title">{{ .Title }}</span><span aria-hidden="true">↗</span></a></li>
+        {{ end }}
+        {{ if eq $count 0 }}<li class="sl-empty">Chưa có bài nào được xuất bản.</li>{{ end }}
         </ol>
-      </article>
-    {{ end }}
+      </details>
+    </article>
+  {{ end }}
   </section>
+  <p id="sl-no-results" hidden>Không tìm thấy series phù hợp. Hãy thử từ khóa hoặc bộ lọc khác.</p>
 </main>
 <style>
-.series-insights{box-sizing:border-box;max-width:1120px;margin:32px auto 80px;padding:0 20px;color:#162438}
-.series-hero{padding:clamp(26px,5vw,54px);background:linear-gradient(120deg,#e9f3ff,#f8fbff 72%);border:1px solid #d8e7fb;border-radius:22px;margin-bottom:22px}
-.series-overline,.series-eyebrow{font-size:.76rem;letter-spacing:.12em;font-weight:800;color:#326da9;text-transform:uppercase}
-.series-hero h1{font-size:clamp(2rem,5vw,3.5rem);line-height:1.12;letter-spacing:-.035em;margin:12px 0 14px;color:#142945}
-.series-hero h1 span{color:#3577cb}
-.series-hero p{line-height:1.7;max-width:680px;margin:0;color:#4d6075}
-.series-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px;margin:0 0 25px}
-.series-kpi{background:#f4f8ff;border:1px solid #dce8f6;border-radius:15px;padding:20px;display:flex;flex-direction:column;gap:7px}
-.series-kpi span,.series-kpi small{color:#536881}.series-kpi span{font-size:.84rem;font-weight:700}.series-kpi strong{font-size:2.25rem;line-height:1.1;color:#174b86;font-variant-numeric:tabular-nums}
-.series-panel{padding:clamp(18px,3vw,32px);border:1px solid #d7e6f7;border-radius:18px;background:#fff;box-shadow:0 8px 30px rgba(37,87,143,.055);margin-bottom:22px}
-.series-panel-head{display:flex;gap:20px;justify-content:space-between;align-items:flex-start}.series-panel h2{font-size:clamp(1.3rem,2.5vw,1.85rem);line-height:1.3;margin:8px 0;color:#1b3452}.series-panel-head p{color:#5a6e82;line-height:1.6;margin:0 0 20px;max-width:750px}.series-count{white-space:nowrap;color:#20558d;background:#e9f3ff;border:1px solid #cde3fc;padding:7px 12px;border-radius:99px;font-weight:750;font-size:.85rem}
-.series-progress-line{height:11px;background:#e4edf7;border-radius:99px;overflow:hidden}.series-progress-fill{height:100%;background:linear-gradient(90deg,#5aa0ef,#2675c7);border-radius:99px;max-width:100%}
-.series-progress-caption{display:flex;justify-content:space-between;margin:9px 0 20px;color:#5a6e82;font-size:.84rem}.series-progress-caption strong{color:#20558d}
-.series-episodes{margin:0;padding:0;list-style:none;display:grid;gap:9px}
-.series-episodes li a{display:flex;align-items:center;gap:16px;text-decoration:none;padding:15px;border:1px solid #e0eaf5;border-radius:11px;background:#f9fbff;color:#203953;transition:background .18s,border-color .18s}
-.series-episodes li a:hover,.series-episodes li a:focus-visible{background:#eaf3ff;border-color:#a5c8f0}
-.series-episode-index{font-size:1rem;font-weight:850;font-variant-numeric:tabular-nums;color:#3175c2;min-width:30px}
-.series-episode-title{flex:1;font-weight:760;line-height:1.35}.series-episode-title small{display:block;font-weight:400;color:#64768a;font-size:.77rem;margin-top:5px;line-height:1.45}
-.series-episode-arrow{font-size:1.3rem;color:#4884c9}.series-empty{padding:18px;color:#75859a}
-@media(max-width:640px){.series-insights{padding:0 12px;margin:20px auto 60px}.series-kpis{grid-template-columns:1fr;gap:10px}.series-kpi{padding:14px}.series-kpi strong{font-size:1.75rem}.series-panel-head{display:block}.series-count{display:inline-block;margin-bottom:15px}.series-episodes li a{padding:12px;gap:9px}}
+.series-library{max-width:1200px;margin:24px auto 80px;padding:0 20px;color:#20364f}
+.sl-hero{background:linear-gradient(115deg,#e8f3ff,#f9fcff);border:1px solid #d7e7f8;border-radius:20px;padding:clamp(23px,4vw,44px);margin-bottom:20px}
+.sl-eyebrow,.sl-category{color:#326faf;font-size:.74rem;font-weight:800;letter-spacing:.075em;text-transform:uppercase}
+.sl-hero h1{font-size:clamp(2rem,4.3vw,3.2rem);color:#173b65;margin:10px 0;line-height:1.15}
+.sl-hero h1 span{color:#377cca}.sl-hero p{max-width:680px;line-height:1.7;color:#52677d;margin:0}
+.sl-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:22px}
+.sl-kpis>div{background:#f3f8ff;border:1px solid #dce9f7;border-radius:13px;padding:17px;display:flex;flex-direction:column;gap:4px}
+.sl-kpis small,.sl-kpis span{color:#62758a;font-size:.78rem}.sl-kpis strong{font-size:2rem;line-height:1.15;color:#205d9d;font-variant-numeric:tabular-nums}
+.sl-toolbar{display:flex;align-items:center;flex-wrap:wrap;gap:12px;background:#fff;border:1px solid #e0e9f5;border-radius:14px;padding:13px;margin-bottom:8px}
+.sl-search{flex:1;min-width:195px}.sl-search input{box-sizing:border-box;width:100%;padding:11px 13px;border:1px solid #cedff1;border-radius:9px;color:#243b54;background:#f8fbff}
+.sl-filters{display:flex;gap:4px;flex-wrap:wrap}.sl-filters button{background:#eef4fb;color:#365c86;border:0;border-radius:8px;padding:10px 11px;font-weight:700;cursor:pointer}
+.sl-filters button[aria-pressed=true]{background:#276caf;color:#fff}.sl-sort-label{font-size:.78rem;color:#596b7d;display:flex;gap:7px;align-items:center}
+.sl-sort-label select{padding:9px;border:1px solid #cedff1;border-radius:8px;background:#fff;color:#243b54}
+.sl-result{font-size:.8rem;color:#5e7289;margin:0 0 12px}.sl-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start}
+.sl-card{min-width:0;background:#fff;border:1px solid #dae6f4;box-shadow:0 7px 22px rgba(28,75,124,.045);border-radius:17px;padding:22px}
+.sl-card-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.sl-status{font-size:.75rem;font-weight:750;border-radius:99px;background:#eaf4ff;color:#296aaa;padding:6px 9px;white-space:nowrap}
+.sl-card h2{color:#183c60;font-size:1.26rem;line-height:1.35;margin:15px 0 9px}
+.sl-desc{color:#5e7184;line-height:1.6;font-size:.88rem;margin:0 0 16px;min-height:2.8em}
+.sl-stats{display:flex;justify-content:space-between;color:#5d7085;font-size:.83rem;margin-bottom:9px}.sl-stats strong,.sl-stats b{color:#276baf}
+.sl-track{background:#e6eef7;border-radius:20px;height:9px;overflow:hidden}.sl-track span{display:block;background:#3b87d7;height:100%;border-radius:20px}
+.sl-details{margin-top:17px;border-top:1px solid #e3ecf5;padding-top:13px}.sl-details summary{display:flex;justify-content:space-between;cursor:pointer;color:#276aaa;font-weight:800;font-size:.86rem;list-style:none}
+.sl-details summary::-webkit-details-marker{display:none}.sl-details[open] summary span:last-child{transform:rotate(180deg)}
+.sl-details ol{list-style:none;padding:0;margin:13px 0 0;display:grid;gap:7px}
+.sl-details li a{display:flex;gap:11px;align-items:flex-start;padding:11px;border-radius:9px;text-decoration:none;color:#23415e;background:#f5f9ff;font-size:.83rem;line-height:1.45}
+.sl-details li a:hover,.sl-details li a:focus-visible{background:#e6f2ff}.sl-num{color:#387abb;font-weight:850;flex-shrink:0}.sl-article-title{flex:1}.sl-empty{color:#758498;font-size:.84rem}
+.sl-sr-only{position:absolute;width:1px;height:1px;clip:rect(0,0,0,0);overflow:hidden}
+#sl-no-results{color:#64778b;text-align:center;padding:40px 12px}
+@media(max-width:800px){.sl-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.sl-grid{grid-template-columns:1fr}}
+@media(max-width:480px){.series-library{padding:0 12px}.sl-kpis{gap:8px}.sl-kpis>div{padding:12px}.sl-kpis strong{font-size:1.6rem}.sl-card{padding:17px}.sl-toolbar{align-items:stretch}.sl-filters{width:100%}.sl-filters button{flex:1}}
 </style>
+<script>
+document.addEventListener("DOMContentLoaded",function(){
+  const input=document.getElementById("sl-search"), sort=document.getElementById("sl-sort"), grid=document.getElementById("sl-grid"), result=document.getElementById("sl-result"), empty=document.getElementById("sl-no-results");
+  if(!input||!grid)return;
+  const cards=Array.from(grid.querySelectorAll(".sl-card"));
+  const buttons=Array.from(document.querySelectorAll(".sl-filters button"));
+  let filter="all";
+  function update(){
+    const query=input.value.toLocaleLowerCase("vi").normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim();
+    let shown=0;
+    for(const card of cards){
+      const search=(card.dataset.search||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+      const matches=(!query||search.includes(query))&&(filter==="all"||card.dataset.status===filter);
+      card.hidden=!matches;
+      if(matches)shown++;
+    }
+    const selected=sort.value;
+    const ordered=cards.slice().sort((a,b)=>selected==="title"?(a.dataset.title||"").localeCompare(b.dataset.title||"","vi"):selected==="progress"?Number(b.dataset.progress)-Number(a.dataset.progress):Number(b.dataset.date)-Number(a.dataset.date));
+    ordered.forEach(el=>grid.appendChild(el));
+    result.textContent="Hiển thị "+shown+" / "+cards.length+" series";
+    empty.hidden=shown!==0;
+  }
+  input.addEventListener("input",update);
+  sort.addEventListener("change",update);
+  buttons.forEach(btn=>btn.addEventListener("click",function(){filter=btn.dataset.filter;buttons.forEach(x=>x.setAttribute("aria-pressed",String(x===btn)));update()}));
+  update();
+});
+</script>
 {{ end }}
