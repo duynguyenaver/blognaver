@@ -8,7 +8,55 @@
     {{- end -}}
   {{- end -}}
   {{- $data := dict "articles" $articles "series" (.Params.series | default "") "order" (.Params.seriesOrder | default 0) "current" .RelPermalink -}}
+  {{- $candidates := slice -}}
+  {{- range where site.RegularPages "Section" "posts" -}}
+    {{- if ne .RelPermalink $.RelPermalink -}}
+      {{- $candidates = $candidates | append . -}}
+    {{- end -}}
+  {{- end -}}
+  {{- if gt (len $candidates) 0 -}}
+  {{- with (index (shuffle $candidates) 0) -}}
+  {{- $thumb := .Params.featuredImagePreview | default .Params.featuredImage | default .Params.cover -}}
+  <aside id="bn-midarticle-card" class="bn-rec-section bn-rec-inline" aria-label="Có thể bạn sẽ thích">
+    <h2>CÓ THỂ BẠN SẼ THÍCH</h2>
+    <a class="bn-rec-card" href="{{ .RelPermalink }}">
+      <span class="bn-rec-image">
+        {{- with $thumb -}}<img src="{{ . | safeURL }}" loading="lazy" decoding="async" alt="Ảnh minh họa: {{ $.Title }}" onerror="this.remove()">{{- end -}}
+      </span>
+      <span class="bn-rec-copy">
+        <strong>{{ .Title }}</strong>
+        <small>{{ .Description | default (.Summary | plainify | truncate 125) }}</small>
+      </span>
+    </a>
+  </aside>
+  {{- end -}}
+  {{- end -}}
   <script id="bn-article-recommendations-data" type="application/json">{{ $data | jsonify | safeHTML }}</script>
   <link rel="stylesheet" href="{{ "css/article-recommendations.css" | relURL }}">
   <script src="{{ "js/article-recommendations.js" | relURL }}" defer></script>
+  <script>
+  (function () {
+    function placeSuggestion() {
+      var block = document.getElementById("bn-midarticle-card");
+      var body = document.querySelector("article.page.single #content");
+      if (!block || !body || body.contains(block)) return;
+      var paragraphs = Array.from(body.querySelectorAll("p")).filter(function (el) {
+        return (el.textContent || "").trim().length > 30 &&
+          !el.closest("aside, .bn-rec-section, nav, blockquote");
+      });
+      var anchors = paragraphs.length ? paragraphs :
+        Array.from(body.querySelectorAll("h2, h3, ul, ol, blockquote"));
+      if (anchors.length) {
+        anchors[Math.floor((anchors.length - 1) / 2)].insertAdjacentElement("afterend", block);
+      } else {
+        body.appendChild(block);
+      }
+    }
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", placeSuggestion, { once: true });
+    } else {
+      placeSuggestion();
+    }
+  })();
+  </script>
 {{- end -}}

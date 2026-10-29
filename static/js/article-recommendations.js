@@ -38,25 +38,6 @@
     link.append(visual, copy);
     return link;
   }
-  // Insert a single suggestion within the rendered article body, not at the footer.
-  // Select an actual text paragraph; nested Markdown wrappers are supported.
-  const paragraphs = [...body.querySelectorAll("p")]
-    .filter(p => !p.closest(".bn-rec-section, aside, nav, footer, header")
-      && (p.textContent || "").trim().length >= 40);
-  const anchors = paragraphs.length
-    ? paragraphs
-    : [...body.querySelectorAll("h2,h3,blockquote,ul,ol")].filter(el => !el.closest(".bn-rec-section"));
-  if (anchors.length) {
-    const choice = articles[Math.floor(Math.random() * articles.length)];
-    const inline = document.createElement("aside");
-    inline.className = "bn-rec-section bn-rec-inline";
-    inline.setAttribute("aria-label", "Có thể bạn sẽ thích");
-    const title = document.createElement("h2");
-    title.textContent = "CÓ THỂ BẠN SẼ THÍCH";
-    inline.append(title, card(choice));
-    const at = anchors[Math.max(0, Math.floor((anchors.length - 1) / 2))];
-    at.insertAdjacentElement("afterend", inline);
-  }
   const series = Array.isArray(data.series) ? data.series : [];
   const same = articles.filter(a => Array.isArray(a.series) && a.series.some(v => series.includes(v))).sort((a,b) => Number(a.order)-Number(b.order));
   const next = same.find(a => Number(a.order) > Number(data.order || 0));
