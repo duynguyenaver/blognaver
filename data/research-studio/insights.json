@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-29T20:56:55.116Z",
+  "updatedAt": "2026-10-29T20:57:54.741Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -358,7 +358,8 @@
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
-      ]
+      ],
+      "live": true
     },
     {
       "slug": "cold-fusion-nghich-ly-so-hoa-thi-truong-tour-va-trai-nghiem-du-lich-170-ty-usd-2026-10-29",
@@ -372,6 +373,23 @@
         "tokens": 19828,
         "inputTokens": 14283,
         "outputTokens": 5545
+      },
+      "models": [
+        "Gemini · models/gemini-3.5-flash-lite"
+      ]
+    },
+    {
+      "slug": "cold-fusion-thi-truong-cho-thue-ngan-han-tu-su-bung-no-nguon-cung-den-ap-luc-phap-ly-va-2026-10-29",
+      "title": "Thị trường cho thuê ngắn hạn: Từ sự bùng nổ nguồn cung đến áp lực pháp lý và bài học mở rộng quy mô",
+      "series": "cold-fusion",
+      "sha": "b00963eae1c299de02420f14b148d6eb7ba2e057",
+      "commitAt": "2026-10-29T20:57:33Z",
+      "durationMs": 30572,
+      "quota": {
+        "requests": 8,
+        "tokens": 25614,
+        "inputTokens": 19442,
+        "outputTokens": 6172
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
