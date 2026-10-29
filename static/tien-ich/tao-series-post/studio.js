@@ -2,7 +2,7 @@
 const $=s=>document.querySelector(s),REPO="duynguyenaver/blognaver",API="https://api.github.com/repos/"+REPO,SITE="https://duynguyenaver.github.io/blognaver/";
 const SERIES={"cold-fusion":{name:"ColdFusion Research",tag:"cold fusion",category:"Công nghệ"},"lex-fridman":{name:"Lex Fridman Podcast Research",tag:"Lex Fridman",category:"Công nghệ"}};
 const KEYSTORE="bn_series_research_gemini_session",DRAFT="bn_series_research_checkpoint_v1";
-let abort=null,working=false,rawMarkdown="",currentModel="",key="",lastSlug="";
+let abort=null,working=false,rawMarkdown="",currentModel="",key="",lastSlug="",lastCommitProof=null;
 const clean=s=>String(s||"").trim(),slug=s=>clean(s).normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/đ/g,"d").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,75);
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const json=s=>{try{return JSON.parse(s)}catch{const first=s.indexOf("{"),last=s.lastIndexOf("}");if(first>=0&&last>first)return JSON.parse(s.slice(first,last+1));throw Error("Gemini không trả về JSON hợp lệ")}};
@@ -10,7 +10,7 @@ const encode=str=>{let bin="";for(const b of new TextEncoder().encode(str))bin+=
 const decode=str=>new TextDecoder().decode(Uint8Array.from(atob(str.replace(/\s/g,"")),c=>c.charCodeAt(0)));
 const state=(message,error=false)=>{$("#status").textContent=message;$("#status").style.color=error?"#b33b52":"#52708b"};
 function progress(n,phase,step){$("#progressFill").style.width=n+"%";$("#percent").textContent=n+"%";$("#phase").textContent=phase;[...$("#steps").children].forEach((e,i)=>e.className=i<step?"done":i===step?"active":"")}
-function checkpoint(extra){try{localStorage.setItem(DRAFT,JSON.stringify({at:Date.now(),series:$("#series").value,source:$("#transcript").value,sourceUrl:$("#sourceUrl").value,angle:$("#angle").value,markdown:rawMarkdown,...extra}))}catch{state("Bộ nhớ trình duyệt đầy. Bài vẫn trong trang; hãy tải Markdown để sao lưu.")}}
+function checkpoint(extra){try{localStorage.setItem(DRAFT,JSON.stringify({at:Date.now(),series:$("#series").value,source:$("#transcript").value,sourceUrl:$("#sourceUrl").value,angle:$("#angle").value,markdown:rawMarkdown,commitProof:lastCommitProof,...extra}))}catch{state("Bộ nhớ trình duyệt đầy. Bài vẫn trong trang; hãy tải Markdown để sao lưu.")}}
 function available(){key=clean($("#geminiKey").value)||sessionStorage.getItem(KEYSTORE)||"";if(!key)throw Error("Bạn cần nhập Gemini API key mới. Key chỉ dùng trong phiên này.");sessionStorage.setItem(KEYSTORE,key);return key}
 async function geminiRequest(url,body=null,signal=null){
  const token=availableKey();let last;
@@ -85,6 +85,7 @@ function makeArticle(d){
  return front.join("\n")+(cover?"![Ảnh nhận diện nguồn video]("+cover+")\n\n":"")+d.body+"\n\n---\n\n## Nguồn và phương pháp\n\n- "+reference+"\n- Các lập luận trong bài được phát triển từ transcript gốc. Bài không sao chép hoặc dịch nguyên văn phụ đề.\n- Thông tin bên ngoài transcript chưa được xác minh tự động từ nguồn thứ ba; không coi diễn giải thành sự thật đã kiểm chứng.\n"
 }
 function setPublishEvidence(proof){
+ lastCommitProof=proof||null;
  const link=$("#actionsVerifyLink"),panel=$("#publishEvidence");
  if(!proof?.sha||!/^[a-f0-9]{40}$/.test(proof.sha)||!/^content\/posts\/[a-z0-9-]+\.md$/.test(proof.path)){
   link.hidden=true;panel.hidden=true;return;
