@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-29T20:53:55.760Z",
+  "updatedAt": "2026-10-29T20:56:55.116Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -340,7 +340,8 @@
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
-      ]
+      ],
+      "live": true
     },
     {
       "slug": "cold-fusion-hanh-trinh-the-ky-cua-marriott-tu-quay-bia-goc-den-de-che-khach-san-toan-ca-2026-10-29",
@@ -354,6 +355,23 @@
         "tokens": 28183,
         "inputTokens": 21323,
         "outputTokens": 6860
+      },
+      "models": [
+        "Gemini · models/gemini-3.5-flash-lite"
+      ]
+    },
+    {
+      "slug": "cold-fusion-nghich-ly-so-hoa-thi-truong-tour-va-trai-nghiem-du-lich-170-ty-usd-2026-10-29",
+      "title": "Nghịch lý số hóa thị trường tour và trải nghiệm du lịch 170 tỷ USD",
+      "series": "cold-fusion",
+      "sha": "525f2a91d04e62117c7e12290867ec7556821af8",
+      "commitAt": "2026-10-29T20:56:32Z",
+      "durationMs": 28385,
+      "quota": {
+        "requests": 8,
+        "tokens": 19828,
+        "inputTokens": 14283,
+        "outputTokens": 5545
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
