@@ -22,3 +22,9 @@
   total: 0
   category: "Công nghệ · Kinh doanh"
   accent: "#397bd4"
+- id: lex-fridman
+  title: "Lex Fridman Podcast Research · Phân tích công nghệ"
+  description: "Nghiên cứu bằng tiếng Việt từ transcript podcast và video Lex Fridman: AI, kỹ thuật, kinh doanh và con người, được kiểm chứng nguồn."
+  total: 0
+  category: "Công nghệ · Podcast"
+  accent: "#397bd4"
