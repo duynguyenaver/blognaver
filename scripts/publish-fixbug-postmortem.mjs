@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // Fact-based, idempotent, no LLM, no execution of untrusted PR code.
 import {readFile} from "node:fs/promises";
+import {appendFileSync} from "node:fs";
 const repo=process.env.GITHUB_REPOSITORY||"duynguyenaver/blognaver";
 const token=process.env.GITHUB_TOKEN,number=Number(process.env.PR_NUMBER);
 if(!token||!Number.isInteger(number)||number<=0)throw Error("GITHUB_TOKEN / PR_NUMBER missing");
@@ -26,7 +27,32 @@ async function pages(path,limit=5){
  }
  return all;
 }
-const skip=s=>{console.log("SKIPPED: "+s);process.exit(0)};
+const labelSpecs={
+  "fixbug:evidence-confirmed":{color:"0969da",description:"PR had failed CI, a later passing revision and verified deterministic log evidence"},
+  "fixbug:published":{color:"1a7f37",description:"A verified Fix Bug 2026 blog article exists on main"},
+  "fixbug:github-only":{color:"9a6700",description:"No public Fix Bug article was generated; see workflow log for reason"}
+};
+const statuses=Object.keys(labelSpecs);
+function summary(kind,reason,url=""){
+ const msg="FIXBUG STATUS: "+kind+" — "+reason+(url?" | "+url:"");
+ console.log(msg);
+ if(process.env.GITHUB_STEP_SUMMARY)appendFileSync(process.env.GITHUB_STEP_SUMMARY,
+   "### Fix Bug 2026 · PR #"+number+"\n\n**"+kind+"** — "+reason+
+   (url?"\n\n[Bài blog / Markdown]("+url+")":"")+"\n\n");
+}
+async function mark(status){
+ try{
+   for(const [label,spec] of Object.entries(labelSpecs)){
+     const exists=await api("/labels/"+encodeURIComponent(label),"GET",null,true);
+     if(!exists){try{await api("/labels","POST",{name:label,...spec})}catch(e){if(!String(e).includes("422"))throw e}}
+   }
+   await api("/issues/"+number+"/labels","POST",{labels:[status]});
+   for(const label of statuses.filter(x=>x!==status)){
+     try{await api("/issues/"+number+"/labels/"+encodeURIComponent(label),"DELETE",null,true)}catch(e){console.warn("Could not clear old label:",e.message)}
+   }
+ }catch(e){console.warn("Could not update PR labels:",e.message)}
+}
+const skip=async reason=>{await mark("fixbug:github-only");summary("GITHUB ONLY / SKIPPED",reason);process.exit(0)};
 async function readLog(job){
  const r=await fetch(base+"/actions/jobs/"+job.id+"/logs",{headers:{Authorization:"Bearer "+token,Accept:"application/vnd.github+json"},redirect:"manual"});
  if([301,302,303,307].includes(r.status)){
@@ -40,10 +66,10 @@ async function readLog(job){
  return (await r.text()).slice(-250000);
 }
 const pr=await api("/pulls/"+number);
-if(pr.state!=="closed"||!pr.merged_at||!pr.merge_commit_sha)skip("PR not merged");
-if(pr.base.ref!=="main"||pr.head.repo?.full_name!==repo)skip("PR not from this repository/main");
-if(pr.user?.login==="github-actions[bot]"||/fixbug.2026/i.test(pr.title))skip("Avoid automation loop");
-if(await api("/contents/"+target+"?ref=main","GET",null,true))skip("Post already exists");
+if(pr.state!=="closed"||!pr.merged_at||!pr.merge_commit_sha)await skip("PR not merged");
+if(pr.base.ref!=="main"||pr.head.repo?.full_name!==repo)await skip("PR not from this repository/main");
+if(pr.user?.login==="github-actions[bot]"||/fixbug.2026/i.test(pr.title))await skip("Avoid automation loop");
+if(await api("/contents/"+target+"?ref=main","GET",null,true)){await mark("fixbug:published");summary("PUBLISHED","Article already exists on main",web+"/blob/main/"+target);process.exit(0)}
 const all=await pages("/actions/workflows/pr-bug-checker.yml/runs?event=pull_request",6);
 const runs=all.filter(r=>{
  const explicit=(r.pull_requests||[]).some(x=>x.number===number);
@@ -51,22 +77,24 @@ const runs=all.filter(r=>{
  return (explicit||fallback)&&ts(r.created_at)>=ts(pr.created_at)-60000&&ts(r.created_at)<=ts(pr.merged_at)+120000;
 }).sort((a,b)=>ts(a.created_at)-ts(b.created_at));
 const success=runs.filter(r=>r.status==="completed"&&r.conclusion==="success").at(-1);
-if(!success)skip("No successful linked Bug Checker run");
+if(!success)await skip("No successful linked Bug Checker run");
 const failed=runs.filter(r=>r.conclusion==="failure"&&r.head_sha!==success.head_sha&&ts(r.created_at)<ts(success.created_at)).at(-1);
-if(!failed)skip("No earlier failure on a different tested revision");
+if(!failed)await skip("No earlier failure on a different tested revision");
 const commits=await pages("/pulls/"+number+"/commits",3);
-if(commits.length<2)skip("No fix revision in PR commit history");
+if(commits.length<2)await skip("No fix revision in PR commit history");
 const jobs=await pages("/actions/runs/"+failed.id+"/jobs",2);
 let log="";
 for(const job of jobs.filter(j=>j.conclusion==="failure").slice(0,2)){try{log+="\n"+await readLog(job)}catch(e){console.warn("Log inaccessible:",e.message)}}
-if(!log)skip("No failed-job log");
+if(!log)await skip("No failed-job log");
 const kb=JSON.parse(await readFile("data/ci/bug-knowledge.json","utf8"));
 const known=(kb.cases||[]).filter(c=>{try{return new RegExp(c.regex,"im").test(log)}catch{return false}});
 const symptom=known.find(c=>c.kind==="deterministic");
-if(!symptom)skip("No deterministic evidence recognized in knowledge base");
+if(!symptom)await skip("No deterministic evidence recognized in knowledge base");
+await mark("fixbug:evidence-confirmed");
+summary("EVIDENCE CONFIRMED","Failed and passing runs on different SHAs, deterministic knowledge-base log signature");
 const changes=await pages("/pulls/"+number+"/files",3);
 const files=changes.filter(c=>c.filename&&c.status!=="removed").slice(0,12);
-if(!files.length)skip("No source files to describe");
+if(!files.length)await skip("No source files to describe");
 const title="Fix Bug 2026: "+clean(symptom.title,95)+" — PR #"+number;
 const lines=[
 "---",
@@ -125,11 +153,13 @@ const content=lines.join("\n");
 if(process.env.DRY_RUN==="1"){console.log("DRY RUN: "+target+" chars="+content.length);process.exit(0)}
 let saved=null;
 for(let i=0;i<3;i++){
- if(await api("/contents/"+target+"?ref=main","GET",null,true))skip("Already published on retry");
+ if(await api("/contents/"+target+"?ref=main","GET",null,true))await skip("Already published on retry");
  try{saved=await api("/contents/"+target,"PUT",{branch:"main",message:"content(fixbug): publish verified CI recovery PR #"+number,content:Buffer.from(content).toString("base64")});break}
  catch(e){if(i===2||!/\b409\b|\b422\b/.test(String(e)))throw e;await new Promise(r=>setTimeout(r,(i+1)*800))}
 }
 console.log("PUBLISHED "+target+" @ "+saved.commit.sha);
+await mark("fixbug:published");
+summary("PUBLISHED","Created file and committed to main",web+"/blob/main/"+target);
 // GITHUB_TOKEN commit does not trigger push workflows. workflow_dispatch is an exception.
 await api("/actions/workflows/hugo.yml/dispatches","POST",{ref:"main"});
 console.log("DEPLOY DISPATCHED for "+target);
