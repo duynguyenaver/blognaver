@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-29T22:06:23.910Z",
+  "updatedAt": "2026-10-29T22:08:11.381Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -482,6 +482,23 @@
         "tokens": 21370,
         "inputTokens": 15925,
         "outputTokens": 5445
+      },
+      "models": [
+        "Gemini · models/gemini-3.5-flash-lite"
+      ]
+    },
+    {
+      "slug": "cold-fusion-su-tien-hoa-cua-bao-tri-cong-nghiep-tu-bao-tri-dinh-ky-den-du-doan-thong-mi-2026-10-29",
+      "title": "Sự tiến hóa của bảo trì công nghiệp: Từ bảo trì định kỳ đến dự đoán thông minh",
+      "series": "cold-fusion",
+      "sha": "e10c64ceaa5d4bb8fcb7784e97d0d2aa933e2e96",
+      "commitAt": "2026-10-29T22:07:42Z",
+      "durationMs": 31102,
+      "quota": {
+        "requests": 9,
+        "tokens": 25049,
+        "inputTokens": 18860,
+        "outputTokens": 6189
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
