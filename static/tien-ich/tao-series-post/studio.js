@@ -283,19 +283,33 @@ async function publish(d){
  return created
 }
 async function start(e,restore=false){
- e.preventDefault();if(working)return;
- if(!restore){runData={};rawMarkdown="";resumePending=false}
- else if(lastCommitProof?.sha)return;
- abort=new AbortController();startedAt=Date.now();window.BNQuota?.beginRun();working=true;$("#startBtn").disabled=true;$("#cancelBtn").disabled=false;
- if(!restore){$("#resultLinks").replaceChildren();setPublishEvidence(null)}
- checkpoint({runStatus:restore&&(window.BNQuota?.retryAt?.()||0)>Date.now()?"waiting":"running",autoPublish:restore?runData.autoPublish:$("#autoPublish").checked});
+ e.preventDefault();
+ if(working){
+  try{enqueue()}catch(err){state("Không thể xếp hàng: "+err.message,true)}
+  return;
+ }
+ let job;
  try{
- const src=rawSource($("#transcript").value),url=clean($("#sourceUrl").value),series=$("#series").value,angle=clean($("#angle").value);
+  if(restore){
+   if(lastCommitProof?.sha)return;
+   job={source:runData.source,sourceUrl:runData.sourceUrl||"",series:runData.series||$("#series").value,angle:runData.angle||"",autoPublish:runData.autoPublish!==false};
+  }else job=formJob();
+ }catch(err){state("Không thể bắt đầu: "+err.message,true);return}
+ activeSource={...job};
+ if(!restore){runData={};rawMarkdown="";resumePending=false;clearSourceForm()}
+ abort=new AbortController();startedAt=Date.now();window.BNQuota?.beginRun();working=true;
+ $("#startBtn").disabled=false;$("#cancelBtn").disabled=false;
+ if(!restore){$("#resultLinks").replaceChildren();setPublishEvidence(null)}
+ renderQueue();
+ checkpoint({runStatus:restore&&(window.BNQuota?.retryAt?.()||0)>Date.now()?"waiting":"running",autoPublish:job.autoPublish});
+ let succeeded=false;
+ try{
+ const src=rawSource(job.source),url=clean(job.sourceUrl),series=job.series,angle=clean(job.angle);
  if(!SERIES[series])throw Error("Series không hợp lệ.");
  if(src.length<700)throw Error("Phụ đề quá ngắn. Hãy dán ít nhất 700 ký tự tiếng Anh.");
  if(src.length>350000)throw Error("Nguồn quá dài. Chia phụ đề thành file nhỏ hơn 350.000 ký tự.");
  if(url&&!/^https:\/\//i.test(url))throw Error("Đường dẫn nguồn phải là HTTPS.");
- available();if($("#autoPublish").checked&&!window.BNAuth?.read?.()&&!clean($("#githubManual").value))throw Error("Để tự đăng, hãy kết nối GitHub token chung của CMS trước.");if(!currentModel)await models();
+ available();if(job.autoPublish&&!window.BNAuth?.read?.()&&!clean($("#githubManual").value))throw Error("Để tự đăng, hãy kết nối GitHub token chung của CMS trước.");if(!currentModel)await models();
  progress(4,"Đọc nguồn và lập dàn ý",0);
  const chunks=chunkSource(src),briefs=restore&&Array.isArray(runData.briefs)?runData.briefs.slice():[];
  for(let i=briefs.length;i<chunks.length;i++){
@@ -323,29 +337,29 @@ async function start(e,restore=false){
  d.body="*"+prefix+". Bài viết phân tích dựa trên phụ đề tiếng Anh cung cấp, không phải bản dịch nguyên văn.*\n\n"+d.body;
  rawMarkdown=makeArticle(d);lastSlug=d.slug;$("#preview").textContent=rawMarkdown;$("#resultTitle").textContent=title;
  progress(88,"Đã hoàn thiện bản nghiên cứu",2);checkpoint({outline,published:false,slug:d.slug});
- if($("#autoPublish").checked){
+ if(job.autoPublish){
   progress(92,"Commit bài lên GitHub",3);await publish(d);progress(100,"Đã commit (kiểm tra Pages deploy riêng)",4);// Keep the publish proof and draft preview but clear the English source for a NEW job.
-  // Reset only the source inputs; keep series selection, API connections,
-  // generation result, GitHub commit links and Smart Insights intact.
-  $("#transcript").value="";
-  $("#transcript").defaultValue="";
-  $("#sourceFile").value="";
-  $("#sourceUrl").value="";
-  $("#sourceUrl").defaultValue="";
-  $("#angle").value="";
-  $("#sourceStats").textContent="0 ký tự";
+  // Source inputs were reset at the START of this run, so later incoming queue entries are never erased.
   checkpoint({published:true,runStatus:"completed",slug:d.slug,source:"",sourceUrl:"",angle:"",commitProof:lastCommitProof,productionMetrics:metrics,briefs:[],pieces:[],outline:null,retryAt:0});
-  state($("#status").textContent+"\nĐã làm mới biểu mẫu nguồn. Bạn có thể dán phụ đề mới ngay.");
+  state($("#status").textContent+"\nBiểu mẫu nguồn sẵn sàng cho bài mới. Hàng đợi sẽ chạy tiếp nếu có.");
   if(githubVerified)window.BNSeriesInsights?.sync().catch(()=>{});
  }else{checkpoint({runStatus:"completed"});window.BNSeriesInsights?.record({slug:d.slug,title:d.title,series:d.series,state:"draft",durationMs:Date.now()-startedAt,live:false,quota:window.BNQuota?.runSummary()});progress(100,"Hoàn thành bản thảo; chưa đăng",4);state("Đã tạo bản thảo Markdown. Bạn có thể copy hoặc xuất file; chưa ghi lên GitHub.")}
+ succeeded=true;
  }catch(e){
   state("Không hoàn tất: "+e.message,true);
   checkpoint({runStatus:abort?.signal.aborted?"stopped":"failed",error:e.message,retryAt:window.BNQuota?.retryAt?.()||0})
  }
- finally{window.BNQuota?.finishRun(Boolean(lastCommitProof?.sha));working=false;$("#startBtn").disabled=false;$("#cancelBtn").disabled=true;abort=null}
+ finally{
+  window.BNQuota?.finishRun(Boolean(lastCommitProof?.sha));working=false;
+  $("#cancelBtn").disabled=true;abort=null;activeSource=null;
+  renderQueue();
+  if(succeeded){$("#queueMessage").textContent="Đã hoàn tất phiên vừa chạy. "+queue.length+" bài còn lại sẽ tự tiếp tục.";dispatchNext()}
+  else $("#queueMessage").textContent="Phiên hiện tại dừng vì lỗi. Bài đang chờ vẫn được lưu; hãy tiếp tục phiên trước để xử lý hàng đợi.";
+}
 }
 function saveMarkdown(){const blob=new Blob([rawMarkdown],{type:"text/markdown;charset=utf-8"}),u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download=(lastSlug||"series-research")+".md";a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
 $("#studioForm").addEventListener("submit",start);
+$("#queueResume").onclick=()=>{if(working)return;const old=JSON.parse(localStorage.getItem(DRAFT)||"null");if(!old?.source)return;runData={...old};populateJob(old);start(new Event("submit"),true)};
 $("#cancelBtn").onclick=()=>{abort?.abort();runData.runStatus="stopped";checkpoint({runStatus:"stopped"});state("Đã yêu cầu dừng tự retry. Bản thảo vẫn được lưu.")};
 $("#sourceFile").onchange=async e=>{const f=e.target.files?.[0];if(!f)return;if(f.size>750000){state("File trên 750 KB: hãy chia thành nhiều phần.",true);return}$("#transcript").value=await f.text();$("#transcript").dispatchEvent(new Event("input"));checkpoint()};
 $("#transcript").addEventListener("input",()=>{$("#sourceStats").textContent=$("#transcript").value.length.toLocaleString("vi-VN")+" ký tự"});
@@ -373,7 +387,7 @@ try{const k=sessionStorage.getItem(KEYSTORE);if(k)$("#geminiKey").value=k;const 
 verifyExistingConnections().catch(()=>{});
 try{
  const old=JSON.parse(localStorage.getItem(DRAFT)||"null");
- if(old?.source&&old.runStatus==="waiting"&&!old.commitProof?.sha){
+ if(old?.source&&["waiting","running"].includes(old.runStatus)&&!old.commitProof?.sha){
   runData={...old};resumePending=true;
   $("#series").value=old.series||"cold-fusion";
   $("#autoPublish").checked=old.autoPublish!==false;
@@ -388,4 +402,6 @@ try{
   setTimeout(()=>start(new Event("submit"),true),1500);
  }
 }catch{}
+renderQueue();
+if(!resumePending&&queue.length)dispatchNext();
 })();
