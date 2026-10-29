@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-29T19:05:40.492Z",
+  "updatedAt": "2026-10-29T19:10:23.094Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -172,6 +172,24 @@
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
+      ],
+      "live": true
+    },
+    {
+      "slug": "cold-fusion-thanh-cat-tu-han-tu-bi-kich-ca-nhan-den-kien-truc-su-cua-the-gioi-hien-dai-2026-10-29",
+      "title": "Thành Cát Tư Hãn: Từ bi kịch cá nhân đến kiến trúc sư của thế giới hiện đại",
+      "series": "cold-fusion",
+      "sha": "5e2588b20fb026c0810c1a7376a38b692975ad9c",
+      "commitAt": "2026-10-29T19:10:06Z",
+      "durationMs": 170583,
+      "quota": {
+        "requests": 21,
+        "tokens": 215509,
+        "inputTokens": 198838,
+        "outputTokens": 16671
+      },
+      "models": [
+        "Gemini · models/gemini-3.1-flash-lite"
       ]
     }
   ]
