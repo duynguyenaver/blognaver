@@ -39,6 +39,46 @@ async function api(path,token){
  if(!response.ok){const e=Error("GitHub HTTP "+response.status);e.code=response.status;throw e}
  return response.json()
 }
+const CLOUD_FILE="data/research-studio/insights.json";
+const encode=value=>{const bytes=new TextEncoder().encode(value);let binary="";for(const v of bytes)binary+=String.fromCharCode(v);return btoa(binary)};
+async function pushHistory(token,entries,sha){
+ const response=await fetch(API+"/contents/"+CLOUD_FILE,{
+  method:"PUT",headers:{Authorization:"Bearer "+token,Accept:"application/vnd.github+json","Content-Type":"application/json"},
+  body:JSON.stringify({branch:"main",message:"chore(series): sync Research Studio publishing insights",content:encode(JSON.stringify({version:1,updatedAt:new Date().toISOString(),entries},null,2)+"\\n"),...(sha?{sha}:{})})
+ });
+ if(!response.ok)throw Error("Không thể lưu Insights lên GitHub: HTTP "+response.status);
+}
+function mergeHistory(cloudEntries){
+ const fields=["durationMs","quota","models","commitAt","live"];
+ for(const remote of cloudEntries){
+  if(!remote?.slug||!remote.sha)continue;
+  const item=rows.find(x=>x.slug===remote.slug);
+  if(!item){rows.push({...remote,state:"committed",fromGitHub:true});continue}
+  for(const field of fields){
+   if((item[field]===undefined||item[field]===null||field==="models"&&!item.models?.length)&&remote[field]!==undefined)item[field]=remote[field];
+  }
+ }
+}
+async function syncCloud(token){
+ let sha=null,cloudEntries=[];
+ try{const data=await api("contents/"+CLOUD_FILE+"?ref=main",token);sha=data.sha;
+  const source=JSON.parse(decode(data.content));cloudEntries=Array.isArray(source.entries)?source.entries:[];
+ }catch(e){if(e.code!==404)throw e}
+ mergeHistory(cloudEntries);
+ const existing=new Map(cloudEntries.map(x=>[x.slug,x]));
+ const canonical=rows.filter(x=>x.sha&&x.slug).map(x=>({
+   slug:x.slug,title:x.title,series:x.series,sha:x.sha,commitAt:x.commitAt||null,
+   ...(Number.isFinite(x.durationMs)?{durationMs:x.durationMs}:{}),
+   ...(x.quota?{quota:x.quota}:{}),
+   ...(Array.isArray(x.models)&&x.models.length?{models:x.models}:{}),
+   ...(x.live===true?{live:true}:{})
+ }));
+ for(const e of canonical)existing.set(e.slug,{...(existing.get(e.slug)||{}),...e});
+ const merged=[...existing.values()].slice(0,200);
+ const normalized=arr=>JSON.stringify(arr.slice().sort((a,b)=>a.slug.localeCompare(b.slug)).map(x=>({...x,commitAt:x.commitAt||null})));
+ if(normalized(merged)!==normalized(cloudEntries))await pushHistory(token,merged,sha);
+ return merged.length
+}
 const decode=value=>{const raw=atob(String(value||"").replace(/\s/g,""));return new TextDecoder().decode(Uint8Array.from(raw,c=>c.charCodeAt(0)))};
 const frontValue=(md,key)=>{
  const front=md.match(/^---\s*\r?\n([\s\S]*?)\r?\n---/);
@@ -110,11 +150,12 @@ async function sync(){
     if(previous)Object.assign(previous,item);else rows.push(item);
    }catch{failedDetails++}
   }
+  let cloudStatus="";try{const total=await syncCloud(token);cloudStatus=" · cloud "+total+" bài"}catch(e){cloudStatus=" · cloud chưa cập nhật: "+e.message}
   save();render();
   const liveCandidates=rows.filter(x=>x.sha&&!x.live).slice(0,12);
   await Promise.all(liveCandidates.map(verifyLive));save();render();
   lastSync=Date.now();
-  note("Đồng bộ với GitHub hoàn tất: "+selected.length+" bài từ commit và Markdown trên main"+(truncated?" · chỉ quét 500 commit gần nhất":"")+(failedDetails?" · "+failedDetails+" file chưa đọc được":"")+". Cập nhật "+new Date(lastSync).toLocaleTimeString("vi-VN")+".");
+  note("Đồng bộ với GitHub hoàn tất: "+selected.length+" bài từ commit và Markdown trên main"+(truncated?" · chỉ quét 500 commit gần nhất":"")+(failedDetails?" · "+failedDetails+" file chưa đọc được":"")+cloudStatus+". Cập nhật "+new Date(lastSync).toLocaleTimeString("vi-VN")+".");
  }catch(e){
   note("Không thể đồng bộ GitHub: "+e.message+". Dữ liệu cục bộ vẫn được giữ lại; kiểm tra token và thử làm mới.",true)
  }finally{busy=false;$("#refreshInsights").disabled=!connected}
