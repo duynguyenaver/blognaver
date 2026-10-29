@@ -23,8 +23,8 @@ function render(){
    const a=document.createElement("a");a.href=SITE+"bai-viet/"+encodeURIComponent(slug)+"/";a.textContent=x.live?"Mở bài đã xác nhận live ↗":"URL dự kiến · chưa xác nhận live ↗";a.target="_blank";a.rel="noopener noreferrer";first.append(document.createElement("br"),a)
   }
   cell(tr,x.series==="lex-fridman"?"Lex Fridman":x.series==="cold-fusion"?"ColdFusion":x.series||"—");
-  cell(tr,Number.isFinite(x.durationMs)?fmtTime(x.durationMs):"Chưa ghi nhận (bài cũ)");
-  cell(tr,Number.isFinite(x.quota?.requests)?Number(x.quota.tokens||0).toLocaleString("vi-VN")+" tokens · "+x.quota.requests+" requests":"Chưa ghi nhận (bài cũ)");
+  cell(tr,x.commitAt?new Date(x.commitAt).toLocaleString("vi-VN",{dateStyle:"short",timeStyle:"medium"}):x.sha?"Chưa xác nhận thời điểm commit":"Chưa commit");
+  cell(tr,Array.isArray(x.models)&&x.models.length?x.models.join(" · "):"Chưa ghi model (bài cũ)");
   const status=cell(tr,x.live?"Live ✓":x.sha?"Đã commit · Chờ xác nhận live":"Bản thảo");
   if(x.sha){const a=document.createElement("a");a.href="https://github.com/"+REPO+"/commit/"+x.sha;a.target="_blank";a.rel="noopener noreferrer";a.textContent=" · Commit ↗";status.append(a)}
   tbody.append(tr)
@@ -59,8 +59,9 @@ async function verifyLive(entry){
  }catch{}
 }
 async function sync(){
- if(!connected||busy)return;
+ if(busy)return;
  const token=window.BNAuth?.read?.();if(!token){setConnection(false);return}
+ try{await window.BNAuth.validate(token);connected=true}catch(e){setConnection(false);note("GitHub token chưa hợp lệ hoặc đã hết quyền. Kết nối lại token trước khi đồng bộ.",true);return}
  busy=true;$("#refreshInsights").disabled=true;note("Đang đối chiếu lịch sử commit và file bài viết trên GitHub…");
  try{
   const tree=await api("git/trees/main?recursive=1",token);
@@ -74,7 +75,7 @@ async function sync(){
     const match=line.match(/^content\(series-ai\): publish (cold-fusion|lex-fridman) research ([a-z0-9-]+)$/);
     if(match){
      const file="content/posts/"+match[2]+".md";
-     if(known.has(file))commits.push({sha:c.sha,path:file,slug:match[2],series:match[1],at:Date.parse(c.commit?.committer?.date||"")||0});
+     if(known.has(file))commits.push({sha:c.sha,path:file,slug:match[2],series:match[1],at:Date.parse(c.commit?.committer?.date||"")||0,commitAt:c.commit?.committer?.date||null});
     }
    }
    if(batch.length<100)break;
@@ -95,9 +96,11 @@ async function sync(){
     // Older posts may not contain metrics. Never manufacture exact time or token
     // values from GitHub timestamps or a different article's quota samples.
     const recovered=publishedMetrics&&typeof publishedMetrics==="object"?publishedMetrics:null;
+    const modelList=recovered?.models||frontValue(md,"aiModels");
     if(Array.isArray(realSeries)&&!realSeries.includes(entry.series))continue;
     const previous=rows.find(x=>x.slug===realSlug||x.slug===entry.slug);
-    const item={...(previous||{}),slug:realSlug,title,series:entry.series,sha:entry.sha,at:entry.at||Date.now(),state:"committed",fromGitHub:true};
+    const item={...(previous||{}),slug:realSlug,title,series:entry.series,sha:entry.sha,at:entry.at||Date.now(),commitAt:entry.commitAt||previous?.commitAt||null,state:"committed",fromGitHub:true};
+    if(Array.isArray(modelList)&&modelList.length)item.models=[...new Set(modelList.filter(x=>typeof x==="string"))];
     if(recovered){
       if(Number.isFinite(Number(recovered.durationMs))&&Number(recovered.durationMs)>=0)item.durationMs=Number(recovered.durationMs);
       if(Number.isFinite(Number(recovered.geminiRequests))&&Number(recovered.geminiRequests)>=0){
@@ -111,7 +114,7 @@ async function sync(){
   const liveCandidates=rows.filter(x=>x.sha&&!x.live).slice(0,12);
   await Promise.all(liveCandidates.map(verifyLive));save();render();
   lastSync=Date.now();
-  note("GitHub đã đồng bộ: "+selected.length+" bài Research Studio được xác nhận từ commit và Markdown trên main"+(truncated?" · chỉ quét 500 commit gần nhất":"")+(failedDetails?" · "+failedDetails+" file chưa đọc được":"")+". Cập nhật "+new Date(lastSync).toLocaleTimeString("vi-VN")+".");
+  note("Đồng bộ với GitHub hoàn tất: "+selected.length+" bài từ commit và Markdown trên main"+(truncated?" · chỉ quét 500 commit gần nhất":"")+(failedDetails?" · "+failedDetails+" file chưa đọc được":"")+". Cập nhật "+new Date(lastSync).toLocaleTimeString("vi-VN")+".");
  }catch(e){
   note("Không thể đồng bộ GitHub: "+e.message+". Dữ liệu cục bộ vẫn được giữ lại; kiểm tra token và thử làm mới.",true)
  }finally{busy=false;$("#refreshInsights").disabled=!connected}
@@ -123,7 +126,7 @@ function setConnection(ok){
  else note("Đã xác thực GitHub. Đang chuẩn bị đồng bộ lịch sử bài đăng…");
  render();
 }
-$("#refreshInsights").onclick=async()=>{if(!connected)return;await sync()};
+$("#refreshInsights").onclick=async()=>{await sync()};
 window.BNSeriesInsights={record,render,sync,setConnection,checkLive:async()=>{if(connected)await sync()}};
 setConnection(false);
 })();
