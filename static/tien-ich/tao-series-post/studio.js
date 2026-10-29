@@ -427,9 +427,9 @@ function populateJob(job){
  $("#angle").value=job.angle||"";$("#autoPublish").checked=job.autoPublish!==false;
  $("#sourceStats").textContent=job.source.length.toLocaleString("vi-VN")+" ký tự";
 }
-function dispatchNext(){
+function dispatchNext(force=false){
  if(working||queueBusy||!queue.length)return;
- const index=nextRunnableIndex();
+ const index=force?0:nextRunnableIndex();
  if(index<0){
   const earliest=Math.min(...queue.map(x=>Number(x.retryAt)||Date.now()+60000));
   $("#queueMessage").textContent="Các bài lỗi sẽ luân phiên thử model lại tự động; không chờ cooldown API.";
@@ -440,7 +440,7 @@ function dispatchNext(){
   $("#queueMessage").textContent="Hàng đợi đã lưu an toàn. Kết nối lại Gemini"+(upcoming.autoPublish!==false?" và GitHub":"")+" để tiếp tục; bài chờ chưa bị lấy ra.";
   openCredentials("Cần kết nối để chạy hàng đợi");renderQueue();return;
  }
- if(["failed","stopped","waiting","running"].includes(runData.runStatus)&&runData.source&&!lastCommitProof?.sha&&!queue.some(item=>item.source===runData.source)){
+ if(!force&&["failed","stopped","waiting","running"].includes(runData.runStatus)&&runData.source&&!lastCommitProof?.sha&&!queue.some(item=>item.source===runData.source)){
   $("#queueMessage").textContent="Phiên trước chưa hoàn thành; tiếp tục phiên này trước khi chạy hàng đợi.";
   renderQueue();return;
  }
@@ -457,8 +457,9 @@ function dispatchNext(){
   queueBusy=false;
   if(item.checkpoint){
    runData={...item.checkpoint};rawMarkdown=item.checkpoint.markdown||"";
-   setPublishEvidence(null);
   }
+  // A prior successful article must never block a different queued article.
+  setPublishEvidence(null);
   renderQueue();
   start(new Event("submit"),Boolean(item.checkpoint),item).catch(e=>state("Không thể chạy bài trong hàng đợi: "+e.message,true));
  },0);
@@ -1048,7 +1049,7 @@ async function start(e,restore=false,queuedJob=null){
  let job;
  try{
   if(restore){
-   if(lastCommitProof?.sha)return;
+   if(lastCommitProof?.sha&&!queuedJob)return;
    job=queuedJob?{...queuedJob}:{source:runData.source,sourceUrl:runData.sourceUrl||"",series:runData.series||$("#series").value,angle:runData.angle||"",autoPublish:runData.autoPublish!==false};
   }else job=queuedJob?{...queuedJob}:formJob();
  }catch(err){state("Không thể bắt đầu: "+err.message,true);return}
@@ -1190,11 +1191,19 @@ function saveMarkdown(){const blob=new Blob([rawMarkdown],{type:"text/markdown;c
 $("#studioForm").addEventListener("submit",start);
 $("#restoreQueueGithubBtn").addEventListener("click",pullQueueCloud);
 $("#runQueueBtn").addEventListener("click",async()=>{
- if(working||queueBusy){$("#queueMessage").textContent="Có bài đang chạy; hàng đợi sẽ tự tiếp tục sau khi bài hiện tại kết thúc.";return}
- if(!queue.length){$("#queueMessage").textContent="Đang khôi phục hàng đợi từ GitHub…";await pullQueueCloud(false);if(!queue.length){$("#queueMessage").textContent="Không có bài chờ trong bộ nhớ hoặc bản sao GitHub.";return}}
- $("#queueMessage").textContent="Đã yêu cầu chạy bài kế tiếp trong hàng đợi.";
- if(runData.source&&queue.some(x=>x.source===runData.source))runData={runStatus:"completed"};
- dispatchNext();
+ const btn=$("#runQueueBtn");btn.disabled=true;
+ try{
+  if(working||queueBusy){$("#queueMessage").textContent="Bài hiện tại đang chạy; sẽ tự chạy bài tiếp theo sau khi hoàn thành.";return}
+  if(!queue.length){$("#queueMessage").textContent="Đang khôi phục hàng đợi từ GitHub…";await pullQueueCloud(false)}
+  if(!queue.length){$("#queueMessage").textContent="Không tìm thấy bài nào trong hàng đợi cục bộ/GitHub.";return}
+  // Manual action explicitly bypasses queued job cooldown and a stale
+  // previous-draft status. A separate active job is never interrupted.
+  runData={runStatus:"completed"};resumePending=false;
+  setPublishEvidence(null);
+  $("#queueMessage").textContent="Đang khởi chạy bài #1 ở Section 05…";
+  dispatchNext(true);
+ }catch(e){$("#queueMessage").textContent="Không khởi chạy được hàng đợi: "+e.message;state(e.message,true)}
+ finally{btn.disabled=false}
 });
 $("#cancelBtn").onclick=()=>{abort?.abort();runData.runStatus="stopped";checkpoint({runStatus:"stopped"});state("Đã yêu cầu dừng tự retry. Bản thảo vẫn được lưu.")};
 $("#sourceFile").onchange=async e=>{const f=e.target.files?.[0];if(!f)return;if(f.size>750000){state("File trên 750 KB: hãy chia thành nhiều phần.",true);return}$("#transcript").value=await f.text();$("#transcript").dispatchEvent(new Event("input"));checkpoint()};
