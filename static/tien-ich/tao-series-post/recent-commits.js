@@ -3,7 +3,7 @@ const REPO="duynguyenaver/blognaver",API="https://api.github.com/repos/"+REPO,BA
 const $=s=>document.querySelector(s);
 const details=$("#recentCommitsDisclosure"),list=$("#recentCommitsList"),status=$("#recentCommitsStatus"),button=$("#recentCommitsRefresh");
 if(!details||!list||!status||!button)return;
-let timer=null,busy=false,lastLoaded=null,runId=0;
+let busy=false,lastLoaded=null,runId=0;
 function headers(){
  const token=window.BNAuth?.read?.()||"";
  return {Accept:"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28",...(token?{Authorization:"Bearer "+token}:{})};
@@ -29,7 +29,7 @@ function predictedUrl(path){
  return BASE+"/bai-viet/"+short.split("/").map(encodeURIComponent).join("/")+"/";
 }
 async function load(){
- if(busy||!details.open||document.hidden)return;
+ if(busy||!details.open)return;
  busy=true;button.disabled=true;
  const call=++runId;
  status.textContent="Đang đồng bộ commit và GitHub Actions…";
@@ -77,12 +77,6 @@ async function load(){
   status.textContent="Không thể làm mới: "+e.message+(lastLoaded?" · Giữ dữ liệu lần tải "+lastLoaded.toLocaleTimeString("vi-VN"):"");
  }finally{busy=false;button.disabled=false}
 }
-function manage(){
- clearInterval(timer);timer=null;
- if(details.open){load();timer=setInterval(load,30000)}
-}
-details.addEventListener("toggle",manage);
-document.addEventListener("visibilitychange",()=>{if(!document.hidden&&details.open)load()});
+// Deliberately no automatic fetch on open, focus, visibility or timer.
 button.addEventListener("click",load);
-if(details.open)manage();
 })();
