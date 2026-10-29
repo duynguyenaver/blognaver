@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-29T22:05:43.895Z",
+  "updatedAt": "2026-10-29T22:06:23.910Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -432,7 +432,8 @@
         "Groq · qwen/qwen3.8-27b",
         "Groq · allam-2-7b",
         "Gemini · models/gemini-3.5-flash-lite"
-      ]
+      ],
+      "live": true
     },
     {
       "slug": "cold-fusion-hanh-trinh-cua-uber-tu-cuoc-cach-mang-goi-xe-den-bai-toan-sieu-ung-dung-va--2026-10-29",
@@ -449,7 +450,8 @@
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
-      ]
+      ],
+      "live": true
     },
     {
       "slug": "cold-fusion-ung-dung-ai-va-khoa-hoc-du-lieu-trong-hang-khong-thuong-mai-thuc-te-toi-uu--2026-10-29",
@@ -463,6 +465,23 @@
         "tokens": 26016,
         "inputTokens": 18785,
         "outputTokens": 7231
+      },
+      "models": [
+        "Gemini · models/gemini-3.5-flash-lite"
+      ]
+    },
+    {
+      "slug": "ota-travel-chien-luoc-quan-tri-du-lieu-trong-nganh-ota-tu-nen-tang-cu-den-ky-nguyen-ai-2026-10-29",
+      "title": "Chiến lược quản trị dữ liệu trong ngành OTA: Từ nền tảng cũ đến kỷ nguyên AI",
+      "series": "ota-travel",
+      "sha": "901696f6370a6995e5f0928b3f682b19f848ff7e",
+      "commitAt": "2026-10-29T22:05:53Z",
+      "durationMs": 33551,
+      "quota": {
+        "requests": 8,
+        "tokens": 21370,
+        "inputTokens": 15925,
+        "outputTokens": 5445
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
