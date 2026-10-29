@@ -17,3 +17,36 @@
   text-transform: uppercase;
 }
 </style>
+
+<style>
+/* Editorial menu: match bold uppercase magazine navigation; retain current colors. */
+#header .menu-container .menu-item,
+#header .menu-container .menu-item a,
+#header .menu-container .menu-item span,
+#header .menu-container .menu-inner a,
+#header nav a,
+.header .menu-container a,
+.header .menu a,
+#header .header-title a {
+  text-transform: uppercase !important;
+  font-weight: 800 !important;
+  letter-spacing: .035em !important;
+}
+#footer a, #footer .footer-container, footer a {
+  text-transform: uppercase !important;
+  font-weight: 800 !important;
+}
+/* Remove all DoIt theme-selection widgets, including mobile variants. */
+#theme-switch, #theme-select, #theme-toggle,
+.theme-switch, .theme-select, .theme-toggle,
+.theme-switcher, [id^="theme-switch"], [id^="theme-select"] {
+  display: none !important;
+}
+</style>
+<script>
+/* Force light before theme initialization and discard an older dark preference. */
+try {
+  localStorage.setItem("theme", "light");
+} catch (e) {}
+document.documentElement.setAttribute("data-theme","light");
+</script>
