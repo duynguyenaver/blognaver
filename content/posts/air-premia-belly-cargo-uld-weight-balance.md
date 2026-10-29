@@ -2,7 +2,7 @@
 title: "Từ kho hàng lên Boeing 787-9: ULD, DCS và bài toán Weight & Balance"
 date: 2026-10-29T14:37:00+07:00
 draft: false
-series: "air-premia-cargo"
+series: ["air-premia-cargo"]
 seriesOrder: 3
 slug: "air-premia-belly-cargo-uld-weight-balance"
 description: "Giải thích GHA, build-up ULD, giới hạn tải và liên kết dữ liệu cargo với load control."
