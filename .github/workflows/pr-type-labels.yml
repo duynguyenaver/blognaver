@@ -1,0 +1,79 @@
+name: Label PR by conventional type and CI result
+run-name: "Label PRs · ${{ github.event.workflow_run.display_title }}"
+
+on:
+  workflow_run:
+    workflows: ["PR Bug Checker"]
+    types: [completed]
+
+permissions:
+  pull-requests: write
+  issues: write
+  actions: read
+  contents: read
+
+jobs:
+  label:
+    name: Update PR type and CI labels
+    if: github.event.workflow_run.event == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Identify tested PR and apply conventional labels
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b
+        with:
+          script: |
+            const owner=context.repo.owner,repo=context.repo.repo;
+            const run=context.payload.workflow_run;
+            const linked=run.pull_requests || [];
+            const matches=linked.length?linked:(await github.rest.repos.listPullRequestsAssociatedWithCommit({
+              owner,repo,commit_sha:run.head_sha
+            })).data;
+            if(matches.length!==1||!matches[0].number){core.notice('No unique PR associated with this run');return;}
+            const number=matches[0].number;
+            const {data:pr}=await github.rest.pulls.get({owner,repo,pull_number:number});
+            if(pr.base.ref!=='main'||pr.head.repo.full_name!==owner+'/'+repo){
+              core.notice('Skipping fork/unrelated PR');return;
+            }
+            const type=(pr.title.match(/^([a-z]+)(?:\([^)]+\))?(?:!?)\s*:/i)||[])[1]?.toLowerCase()||'other';
+            const definitions={
+              feat:{color:'8957e5',description:'New feature'},
+              fix:{color:'d73a49',description:'Bug fix'},
+              chore:{color:'8b949e',description:'Maintenance'},
+              docs:{color:'0969da',description:'Documentation'},
+              perf:{color:'0e8a16',description:'Performance optimization'},
+              refactor:{color:'6f42c1',description:'Refactoring'},
+              style:{color:'e99695',description:'Style and UI'},
+              test:{color:'fbca04',description:'Tests'},
+              ci:{color:'1f883d',description:'CI and automation'},
+              content:{color:'bf8700',description:'Editorial content'},
+              hotfix:{color:'b60205',description:'Urgent repair'},
+              ux:{color:'c297ff',description:'UX changes'},
+              other:{color:'ced9e0',description:'Unclassified'}
+            };
+            const desired=definitions[type]?type:'other';
+            const ciLabel=run.conclusion==='success'?'ci:passed':run.conclusion==='failure'?'ci:failed':null;
+            const labelDefs={...definitions,
+              'ci:passed':{color:'1a7f37',description:'Bug Checker passed'},
+              'ci:failed':{color:'b60205',description:'Bug Checker failed'}
+            };
+            for(const [label,spec] of Object.entries(labelDefs)){
+              try{await github.rest.issues.getLabel({owner,repo,name:label})}
+              catch(e){if(e.status!==404)throw e;try{await github.rest.issues.createLabel({owner,repo,name:label,...spec})}
+                catch(err){if(err.status!==422)throw err}}
+            }
+            const {data:existing}=await github.rest.issues.listLabelsOnIssue({owner,repo,issue_number:number,per_page:100});
+            const current=new Set(existing.map(x=>x.name));
+            const toAdd=[desired];
+            const fresh=pr.head.sha===run.head_sha;
+            if(ciLabel&&fresh)toAdd.push(ciLabel);
+            for(const label of toAdd.filter(x=>!current.has(x))){
+              await github.rest.issues.addLabels({owner,repo,issue_number:number,labels:[label]});
+            }
+            for(const old of current){
+              if((Object.hasOwn(definitions,old)&&old!==desired)||
+                  (fresh&&(old==='ci:passed'||old==='ci:failed')&&old!==ciLabel)){
+                await github.rest.issues.removeLabel({owner,repo,issue_number:number,name:old}).catch(e=>{if(e.status!==404)throw e});
+              }
+            }
+            core.notice('PR #'+number+' labels: '+toAdd.join(', ')+(fresh?'':' (CI status not changed: stale SHA)'));
+            await core.summary.addHeading('PR labels').addRaw('PR #'+number+' · Type: '+desired+' · CI: '+(ciLabel||run.conclusion)+' · SHA checked: '+run.head_sha).write();
