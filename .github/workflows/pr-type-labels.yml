@@ -1,7 +1,10 @@
 name: Label PR by conventional type and CI result
-run-name: "Label PRs · ${{ github.event.workflow_run.display_title }}"
+run-name: "Label PR · ${{ github.event.pull_request.title || github.event.workflow_run.display_title }}"
 
 on:
+  pull_request_target:
+    types: [opened, edited, reopened, synchronize]
+    branches: [main]
   workflow_run:
     workflows: ["PR Bug Checker"]
     types: [completed]
@@ -15,7 +18,7 @@ permissions:
 jobs:
   label:
     name: Update PR type and CI labels
-    if: github.event.workflow_run.event == 'pull_request'
+    if: github.event_name == 'pull_request_target' || github.event.workflow_run.event == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - name: Identify tested PR and apply conventional labels
@@ -24,17 +27,23 @@ jobs:
           script: |
             const owner=context.repo.owner,repo=context.repo.repo;
             const run=context.payload.workflow_run;
-            const linked=run.pull_requests || [];
-            const matches=linked.length?linked:(await github.rest.repos.listPullRequestsAssociatedWithCommit({
-              owner,repo,commit_sha:run.head_sha
-            })).data;
-            if(matches.length!==1||!matches[0].number){core.notice('No unique PR associated with this run');return;}
-            const number=matches[0].number;
+            let number=context.payload.pull_request?.number;
+            if(!number){
+              const linked=run?.pull_requests || [];
+              const matches=linked.length?linked:(await github.rest.repos.listPullRequestsAssociatedWithCommit({
+                owner,repo,commit_sha:run.head_sha
+              })).data;
+              if(matches.length!==1||!matches[0].number){core.notice('No unique PR associated with this run');return;}
+              number=matches[0].number;
+            }
             const {data:pr}=await github.rest.pulls.get({owner,repo,pull_number:number});
             if(pr.base.ref!=='main'||pr.head.repo.full_name!==owner+'/'+repo){
               core.notice('Skipping fork/unrelated PR');return;
             }
-            const type=(pr.title.match(/^([a-z]+)(?:\([^)]+\))?(?:!?)\s*:/i)||[])[1]?.toLowerCase()||'other';
+            const titleType=(pr.title.match(/^([a-z]+)(?:\([^)]+\))?(?:!?)\s*:/i)||[])[1]?.toLowerCase();
+            const branchType=(pr.head.ref.match(/^(feat|feature|fix|bugfix|chore|docs|perf|refactor|style|test|ci|content|hotfix|ux)[/-]/i)||[])[1]?.toLowerCase();
+            const aliases={feature:'feat',bugfix:'fix'};
+            const type=aliases[titleType]||titleType||aliases[branchType]||branchType||'other';
             const definitions={
               feat:{color:'8957e5',description:'New feature'},
               fix:{color:'d73a49',description:'Bug fix'},
@@ -51,7 +60,7 @@ jobs:
               other:{color:'ced9e0',description:'Unclassified'}
             };
             const desired=definitions[type]?type:'other';
-            const ciLabel=run.conclusion==='success'?'ci:passed':run.conclusion==='failure'?'ci:failed':null;
+            const ciLabel=run?.conclusion==='success'?'ci:passed':run?.conclusion==='failure'?'ci:failed':null;
             const labelDefs={...definitions,
               'ci:passed':{color:'1a7f37',description:'Bug Checker passed'},
               'ci:failed':{color:'b60205',description:'Bug Checker failed'}
@@ -64,7 +73,7 @@ jobs:
             const {data:existing}=await github.rest.issues.listLabelsOnIssue({owner,repo,issue_number:number,per_page:100});
             const current=new Set(existing.map(x=>x.name));
             const toAdd=[desired];
-            const fresh=pr.head.sha===run.head_sha;
+            const fresh=Boolean(run && pr.head.sha===run.head_sha);
             if(ciLabel&&fresh)toAdd.push(ciLabel);
             for(const label of toAdd.filter(x=>!current.has(x))){
               await github.rest.issues.addLabels({owner,repo,issue_number:number,labels:[label]});
@@ -76,4 +85,4 @@ jobs:
               }
             }
             core.notice('PR #'+number+' labels: '+toAdd.join(', ')+(fresh?'':' (CI status not changed: stale SHA)'));
-            await core.summary.addHeading('PR labels').addRaw('PR #'+number+' · Type: '+desired+' · CI: '+(ciLabel||run.conclusion)+' · SHA checked: '+run.head_sha).write();
+            await core.summary.addHeading('PR labels').addRaw('PR #'+number+' · Type: '+desired+' · Source: '+(titleType?'title':'branch')+' · CI: '+(ciLabel||'not changed')+(run?' · SHA checked: '+run.head_sha:'')).write();
