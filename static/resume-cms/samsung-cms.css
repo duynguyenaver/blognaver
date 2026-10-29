@@ -1,0 +1,28 @@
+/* Samsung-document-inspired form UX; BlogNaver distinct identity. */
+:root{--s-blue:#087eb6;--s-dark:#102b49;--s-border:#b9c8d6;--s-soft:#edf5fc}
+header{background:#102b49}header h1{letter-spacing:-.025em}
+.container{max-width:1440px}.layout{grid-template-columns:270px minmax(0,1fr);gap:22px}
+.card{border-radius:12px;border-color:#cfdae5;box-shadow:0 3px 17px #16304b09}
+#form>.card{padding:0 0 21px;overflow:hidden}
+#form>.card>:not(.labelrow):not(h2){margin-left:22px;margin-right:22px}
+#form>.card>h2,#form>.card>.labelrow{background:#eaf2fa;border-bottom:2px solid #167fb4;padding:18px 22px;margin:0 0 17px;min-height:58px}
+#form>.card>.labelrow>h2{margin:0;font-size:18px;font-weight:850;color:#123e60}
+#form>.card>h2{font-weight:850;color:#123e60;font-size:18px}
+label{color:#344c63;font-size:12px;font-weight:750}
+input,textarea,select{border:1px solid #b7c7d6;border-radius:5px;background:#fff}
+input:focus,textarea:focus,select:focus{outline:2px solid #a2d9f6;outline-offset:1px;border-color:#1681b8}
+input[type=range]{accent-color:#087eb6;padding:3px}
+button{background:#0d699e}button.secondary{background:#edf5fc;color:#194967;border:1px solid #c4daea}
+button:hover{filter:brightness(.97)}button:focus-visible{outline:3px solid #7ab8f5;outline-offset:2px}
+.entry{background:#f8fbfe;border:1px solid #c8d9e7;border-left:4px solid #2ba4db;border-radius:7px}
+.entry h4{font-size:14px;color:#173d5b}
+.notice{background:#eaf4ff;color:#254660;border:1px solid #c8e2f3;line-height:1.65}
+.samsung-step .sub{line-height:1.7}
+#portraitCropControls[hidden]{display:none!important}
+#portraitPreview{width:104px!important;height:130px!important;border:2px solid #9abed9;border-radius:3px!important}
+#resumePreview{border:1px solid #bdcfdd}
+.previewbar{background:#112f4b}
+.cv-workflow-guide{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 14px;color:#2b5c81}
+.cv-workflow-guide>span{display:inline-block;background:#e6f2fb;border-radius:99px;padding:6px 11px;font-size:11px;font-weight:750}
+@media(max-width:850px){.layout{display:block}.sticky{position:static}}
+@media(max-width:600px){.container{padding:12px 9px}#form>.card>:not(.labelrow):not(h2){margin-left:13px;margin-right:13px}#form>.card>h2,#form>.card>.labelrow{padding:15px 13px}.card{padding:15px}}
