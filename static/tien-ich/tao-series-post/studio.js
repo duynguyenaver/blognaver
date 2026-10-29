@@ -172,9 +172,17 @@ $("#cancelBtn").onclick=()=>{abort?.abort();state("Đang dừng các yêu cầu 
 $("#sourceFile").onchange=async e=>{const f=e.target.files?.[0];if(!f)return;if(f.size>750000){state("File trên 750 KB: hãy chia thành nhiều phần.",true);return}$("#transcript").value=await f.text();$("#transcript").dispatchEvent(new Event("input"));checkpoint()};
 $("#transcript").addEventListener("input",()=>{$("#sourceStats").textContent=$("#transcript").value.length.toLocaleString("vi-VN")+" ký tự"});
 $("#testAI").onclick=()=>models().catch(e=>{openCredentials("Kiểm tra lại Gemini");state(e.message,true)});
+/* Verify previously connected credentials once on reload; never collapse solely on a stored key. */
+async function verifyExistingConnections(){
+ const saved=window.BNAuth?.read?.(),gemini=availableKey();
+ if(saved){try{await window.BNAuth.validate(saved);githubVerified=true;$("#githubState").textContent="● Đã xác thực GitHub token chung";foldCredentials()}catch{githubVerified=false;openCredentials("GitHub token cần kiểm tra")}}
+ if(gemini){try{await models()}catch{geminiVerified=false;openCredentials("Gemini key cần kiểm tra")}}
+}
+
 $("#model").onchange=()=>{currentModel=$("#model").value;state("Model đã chọn: "+currentModel)};
 $("#copyDraft").onclick=()=>navigator.clipboard.writeText(rawMarkdown).then(()=>state("Đã copy Markdown.")).catch(e=>state(e.message,true));
 $("#downloadDraft").onclick=saveMarkdown;
 $("#connectGithub").onclick=async()=>{try{const value=clean($("#githubManual").value);if(value){await window.BNAuth.validate(value);window.BNAuth.save(value,$("#rememberGithub").checked);$("#githubManual").value=""}else{const t=window.BNAuth?.read();if(!t)throw Error("Chưa có token CMS. Hãy nhập token phía dưới.");await window.BNAuth.validate(t)}$("#githubState").textContent="● Đã kết nối GitHub (token CMS chung)";githubVerified=true;foldCredentials();}catch(e){githubVerified=false;openCredentials("Kiểm tra lại GitHub");state("Không thể kết nối GitHub: "+e.message,true)}};
 try{const k=sessionStorage.getItem(KEYSTORE);if(k)$("#geminiKey").value=k;const t=window.BNAuth?.read?.();$("#githubState").textContent=t?"● Đã có GitHub token chung từ CMS":"○ Chưa có token CMS — cần kết nối trước khi đăng";const old=JSON.parse(localStorage.getItem(DRAFT)||"null");if(old?.source&&Date.now()-old.at<86400000){$("#series").value=old.series||"cold-fusion";$("#transcript").value=old.source;$("#sourceUrl").value=old.sourceUrl||"";$("#angle").value=old.angle||"";rawMarkdown=old.markdown||"";setPublishEvidence(old.commitProof);$("#preview").textContent=rawMarkdown;$("#copyDraft").disabled=!rawMarkdown;$("#downloadDraft").disabled=!rawMarkdown;$("#transcript").dispatchEvent(new Event("input"));state("Đã khôi phục checkpoint của phiên viết trước. Có thể bắt đầu lại hoặc tải bản thảo.");}}catch{}
+verifyExistingConnections().catch(()=>{});
 })();
