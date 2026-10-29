@@ -182,13 +182,22 @@ async function publish(d){
  const file="content/posts/"+d.slug+".md";
  // Never overwrite a historical post. First check source.
  try{await github("contents/"+file+"?ref=main");throw Error("Slug này đã có bài trên main, không được ghi đè. Thử lại với tiêu đề khác.");}catch(e){if(e.status!==404)throw e}
+ // Persist non-sensitive production metrics with the article itself so GitHub can
+ // restore exact values after reload, on the same device or a new browser.
+ // This is elapsed generation time BEFORE the GitHub write (not deploy time).
+ const usage=window.BNQuota?.runSummary?.()||{};
+ const metrics={durationMs:Math.max(0,Date.now()-startedAt),geminiRequests:Number(usage.requests)||0,geminiTokens:Number(usage.tokens)||0,inputTokens:Number(usage.inputTokens)||0,outputTokens:Number(usage.outputTokens)||0};
+ if(!rawMarkdown.startsWith("---\n"))throw Error("Bản thảo thiếu YAML frontmatter, không thể lưu metadata.");
+ rawMarkdown=rawMarkdown.replace(/^---\n/,"---\nresearchStudio: "+JSON.stringify(metrics)+"\n");
+ $("#preview").textContent=rawMarkdown;
+ checkpoint({productionMetrics:metrics});
  const created=await github("contents/"+file,"PUT",{message:"content(series-ai): publish "+d.series+" research "+d.slug,branch:"main",content:encode(rawMarkdown)});
  const proof={sha:created.commit.sha,path:file,deployDispatched:false};
  setPublishEvidence(proof);
- checkpoint({published:false,commitProof:proof,slug:d.slug});window.BNSeriesInsights?.record({slug:d.slug,title:d.title,series:d.series,state:"committed",sha:proof.sha,durationMs:Date.now()-startedAt,live:false,quota:window.BNQuota?.runSummary()});
+ checkpoint({published:false,commitProof:proof,slug:d.slug});window.BNSeriesInsights?.record({slug:d.slug,title:d.title,series:d.series,state:"committed",sha:proof.sha,durationMs:metrics.durationMs,live:false,quota:{requests:metrics.geminiRequests,tokens:metrics.geminiTokens,inputTokens:metrics.inputTokens,outputTokens:metrics.outputTokens}});
  addLink("Xem commit GitHub ↗",created.commit.html_url||"https://github.com/"+REPO+"/commit/"+created.commit.sha);
  addLink("Mở bài trên blog sau khi deploy ↗",SITE+"bai-viet/"+d.slug+"/");
- try{await github("actions/workflows/hugo.yml/dispatches","POST",{ref:"main"});proof.deployDispatched=true;setPublishEvidence(proof);checkpoint({published:true,commitProof:proof,slug:d.slug});window.BNSeriesInsights?.record({slug:d.slug,title:d.title,series:d.series,state:"committed",sha:proof.sha,durationMs:Date.now()-startedAt,live:false});state("Đã commit bài "+created.commit.sha.slice(0,9)+" và kích hoạt GitHub Pages. Đợi trạng thái deploy thành công trước khi coi là đã xuất bản trên website.");}
+ try{await github("actions/workflows/hugo.yml/dispatches","POST",{ref:"main"});proof.deployDispatched=true;setPublishEvidence(proof);checkpoint({published:true,commitProof:proof,slug:d.slug});window.BNSeriesInsights?.record({slug:d.slug,title:d.title,series:d.series,state:"committed",sha:proof.sha,durationMs:metrics.durationMs,live:false,quota:{requests:metrics.geminiRequests,tokens:metrics.geminiTokens,inputTokens:metrics.inputTokens,outputTokens:metrics.outputTokens}});state("Đã commit bài "+created.commit.sha.slice(0,9)+" và kích hoạt GitHub Pages. Đợi trạng thái deploy thành công trước khi coi là đã xuất bản trên website.");}
  catch(e){state("Bài đã commit lên main, nhưng chưa gọi được deploy: "+e.message+". Vào GitHub Actions để chạy Hugo Deploy bằng workflow_dispatch.",true)}
  return created
 }
@@ -235,12 +244,16 @@ async function start(e,restore=false){
  progress(88,"Đã hoàn thiện bản nghiên cứu",2);checkpoint({outline,published:false,slug:d.slug});
  if($("#autoPublish").checked){
   progress(92,"Commit bài lên GitHub",3);await publish(d);progress(100,"Đã commit (kiểm tra Pages deploy riêng)",4);// Keep the publish proof and draft preview but clear the English source for a NEW job.
+  // Reset only the source inputs; keep series selection, API connections,
+  // generation result, GitHub commit links and Smart Insights intact.
   $("#transcript").value="";
+  $("#transcript").defaultValue="";
   $("#sourceFile").value="";
   $("#sourceUrl").value="";
+  $("#sourceUrl").defaultValue="";
   $("#angle").value="";
   $("#sourceStats").textContent="0 ký tự";
-  checkpoint({published:true,runStatus:"completed",slug:d.slug,source:"",sourceUrl:"",angle:"",commitProof:lastCommitProof,briefs:[],pieces:[],outline:null,retryAt:0});
+  checkpoint({published:true,runStatus:"completed",slug:d.slug,source:"",sourceUrl:"",angle:"",commitProof:lastCommitProof,productionMetrics:metrics,briefs:[],pieces:[],outline:null,retryAt:0});
   state($("#status").textContent+"\nĐã làm mới biểu mẫu nguồn. Bạn có thể dán phụ đề mới ngay.");
   if(githubVerified)window.BNSeriesInsights?.sync().catch(()=>{});
  }else{checkpoint({runStatus:"completed"});window.BNSeriesInsights?.record({slug:d.slug,title:d.title,series:d.series,state:"draft",durationMs:Date.now()-startedAt,live:false,quota:window.BNQuota?.runSummary()});progress(100,"Hoàn thành bản thảo; chưa đăng",4);state("Đã tạo bản thảo Markdown. Bạn có thể copy hoặc xuất file; chưa ghi lên GitHub.")}
