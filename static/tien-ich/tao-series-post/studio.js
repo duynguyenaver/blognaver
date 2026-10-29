@@ -212,7 +212,7 @@ function scheduleCloudQueueSync(){
   });
  },700);
 }
-async function pullQueueCloud(){
+async function pullQueueCloud(autoRun=true){
  const button=$("#restoreQueueGithubBtn");button.disabled=true;
  try{
   // Finish queued local writes before merging cloud state.
@@ -240,7 +240,7 @@ async function pullQueueCloud(){
   if(queue.length!==parsed.items.length||added.length)scheduleCloudQueueSync();
   renderQueue();queueCloudStatus();
   $("#queueMessage").textContent="Đã tải "+added.length+" bài chưa có trên máy từ GitHub. Tự chạy bài chờ tiếp theo.";
-  if(!working)dispatchNext();
+  if(autoRun&&!working)dispatchNext();
  }catch(e){
   $("#queueMessage").textContent="Không thể tải hàng đợi từ GitHub: "+e.message+". Dữ liệu hiện tại không bị xóa.";
  }finally{button.disabled=false}
@@ -518,9 +518,9 @@ function showRecoveryDownload(){
  button.hidden=false;button.onclick=downloadRecoveryCheckpoint;
 }
 function checkpoint(extra={}){
- // Queue changes are backed up separately; checkpoint updates are debounced.
- if(working) scheduleCloudQueueSync();
  runData={...runData,...extra};
+ // The remote snapshot is made from updated in-memory runData, not stale state.
+ if(working) scheduleCloudQueueSync();
  const data={at:Date.now(),series:activeSource?.series||$("#series").value,source:activeSource?.source??$("#transcript").value,sourceUrl:activeSource?.sourceUrl??$("#sourceUrl").value,angle:activeSource?.angle??$("#angle").value,markdown:rawMarkdown,commitProof:lastCommitProof,...runData};
  // The article is already committed. Its source and generated body no longer need
  // a crash-recovery checkpoint (commit proof remains available in memory/UI).
@@ -1180,9 +1180,9 @@ async function start(e,restore=false,queuedJob=null){
 function saveMarkdown(){const blob=new Blob([rawMarkdown],{type:"text/markdown;charset=utf-8"}),u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download=(lastSlug||"series-research")+".md";a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
 $("#studioForm").addEventListener("submit",start);
 $("#restoreQueueGithubBtn").addEventListener("click",pullQueueCloud);
-$("#runQueueBtn").addEventListener("click",()=>{
+$("#runQueueBtn").addEventListener("click",async()=>{
  if(working||queueBusy){$("#queueMessage").textContent="Có bài đang chạy; hàng đợi sẽ tự tiếp tục sau khi bài hiện tại kết thúc.";return}
- if(!queue.length){$("#queueMessage").textContent="Hàng đợi đang trống. Hãy thêm bài bằng nút Viết và xuất bản khi đang có phiên chạy.";return}
+ if(!queue.length){$("#queueMessage").textContent="Đang khôi phục hàng đợi từ GitHub…";await pullQueueCloud(false);if(!queue.length){$("#queueMessage").textContent="Không có bài chờ trong bộ nhớ hoặc bản sao GitHub.";return}}
  $("#queueMessage").textContent="Đã yêu cầu chạy bài kế tiếp trong hàng đợi.";
  dispatchNext();
 });
