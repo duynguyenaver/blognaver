@@ -14,6 +14,7 @@
       {{- $candidates = $candidates | append . -}}
     {{- end -}}
   {{- end -}}
+  {{- if gt (len $candidates) 0 -}}
   {{- with (index (shuffle $candidates) 0) -}}
   {{- $thumb := .Params.featuredImagePreview | default .Params.featuredImage | default .Params.cover -}}
   <aside id="bn-midarticle-card" class="bn-rec-section bn-rec-inline" aria-label="Có thể bạn sẽ thích">
@@ -28,6 +29,7 @@
       </span>
     </a>
   </aside>
+  {{- end -}}
   {{- end -}}
   <script id="bn-article-recommendations-data" type="application/json">{{ $data | jsonify | safeHTML }}</script>
   <link rel="stylesheet" href="{{ "css/article-recommendations.css" | relURL }}">
