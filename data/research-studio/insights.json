@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-29T19:54:39.924Z",
+  "updatedAt": "2026-10-29T19:59:32.712Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -246,6 +246,23 @@
       "models": [
         "Groq · openai/gpt-oss-20b",
         "Groq · qwen/qwen3.8-27b"
+      ]
+    },
+    {
+      "slug": "cold-fusion-agentic-ai-trong-nganh-khach-san-tu-chatbot-den-tu-dong-hoa-van-hanh-toan-d-2026-10-29",
+      "title": "Agentic AI trong ngành khách sạn: Từ chatbot đến tự động hóa vận hành toàn diện",
+      "series": "cold-fusion",
+      "sha": "6add1a736e7cff3236637b0d2e5ebe7e2105d367",
+      "commitAt": "2026-10-29T19:59:12Z",
+      "durationMs": 8255,
+      "quota": {
+        "requests": 1,
+        "tokens": 3823,
+        "inputTokens": 2018,
+        "outputTokens": 1805
+      },
+      "models": [
+        "Gemini · models/gemini-3.5-flash-lite"
       ]
     }
   ]
