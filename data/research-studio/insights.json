@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-29T19:59:53.617Z",
+  "updatedAt": "2026-10-29T20:04:21.804Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -264,6 +264,25 @@
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
+      ]
+    },
+    {
+      "slug": "cold-fusion-agentic-ai-ot-pha-moi-trong-nganh-khach-san-2026-10-29",
+      "title": "Agentic AI: Đột phá mới trong ngành khách sạn",
+      "series": "cold-fusion",
+      "sha": "9b0bfac2911271f2feecec4805dddb9cfbb9e972",
+      "commitAt": "2026-10-29T20:04:00Z",
+      "durationMs": 8689,
+      "quota": {
+        "requests": 0,
+        "tokens": 0,
+        "inputTokens": 0,
+        "outputTokens": 0
+      },
+      "models": [
+        "Groq · qwen/qwen3.8-27b",
+        "Groq · openai/gpt-oss-20b",
+        "Groq · openai/gpt-oss-120b"
       ]
     }
   ]
