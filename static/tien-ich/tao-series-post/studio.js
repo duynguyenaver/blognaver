@@ -1092,7 +1092,23 @@ async function start(e,restore=false,queuedJob=null){
  progress(74,"Biên tập và kiểm tra chất lượng",2);
  const edited=await generate("Biên tập bản nháp nghiên cứu dưới đây thành bài độc lập, chuẩn tiếng Việt tự nhiên, có sapo, 4–6 H2, đoạn kết luận rõ, tránh lặp, không viết như bản tóm tắt gạch đầu dòng. Không thêm số liệu, nguồn, phát ngôn hay sự kiện mới không có trong nội dung. Trả về Markdown body thuần, không frontmatter. Bài phải ít nhất 900 từ khi có đủ dữ kiện, không kéo dài bằng suy đoán. Giữ ý chính và mọi ranh giới giữa lời kể/nhận định. BẢN NHÁP:\n"+rawMarkdown,abort.signal,12000);
  if(edited.length>rawMarkdown.length*.45)rawMarkdown=edited;
- const title=clean(outline.title),description=clean(outline.description).slice(0,160);verifyMarkdown(rawMarkdown,title,sections);
+ const title=clean(outline.title),description=clean(outline.description).slice(0,160);try{verifyMarkdown(rawMarkdown,title,sections)}
+ catch(e){
+  if(!/ít nhất 3 mục H2/.test(e.message))throw e;
+  // Sections are already generated separately. Rebuild the missing Markdown
+  // hierarchy from the verified outline rather than failing the full article.
+  const cleaned=rawMarkdown.replace(/^\s*#{1,6}\s+/gm,"").trim();
+  let rebuilt=sections.map((section,i)=>{
+   const original=String(pieces[i]||"").trim();
+   const body=original.replace(/^\s*#{1,6}\s+[^\n]*\n?/,"").trim();
+   return "## "+clean(section.heading||"Phần "+(i+1))+"\n\n"+body;
+  }).join("\n\n");
+  if(rebuilt.length<3000||sections.length<3)throw e;
+  rawMarkdown="# "+title+"\n\n"+rebuilt;
+  checkpoint({pieces,markdown:rawMarkdown});
+  verifyMarkdown(rawMarkdown,title,sections);
+  state("Đã tự sửa lỗi thiếu H2 từ dàn ý và các phần nội dung đã viết.");
+ }
  const tags=Array.isArray(outline.tags)?outline.tags.filter(t=>typeof t==="string").slice(0,5):[];
  const id=slug(title)||"research-"+Date.now(),name=SERIES[series].name;
  // Prefix with date/time for collision resilience, and reserve the series in metadata.
@@ -1129,7 +1145,7 @@ async function start(e,restore=false,queuedJob=null){
   }else if(rotationRequested){
    const saved={...runData,source:job.source,sourceUrl:job.sourceUrl||"",series:job.series,angle:job.angle||"",autoPublish:job.autoPublish!==false,markdown:rawMarkdown,runStatus:"paused",commitProof:null};
    const paused={...job,rotations:(job.rotations||0)+1,retryCount:((Number(job.retryCount)||0)+1)%3,
-    retryAt:Date.now()+1000,
+    retryAt:0,
     failed:true,failedAt:job.failedAt||Date.now(),checkpoint:saved};
    // Enqueue behind currently waiting articles. Do not lose checkpoints on reload.
    queue.push(paused);
@@ -1144,7 +1160,7 @@ async function start(e,restore=false,queuedJob=null){
    const attempts=previous+1;
    // One attempt per turn. After 3 unsuccessful turns, park for 60 seconds,
    // then begin a fresh round while other queued jobs continue immediately.
-   const retryAt=Date.now()+Math.min(60000,Math.max(1000,attempts>=3?60000:1000));
+   const retryAt=0; // Immediately eligible for the next FIFO turn; model router handles provider failures.
    const failedJob={...job,failed:true,failedAt:job.failedAt||Date.now(),retryCount:attempts>=3?0:attempts,retryAt,checkpoint:snapshot};
    if(!queue.some(item=>item.id===failedJob.id)){queue.push(failedJob);await saveQueue()}
    queuedForRetry=true;
