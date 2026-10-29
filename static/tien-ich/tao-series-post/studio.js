@@ -3,6 +3,87 @@ const $=s=>document.querySelector(s),REPO="duynguyenaver/blognaver",API="https:/
 const SERIES={"cold-fusion":{name:"ColdFusion Research",tag:"cold fusion",category:"Công nghệ"},"lex-fridman":{name:"Lex Fridman Podcast Research",tag:"Lex Fridman",category:"Công nghệ"}};
 const KEYSTORE="bn_series_research_gemini_session",DRAFT="bn_series_research_checkpoint_v1";
 let abort=null,working=false,rawMarkdown="",currentModel="",key="",lastSlug="",lastCommitProof=null,startedAt=0,geminiVerified=false,githubVerified=false,runData={},resumePending=false;
+const QUEUE_STORE="bn_series_research_fifo_queue_v1";
+let activeSource=null,queue=[],queueBusy=false;
+try{
+ const saved=JSON.parse(localStorage.getItem(QUEUE_STORE)||"[]");
+ queue=Array.isArray(saved)?saved.filter(x=>x&&typeof x.source==="string"&&x.source.length>=700&&SERIES[x.series]).slice(0,30):[];
+}catch{}
+function saveQueue(){
+ try{localStorage.setItem(QUEUE_STORE,JSON.stringify(queue))}catch{
+  state("Không thể lưu hàng đợi. Kiểm tra dung lượng bộ nhớ trình duyệt.",true);
+  return false;
+ }
+ return true;
+}
+function describeJob(job){return job.series==="lex-fridman"?"Lex Fridman":"ColdFusion"}
+function renderQueue(){
+ const target=$("#queueItems");if(!target)return;
+ target.replaceChildren();
+ $("#queueCount").textContent=queue.length+" bài";
+ $("#queueActive").textContent=working?(activeSource?describeJob(activeSource):"Đang khôi phục"):"Chưa có";
+ $("#queueStatus").textContent=working?"Đang xử lý":queue.length?"Đang chờ":"Sẵn sàng";
+ if(!queue.length){const empty=document.createElement("li");empty.className="queue-empty";empty.textContent="Chưa có bài nào trong hàng đợi.";target.append(empty)}
+ queue.forEach((job,index)=>{
+  const li=document.createElement("li");li.className="queue-entry";
+  const label=document.createElement("div"),title=document.createElement("strong"),detail=document.createElement("span");
+  title.textContent="#"+(index+1)+" · "+describeJob(job);
+  detail.textContent=(job.sourceUrl||"Phụ đề tiếng Anh")+" · "+job.source.length.toLocaleString("vi-VN")+" ký tự · "+new Date(job.at).toLocaleTimeString("vi-VN");
+  label.append(title,detail);
+  const remove=document.createElement("button");remove.type="button";remove.textContent="Xóa";remove.className="queue-remove";remove.setAttribute("aria-label","Xóa bài chờ số "+(index+1));
+  remove.onclick=()=>{queue=queue.filter(x=>x.id!==job.id);saveQueue();renderQueue()};
+  li.append(label,remove);target.append(li);
+ });
+ $("#startBtn").disabled=false;
+ $("#startBtn").firstChild.textContent=working?"Thêm vào hàng đợi ":"Viết nghiên cứu & đăng bài ";
+ const savedRun=runData?.runStatus;
+ $("#queueResume").hidden=working||!["failed","stopped","waiting","running"].includes(savedRun)||!runData.source||Boolean(lastCommitProof?.sha);
+}
+function clearSourceForm(){
+ $("#transcript").value="";$("#transcript").defaultValue="";
+ $("#sourceFile").value="";$("#sourceUrl").value="";$("#sourceUrl").defaultValue="";
+ $("#angle").value="";$("#sourceStats").textContent="0 ký tự";
+}
+function formJob(){
+ const job={id:Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,8),at:Date.now(),series:$("#series").value,source:$("#transcript").value,sourceUrl:$("#sourceUrl").value,angle:$("#angle").value,autoPublish:$("#autoPublish").checked};
+ if(!SERIES[job.series])throw Error("Series không hợp lệ");
+ if(rawSource(job.source).length<700)throw Error("Phụ đề cần ít nhất 700 ký tự tiếng Anh.");
+ if(rawSource(job.source).length>350000)throw Error("Phụ đề dài quá 350.000 ký tự.");
+ if(job.sourceUrl&&!/^https:\/\//i.test(job.sourceUrl))throw Error("URL nguồn phải dùng HTTPS.");
+ return job
+}
+function enqueue(){
+ const job=formJob();
+ if(queue.length>=30)throw Error("Hàng đợi tối đa 30 bài. Hãy xóa bài chưa cần thiết.");
+ queue.push(job);
+ if(!saveQueue()){queue.pop();throw Error("Hàng đợi chưa được lưu; vui lòng giải phóng bộ nhớ trình duyệt.");}
+ clearSourceForm();
+ renderQueue();
+ $("#queueMessage").textContent="Đã thêm bài #"+queue.length+" · "+describeJob(job)+" vào hàng đợi. Tiếp tục nhập phụ đề khác nếu muốn.";
+ state("Bài hiện tại tiếp tục chạy; "+queue.length+" bài được lưu trong hàng đợi.");
+}
+function populateJob(job){
+ $("#series").value=job.series;
+ $("#transcript").value=job.source;$("#sourceUrl").value=job.sourceUrl||"";
+ $("#angle").value=job.angle||"";$("#autoPublish").checked=job.autoPublish!==false;
+ $("#sourceStats").textContent=job.source.length.toLocaleString("vi-VN")+" ký tự";
+}
+function dispatchNext(){
+ if(working||queueBusy||!queue.length)return;
+ if(["failed","stopped","waiting","running"].includes(runData.runStatus)&&runData.source&&!lastCommitProof?.sha){
+  $("#queueMessage").textContent="Phiên trước chưa hoàn thành; tiếp tục phiên này trước khi chạy hàng đợi.";
+  renderQueue();return;
+ }
+ queueBusy=true;
+ const item=queue[0];
+ populateJob(item);
+ $("#queueMessage").textContent="Đang chuyển bài tiếp theo từ hàng đợi vào quy trình viết.";
+ setTimeout(()=>{
+  queue.shift();saveQueue();queueBusy=false;renderQueue();
+  start(new Event("submit")).catch(e=>state("Không thể chạy bài trong hàng đợi: "+e.message,true));
+ },0);
+}
+
 const clean=s=>String(s||"").trim(),slug=s=>clean(s).normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/đ/g,"d").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,75);
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const json=s=>{try{return JSON.parse(s)}catch{const first=s.indexOf("{"),last=s.lastIndexOf("}");if(first>=0&&last>first)return JSON.parse(s.slice(first,last+1));throw Error("Gemini không trả về JSON hợp lệ")}};
@@ -25,7 +106,7 @@ function progress(n,phase,step){
 }
 function checkpoint(extra={}){
  runData={...runData,...extra};
- try{localStorage.setItem(DRAFT,JSON.stringify({at:Date.now(),series:$("#series").value,source:$("#transcript").value,sourceUrl:$("#sourceUrl").value,angle:$("#angle").value,markdown:rawMarkdown,commitProof:lastCommitProof,...runData}))}
+ try{localStorage.setItem(DRAFT,JSON.stringify({at:Date.now(),series:activeSource?.series||$("#series").value,source:activeSource?.source??$("#transcript").value,sourceUrl:activeSource?.sourceUrl??$("#sourceUrl").value,angle:activeSource?.angle??$("#angle").value,markdown:rawMarkdown,commitProof:lastCommitProof,...runData}))}
  catch{state("Không đủ bộ nhớ lưu checkpoint. Giữ tab mở hoặc tải bản thảo Markdown để tránh mất dữ liệu.",true)}
 }
 function waitForRetry(ms,signal){
