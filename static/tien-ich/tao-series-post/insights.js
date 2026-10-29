@@ -11,12 +11,13 @@ function render(){
  $("#insightsLive").textContent=rows.filter(x=>x.live===true).length;
  const completed=rows.filter(x=>Number.isFinite(x.durationMs)&&x.durationMs>=0);$("#insightsAverage").textContent=completed.length?fmtTime(completed.reduce((a,x)=>a+x.durationMs,0)/completed.length):"—";
  const target=$("#insightsRows");target.replaceChildren();
- if(!rows.length){const tr=document.createElement("tr");cell(tr,"Chưa có bài được ghi nhận trên thiết bị này.").colSpan=4;target.append(tr);return}
+ if(!rows.length){const tr=document.createElement("tr");cell(tr,"Chưa có bài được ghi nhận trên thiết bị này.").colSpan=5;target.append(tr);return}
  for(const x of rows.slice(0,50)){
   const tr=document.createElement("tr"),first=cell(tr,x.title||x.slug||"Bản thảo"),slug=x.slug||"";
   if(slug){const link=document.createElement("a");link.href=SITE+"bai-viet/"+encodeURIComponent(slug)+"/";link.textContent="Xem URL live ↗";link.target="_blank";link.rel="noopener noreferrer";first.append(document.createElement("br"),link)}
   cell(tr,x.series==="lex-fridman"?"Lex Fridman":"ColdFusion");
   cell(tr,Number.isFinite(x.durationMs)?fmtTime(x.durationMs):"—");
+  cell(tr,x.quota?.requests?Number(x.quota.tokens||0).toLocaleString("vi-VN")+" tokens · "+x.quota.requests+" requests":"—");
   const st=cell(tr,x.live?"Live ✓":x.sha?"Đã commit · Chờ live":"Bản thảo");
   if(x.sha){const a=document.createElement("a");a.href="https://github.com/duynguyenaver/blognaver/commit/"+x.sha;a.target="_blank";a.rel="noopener noreferrer";a.textContent=" · Commit ↗";st.append(a)}
   target.append(tr)
