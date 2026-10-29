@@ -105,3 +105,10 @@ All post-merge Fix Bug publication checks must make the result visible on the or
 - `fixbug:github-only` (yellow): publisher skipped the article because required evidence was missing; its diagnostic result is visible in the GitHub Actions log/summary. This label **does not** assert that new knowledge was automatically written to AGENTS.md.
 
 Keep `fixbug:evidence-confirmed` together with `fixbug:published` when both facts hold; `fixbug:github-only` must not coexist with a published label. Report `PUBLISHED`, `EVIDENCE CONFIRMED`, or `GITHUB ONLY / SKIPPED` in the GitHub Actions job summary. The Actions workflow run-name must mention the PR number. Never report a skipped or still-pending article as published.
+
+
+## Editorial workflow: ColdFusion and Lex Fridman research series (2026-10-29)
+
+When the editor requests **cold fusion** or **Lex Fridman** as a standalone content shortcut, **request the original English transcript, subtitles, or article text before drafting or publishing**. Do not infer a specific episode without a supplied source, and do not silently translate unrelated prior content. Once source content is available, create an original Vietnamese research article, not a line-by-line translation. Read the whole source; distinguish guests' assertions, independent evidence, opinion and editorial interpretation; verify any external time-sensitive claims with authoritative references. Credit the original video/podcast URL and make it clear the post is an independent analysis. Do not copy substantial copyrighted transcript text.
+
+Use `series: ["cold-fusion"]`, `tags: ["cold fusion", "series", ...]` for ColdFusion Research. Use `series: ["lex-fridman"]`, `tags: ["Lex Fridman", "series", ...]` for Lex Fridman Podcast Research. Add `seriesOrder` incrementally and keep both series registered in `data/series.yaml` with `total: 0` for ongoing coverage. Preserve original editorial and SEO standards and only claim publication after confirming CI, merge and Pages deployment.
