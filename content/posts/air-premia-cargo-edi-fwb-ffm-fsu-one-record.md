@@ -2,10 +2,12 @@
 title: "FWB, FFM, FSU và ONE Record: ngôn ngữ dữ liệu đứng sau Air Cargo"
 date: 2026-10-29T14:38:00+07:00
 draft: false
+series: "air-premia-cargo"
+seriesOrder: 4
 slug: "air-premia-cargo-edi-fwb-ffm-fsu-one-record"
 description: "Vai trò điện văn cargo, truyền dữ liệu hải quan và ranh giới giữa tiêu chuẩn IATA với mạng SITA."
 categories: ["Hàng không", "Air Cargo"]
-tags: ["Air Premia", "iCargo", "Logistics", "Air Cargo", "Nghiên cứu"]
+tags: ["Air Premia", "iCargo", "Logistics", "Air Cargo", "Nghiên cứu", "series"]
 author: "Duy Nguyen"
 featuredImage: "https://images.unsplash.com/photo-1494412519320-aa613dfb7738?w=1600&q=85"
 featuredImagePreview: "https://images.unsplash.com/photo-1494412519320-aa613dfb7738?w=1600&q=85"
