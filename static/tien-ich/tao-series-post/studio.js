@@ -158,7 +158,8 @@ function jobIdentity(job){
  return url?"url:"+url:"source:"+source.slice(0,1400)+":"+source.length;
 }
 function sameQueueJob(a,b){return Boolean(a&&b&&(a.id&&a.id===b.id||jobIdentity(a)&&jobIdentity(a)===jobIdentity(b)))}
-function isQueueDone(job){const done=doneQueueIds();return Boolean(job&&(job.id&&done.has(job.id)||done.has(jobIdentity(job))||isCommittedCheckpoint(job.checkpoint)))}
+function hasCommitProof(proof){return Boolean(proof&&/^[a-f0-9]{40}$/i.test(proof.sha||"")&&/^content\/posts\/[a-z0-9-]+\.md$/.test(proof.path||""))}
+function isQueueDone(job){const done=doneQueueIds();return Boolean(job&&(job.id&&done.has(job.id)||done.has(jobIdentity(job))||hasCommitProof(job.checkpoint?.commitProof)||isCommittedCheckpoint(job.checkpoint)))}
 
 function githubQueueToken(){return window.BNAuth?.read?.()||clean($("#githubManual")?.value)}
 function b64(bytes){let result="";for(let i=0;i<bytes.length;i+=32768)result+=String.fromCharCode(...bytes.subarray(i,i+32768));return btoa(result)}
@@ -278,8 +279,8 @@ async function hydrateQueue(){
   const storedDraft=await queueDisk("checkpoint",null,"get");
   const legacy=(()=>{try{return JSON.parse(localStorage.getItem(QUEUE_STORE)||"[]")}catch{return []}})();
   const combined=[...(Array.isArray(disk)?disk:[]),...(Array.isArray(legacy)?legacy:[])];
-  if(active?.source&&!isCommittedCheckpoint(active.checkpoint))combined.unshift({...active,checkpoint:active.checkpoint||null});
-  if(storedDraft?.source&&!isCommittedCheckpoint(storedDraft))combined.unshift({id:"checkpoint-"+(storedDraft.at||Date.now()),at:storedDraft.at||Date.now(),source:storedDraft.source,sourceUrl:storedDraft.sourceUrl||"",angle:storedDraft.angle||"",series:storedDraft.series,autoPublish:storedDraft.autoPublish!==false,checkpoint:storedDraft});
+  if(active?.source&&!isQueueDone(active))combined.unshift({...active,checkpoint:active.checkpoint||null});
+  if(storedDraft?.source&&!hasCommitProof(storedDraft.commitProof)&&!isCommittedCheckpoint(storedDraft))combined.unshift({id:"checkpoint-"+(storedDraft.at||Date.now()),at:storedDraft.at||Date.now(),source:storedDraft.source,sourceUrl:storedDraft.sourceUrl||"",angle:storedDraft.angle||"",series:storedDraft.series,autoPublish:storedDraft.autoPublish!==false,checkpoint:storedDraft});
   const seen=new Set();
   queue=combined.filter(job=>{
    if(!job||typeof job.source!=="string"||job.source.length<700||isQueueDone(job))return false;
@@ -344,7 +345,7 @@ function scheduleQueueRetry(at){
 function restoreFailedFromDraft(){
  try{
   const d=JSON.parse(localStorage.getItem(DRAFT)||"null");
-  if(!d?.source||d.commitProof?.sha||isCommittedCheckpoint(d)||!["failed","waiting","stopped","running"].includes(d.runStatus))return;
+  if(!d?.source||hasCommitProof(d.commitProof)||isCommittedCheckpoint(d)||!["failed","waiting","stopped","running"].includes(d.runStatus))return;
   if(queue.some(x=>sameQueueJob(x,d))||sameQueueJob(activeSource,d))return;
   const job={id:"recovered-"+(d.at||Date.now()),at:d.at||Date.now(),failedAt:d.at||Date.now(),failed:true,retryAt:Number(d.retryAt)||0,source:d.source,sourceUrl:d.sourceUrl||"",series:d.series,angle:d.angle||"",autoPublish:d.autoPublish!==false,checkpoint:{...d}};
   if(SERIES[job.series]){queue.unshift(job);failedFirst();/* persisted on startup after hydration */}
@@ -555,7 +556,7 @@ function checkpoint(extra={}){
  // IndexedDB is the primary durable checkpoint store. Do not copy long transcripts
  // into localStorage; that quota is shared with provider credentials.
  checkpointWrite=checkpointWrite.catch(()=>{}).then(async()=>{
-  if(isCommittedCheckpoint(data)){await queueDisk("checkpoint",null,"delete");try{localStorage.removeItem(DRAFT)}catch{};return}
+  if(hasCommitProof(data.commitProof)||isCommittedCheckpoint(data)){await queueDisk("checkpoint",null,"delete");try{localStorage.removeItem(DRAFT)}catch{};return}
   await queueDisk("checkpoint",data);
   // Remove obsolete localStorage only AFTER the successful IndexedDB write.
   try{localStorage.removeItem(DRAFT)}catch{}
@@ -1045,7 +1046,10 @@ function addLink(label,url){const a=document.createElement("a");a.href=url;a.tar
 async function publish(d){
  const file="content/posts/"+d.slug+".md";
  // Never overwrite a historical post. First check source.
- try{await github("contents/"+file+"?ref=main");throw Error("Slug này đã có bài trên main, không được ghi đè. Thử lại với tiêu đề khác.");}catch(e){if(e.status!==404)throw e}
+ try{await github("contents/"+file+"?ref=main");
+  const duplicate=Error("Bài đã có slug trên main. Dừng tự động để tránh tạo trùng: "+d.slug);
+  duplicate.code="DUPLICATE_SLUG";throw duplicate;
+ }catch(e){if(e.status!==404)throw e}
  // Persist non-sensitive production metrics with the article itself so GitHub can
  // restore exact values after reload, on the same device or a new browser.
  // This is elapsed generation time BEFORE the GitHub write (not deploy time).
@@ -1193,14 +1197,14 @@ async function start(e,restore=false,queuedJob=null){
    runData={runStatus:"completed"};setPublishEvidence(null);
    state("Đã tạm dừng an toàn bài "+describeJob(job)+" và chuyển sang bài kế tiếp.");
   }else{
-  if(!lastCommitProof?.sha){
+  if(!hasCommitProof(lastCommitProof)){
    const snapshot={...runData,source:job.source,sourceUrl:job.sourceUrl||"",series:job.series,angle:job.angle||"",autoPublish:job.autoPublish!==false,markdown:rawMarkdown,runStatus:"failed",error:e.message,commitProof:null};
    const previous=Number(job.retryCount)||0;
    const attempts=previous+1;
    // One attempt per turn. After 3 unsuccessful turns, park for 60 seconds,
    // then begin a fresh round while other queued jobs continue immediately.
    const retryAt=0; // No provider cooldown; capped per-job to prevent infinite retries.
-   const failedJob={...job,failed:true,failedAt:job.failedAt||Date.now(),retryCount:Math.min(3,attempts),retryExhausted:attempts>=3,retryAt,checkpoint:snapshot};
+   const failedJob={...job,failed:true,failedAt:job.failedAt||Date.now(),retryCount:Math.min(3,attempts),retryExhausted:attempts>=3||e.code==="DUPLICATE_SLUG",retryAt,checkpoint:snapshot};
    const existing=queue.find(item=>sameQueueJob(item,failedJob));
    if(existing){Object.assign(existing,failedJob);await saveQueue()}
    else{queue.push(failedJob);await saveQueue()}
@@ -1217,11 +1221,15 @@ async function start(e,restore=false,queuedJob=null){
   stopStallWatch();window.BNQuota?.finishRun(Boolean(lastCommitProof?.sha));working=false;manualModelOverride=null;quotaResumedNotice=false;
   $("#cancelBtn").disabled=true;abort=null;activeSource=null;
   // After an item is safely requeued or successfully committed, retire its crash backup.
-  if(succeeded){markQueueDone(job);await checkpointWrite.catch(()=>{});await queueDisk("checkpoint",null,"delete").catch(()=>{});try{localStorage.removeItem(DRAFT)}catch{};scheduleCloudQueueSync()}
-  if(queuedJob&&(succeeded||queuedForRetry||rotationRequested))queueDisk("active",null,"delete").catch(()=>{});
+  if(succeeded||hasCommitProof(lastCommitProof)){
+   // A successful GitHub commit is terminal even if deployment or later code fails.
+   markQueueDone(job);queue=queue.filter(item=>!sameQueueJob(item,job));await saveQueue();
+   await checkpointWrite.catch(()=>{});await queueDisk("checkpoint",null,"delete").catch(()=>{});try{localStorage.removeItem(DRAFT)}catch{};scheduleCloudQueueSync()}
+  if(queuedJob&&(succeeded||hasCommitProof(lastCommitProof)||queuedForRetry||rotationRequested))queueDisk("active",null,"delete").catch(()=>{});
   renderQueue();
   if(checkpointStorageFailed){$("#queueMessage").textContent="Bộ nhớ checkpoint đầy · đang giữ hàng đợi và bản thảo trong tab. Hãy sao lưu JSON.";dispatchNext()}
   else if(succeeded){runtime("idle",null,"Hoàn thành","Bài đã xử lý xong. Xem thông tin model trong metadata bài viết.");$("#queueMessage").textContent="Đã hoàn tất phiên vừa chạy. "+queue.length+" bài còn lại sẽ tự tiếp tục.";dispatchNext()}
+  else if(hasCommitProof(lastCommitProof)){$("#queueMessage").textContent="Bài đã commit lên main. Không retry tạo trùng; tiếp tục bài khác.";dispatchNext()}
   else if(queuedForRetry){$("#queueMessage").textContent="Đã giữ bài lỗi trong hàng chờ ưu tiên; tự thử lại khi API sẵn sàng.";dispatchNext()}
   else if(skippedShortResearch){$("#queueMessage").textContent="Đã bỏ qua bài không đạt chuẩn độ dài; "+queue.length+" bài còn lại trong hàng đợi sẽ tự chạy.";dispatchNext()}
   else if(rotationRequested){rotationRequested=false;dispatchNext()}
