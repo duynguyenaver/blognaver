@@ -86,6 +86,7 @@ function renderResumePreview(res){
 }
 $('#preview').onclick=()=>{try{const r=fields(true);if(portraitData)r.resume.avatar=portraitData;$('#previewFrame').srcdoc=window.renderSamsungCV(r.resume);$('#resumePreview').showModal()}catch(e){notify(e.message,true)}};
 $('#closeResumePreview').onclick=()=>$('#resumePreview').close();
+$('#printResumePreview').onclick=()=>{const frame=$('#previewFrame');if(!frame.srcdoc){notify('Hãy xem trước CV trước khi in.',true);return}frame.contentWindow?.focus();frame.contentWindow?.print()};
 $('#resumePreview').addEventListener('close',()=>{$('#previewFrame').removeAttribute('srcdoc')});
 reset();
 })();
