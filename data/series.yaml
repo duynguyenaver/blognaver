@@ -10,3 +10,9 @@
   total: 4
   category: "Công nghệ · DevOps"
   accent: "#397bd4"
+- id: fix-bug-2026
+  title: "Fix Bug 2026 · Nhật ký khắc phục CI"
+  description: "Các ca Pull Request từng thất bại, có bằng chứng sửa mã và CI thành công sau đó; bài được tạo từ log và lịch sử GitHub."
+  total: 0
+  category: "Công nghệ · Debugging"
+  accent: "#3678c4"
