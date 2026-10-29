@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-29T19:33:00.839Z",
+  "updatedAt": "2026-10-29T19:54:39.924Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -229,6 +229,24 @@
         "Groq · qwen/qwen3.8-27b"
       ],
       "live": true
+    },
+    {
+      "slug": "cold-fusion-tu-giay-to-roi-rac-den-he-thong-chu-dong-tai-cau-truc-chi-phi-cong-tac-2026-10-29",
+      "title": "Từ giấy tờ rời rạc đến hệ thống chủ động: Tái cấu trúc chi phí công tác",
+      "series": "cold-fusion",
+      "sha": "fc979a9783ea7ecf13bf1a12d24bd45d0e15f906",
+      "commitAt": "2026-10-29T19:54:20Z",
+      "durationMs": 12157,
+      "quota": {
+        "requests": 0,
+        "tokens": 0,
+        "inputTokens": 0,
+        "outputTokens": 0
+      },
+      "models": [
+        "Groq · openai/gpt-oss-20b",
+        "Groq · qwen/qwen3.8-27b"
+      ]
     }
   ]
 }
