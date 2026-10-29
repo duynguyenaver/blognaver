@@ -34,3 +34,6 @@ a:hover { color: var(--blognaver-accent); }
     border-radius: 12px;
   }
 }
+
+/* Commit Status now lives in Smart Insights, not the public homepage footer. */
+[data-commit-status] { display: none !important; }
