@@ -980,8 +980,8 @@ async function start(e,restore=false,queuedJob=null){
    runData={runStatus:"completed"};rawMarkdown="";setPublishEvidence(null);
   }else if(rotationRequested){
    const saved={...runData,source:job.source,sourceUrl:job.sourceUrl||"",series:job.series,angle:job.angle||"",autoPublish:job.autoPublish!==false,markdown:rawMarkdown,runStatus:"paused",commitProof:null};
-   const paused={...job,rotations:(job.rotations||0)+1,retryCount:(Number(job.retryCount)||0)+1,
-    retryAt:Math.max(Date.now()+((Number(job.retryCount)||0)>=2?60000:0),window.BNQuota?.retryAt?.()||0),
+   const paused={...job,rotations:(job.rotations||0)+1,retryCount:((Number(job.retryCount)||0)+1)%3,
+    retryAt:Math.max(Date.now()+60000,window.BNQuota?.retryAt?.()||0),
     failed:true,failedAt:job.failedAt||Date.now(),checkpoint:saved};
    // Enqueue behind currently waiting articles. Do not lose checkpoints on reload.
    queue.push(paused);
@@ -996,7 +996,7 @@ async function start(e,restore=false,queuedJob=null){
    const attempts=previous+1;
    // One attempt per turn. After 3 unsuccessful turns, park for 60 seconds,
    // then begin a fresh round while other queued jobs continue immediately.
-   const retryAt=Math.max(Date.now()+(attempts>=3?60000:0),window.BNQuota?.retryAt?.()||0);
+   const retryAt=Math.max(Date.now()+60000,window.BNQuota?.retryAt?.()||0);
    const failedJob={...job,failed:true,failedAt:job.failedAt||Date.now(),retryCount:attempts>=3?0:attempts,retryAt,checkpoint:snapshot};
    if(!queue.some(item=>item.id===failedJob.id)){queue.push(failedJob);saveQueue()}
    queuedForRetry=true;
