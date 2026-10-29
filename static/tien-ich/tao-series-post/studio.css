@@ -182,3 +182,8 @@
 .queue-running-badge{display:inline-flex!important;align-items:center;max-width:100%;margin-top:8px;padding:5px 9px;border:1px solid #72caa3;border-radius:999px;background:#dff8eb;color:#166f47;font-size:10px;font-weight:850;letter-spacing:.035em;line-height:1.4}
 .queue-running-badge[hidden]{display:none!important}
 .queue-paused-badge{display:inline-flex!important;width:max-content;max-width:100%;margin-top:8px;padding:4px 8px;border:1px solid #e5bd80;background:#fff2d8;color:#99611b;border-radius:999px;font-size:10px;font-weight:800}
+
+/* Series custom name and GitHub batch editor */
+#customSeries{margin-top:10px}.series-hint{display:block;margin-top:6px;color:#607b96}
+.batch-editor{margin-top:24px}.editor-toolbar,.editor-footer{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:15px 0}.editor-toolbar label{display:inline-flex;align-items:center;gap:6px}.editor-toolbar input{width:auto;margin:0}
+.editor-items{display:grid;gap:13px;max-height:720px;overflow-y:auto}.editor-card{border:1px solid #c7d9e8;border-radius:12px;padding:15px;background:#f7fbff}.editor-card-head{display:flex;align-items:center;gap:10px}.editor-card-head input{width:auto;margin:0}.editor-card-head strong{overflow-wrap:anywhere}.editor-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:12px}.editor-card small{color:#607b96}.editor-card label{font-size:12px}.editor-card textarea{min-height:75px}.editor-card input{font-size:13px}#editorStatus{white-space:pre-wrap;overflow-wrap:anywhere;color:#365e7d}.editor-footer{justify-content:flex-end}@media(max-width:690px){.editor-fields{grid-template-columns:1fr}}

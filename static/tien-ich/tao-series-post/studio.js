@@ -3,6 +3,17 @@ const $=s=>document.querySelector(s),REPO="duynguyenaver/blognaver",API="https:/
 const SERIES={"cold-fusion":{name:"ColdFusion Research",tag:"cold fusion",category:"Công nghệ"},"lex-fridman":{name:"Lex Fridman Podcast Research",tag:"Lex Fridman",category:"Công nghệ"}};
 const KEYSTORE="bn_series_research_gemini_session",GROQ_STORE="bn_series_groq_key_session_v1",DRAFT="bn_series_research_checkpoint_v1";
 let abort=null,working=false,rawMarkdown="",currentModel="",key="",lastSlug="",lastCommitProof=null,startedAt=0,geminiVerified=false,githubVerified=false,groqVerified=false,groqModel="openai/gpt-oss-120b",runData={},resumePending=false;
+const CUSTOM_SERIES_STORE="bn_series_custom_names_v1";
+try{const saved=JSON.parse(localStorage.getItem(CUSTOM_SERIES_STORE)||"{}");for(const [id,name] of Object.entries(saved)){if(/^[a-z0-9-]{2,75}$/.test(id)&&typeof name==="string"&&name.trim())SERIES[id]={name:name.trim(),tag:name.trim(),category:"Nghiên cứu"}}}catch{}
+function selectedSeries(){
+ const custom=document.querySelector("#customSeries")?.value.trim()||"";
+ if(!custom)return $("#series").value;
+ const id=slug(custom);
+ if(id.length<2)throw Error("Tên series mới cần ít nhất 2 ký tự hợp lệ.");
+ if(!SERIES[id])SERIES[id]={name:custom,tag:custom,category:"Nghiên cứu"};
+ try{const names=JSON.parse(localStorage.getItem(CUSTOM_SERIES_STORE)||"{}");names[id]=custom;localStorage.setItem(CUSTOM_SERIES_STORE,JSON.stringify(names))}catch{}
+ return id;
+}
 const QUEUE_STORE="bn_series_research_fifo_queue_v1";
 let activeSource=null,queue=[],queueBusy=false;
 let stallTimer=null,lastProgressAt=0,lastProgressValue=-1,rotationRequested=false,publishingCommit=false;
@@ -98,10 +109,10 @@ function renderQueue(){
 function clearSourceForm(){
  $("#transcript").value="";$("#transcript").defaultValue="";
  $("#sourceFile").value="";$("#sourceUrl").value="";$("#sourceUrl").defaultValue="";
- $("#angle").value="";$("#sourceStats").textContent="0 ký tự";
+ $("#angle").value="";$("#customSeries").value="";$("#sourceStats").textContent="0 ký tự";
 }
 function formJob(){
- const job={id:Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,8),at:Date.now(),series:$("#series").value,source:$("#transcript").value,sourceUrl:$("#sourceUrl").value,angle:$("#angle").value,autoPublish:$("#autoPublish").checked};
+ const job={id:Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,8),at:Date.now(),series:selectedSeries(),source:$("#transcript").value,sourceUrl:$("#sourceUrl").value,angle:$("#angle").value,autoPublish:$("#autoPublish").checked};
  if(!SERIES[job.series])throw Error("Series không hợp lệ");
  if(rawSource(job.source).length<700)throw Error("Phụ đề cần ít nhất 700 ký tự tiếng Anh.");
  if(rawSource(job.source).length>350000)throw Error("Phụ đề dài quá 350.000 ký tự.");
@@ -121,7 +132,7 @@ function enqueue(){
  state("Bài hiện tại tiếp tục chạy; "+queue.length+" bài được lưu trong hàng đợi.");
 }
 function populateJob(job){
- $("#series").value=job.series;
+ $("#series").value=SERIES[job.series]&&["cold-fusion","lex-fridman"].includes(job.series)?job.series:"cold-fusion";$("#customSeries").value=["cold-fusion","lex-fridman"].includes(job.series)?"":SERIES[job.series]?.name||job.series;
  $("#transcript").value=job.source;$("#sourceUrl").value=job.sourceUrl||"";
  $("#angle").value=job.angle||"";$("#autoPublish").checked=job.autoPublish!==false;
  $("#sourceStats").textContent=job.source.length.toLocaleString("vi-VN")+" ký tự";
@@ -474,7 +485,7 @@ function verifyMarkdown(source,title,sections){if(source.length<3000)throw Error
 async function nextOrder(id){
  const data=await github("contents/data/series.yaml?ref=main");
  const registry=decode(data.content);
- if(!registry.includes("id: "+id))throw Error("Series chưa đăng ký trong data/series.yaml");
+ if(!registry.includes("id: "+id)&&!SERIES[id])throw Error("Series chưa được xác định.");
  const index=await github("git/trees/main?recursive=1");
  const candidates=(index.tree||[]).filter(x=>x.path.startsWith("content/posts/")&&x.path.endsWith(".md"));
  // Existing series posts are read by the lightweight CMS index, falling back to count via GitHub metadata.
@@ -615,7 +626,7 @@ async function start(e,restore=false,queuedJob=null){
   stopStallWatch();window.BNQuota?.finishRun(Boolean(lastCommitProof?.sha));working=false;
   $("#cancelBtn").disabled=true;abort=null;activeSource=null;
   renderQueue();
-  if(succeeded){runtime("idle",null,"Hoàn thành","Bài đã xử lý xong. Xem thông tin Models trong Smart Insights.");$("#queueMessage").textContent="Đã hoàn tất phiên vừa chạy. "+queue.length+" bài còn lại sẽ tự tiếp tục.";dispatchNext()}
+  if(succeeded){runtime("idle",null,"Hoàn thành","Bài đã xử lý xong. Xem thông tin model trong metadata bài viết.");$("#queueMessage").textContent="Đã hoàn tất phiên vừa chạy. "+queue.length+" bài còn lại sẽ tự tiếp tục.";dispatchNext()}
   else if(rotationRequested){rotationRequested=false;dispatchNext()}
   else $("#queueMessage").textContent="Phiên hiện tại dừng vì lỗi. Bài đang chờ vẫn được lưu; hãy tiếp tục phiên trước để xử lý hàng đợi.";
 }
@@ -703,13 +714,13 @@ $("#geminiKey").addEventListener("input",()=>{
 $("#copyDraft").onclick=()=>navigator.clipboard.writeText(rawMarkdown).then(()=>state("Đã copy Markdown.")).catch(e=>state(e.message,true));
 $("#downloadDraft").onclick=saveMarkdown;
 $("#connectGithub").onclick=async()=>{try{const value=clean($("#githubManual").value);if(value){await window.BNAuth.validate(value);window.BNAuth.save(value,$("#rememberGithub").checked);$("#githubManual").value=""}else{const t=window.BNAuth?.read();if(!t)throw Error("Chưa có token CMS. Hãy nhập token phía dưới.");await window.BNAuth.validate(t)}$("#githubState").textContent="● Đã kết nối GitHub (token CMS chung)";githubVerified=true;window.BNSeriesInsights?.setConnection(true);foldCredentials();window.BNSeriesInsights?.sync().catch(()=>{});if(queue.length&&!working)dispatchNext();}catch(e){githubVerified=false;window.BNSeriesInsights?.setConnection(false);openCredentials("Kiểm tra lại GitHub");state("Không thể kết nối GitHub: "+e.message,true)}};
-try{const k=sessionStorage.getItem(KEYSTORE);if(k)$("#geminiKey").value=k;const g=sessionStorage.getItem(GROQ_STORE);if(g)$("#groqKey").value=g;const t=window.BNAuth?.read?.();$("#githubState").textContent=t?"● Đã có GitHub token chung từ CMS":"○ Chưa có token CMS — cần kết nối trước khi đăng";const old=JSON.parse(localStorage.getItem(DRAFT)||"null");if(old&&(old.source||old.commitProof)&&Date.now()-old.at<86400000){$("#series").value=old.series||"cold-fusion";$("#transcript").value=old.source;$("#sourceUrl").value=old.sourceUrl||"";$("#angle").value=old.angle||"";rawMarkdown=old.markdown||"";runData={...old};setPublishEvidence(old.commitProof);$("#preview").textContent=rawMarkdown;$("#copyDraft").disabled=!rawMarkdown;$("#downloadDraft").disabled=!rawMarkdown;$("#transcript").dispatchEvent(new Event("input"));state(old.source?"Đã khôi phục bản nháp từ phiên viết trước.":"Biểu mẫu nguồn đã sẵn sàng cho bài mới. Kết quả xuất bản trước vẫn có thể kiểm tra bên phải.");}}catch{}
+try{const k=sessionStorage.getItem(KEYSTORE);if(k)$("#geminiKey").value=k;const g=sessionStorage.getItem(GROQ_STORE);if(g)$("#groqKey").value=g;const t=window.BNAuth?.read?.();$("#githubState").textContent=t?"● Đã có GitHub token chung từ CMS":"○ Chưa có token CMS — cần kết nối trước khi đăng";const old=JSON.parse(localStorage.getItem(DRAFT)||"null");if(old&&(old.source||old.commitProof)&&Date.now()-old.at<86400000){$("#series").value=SERIES[old.series]&&["cold-fusion","lex-fridman"].includes(old.series)?old.series:"cold-fusion";$("#customSeries").value=!["cold-fusion","lex-fridman"].includes(old.series)?SERIES[old.series]?.name||old.series||"":"";$("#transcript").value=old.source;$("#sourceUrl").value=old.sourceUrl||"";$("#angle").value=old.angle||"";rawMarkdown=old.markdown||"";runData={...old};setPublishEvidence(old.commitProof);$("#preview").textContent=rawMarkdown;$("#copyDraft").disabled=!rawMarkdown;$("#downloadDraft").disabled=!rawMarkdown;$("#transcript").dispatchEvent(new Event("input"));state(old.source?"Đã khôi phục bản nháp từ phiên viết trước.":"Biểu mẫu nguồn đã sẵn sàng cho bài mới. Kết quả xuất bản trước vẫn có thể kiểm tra bên phải.");}}catch{}
 const connectionReady=verifyExistingConnections().catch(e=>state("Không thể xác thực kết nối: "+e.message,true));
 try{
  const old=JSON.parse(localStorage.getItem(DRAFT)||"null");
  if(old?.source&&["waiting","running","failed","stopped"].includes(old.runStatus)&&!old.commitProof?.sha){
   runData={...old};resumePending=true;
-  $("#series").value=old.series||"cold-fusion";
+  $("#series").value=SERIES[old.series]&&["cold-fusion","lex-fridman"].includes(old.series)?old.series:"cold-fusion";$("#customSeries").value=!["cold-fusion","lex-fridman"].includes(old.series)?SERIES[old.series]?.name||old.series||"":"";
   $("#autoPublish").checked=old.autoPublish!==false;
   $("#transcript").value=old.source;
   $("#sourceUrl").value=old.sourceUrl||"";
