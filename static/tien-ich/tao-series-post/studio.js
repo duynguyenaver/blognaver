@@ -141,6 +141,106 @@ function queueDisk(key,value,mode="put"){
   };
  });
 }
+
+const CLOUD_QUEUE_BRANCH="research-studio-queue-backup",CLOUD_QUEUE_FILE="queue.encrypted.json";
+let cloudSynced=new Set(),cloudSyncTimer=null,cloudWrite=Promise.resolve(),cloudSyncError="";
+function githubQueueToken(){return window.BNAuth?.read?.()||clean($("#githubManual")?.value)}
+function b64(bytes){let result="";for(let i=0;i<bytes.length;i+=32768)result+=String.fromCharCode(...bytes.subarray(i,i+32768));return btoa(result)}
+function unb64(value){return Uint8Array.from(atob(value),c=>c.charCodeAt(0))}
+async function queueCipherKey(){
+ const token=githubQueueToken();
+ if(!token)throw Error("Cần kết nối GitHub token để đồng bộ hàng đợi.");
+ const digest=await crypto.subtle.digest("SHA-256",new TextEncoder().encode("blognaver-queue-v1:"+token));
+ return crypto.subtle.importKey("raw",digest,{name:"AES-GCM"},false,["encrypt","decrypt"]);
+}
+async function cloudQueueRequest(path,method="GET",payload){
+ const token=githubQueueToken();
+ if(!token)throw Error("Chưa có GitHub token.");
+ const response=await fetch(API+"/"+path,{method,cache:"no-store",headers:{
+  Authorization:"Bearer "+token,Accept:"application/vnd.github+json",
+  "X-GitHub-Api-Version":"2022-11-28",...(payload?{"Content-Type":"application/json"}:{})
+ },body:payload?JSON.stringify(payload):undefined});
+ const data=await response.json().catch(()=>({}));
+ if(!response.ok){const error=Error("GitHub "+response.status+": "+String(data.message||"Request failed"));error.status=response.status;throw error}
+ return data;
+}
+async function ensureCloudQueueBranch(){
+ try{await cloudQueueRequest("git/ref/heads/"+CLOUD_QUEUE_BRANCH);return}
+ catch(e){if(e.status!==404)throw e}
+ const main=await cloudQueueRequest("git/ref/heads/main");
+ try{await cloudQueueRequest("git/refs","POST",{ref:"refs/heads/"+CLOUD_QUEUE_BRANCH,sha:main.object.sha})}
+ catch(e){if(e.status!==422)throw e}
+}
+function cloudQueueItems(){
+ const items=[...queue];
+ if(working&&activeSource?.source&&!lastCommitProof?.sha){
+  const data={...runData,source:activeSource.source,sourceUrl:activeSource.sourceUrl||"",
+   series:activeSource.series,angle:activeSource.angle||"",markdown:rawMarkdown,commitProof:null};
+  if(!items.some(x=>x.id===activeSource.id))items.unshift({...activeSource,checkpoint:data});
+ }
+ return items.filter(x=>x?.source&&!isCommittedCheckpoint(x.checkpoint));
+}
+function queueCloudStatus(){
+ const target=$("#queueItems");if(!target)return;
+ [...target.querySelectorAll(".queue-entry")].forEach((row,index)=>{
+  const job=queue[index];if(!job)return;
+  let badge=row.querySelector(".queue-cloud-status");
+  if(!badge){badge=document.createElement("span");badge.className="queue-cloud-status";row.querySelector("div")?.append(badge)}
+  badge.textContent=cloudSynced.has(job.id)?"✓ Synced lên GitHub":cloudSyncError?"Chưa sync · "+cloudSyncError:"Chờ sync GitHub";
+ });
+}
+async function pushQueueCloud(){
+ const token=githubQueueToken();if(!token){cloudSyncError="Thiếu token";queueCloudStatus();return}
+ const items=cloudQueueItems(),key=await queueCipherKey(),iv=crypto.getRandomValues(new Uint8Array(12));
+ const plaintext=new TextEncoder().encode(JSON.stringify({version:1,at:Date.now(),items}));
+ const encrypted=new Uint8Array(await crypto.subtle.encrypt({name:"AES-GCM",iv},key,plaintext));
+ const content=b64(new TextEncoder().encode(JSON.stringify({version:1,algorithm:"AES-256-GCM",iv:b64(iv),data:b64(encrypted)})));
+ await ensureCloudQueueBranch();
+ let sha;
+ try{const original=await cloudQueueRequest("contents/"+CLOUD_QUEUE_FILE+"?ref="+CLOUD_QUEUE_BRANCH);sha=original.sha}
+ catch(e){if(e.status!==404)throw e}
+ await cloudQueueRequest("contents/"+CLOUD_QUEUE_FILE,"PUT",{message:"backup: encrypted Research Studio pending queue",branch:CLOUD_QUEUE_BRANCH,content,...(sha?{sha}:{})});
+ cloudSynced=new Set(items.map(x=>x.id));cloudSyncError="";queueCloudStatus();
+}
+function scheduleCloudQueueSync(){
+ if(cloudSyncTimer)clearTimeout(cloudSyncTimer);
+ cloudSyncTimer=setTimeout(()=>{
+  cloudSyncTimer=null;
+  cloudWrite=cloudWrite.catch(()=>{}).then(()=>pushQueueCloud()).catch(e=>{
+   cloudSyncError=e.message;queueCloudStatus();$("#queueMessage").textContent="Đồng bộ GitHub chưa thành công: "+e.message+" · hàng đợi cục bộ vẫn được giữ.";
+  });
+ },700);
+}
+async function pullQueueCloud(){
+ const button=$("#restoreQueueGithubBtn");button.disabled=true;
+ try{
+  // Finish queued local writes before merging cloud state.
+  if(cloudSyncTimer){clearTimeout(cloudSyncTimer);cloudSyncTimer=null}
+  await cloudWrite.catch(()=>{});
+  const file=await cloudQueueRequest("contents/"+CLOUD_QUEUE_FILE+"?ref="+CLOUD_QUEUE_BRANCH);
+  const encrypted=JSON.parse(new TextDecoder().decode(unb64((file.content||"").replace(/\s/g,""))));
+  if(encrypted.version!==1||encrypted.algorithm!=="AES-256-GCM")throw Error("Định dạng bản sao không hỗ trợ.");
+  const plain=await crypto.subtle.decrypt({name:"AES-GCM",iv:unb64(encrypted.iv)},await queueCipherKey(),unb64(encrypted.data));
+  const parsed=JSON.parse(new TextDecoder().decode(plain));
+  if(!Array.isArray(parsed.items))throw Error("Bản sao GitHub không chứa hàng đợi hợp lệ.");
+  const seen=new Set(queue.map(x=>x.id)),added=[];
+  for(const item of parsed.items){
+   if(!item?.id||typeof item.source!=="string"||item.source.length<700||isCommittedCheckpoint(item.checkpoint)||seen.has(item.id))continue;
+   if(!SERIES[item.series])SERIES[item.series]={name:item.series,tag:item.series,category:"Nghiên cứu"};
+   seen.add(item.id);added.push(item);
+  }
+  // Existing local drafts win on conflict; avoid clobbering live work.
+  const previous=[...queue];queue.push(...added);
+  if(!await saveQueue()){queue=previous;throw Error("Không lưu được hàng đợi đã tải vào IndexedDB.")}
+  cloudSynced=new Set([...cloudSynced,...added.map(x=>x.id)]);
+  renderQueue();queueCloudStatus();
+  $("#queueMessage").textContent="Đã tải "+added.length+" bài chưa có trên máy từ GitHub. Tự chạy bài chờ tiếp theo.";
+  if(!working)dispatchNext();
+ }catch(e){
+  $("#queueMessage").textContent="Không thể tải hàng đợi từ GitHub: "+e.message+". Dữ liệu hiện tại không bị xóa.";
+ }finally{button.disabled=false}
+}
+
 let queueWriteChain=Promise.resolve();
 function queuePersist(items){
  const snapshot=structuredClone(items);
@@ -224,7 +324,7 @@ function restoreFailedFromDraft(){
 }
 async function saveQueue(){
  failedFirst();
- try{await queuePersist(queue);return true}
+ try{await queuePersist(queue);scheduleCloudQueueSync();return true}
  catch(e){state("Không thể lưu hàng đợi IndexedDB: "+e.message,true);return false}
 }
 function youtubeVideoId(value){
@@ -305,7 +405,7 @@ async function enqueue(){
  queue.push(job);
  if(!await saveQueue()){queue.pop();throw Error("Hàng đợi chưa được lưu; vui lòng giải phóng bộ nhớ trình duyệt.");}
  clearSourceForm();
- renderQueue();
+ renderQueue();queueCloudStatus();
  $("#queueMessage").removeAttribute("data-duplicate");
  $("#queueMessage").textContent="Đã thêm bài #"+queue.length+" · "+describeJob(job)+" vào hàng đợi. Tiếp tục nhập phụ đề khác nếu muốn.";
  state("Bài hiện tại tiếp tục chạy; "+queue.length+" bài được lưu trong hàng đợi.");
@@ -412,6 +512,8 @@ function showRecoveryDownload(){
  button.hidden=false;button.onclick=downloadRecoveryCheckpoint;
 }
 function checkpoint(extra={}){
+ // Queue changes are backed up separately; checkpoint updates are debounced.
+ if(working) scheduleCloudQueueSync();
  runData={...runData,...extra};
  const data={at:Date.now(),series:activeSource?.series||$("#series").value,source:activeSource?.source??$("#transcript").value,sourceUrl:activeSource?.sourceUrl??$("#sourceUrl").value,angle:activeSource?.angle??$("#angle").value,markdown:rawMarkdown,commitProof:lastCommitProof,...runData};
  // The article is already committed. Its source and generated body no longer need
@@ -1071,6 +1173,7 @@ async function start(e,restore=false,queuedJob=null){
 }
 function saveMarkdown(){const blob=new Blob([rawMarkdown],{type:"text/markdown;charset=utf-8"}),u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download=(lastSlug||"series-research")+".md";a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
 $("#studioForm").addEventListener("submit",start);
+$("#restoreQueueGithubBtn").addEventListener("click",pullQueueCloud);
 $("#runQueueBtn").addEventListener("click",()=>{
  if(working||queueBusy){$("#queueMessage").textContent="Có bài đang chạy; hàng đợi sẽ tự tiếp tục sau khi bài hiện tại kết thúc.";return}
  if(!queue.length){$("#queueMessage").textContent="Hàng đợi đang trống. Hãy thêm bài bằng nút Viết và xuất bản khi đang có phiên chạy.";return}
@@ -1249,7 +1352,7 @@ Promise.all([hydrateQueue(),connectionReady]).then(async()=>{
   // Never allow stale resumePending/runData to block the restored queue.
   resumePending=false;
   if(["failed","stopped","waiting","running"].includes(runData.runStatus))runData={runStatus:"completed"};
-  if(await saveQueue())dispatchNext();
+  if(await saveQueue()){queueCloudStatus();dispatchNext()}
  }
 }).catch(e=>state("Không thể khôi phục hàng đợi: "+e.message,true));
 })();
