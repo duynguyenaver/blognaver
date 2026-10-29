@@ -29,70 +29,44 @@ function predictedUrl(path){
  return BASE+"/bai-viet/"+short.split("/").map(encodeURIComponent).join("/")+"/";
 }
 async function load(){
- if(busy||!details.open)return;
+ if(busy)return;
  busy=true;button.disabled=true;
  const call=++runId;
- status.textContent="Đang đồng bộ commit và GitHub Actions…";
+ status.textContent="Đang tìm bài commit gần nhất trên GitHub…";
  try{
-  const [commits,runs]=await Promise.all([
-   request("/commits?sha=main&path=content%2Fposts&per_page=20"),
-   request("/actions/workflows/hugo.yml/runs?branch=main&per_page=60")
-  ]);
-  if(call!==runId)return;
-  const runBySha=new Map();
-  for(const r of runs.workflow_runs||[]){if(!runBySha.has(r.head_sha))runBySha.set(r.head_sha,r)}
-  // The per-file commit endpoint includes unrelated changes only when the same commit
-  // also changes a post. Inspect the diff and only show those that added/modified posts.
-  const detail=await Promise.allSettled(commits.slice(0,12).map(c=>request("/commits/"+encodeURIComponent(c.sha))));
-  if(call!==runId)return;
-  const entries=detail.flatMap((d,i)=>{
-   if(d.status!=="fulfilled")return [];
-   const files=articlePaths(d.value);if(!files.length)return [];
-   return [{commit:commits[i],files,run:runBySha.get(commits[i].sha)}];
-  }).slice(0,8);
-  const fragment=document.createDocumentFragment();
-  for(const entry of entries){
-   const {commit,files,run}=entry;
-   const wrap=node("article","recent-commit-entry");
-   const top=node("div","recent-commit-top");
-   top.append(node("strong","",commit.commit.message.split("\n")[0]),node("span","recent-commit-date",new Date(commit.commit.committer?.date||commit.commit.author?.date||0).toLocaleString("vi-VN")));
-   wrap.append(top);
-   const state=runState(run),pill=node("span","recent-deploy-pill "+state.cls,state.label);
-   const links=node("div","recent-commit-links");links.append(link("Commit "+commit.sha.slice(0,8),commit.html_url),pill);
-   if(run)links.append(link("Theo dõi Actions",run.html_url));
-   wrap.append(links);
-   for(const file of files){
-    const row=node("div","recent-article-links");
-    row.append(node("span","recent-source-name",file.split("/").pop()),link("URL bài dự kiến",predictedUrl(file)));
-    wrap.append(row);
-   }
-   fragment.append(wrap);
+  const commits=await request("/commits?sha=main&path=content%2Fposts&per_page=12");
+  let latest=null;
+  for(const commit of commits){
+   const detail=await request("/commits/"+encodeURIComponent(commit.sha));
+   const files=articlePaths(detail);
+   if(files.length){latest={commit,file:files[0]};break}
   }
-  if(!entries.length)fragment.append(node("p","recent-empty","Không tìm thấy commit bài viết trong những thay đổi gần đây."));
-  list.replaceChildren(fragment);
-  lastLoaded=new Date();
-  const skipped=detail.filter(d=>d.status==="rejected").length;
-  status.textContent="Đã kiểm tra "+lastLoaded.toLocaleTimeString("vi-VN")+" · "+entries.length+" commit liên quan bài viết"+(skipped?" · "+skipped+" commit chưa đọc được chi tiết":"");
+  if(call!==runId)return;
+  if(!latest){list.replaceChildren();status.textContent="Chưa tìm thấy bài viết đã commit.";return}
+  renderLatest(latest.file,latest.commit.sha);
  }catch(e){
-  status.textContent="Không thể làm mới: "+e.message+(lastLoaded?" · Giữ dữ liệu lần tải "+lastLoaded.toLocaleTimeString("vi-VN"):"");
+  if(call===runId)status.textContent="Không tải được bài gần nhất: "+e.message;
  }finally{busy=false;button.disabled=false}
 }
-// A verified commit updates Section 08 without a full-page reload or API scan.
-window.addEventListener("bn:research-article-committed",event=>{
- const proof=event.detail||{};
- const file=String(proof.path||"");
- if(!file.startsWith("content/posts/")||!file.endsWith(".md")||!(/^[a-f0-9]{40}$/i).test(String(proof.sha||"")))return;
- runId++;
+function renderLatest(file,sha){
+ if(!file.startsWith("content/posts/")||!file.endsWith(".md"))return;
  details.open=true;
  const wrap=node("article","recent-commit-entry");
  wrap.append(node("strong","", "Bài vừa commit thành công"));
  const row=node("div","recent-article-links");
  row.append(link("Đọc bài · URL dự kiến",predictedUrl(file)));
- wrap.append(row);
- list.replaceChildren(wrap);
- status.textContent="Commit "+proof.sha.slice(0,10)+" đã ghi trên main. Chỉ hiển thị URL bài vừa tạo; cần đợi Hugo deploy thành công để đọc.";
+ wrap.append(row);list.replaceChildren(wrap);
+ status.textContent="Commit "+sha.slice(0,10)+" · Đã ghi trên GitHub main. Chờ Hugo deploy hoàn tất để truy cập URL.";
  lastLoaded=new Date();
+}
+// A verified commit updates Section 08 without a full-page reload or API scan.
+window.addEventListener("bn:research-article-committed",event=>{
+ const proof=event.detail||{};
+ if(typeof proof.sha==="string"&&typeof proof.path==="string"){
+  runId++;renderLatest(proof.path,proof.sha);
+ }
 });
-// Deliberately no automatic fetch on open, focus, visibility or timer.
+// Fetch once on load and on user refresh; keep only the latest commit.
 button.addEventListener("click",load);
+load();
 })();
