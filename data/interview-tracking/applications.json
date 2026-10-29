@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "updatedAt": "2026-10-29T12:49:42.186Z",
+  "applications": [
+    {
+      "company": "Air premia",
+      "role": "Cargo Representative",
+      "appliedDate": "2026-09-02",
+      "location": "Ho Chi Minh",
+      "jobUrl": "",
+      "source": "Web",
+      "salary": "23000000",
+      "contact": "HR",
+      "notes": "",
+      "id": "5fc37ed2-57be-4bcd-ba08-2c374243dc71",
+      "stage": "final",
+      "createdAt": "2026-10-29T12:48:58.342Z",
+      "updatedAt": "2026-10-29T12:49:31.512Z",
+      "nextAction": "",
+      "nextActionDate": "",
+      "history": [
+        {
+          "stage": "applied",
+          "at": "2026-09-02T12:00:00",
+          "note": "Đã tạo hồ sơ ứng tuyển"
+        },
+        {
+          "stage": "final",
+          "at": "2026-10-29T12:45:00.000Z",
+          "note": ""
+        }
+      ]
+    }
+  ]
+}
