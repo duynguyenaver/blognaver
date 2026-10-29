@@ -124,6 +124,53 @@ function selectedSeries(){
  return id;
 }
 const QUEUE_STORE="bn_series_research_fifo_queue_v1";
+const QUEUE_DB="bn_series_queue_durable_v2";
+function queueDisk(key,value,mode="put"){
+ return new Promise((resolve,reject)=>{
+  if(!indexedDB)return reject(Error("IndexedDB không khả dụng"));
+  const request=indexedDB.open(QUEUE_DB,1);
+  request.onupgradeneeded=()=>{if(!request.result.objectStoreNames.contains("data"))request.result.createObjectStore("data")};
+  request.onerror=()=>reject(request.error||Error("Không mở được kho hàng đợi"));
+  request.onsuccess=()=>{
+   const db=request.result,tx=db.transaction("data",mode==="get"?"readonly":"readwrite");
+   const store=tx.objectStore("data"),op=mode==="get"?store.get(key):mode==="delete"?store.delete(key):store.put(value,key);
+   let result;op.onsuccess=()=>{result=op.result};
+   tx.oncomplete=()=>{db.close();resolve(result)};
+   tx.onerror=()=>{db.close();reject(tx.error||Error("Không ghi được hàng đợi"))};
+   tx.onabort=()=>{db.close();reject(tx.error||Error("Lưu hàng đợi bị gián đoạn"))};
+  };
+ });
+}
+let queueWriteChain=Promise.resolve();
+function queuePersist(items){
+ const snapshot=structuredClone(items);
+ queueWriteChain=queueWriteChain.catch(()=>{}).then(()=>queueDisk("queue",snapshot));
+ return queueWriteChain;
+}
+async function hydrateQueue(){
+ try{
+  const disk=await queueDisk("queue",null,"get");
+  const active=await queueDisk("active",null,"get");
+  const legacy=(()=>{try{return JSON.parse(localStorage.getItem(QUEUE_STORE)||"[]")}catch{return []}})();
+  const combined=[...(Array.isArray(disk)?disk:[]),...(Array.isArray(legacy)?legacy:[])];
+  if(active?.source&&!isCommittedCheckpoint(active.checkpoint))combined.unshift({...active,checkpoint:active.checkpoint||null});
+  const seen=new Set();
+  queue=combined.filter(job=>{
+   if(!job||typeof job.source!=="string"||job.source.length<700||isCommittedCheckpoint(job.checkpoint))return false;
+   if(job.series&&!SERIES[job.series])SERIES[job.series]={name:job.series,tag:job.series,category:"Nghiên cứu"};
+   const id=job.id||job.sourceUrl||job.source;
+   if(seen.has(id))return false;
+   seen.add(id);return true;
+  }).slice(0,30);
+  await queuePersist(queue);
+  if(active)await queueDisk("active",null,"delete");
+  try{localStorage.removeItem(QUEUE_STORE)}catch{}
+ }catch(e){
+  $("#queueMessage").textContent="Không đọc được kho hàng đợi bền vững: "+e.message;
+ }
+ renderQueue();
+}
+
 let activeSource=null,queue=[],queueBusy=false,checkpointStorageFailed=false,queueRetryTimer=null;
 let stallTimer=null,lastProgressAt=0,lastProgressValue=-1,rotationRequested=false,publishingCommit=false;
 const STALL_MS=60000,MAX_ROTATIONS=3;
@@ -170,16 +217,13 @@ function restoreFailedFromDraft(){
   if(!d?.source||d.commitProof?.sha||isCommittedCheckpoint(d)||!["failed","waiting","stopped","running"].includes(d.runStatus))return;
   if(queue.some(x=>x.sourceUrl&&d.sourceUrl&&x.sourceUrl===d.sourceUrl||x.source===d.source))return;
   const job={id:"recovered-"+(d.at||Date.now()),at:d.at||Date.now(),failedAt:d.at||Date.now(),failed:true,retryAt:Number(d.retryAt)||0,source:d.source,sourceUrl:d.sourceUrl||"",series:d.series,angle:d.angle||"",autoPublish:d.autoPublish!==false,checkpoint:{...d}};
-  if(SERIES[job.series]){queue.unshift(job);failedFirst();if(saveQueue()){runData={runStatus:"completed"};try{localStorage.removeItem(DRAFT)}catch{}}}
+  if(SERIES[job.series]){queue.unshift(job);failedFirst();/* persisted on startup after hydration */}
  }catch{}
 }
-function saveQueue(){
+async function saveQueue(){
  failedFirst();
- try{localStorage.setItem(QUEUE_STORE,JSON.stringify(queue))}catch{
-  state("Không thể lưu hàng đợi. Kiểm tra dung lượng bộ nhớ trình duyệt.",true);
-  return false;
- }
- return true;
+ try{await queuePersist(queue);return true}
+ catch(e){state("Không thể lưu hàng đợi IndexedDB: "+e.message,true);return false}
 }
 function youtubeVideoId(value){
  try{
@@ -230,7 +274,7 @@ function renderQueue(){
   if(job.rotations){const stats=document.createElement("span");stats.textContent="Đã luân phiên "+job.rotations+"/"+MAX_ROTATIONS+" lần";label.append(stats)}
 
   const remove=document.createElement("button");remove.type="button";remove.textContent="Xóa";remove.className="queue-remove";remove.setAttribute("aria-label","Xóa bài chờ số "+(index+1));
-  remove.onclick=()=>{queue=queue.filter(x=>x.id!==job.id);saveQueue();renderQueue()};
+  remove.onclick=async()=>{const previous=queue;queue=queue.filter(x=>x.id!==job.id);if(!await saveQueue())queue=previous;renderQueue()};
   li.append(label,remove);target.append(li);
  });
  $("#startBtn").disabled=false;
@@ -252,12 +296,12 @@ function formJob(){
  if(job.sourceUrl&&!/^https:\/\//i.test(job.sourceUrl))throw Error("URL nguồn phải dùng HTTPS.");
  return job
 }
-function enqueue(){
+async function enqueue(){
  const job=formJob();
  if(checkDuplicateYoutube(job))return;
  if(queue.length>=30)throw Error("Hàng đợi tối đa 30 bài. Hãy xóa bài chưa cần thiết.");
  queue.push(job);
- if(!saveQueue()){queue.pop();throw Error("Hàng đợi chưa được lưu; vui lòng giải phóng bộ nhớ trình duyệt.");}
+ if(!await saveQueue()){queue.pop();throw Error("Hàng đợi chưa được lưu; vui lòng giải phóng bộ nhớ trình duyệt.");}
  clearSourceForm();
  renderQueue();
  $("#queueMessage").removeAttribute("data-duplicate");
@@ -291,11 +335,12 @@ function dispatchNext(){
  const item=queue[index];
  populateJob(item);
  $("#queueMessage").textContent="Đang chuyển bài tiếp theo từ hàng đợi vào quy trình viết.";
- setTimeout(()=>{
+ setTimeout(async()=>{
   if(working){queueBusy=false;return}
   // A paused job restores its exact outline/section checkpoint.
+  try{await queueDisk("active",item)}catch(e){queueBusy=false;state("Không thể bảo vệ bài đang chạy: "+e.message,true);return}
   queue.splice(queue.indexOf(item),1);
-  if(!saveQueue()){queue.splice(Math.min(index,queue.length),0,item);queueBusy=false;renderQueue();return}
+  if(!await saveQueue()){queue.splice(Math.min(index,queue.length),0,item);queueBusy=false;renderQueue();return}
   queueBusy=false;
   if(item.checkpoint){
    runData={...item.checkpoint};rawMarkdown=item.checkpoint.markdown||"";
@@ -894,7 +939,7 @@ async function publish(d){
 async function start(e,restore=false,queuedJob=null){
  e.preventDefault();
  if(working){
-  try{enqueue()}catch(err){$("#queueMessage").textContent="Không thể xếp hàng: "+err.message;state("Không thể xếp hàng: "+err.message,true)}
+  try{await enqueue()}catch(err){$("#queueMessage").textContent="Không thể xếp hàng: "+err.message;state("Không thể xếp hàng: "+err.message,true)}
   return;
  }
  let job;
@@ -985,7 +1030,7 @@ async function start(e,restore=false,queuedJob=null){
     failed:true,failedAt:job.failedAt||Date.now(),checkpoint:saved};
    // Enqueue behind currently waiting articles. Do not lose checkpoints on reload.
    queue.push(paused);
-   if(!saveQueue())state("Bộ nhớ trình duyệt đầy; không thể bảo đảm lưu bài tạm dừng.",true);
+   if(!await saveQueue())state("Bộ nhớ trình duyệt đầy; không thể bảo đảm lưu bài tạm dừng.",true);
    try{localStorage.removeItem(DRAFT)}catch{}
    runData={runStatus:"completed"};setPublishEvidence(null);
    state("Đã tạm dừng an toàn bài "+describeJob(job)+" và chuyển sang bài kế tiếp.");
@@ -998,7 +1043,7 @@ async function start(e,restore=false,queuedJob=null){
    // then begin a fresh round while other queued jobs continue immediately.
    const retryAt=Math.max(Date.now()+60000,window.BNQuota?.retryAt?.()||0);
    const failedJob={...job,failed:true,failedAt:job.failedAt||Date.now(),retryCount:attempts>=3?0:attempts,retryAt,checkpoint:snapshot};
-   if(!queue.some(item=>item.id===failedJob.id)){queue.push(failedJob);saveQueue()}
+   if(!queue.some(item=>item.id===failedJob.id)){queue.push(failedJob);await saveQueue()}
    queuedForRetry=true;
    try{localStorage.removeItem(DRAFT)}catch{}
    runData={runStatus:"completed"};setPublishEvidence(null);
@@ -1011,6 +1056,8 @@ async function start(e,restore=false,queuedJob=null){
  finally{
   stopStallWatch();window.BNQuota?.finishRun(Boolean(lastCommitProof?.sha));working=false;manualModelOverride=null;quotaResumedNotice=false;
   $("#cancelBtn").disabled=true;abort=null;activeSource=null;
+  // After an item is safely requeued or successfully committed, retire its crash backup.
+  if(queuedJob&&(succeeded||queuedForRetry||rotationRequested))queueDisk("active",null,"delete").catch(()=>{});
   renderQueue();
   if(checkpointStorageFailed){$("#queueMessage").textContent="Bộ nhớ checkpoint đầy · đang giữ hàng đợi và bản thảo trong tab. Hãy sao lưu JSON.";dispatchNext()}
   else if(succeeded){runtime("idle",null,"Hoàn thành","Bài đã xử lý xong. Xem thông tin model trong metadata bài viết.");$("#queueMessage").textContent="Đã hoàn tất phiên vừa chạy. "+queue.length+" bài còn lại sẽ tự tiếp tục.";dispatchNext()}
@@ -1193,6 +1240,8 @@ try{
   // Recovered into the priority FIFO below; do not also start a duplicate run.
  }
 }catch{}
-restoreFailedFromDraft();failedFirst();renderQueue();
-if(queue.length)connectionReady.then(()=>{if(!working)dispatchNext()});
+Promise.all([hydrateQueue(),connectionReady]).then(async()=>{
+ restoreFailedFromDraft();
+ if(queue.length){await saveQueue();dispatchNext()}
+}).catch(e=>state("Không thể khôi phục hàng đợi: "+e.message,true));
 })();
