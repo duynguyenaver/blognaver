@@ -5,6 +5,29 @@ const KEYSTORE="bn_series_research_gemini_session",GROQ_STORE="bn_series_groq_ke
 let abort=null,working=false,rawMarkdown="",currentModel="",key="",lastSlug="",lastCommitProof=null,startedAt=0,geminiVerified=false,githubVerified=false,groqVerified=false,groqModel="openai/gpt-oss-120b",runData={},resumePending=false;
 const QUEUE_STORE="bn_series_research_fifo_queue_v1";
 let activeSource=null,queue=[],queueBusy=false;
+let stallTimer=null,lastProgressAt=0,lastProgressValue=-1,rotationRequested=false,publishingCommit=false;
+const STALL_MS=60000,MAX_ROTATIONS=3;
+function stopStallWatch(){if(stallTimer){clearInterval(stallTimer);stallTimer=null}}
+function monitorProgress(){
+ stopStallWatch();lastProgressAt=Date.now();lastProgressValue=Number($("#percent").textContent.replace("%",""))||0;
+ stallTimer=setInterval(()=>{
+  if(!working||rotationRequested||publishingCommit||abort?.signal.aborted)return;
+  const pct=Number($("#percent").textContent.replace("%",""))||0;
+  if(pct!==lastProgressValue){lastProgressValue=pct;lastProgressAt=Date.now();return}
+  if(Date.now()-lastProgressAt<STALL_MS)return;
+  // Do not cancel a GitHub write: it could already have committed a post.
+  if(!queue.length){$("#queueMessage").textContent="Bài đang đứng ở "+pct+"% quá 60 giây, nhưng chưa có bài khác để luân phiên. Vẫn giữ phiên và tự retry API.";lastProgressAt=Date.now();return}
+  if((activeSource?.rotations||0)>=MAX_ROTATIONS){
+   $("#queueMessage").textContent="Phiên này đã vượt số lượt luân phiên an toàn. Giữ checkpoint và dừng để tránh vòng lặp vô hạn.";
+   stopStallWatch();return
+  }
+  rotationRequested=true;
+  $("#queueMessage").textContent="Bài đang đứng ở "+pct+"% quá 60 giây. Đang lưu checkpoint và chuyển sang bài kế tiếp.";
+  abort.abort();
+ },5000)
+}
+function touchProgress(pct){if(pct!==lastProgressValue){lastProgressValue=pct;lastProgressAt=Date.now()}}
+
 try{
  const saved=JSON.parse(localStorage.getItem(QUEUE_STORE)||"[]");
  queue=Array.isArray(saved)?saved.filter(x=>x&&typeof x.source==="string"&&x.source.length>=700&&SERIES[x.series]).slice(0,30):[];
@@ -22,6 +45,8 @@ function renderQueue(){
  target.replaceChildren();
  $("#queueCount").textContent=queue.length+" bài";
  $("#queueActive").textContent=working?(activeSource?describeJob(activeSource):"Đang khôi phục"):"Chưa có";
+ const runningBadge=$("#queueRunningBadge");
+ if(runningBadge){runningBadge.hidden=!working;runningBadge.textContent="ĐANG CHẠY RỒI NHA"}
  $("#queueStatus").textContent=working?"Đang xử lý":queue.length?"Đang chờ":"Sẵn sàng";
  if(!queue.length){const empty=document.createElement("li");empty.className="queue-empty";empty.textContent="Chưa có bài nào trong hàng đợi.";target.append(empty)}
  queue.forEach((job,index)=>{
@@ -30,6 +55,9 @@ function renderQueue(){
   title.textContent="#"+(index+1)+" · "+describeJob(job);
   detail.textContent=(job.sourceUrl||"Phụ đề tiếng Anh")+" · "+job.source.length.toLocaleString("vi-VN")+" ký tự · "+new Date(job.at).toLocaleTimeString("vi-VN");
   label.append(title,detail);
+  if(job.checkpoint){const status=document.createElement("span");status.className="queue-paused-badge";status.textContent="TẠM DỪNG · CHỜ CHẠY LẠI";label.append(status)}
+  if(job.rotations){const stats=document.createElement("span");stats.textContent="Đã luân phiên "+job.rotations+"/"+MAX_ROTATIONS+" lần";label.append(stats)}
+
   const remove=document.createElement("button");remove.type="button";remove.textContent="Xóa";remove.className="queue-remove";remove.setAttribute("aria-label","Xóa bài chờ số "+(index+1));
   remove.onclick=()=>{queue=queue.filter(x=>x.id!==job.id);saveQueue();renderQueue()};
   li.append(label,remove);target.append(li);
@@ -84,8 +112,15 @@ function dispatchNext(){
  populateJob(item);
  $("#queueMessage").textContent="Đang chuyển bài tiếp theo từ hàng đợi vào quy trình viết.";
  setTimeout(()=>{
-  queue.shift();saveQueue();queueBusy=false;renderQueue();
-  start(new Event("submit")).catch(e=>state("Không thể chạy bài trong hàng đợi: "+e.message,true));
+  if(working){queueBusy=false;return}
+  // A paused job restores its exact outline/section checkpoint.
+  queue.shift();saveQueue();queueBusy=false;
+  if(item.checkpoint){
+   runData={...item.checkpoint};rawMarkdown=item.checkpoint.markdown||"";
+   setPublishEvidence(null);
+  }
+  renderQueue();
+  start(new Event("submit"),Boolean(item.checkpoint),item).catch(e=>state("Không thể chạy bài trong hàng đợi: "+e.message,true));
  },0);
 }
 
@@ -99,6 +134,7 @@ function progress(n,phase,step){
  const current=Math.min(3,Math.max(0,step));
  $("#progressFill").style.width=n+"%";
  $("#percent").textContent=n+"%";
+ touchProgress(n);
  $("#phase").textContent=phase;
  const list=$("#steps");list.dataset.step=String(current);
  $("#progressFill").dataset.step=String(current);
@@ -438,7 +474,7 @@ async function publish(d){
  catch(e){state("Bài đã commit lên main, nhưng chưa gọi được deploy: "+e.message+". Vào GitHub Actions để chạy Hugo Deploy bằng workflow_dispatch.",true)}
  return created
 }
-async function start(e,restore=false){
+async function start(e,restore=false,queuedJob=null){
  e.preventDefault();
  if(working){
   try{enqueue()}catch(err){state("Không thể xếp hàng: "+err.message,true)}
@@ -448,12 +484,13 @@ async function start(e,restore=false){
  try{
   if(restore){
    if(lastCommitProof?.sha)return;
-   job={source:runData.source,sourceUrl:runData.sourceUrl||"",series:runData.series||$("#series").value,angle:runData.angle||"",autoPublish:runData.autoPublish!==false};
-  }else job=formJob();
+   job=queuedJob?{...queuedJob}:{source:runData.source,sourceUrl:runData.sourceUrl||"",series:runData.series||$("#series").value,angle:runData.angle||"",autoPublish:runData.autoPublish!==false};
+  }else job=queuedJob?{...queuedJob}:formJob();
  }catch(err){state("Không thể bắt đầu: "+err.message,true);return}
- activeSource={...job};
+ activeSource={...job};rotationRequested=false;publishingCommit=false;
  if(!restore){runData={};rawMarkdown="";resumePending=false;clearSourceForm()}
- abort=new AbortController();startedAt=Date.now();window.BNQuota?.beginRun();working=true;
+ else{runData={...runData,source:job.source,sourceUrl:job.sourceUrl,series:job.series,angle:job.angle,autoPublish:job.autoPublish}}
+ abort=new AbortController();startedAt=Date.now();window.BNQuota?.beginRun();working=true;monitorProgress();
  $("#startBtn").disabled=false;$("#cancelBtn").disabled=false;
  if(!restore){$("#resultLinks").replaceChildren();setPublishEvidence(null)}
  renderQueue();
@@ -494,23 +531,35 @@ async function start(e,restore=false){
  rawMarkdown=makeArticle(d);lastSlug=d.slug;$("#preview").textContent=rawMarkdown;$("#resultTitle").textContent=title;
  progress(88,"Đã hoàn thiện bản nghiên cứu",2);checkpoint({outline,published:false,slug:d.slug});
  if(job.autoPublish){
-  progress(92,"Commit bài lên GitHub",3);await publish(d);progress(100,"Đã commit (kiểm tra Pages deploy riêng)",4);// Keep the publish proof and draft preview but clear the English source for a NEW job.
+  progress(92,"Commit bài lên GitHub",3);publishingCommit=true;stopStallWatch();await publish(d);progress(100,"Đã commit (kiểm tra Pages deploy riêng)",4);// Keep the publish proof and draft preview but clear the English source for a NEW job.
   // Source inputs were reset at the START of this run, so later incoming queue entries are never erased.
-  checkpoint({published:true,runStatus:"completed",slug:d.slug,source:"",sourceUrl:"",angle:"",commitProof:lastCommitProof,productionMetrics:metrics,briefs:[],pieces:[],outline:null,retryAt:0});
+  checkpoint({published:true,runStatus:"completed",slug:d.slug,source:"",sourceUrl:"",angle:"",commitProof:lastCommitProof,productionMetrics:runData.productionMetrics||null,briefs:[],pieces:[],outline:null,retryAt:0});
   state($("#status").textContent+"\nBiểu mẫu nguồn sẵn sàng cho bài mới. Hàng đợi sẽ chạy tiếp nếu có.");
   if(githubVerified)window.BNSeriesInsights?.sync().catch(()=>{});
  }else{checkpoint({runStatus:"completed"});window.BNSeriesInsights?.record({slug:d.slug,title:d.title,series:d.series,state:"draft",durationMs:Date.now()-startedAt,live:false,quota:window.BNQuota?.runSummary()});progress(100,"Hoàn thành bản thảo; chưa đăng",4);state("Đã tạo bản thảo Markdown. Bạn có thể copy hoặc xuất file; chưa ghi lên GitHub.")}
  succeeded=true;
  }catch(e){
+  if(rotationRequested){
+   const saved={...runData,source:job.source,sourceUrl:job.sourceUrl||"",series:job.series,angle:job.angle||"",autoPublish:job.autoPublish!==false,markdown:rawMarkdown,runStatus:"paused",commitProof:null};
+   const paused={...job,rotations:(job.rotations||0)+1,checkpoint:saved};
+   // Enqueue behind currently waiting articles. Do not lose checkpoints on reload.
+   queue.push(paused);
+   if(!saveQueue())state("Bộ nhớ trình duyệt đầy; không thể bảo đảm lưu bài tạm dừng.",true);
+   try{localStorage.removeItem(DRAFT)}catch{}
+   runData={runStatus:"completed"};setPublishEvidence(null);
+   state("Đã tạm dừng an toàn bài "+describeJob(job)+" và chuyển sang bài kế tiếp.");
+  }else{
   runtime("error",null,"Đã dừng do lỗi",e.message);
   state("Không hoàn tất: "+e.message,true);
   checkpoint({runStatus:abort?.signal.aborted?"stopped":"failed",error:e.message,retryAt:window.BNQuota?.retryAt?.()||0})
+  }
  }
  finally{
-  window.BNQuota?.finishRun(Boolean(lastCommitProof?.sha));working=false;
+  stopStallWatch();window.BNQuota?.finishRun(Boolean(lastCommitProof?.sha));working=false;
   $("#cancelBtn").disabled=true;abort=null;activeSource=null;
   renderQueue();
   if(succeeded){runtime("idle",null,"Hoàn thành","Bài đã xử lý xong. Xem thông tin Models trong Smart Insights.");$("#queueMessage").textContent="Đã hoàn tất phiên vừa chạy. "+queue.length+" bài còn lại sẽ tự tiếp tục.";dispatchNext()}
+  else if(rotationRequested){rotationRequested=false;dispatchNext()}
   else $("#queueMessage").textContent="Phiên hiện tại dừng vì lỗi. Bài đang chờ vẫn được lưu; hãy tiếp tục phiên trước để xử lý hàng đợi.";
 }
 }

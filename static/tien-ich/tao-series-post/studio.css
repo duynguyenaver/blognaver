@@ -177,3 +177,8 @@
 .bn-runtime[data-provider=waiting] #runtimeState{color:#a46a16}
 .bn-runtime-note{font-size:12px;line-height:1.6;color:#607c94;margin:11px 0 0}
 @media(max-width:520px){.bn-runtime{padding:12px}.bn-runtime-grid{grid-template-columns:1fr}}
+
+/* Live queue status and protected progress rotations. */
+.queue-running-badge{display:inline-flex!important;align-items:center;max-width:100%;margin-top:8px;padding:5px 9px;border:1px solid #72caa3;border-radius:999px;background:#dff8eb;color:#166f47;font-size:10px;font-weight:850;letter-spacing:.035em;line-height:1.4}
+.queue-running-badge[hidden]{display:none!important}
+.queue-paused-badge{display:inline-flex!important;width:max-content;max-width:100%;margin-top:8px;padding:4px 8px;border:1px solid #e5bd80;background:#fff2d8;color:#99611b;border-radius:999px;font-size:10px;font-weight:800}
