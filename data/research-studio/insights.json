@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-29T20:58:32.376Z",
+  "updatedAt": "2026-10-29T22:00:13.167Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -376,7 +376,8 @@
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
-      ]
+      ],
+      "live": true
     },
     {
       "slug": "cold-fusion-thi-truong-cho-thue-ngan-han-tu-su-bung-no-nguon-cung-den-ap-luc-phap-ly-va-2026-10-29",
@@ -393,7 +394,8 @@
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
-      ]
+      ],
+      "live": true
     },
     {
       "slug": "cold-fusion-giai-ma-dong-tien-dang-sau-mot-dem-khach-san-tu-doanh-thu-ao-den-loi-nhuan--2026-10-29",
@@ -410,7 +412,8 @@
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
-      ]
+      ],
+      "live": true
     }
   ]
 }
