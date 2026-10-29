@@ -37,6 +37,9 @@
     </div>
   </details>
 </section>
+<section class="insights-card" id="deploymentHistorySection"><div class="insights-card-head"><h2>Actions / Deploy · Lịch sử mở rộng</h2><span class="insights-caption">GitHub Actions · tối đa 300 workflow gần nhất (bao gồm trang 3)</span></div>
+<div class="metrics-grid"><div><strong id="deployAllCount">—</strong><small>Workflow đã kiểm tra</small></div><div><strong id="deploySuccessCount">—</strong><small>Thành công</small></div><div><strong id="deployFailureCount">—</strong><small>Thất bại / quá hạn</small></div><div><strong id="deployRecoveryCount">—</strong><small>Thất bại có lượt thành công sau đó (cùng workflow)</small></div></div>
+<p class="insights-caption" id="deployHistoryNote">Đang đọc lịch sử GitHub Actions…</p><div id="deployFailureList" class="workflow-list"></div></section>
 <section class="insights-card" id="autoPrSection"><div class="insights-card-head"><h2>Auto PR thành công và failed</h2><span class="insights-caption">PR tự động · trạng thái GitHub và CI</span></div><div class="metrics-grid"><div><strong id="autoPrTotal">—</strong><small>Tổng PR được kiểm tra</small></div><div><strong id="autoPrSuccess">—</strong><small>PR đã merge</small></div><div><strong id="autoPrFailed">—</strong><small>CI thất bại</small></div><div><strong id="autoPrOther">—</strong><small>Đang mở / khác</small></div></div><p class="insights-caption" id="autoPrNote">Đang tải Auto PR…</p><div id="autoPrList" class="workflow-list"></div><p class="insights-caption">Thống kê tất cả PR gần đây, gồm PR do người tạo nhưng được workflow tự động merge. PR có lỗi CI được thống kê riêng; PR đóng không merge không tự động là lỗi.</p></section>
 
 </div><script src="../shared-auth.js" defer></script><script src="insights.js" defer></script><script src="feature-insights.js?v=1" defer></script><script src="../../js/commit-status.js?v=insights2" defer></script><script src="git-operations.js?v=insights2" defer></script></body></html>
