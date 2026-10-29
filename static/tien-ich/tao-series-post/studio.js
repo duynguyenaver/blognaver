@@ -399,9 +399,21 @@ async function findPublishedYoutube(job){
  let response;
  try{response=await fetch("https://api.github.com/search/code?"+query,{cache:"no-store",headers:{
   Authorization:"Bearer "+token,Accept:"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"
- }})}catch(cause){const error=Error("Không kết nối được GitHub để kiểm tra video YouTube (Failed to fetch). Đã tạm dừng để tránh đăng trùng.");error.code="YOUTUBE_PREFLIGHT_UNAVAILABLE";error.cause=cause;throw error;}
+ }})}catch(cause){
+  const reason="GitHub Code Search không kết nối được; tiếp tục với bước bảo vệ slug khi commit.";
+  $("#queueMessage").textContent=reason;
+  state(reason,true);
+  return null;
+ }
  const result=await response.json().catch(()=>({}));
- if(!response.ok||result.incomplete_results){const error=Error("Không kiểm chứng được nguồn YouTube đã đăng (GitHub HTTP "+response.status+"). Dừng để tránh đăng trùng.");error.code="YOUTUBE_PREFLIGHT_UNAVAILABLE";error.status=response.status;throw error;}
+ if(!response.ok||result.incomplete_results){
+  // Code Search commonly returns 403 for fine-grained tokens without search access.
+  // Do not treat search availability as a network outage or block every article.
+  const reason="GitHub Code Search HTTP "+response.status+"; bỏ qua bước tìm kiếm tùy chọn. GitHub vẫn kiểm tra slug khi commit.";
+  $("#queueMessage").textContent=reason;
+  state(reason,true);
+  return null;
+ }
  for(const match of result.items||[]){
   if(!String(match.path||"").startsWith("content/posts/")||!String(match.path).endsWith(".md"))continue;
   const file=await github("contents/"+match.path+"?ref=main");
@@ -1182,6 +1194,14 @@ async function start(e,restore=false,queuedJob=null){
  if(src.length<700)throw Error("Phụ đề quá ngắn. Hãy dán ít nhất 700 ký tự tiếng Anh.");
  if(src.length>350000)throw Error("Nguồn quá dài. Chia phụ đề thành file nhỏ hơn 350.000 ký tự.");
  if(url&&!/^https:\/\//i.test(url))throw Error("Đường dẫn nguồn phải là HTTPS.");
+ // A restored checkpoint knows its planned slug. Check this exact file
+ // through the regular GitHub Contents API (not Code Search) before spending AI.
+ if(job.autoPublish&&runData.slug){
+  try{
+   const oldPost=await github("contents/content/posts/"+encodeURIComponent(runData.slug)+".md?ref=main");
+   if(oldPost?.sha){alreadyPublished=true;succeeded=true;progress(100,"Slug đã tồn tại trên main · bỏ qua AI",4);state("Bài đã có trên main; không viết lại: "+runData.slug);return}
+  }catch(error){if(error.status!==404)throw error}
+ }
  const existingPost=await findPublishedYoutube(job);
  if(existingPost){
   alreadyPublished=true;succeeded=true;
