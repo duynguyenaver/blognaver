@@ -15,6 +15,10 @@
             {{- $pages = .Paginate $pages -}}
         {{- end -}}
         {{- .Scratch.Set "paginatorPager" $pages -}}
+        {{- if and (eq $pages.PageNumber 1) (gt (len $pages.Pages) 0) -}}
+          {{- $first := index $pages.Pages 0 -}}
+          {{- $first.Scratch.Set "bn-home-first-image" true -}}
+        {{- end -}}
     {{- end -}}
 
 {{- else if and .IsSection .Pages -}}
