@@ -163,7 +163,9 @@ async function hydrateQueue(){
    seen.add(id);return true;
   }).slice(0,30);
   await queuePersist(queue);
-  if(active)await queueDisk("active",null,"delete");
+  // Do not erase the crash-recovery record during hydration: a refresh during
+  // migration must not destroy the only copy of the active article.
+  if(active&&queue.some(job=>job.id===active.id))await queueDisk("active",null,"delete");
   try{localStorage.removeItem(QUEUE_STORE)}catch{}
  }catch(e){
   $("#queueMessage").textContent="Không đọc được kho hàng đợi bền vững: "+e.message;
@@ -327,7 +329,7 @@ function dispatchNext(){
   $("#queueMessage").textContent="Hàng đợi đã lưu an toàn. Kết nối lại Gemini"+(upcoming.autoPublish!==false?" và GitHub":"")+" để tiếp tục; bài chờ chưa bị lấy ra.";
   openCredentials("Cần kết nối để chạy hàng đợi");renderQueue();return;
  }
- if(["failed","stopped","waiting","running"].includes(runData.runStatus)&&runData.source&&!lastCommitProof?.sha){
+ if(["failed","stopped","waiting","running"].includes(runData.runStatus)&&runData.source&&!lastCommitProof?.sha&&!queue.some(item=>item.source===runData.source)){
   $("#queueMessage").textContent="Phiên trước chưa hoàn thành; tiếp tục phiên này trước khi chạy hàng đợi.";
   renderQueue();return;
  }
@@ -1242,6 +1244,12 @@ try{
 }catch{}
 Promise.all([hydrateQueue(),connectionReady]).then(async()=>{
  restoreFailedFromDraft();
- if(queue.length){await saveQueue();dispatchNext()}
+ if(queue.length){
+  // The previously running draft has been folded into the durable queue.
+  // Never allow stale resumePending/runData to block the restored queue.
+  resumePending=false;
+  if(["failed","stopped","waiting","running"].includes(runData.runStatus))runData={runStatus:"completed"};
+  if(await saveQueue())dispatchNext();
+ }
 }).catch(e=>state("Không thể khôi phục hàng đợi: "+e.message,true));
 })();
