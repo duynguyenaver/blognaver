@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-29T18:26:09.508Z",
+  "updatedAt": "2026-10-29T18:27:40.418Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -97,6 +97,24 @@
       "models": [
         "Groq · openai/gpt-oss-120b",
         "Gemini · models/gemini-3.5-flash-lite"
+      ],
+      "live": true
+    },
+    {
+      "slug": "cold-fusion-e-che-monsanto-tu-dot-pha-hoa-hoc-den-khung-hoang-niem-tin-trong-nong-nghie-2026-10-29",
+      "title": "Đế chế Monsanto: Từ đột phá hóa học đến khủng hoảng niềm tin trong nông nghiệp",
+      "series": "cold-fusion",
+      "sha": "b55b10ad5933d70f8488455dd8c2f7d5258c69f1",
+      "commitAt": "2026-10-29T18:27:26Z",
+      "durationMs": 85915,
+      "quota": {
+        "requests": 10,
+        "tokens": 47294,
+        "inputTokens": 39754,
+        "outputTokens": 7540
+      },
+      "models": [
+        "Gemini · models/gemini-3.1-flash-lite-preview"
       ]
     }
   ]
