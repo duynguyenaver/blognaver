@@ -70,6 +70,11 @@ function populateJob(job){
 }
 function dispatchNext(){
  if(working||queueBusy||!queue.length)return;
+ const upcoming=queue[0];
+ if(!availableKey()||(upcoming.autoPublish!==false&&!window.BNAuth?.read?.()&&!clean($("#githubManual").value))){
+  $("#queueMessage").textContent="Hàng đợi đã lưu an toàn. Kết nối lại Gemini"+(upcoming.autoPublish!==false?" và GitHub":"")+" để tiếp tục; bài chờ chưa bị lấy ra.";
+  openCredentials("Cần kết nối để chạy hàng đợi");renderQueue();return;
+ }
  if(["failed","stopped","waiting","running"].includes(runData.runStatus)&&runData.source&&!lastCommitProof?.sha){
   $("#queueMessage").textContent="Phiên trước chưa hoàn thành; tiếp tục phiên này trước khi chạy hàng đợi.";
   renderQueue();return;
@@ -194,7 +199,7 @@ async function models(){
  const list=(data.models||[]).filter(m=>(m.supportedGenerationMethods||[]).includes("generateContent")).filter(m=>/flash/i.test(m.name)).sort((a,b)=>{const rank=x=>/3[.-]/.test(x.name)?0:/2[.-]5/.test(x.name)?1:2;return rank(a)-rank(b)});
  if(!list.length)throw Error("Không tìm thấy model Gemini Flash có thể tạo nội dung với API key này.");
  const select=$("#model");select.replaceChildren(...list.map(m=>new Option((m.displayName||m.name)+" · "+m.name,m.name)));
- currentModel=select.value;geminiVerified=true;foldCredentials();window.BNQuota?.refresh();state("Gemini kết nối thành công · "+currentModel);return currentModel
+ currentModel=select.value;geminiVerified=true;foldCredentials();window.BNQuota?.refresh();state("Gemini kết nối thành công · "+currentModel);if(queue.length&&!working)dispatchNext();return currentModel
 }
 async function generate(prompt,signal,maxTokens=6500){
  if(!currentModel)await models();
@@ -382,7 +387,7 @@ async function verifyExistingConnections(){
 $("#model").onchange=()=>{currentModel=$("#model").value;state("Model đã chọn: "+currentModel)};
 $("#copyDraft").onclick=()=>navigator.clipboard.writeText(rawMarkdown).then(()=>state("Đã copy Markdown.")).catch(e=>state(e.message,true));
 $("#downloadDraft").onclick=saveMarkdown;
-$("#connectGithub").onclick=async()=>{try{const value=clean($("#githubManual").value);if(value){await window.BNAuth.validate(value);window.BNAuth.save(value,$("#rememberGithub").checked);$("#githubManual").value=""}else{const t=window.BNAuth?.read();if(!t)throw Error("Chưa có token CMS. Hãy nhập token phía dưới.");await window.BNAuth.validate(t)}$("#githubState").textContent="● Đã kết nối GitHub (token CMS chung)";githubVerified=true;window.BNSeriesInsights?.setConnection(true);foldCredentials();window.BNSeriesInsights?.sync().catch(()=>{});}catch(e){githubVerified=false;window.BNSeriesInsights?.setConnection(false);openCredentials("Kiểm tra lại GitHub");state("Không thể kết nối GitHub: "+e.message,true)}};
+$("#connectGithub").onclick=async()=>{try{const value=clean($("#githubManual").value);if(value){await window.BNAuth.validate(value);window.BNAuth.save(value,$("#rememberGithub").checked);$("#githubManual").value=""}else{const t=window.BNAuth?.read();if(!t)throw Error("Chưa có token CMS. Hãy nhập token phía dưới.");await window.BNAuth.validate(t)}$("#githubState").textContent="● Đã kết nối GitHub (token CMS chung)";githubVerified=true;window.BNSeriesInsights?.setConnection(true);foldCredentials();window.BNSeriesInsights?.sync().catch(()=>{});if(queue.length&&!working)dispatchNext();}catch(e){githubVerified=false;window.BNSeriesInsights?.setConnection(false);openCredentials("Kiểm tra lại GitHub");state("Không thể kết nối GitHub: "+e.message,true)}};
 try{const k=sessionStorage.getItem(KEYSTORE);if(k)$("#geminiKey").value=k;const t=window.BNAuth?.read?.();$("#githubState").textContent=t?"● Đã có GitHub token chung từ CMS":"○ Chưa có token CMS — cần kết nối trước khi đăng";const old=JSON.parse(localStorage.getItem(DRAFT)||"null");if(old&&(old.source||old.commitProof)&&Date.now()-old.at<86400000){$("#series").value=old.series||"cold-fusion";$("#transcript").value=old.source;$("#sourceUrl").value=old.sourceUrl||"";$("#angle").value=old.angle||"";rawMarkdown=old.markdown||"";runData={...old};setPublishEvidence(old.commitProof);$("#preview").textContent=rawMarkdown;$("#copyDraft").disabled=!rawMarkdown;$("#downloadDraft").disabled=!rawMarkdown;$("#transcript").dispatchEvent(new Event("input"));state(old.source?"Đã khôi phục bản nháp từ phiên viết trước.":"Biểu mẫu nguồn đã sẵn sàng cho bài mới. Kết quả xuất bản trước vẫn có thể kiểm tra bên phải.");}}catch{}
 verifyExistingConnections().catch(()=>{});
 try{
