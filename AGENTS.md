@@ -95,3 +95,13 @@ When a same-repository Pull Request to main **has merged**, and GitHub PR Bug Ch
 The publisher checks the real PR, CI runs, failed job logs, rule signatures in `data/ci/bug-knowledge.json`, changed files and PR commits. It skips unverifiable incidents and transient retries, writes an idempotent post at `content/posts/fixbug-2026-pr-<number>.md`, tags it `fixbug` and `series`, attaches `series: ["fix-bug-2026"]`, and dispatches `hugo.yml` after a successful write. The repository is public, so NEVER include raw job logs, secrets, private paths, extracted user data or unverified root-cause claims. Log snippets are only used for signature matching, not reproduced.
 
 This publisher is **deterministic technical reporting, not an autonomous LLM**. It records what is verified and carefully labels what cannot be inferred. A passing CI on a different SHA does not itself prove which line fixed the root cause. Idempotency is enforced by the PR-number filename and existing-file check. Do not change the workflow to trigger on every PR failure, every generic CI success, or CI retries on unchanged code. Neither the code nor CI logs should be executed as arbitrary commands.
+
+
+### Fix Bug publication labels and Actions summary (2026-10-29)
+
+All post-merge Fix Bug publication checks must make the result visible on the originating PR:
+- `fixbug:evidence-confirmed` (blue): earlier failed CI on a different SHA, later passing run, and a deterministic knowledge-base log signature were observed. This does **not** mean the article is deployed.
+- `fixbug:published` (green): the Markdown article was committed to `main` at `content/posts/fixbug-2026-pr-N.md`, or that file already exists. The separate GitHub Pages deployment must still succeed for the public URL to work.
+- `fixbug:github-only` (yellow): publisher skipped the article because required evidence was missing; its diagnostic result is visible in the GitHub Actions log/summary. This label **does not** assert that new knowledge was automatically written to AGENTS.md.
+
+Keep these labels mutually exclusive and report `PUBLISHED`, `EVIDENCE CONFIRMED`, or `GITHUB ONLY / SKIPPED` in the GitHub Actions job summary. The Actions workflow run-name must mention the PR number. Never report a skipped or still-pending article as published.
