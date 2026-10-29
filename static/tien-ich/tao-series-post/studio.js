@@ -102,7 +102,8 @@ function renderQueue(){
   li.append(label,remove);target.append(li);
  });
  $("#startBtn").disabled=false;
- $("#startBtn").firstChild.textContent=working?"Thêm vào hàng đợi ":"Viết nghiên cứu & đăng bài ";
+ // Keep the step 04 action label stable; submit while working enqueues via start().
+ $("#startBtn").firstChild.textContent="Viết nghiên cứu & đăng bài ";
  const savedRun=runData?.runStatus;
  // Resume is automatic on page load; no manual resume button.
 }
