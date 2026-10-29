@@ -44,9 +44,14 @@ async function coolDown(signal){
  const until=window.BNQuota?.retryAt?.()||0;
  if(until<=Date.now())return;
  checkpoint({runStatus:"waiting",retryAt:until});
- const remaining=Math.ceil((until-Date.now())/1000);
- state("Gemini 429 · đang tạm dừng "+remaining+" giây. Giữ tab mở (có thể chuyển sang tab khác), hệ thống tự tiếp tục sau khi hết thời gian. Nếu đóng tab, hãy mở lại trang để tự khôi phục.");
- await waitForRetry(until-Date.now(),signal);
+ const update=()=>{
+  const remaining=Math.max(0,Math.ceil((until-Date.now())/1000));
+  const mins=Math.floor(remaining/60),secs=String(remaining%60).padStart(2,"0");
+  state("Gemini 429 · ĐANG CHỜ "+mins+":"+secs+" để tự retry đúng bước. Bạn có thể chuyển sang tab khác khi trang vẫn mở. Nếu đóng tab/trình duyệt, mở lại Research Studio để khôi phục phiên; trang tĩnh không thể chạy khi đã đóng.");
+ };
+ update();
+ const ticker=setInterval(update,1000);
+ try{await waitForRetry(until-Date.now(),signal)}finally{clearInterval(ticker)}
  checkpoint({runStatus:"running",retryAt:0});
  state("Đã hết thời gian chờ Gemini · tiếp tục đúng bước trước đó.");
 }
