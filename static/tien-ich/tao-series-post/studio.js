@@ -1145,6 +1145,7 @@ async function publish(d){
  const created=await github("contents/"+file,"PUT",{message:"content(series-ai): publish "+d.series+" research "+d.slug,branch:"main",content:encode(rawMarkdown)});
  const proof={sha:created.commit.sha,path:file,deployDispatched:false};
  setPublishEvidence(proof);
+ window.dispatchEvent(new CustomEvent("bn:research-article-committed",{detail:{sha:proof.sha,path:proof.path}}));
  checkpoint({published:false,commitProof:proof,slug:d.slug});window.BNSeriesInsights?.record({slug:d.slug,title:d.title,series:d.series,state:"committed",sha:proof.sha,commitAt:created.commit?.committer?.date||new Date().toISOString(),models:metrics.models,durationMs:metrics.durationMs,live:false,quota:{requests:metrics.geminiRequests,tokens:metrics.geminiTokens,inputTokens:metrics.inputTokens,outputTokens:metrics.outputTokens}});
  addLink("Xem commit GitHub ↗",created.commit.html_url||"https://github.com/"+REPO+"/commit/"+created.commit.sha);
  addLink("Mở bài trên blog sau khi deploy ↗",SITE+"bai-viet/"+d.slug+"/");
