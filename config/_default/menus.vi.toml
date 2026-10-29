@@ -20,7 +20,7 @@ weight = 40
 
 [[main]]
 name = "Tiện ích"
-url = "/tien-ich/"
+url = "/blognaver/tien-ich/"
 weight = 45
 
 [[main]]
