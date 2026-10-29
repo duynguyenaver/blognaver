@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-29T20:50:49.803Z",
+  "updatedAt": "2026-10-29T20:53:55.760Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -322,7 +322,8 @@
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
-      ]
+      ],
+      "live": true
     },
     {
       "slug": "ota-travel-su-tien-hoa-cua-ota-travel-va-the-tien-thoai-luong-nan-cua-nganh-khach-san-2026-10-29",
@@ -336,6 +337,23 @@
         "tokens": 22356,
         "inputTokens": 16370,
         "outputTokens": 5986
+      },
+      "models": [
+        "Gemini · models/gemini-3.5-flash-lite"
+      ]
+    },
+    {
+      "slug": "cold-fusion-hanh-trinh-the-ky-cua-marriott-tu-quay-bia-goc-den-de-che-khach-san-toan-ca-2026-10-29",
+      "title": "Hành trình thế kỷ của Marriott: Từ quầy bia gốc đến đế chế khách sạn toàn cầu",
+      "series": "cold-fusion",
+      "sha": "fab199effdb9fa966bd01cbd6d1594149609e9cb",
+      "commitAt": "2026-10-29T20:53:33Z",
+      "durationMs": 36028,
+      "quota": {
+        "requests": 8,
+        "tokens": 28183,
+        "inputTokens": 21323,
+        "outputTokens": 6860
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
