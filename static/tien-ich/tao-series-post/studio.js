@@ -581,7 +581,77 @@ async function models(){
   throw e;
  }finally{button.disabled=false;button.textContent="Kiểm tra Gemini / chọn model"}
 }
+// Automatic model selection resets for each request/new article and uses Section 07
+// historical success rates. All Gemini candidates are attempted before Groq.
+function autoModelCandidates(){
+ const gemini=geminiVerified&&availableKey()?[...$("#model").options].map(o=>o.value).filter(x=>x&&!retiredModels().has(x)):[];
+ const groq=groqVerified&&groqKey()?[...$("#groqModel").options].map(o=>o.value):[];
+ const rank=(provider,ids)=>window.BNModelInsights?.ranked?.(provider,ids)||ids;
+ return [...rank("Gemini",gemini).map(model=>({provider:"gemini",model})),
+         ...rank("Groq",groq).map(model=>({provider:"groq",model}))];
+}
+async function autoGeminiGenerate(model,prompt,signal,maxTokens){
+ const token=availableKey();
+ const controller=new AbortController(),stop=()=>controller.abort();
+ if(signal?.aborted)throw Error("Đã dừng theo yêu cầu.");
+ signal?.addEventListener("abort",stop,{once:true});
+ const timeout=setTimeout(()=>controller.abort(),60000);
+ runtime("gemini",model,"Đang gửi request","Tự động chọn model theo Smart Insights · Gemini ưu tiên.");
+ try{
+  const response=await fetch("https://generativelanguage.googleapis.com/v1beta/"+model+":generateContent",{
+   method:"POST",signal:controller.signal,cache:"no-store",
+   headers:{"x-goog-api-key":token,"Content-Type":"application/json"},
+   body:JSON.stringify({systemInstruction:{parts:[{text:SYSTEM_EDITOR}]},
+    contents:[{role:"user",parts:[{text:prompt}]}],
+    generationConfig:{temperature:0.45,maxOutputTokens:maxTokens}})
+  });
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok){const e=Error("Gemini HTTP "+response.status+": "+String(data.error?.message||"API error").slice(0,170));e.code=response.status;
+   window.BNQuota?.estimateError(e,response,data);
+   window.BNModelInsights?.record("Gemini",model,false,response.status);
+   if(isRetired(e))markRetired(model);
+   throw e;
+  }
+  const output=(data.candidates?.[0]?.content?.parts||[]).map(p=>p.text||"").join("").trim();
+  if(!output){window.BNModelInsights?.record("Gemini",model,false,0);throw Error("Model trả về nội dung trống.");}
+  window.BNQuota?.record(Number(data.usageMetadata?.totalTokenCount)||Math.ceil(prompt.length/4),data.usageMetadata);
+  window.BNModelInsights?.record("Gemini",model,true,200);
+  recordModel("Gemini",model);currentModel=model;
+  runtime("gemini",model,"Đã phản hồi","Model tự chọn đã hoàn thành bước này.");
+  return output;
+ }finally{clearTimeout(timeout);signal?.removeEventListener("abort",stop)}
+}
 async function generate(prompt,signal,maxTokens=6500){
+ if(signal?.aborted)throw Error("Đã dừng theo yêu cầu.");
+ let choices=autoModelCandidates();
+ if(!choices.length&&availableKey()){
+  try{await models()}catch(e){provider("Không tải được danh sách Gemini: "+e.message,true)}
+  choices=autoModelCandidates();
+ }
+ if(!choices.length)throw Error("Chưa có model Gemini/Groq đã xác thực. Hãy kết nối API trước khi viết.");
+ const failures=[];
+ for(const item of choices){
+  if(signal?.aborted)throw Error("Đã dừng theo yêu cầu.");
+  // A failed model is skipped for the current request, while the next request
+  // starts a fresh ranking, allowing recovered models to participate again.
+  runtime(item.provider,item.model,"Đang thử tự động","Xếp hạng thành công Section 07 · Gemini trước Groq.");
+  try{
+   let output;
+   if(item.provider==="gemini")output=await autoGeminiGenerate(item.model,prompt,signal,maxTokens);
+   else{groqModel=item.model;output=await groqGenerate(prompt,signal,maxTokens)}
+   state("Model tự động thành công: "+item.model+". Tiếp tục phần đang viết, giữ nguyên checkpoint.");
+   return output;
+  }catch(e){
+   if(signal?.aborted)throw e;
+   failures.push(item.provider+"/"+item.model+": "+e.message);
+   state("Model "+item.model+" không khả dụng; đang tự thử model kế tiếp ("+failures.length+"/"+choices.length+").");
+  }
+ }
+ // Never invent success or spin endlessly when every credential/model is blocked.
+ // Preserve completed sections through the existing checkpoint/failure handler.
+ throw Error("Tất cả "+choices.length+" model đã thử đều không khả dụng. Checkpoint được giữ để khôi phục. "+failures.slice(-3).join(" | "));
+}
+async function legacyGenerate(prompt,signal,maxTokens=6500){
  const useGroq=canUseGroq();
  if(manualModelOverride?.provider==="groq")return groqGenerate(prompt,signal,maxTokens);
  if(manualModelOverride?.provider==="gemini")currentModel=manualModelOverride.model;
