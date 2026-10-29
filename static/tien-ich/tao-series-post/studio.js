@@ -361,12 +361,14 @@ async function groqGenerate(prompt,signal,maxTokens){
   });
   const data=await response.json().catch(()=>({}));
   if(!response.ok){
+   window.BNModelInsights?.record("Groq",groqModel,false,response.status);
    const e=Error("Groq HTTP "+response.status+": "+String(data.error?.message||"Không thể tạo nội dung").slice(0,160));e.code=response.status;
    if([401,403].includes(response.status)){groqVerified=false;$("#groqStatus").textContent="Cần kết nối lại";openCredentials("Groq key không hợp lệ")}
    throw e;
   }
   const output=(data.choices?.[0]?.message?.content||"").trim();
-  if(!output)throw Error("Groq không trả về nội dung văn bản.");
+  if(!output){window.BNModelInsights?.record("Groq",groqModel,false,0);throw Error("Groq không trả về nội dung văn bản.");}
+  window.BNModelInsights?.record("Groq",groqModel,true,200);
   // Gemini quota widget remains Gemini-only; Groq usage is not added to Gemini RPM/TPM.
   recordModel("Groq",groqModel);
   runData.groqRequests=(runData.groqRequests||0)+1;runData.groqTokens=(runData.groqTokens||0)+(Number(data.usage?.total_tokens)||0);
@@ -407,6 +409,7 @@ async function geminiRequest(url,body=null,signal=null){
      const err=Error("Gemini HTTP "+response.status+": "+String(data.error?.message||"API error").slice(0,180));
      err.code=response.status;
      window.BNQuota?.estimateError(err,response,data);
+     if(isGenerate)window.BNModelInsights?.record("Gemini",manualModelOverride?.provider==="gemini"?manualModelOverride.model:currentModel,false,response.status);
      if([400,401,403].includes(response.status)){geminiVerified=false;openCredentials("Gemini key không hợp lệ")}
      throw err;
     }
@@ -514,7 +517,8 @@ async function generate(prompt,signal,maxTokens=6500){
    generationConfig:{temperature:0.45,maxOutputTokens:maxTokens}
   },signal);
   const result=(data.candidates?.[0]?.content?.parts||[]).map(p=>p.text||"").join("").trim();
-  if(!result)throw Error("Gemini trả về nội dung trống"+(data.candidates?.[0]?.finishReason?" ("+data.candidates[0].finishReason+")":""));
+  if(!result){window.BNModelInsights?.record("Gemini",currentModel,false,0);if(!result)throw Error("Gemini trả về nội dung trống"+(data.candidates?.[0]?.finishReason?" ("+data.candidates[0].finishReason+")":""));}
+  window.BNModelInsights?.record("Gemini",currentModel,true,200);
   recordModel("Gemini",currentModel);
   runtime("gemini",currentModel,"Đã phản hồi","Gemini đã tạo xong nội dung bước hiện tại.");
   provider("Gemini · "+currentModel+" · hoạt động bình thường");

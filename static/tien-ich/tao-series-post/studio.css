@@ -275,3 +275,24 @@
 /* Manual model switch beside the pending runtime status */
 .bn-model-switch{display:grid;grid-template-columns:minmax(0,1fr) minmax(190px,1.4fr) auto;align-items:center;gap:10px;margin:14px 0;padding:12px;background:#eaf3ff;border:1px solid #9bbfe8;border-radius:12px}
 .bn-model-switch[hidden]{display:none!important}.bn-model-switch label{font-size:12px;font-weight:800;color:#164e83}.bn-model-switch select{min-width:0;width:100%;background:#fff}.bn-model-switch small{grid-column:1/-1;color:#315d84;line-height:1.5}.bn-model-switch button{white-space:nowrap}@media(max-width:720px){.bn-model-switch{grid-template-columns:1fr}.bn-model-switch small{grid-column:auto}}
+
+
+/* Section 07 · Smart Insights of Models */
+#modelInsightsPanel{background:#eaf3ff;border:2px solid #9abce3;box-shadow:0 9px 28px rgba(20,71,120,.10)}
+#modelInsightsPanel .editor-collapse>summary{width:100%;box-sizing:border-box;display:flex;align-items:center;gap:14px;padding:16px;background:linear-gradient(110deg,#dcecff,#f5faff);border:1px solid #b2cfee;border-radius:12px}
+#modelInsightsPanel .editor-collapse>summary .step{display:flex;flex:1;min-width:0;align-items:center;gap:14px;margin:0}
+#modelInsightsPanel .editor-collapse>summary .step>span:first-child{flex:0 0 50px;width:50px;height:50px;display:flex;align-items:center;justify-content:center;border-radius:12px;background:#b5dafa;color:#084b83;font-weight:800}
+#modelInsightsPanel .editor-collapse>summary .step>span:nth-child(2){display:block;flex:1;min-width:0;width:auto;height:auto;place-items:unset;background:none;color:#163a5d}
+#modelInsightsPanel .editor-collapse>summary strong{display:block;font-size:clamp(18px,2.1vw,26px);line-height:1.2;word-break:normal}
+#modelInsightsPanel .editor-collapse>summary small{display:block;margin-top:5px;color:#315b7c;font-size:13px;line-height:1.5}
+#modelInsightsPanel .editor-collapse-body{background:white;border:1px solid #c5d9ef;border-radius:12px;margin-top:14px;padding:20px}
+.model-insights-description{color:#315b7c;line-height:1.6}
+.model-insights-toolbar{display:flex;align-items:end;gap:12px;flex-wrap:wrap;margin:16px 0}
+.model-insights-toolbar label{flex:1;max-width:300px}
+.model-insights-table-wrap{overflow-x:auto}
+.model-insights-table{width:100%;border-collapse:collapse;min-width:580px}
+.model-insights-table th,.model-insights-table td{padding:12px;text-align:left;border-bottom:1px solid #d4e2ef;overflow-wrap:anywhere}
+.model-insights-table th{background:#eaf3ff;color:#123f70}
+.model-insights-table td{color:#20425f}
+.model-insights-best{padding:12px 14px;border-left:4px solid #2676ba;background:#f1f7ff;color:#204c79;border-radius:6px}
+@media(max-width:580px){#modelInsightsPanel .editor-collapse>summary{padding:12px}#modelInsightsPanel .editor-collapse-body{padding:12px}#modelInsightsPanel .editor-collapse>summary .step>span:first-child{flex-basis:42px;width:42px;height:42px}}
