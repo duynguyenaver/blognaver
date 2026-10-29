@@ -1,2 +1,19 @@
 <link rel="stylesheet" href="{{ "access-gate.css" | relURL }}">
 <script src="{{ "access-gate.js" | relURL }}"></script>
+
+<style>
+/* Ensure navigation typography even if theme custom SCSS is not bundled. */
+#header .header-title, .header .header-title,
+#header .menu .menu-item, .header .menu .menu-item,
+#header .menu .menu-item a, .header .menu .menu-item a,
+#header .menu a, .header .menu a {
+  font-weight: 800 !important;
+  text-transform: uppercase !important;
+  letter-spacing: .035em;
+}
+#footer .footer-container, .footer .footer-container,
+#footer a, .footer a {
+  font-weight: 800;
+  text-transform: uppercase;
+}
+</style>
