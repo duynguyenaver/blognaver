@@ -55,3 +55,39 @@ footer .footer-container a {
 header nav a { letter-spacing: .035em; }
 #footer .footer-container a,
 footer .footer-container a { letter-spacing: .025em; }
+
+/* Home editorial tagline: one full-width, readable panel. */
+.bn-home-tagline {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: none;
+  margin: 12px 0 30px;
+  padding: clamp(20px, 3.5vw, 36px);
+  border: 1px solid rgba(102, 158, 224, .38);
+  border-left: 4px solid var(--blognaver-accent);
+  border-radius: 16px;
+  background: rgba(77, 131, 199, .18);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, .07);
+}
+.bn-home-tagline p {
+  margin: 0;
+  width: 100%;
+  max-width: none;
+  font-size: clamp(1.03rem, 1.6vw, 1.27rem);
+  line-height: 1.85;
+  text-align: justify;
+  text-justify: inter-word;
+  text-align-last: left;
+}
+.bn-home-tagline strong { font-weight: 750; }
+@media (prefers-color-scheme: dark) {
+  .bn-home-tagline {
+    background: rgba(82, 139, 213, .23);
+    border-color: rgba(122, 178, 239, .36);
+    border-left-color: var(--blognaver-accent);
+  }
+}
+@media (max-width: 680px) {
+  .bn-home-tagline { padding: 18px 20px; margin-bottom: 24px; }
+  .bn-home-tagline p { text-align: left; line-height: 1.75; }
+}
