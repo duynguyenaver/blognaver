@@ -70,3 +70,8 @@ Merges done with GitHub Actions' `GITHUB_TOKEN` do not start regular `push` work
 ## GitHub Actions SHA pinning incident (2026-10-29)
 
 The repository previously enforced full-length immutable commit SHAs for every `uses:` action. Workflow runs 40788272031 and PR #11 check runs failed at **Set up job**, before Hugo, CMS, or tests executed, because workflows referenced moving tags such as `actions/checkout@v4`. Fix: pin each referenced Action to its resolved, verified 40-character commit SHA. Do not delete `hugo.yml` because it is the production GitHub Pages deployment pipeline. Disabling the policy may unblock runs, but pinning is more reproducible. Record the failure as `ci-policy/sha-pinning`, not application or Hugo failure. After fixing CI, rerun/check PR workflows and production deployment.
+
+
+## Theme migration DoIt and UI gate (2026-10-29)
+
+The active Hugo theme is `github.com/HEIGE-PCloud/DoIt`. Do not restore Blowfish, Stack, Prism or their styling. Preserve custom Resume template, independent Resume CMS and blog CMS. `layouts/baseof.html` integrates the UI-only PIN gate and Commit Status component into DoIt. Homepage, post listing and individual posts are publicly readable; other pages display a SHA-256 PIN prompt. This is not secure server-side authorization: all files remain publicly fetchable, and the four-digit PIN is brute-forceable. Never place private data on public GitHub Pages relying on this gate.

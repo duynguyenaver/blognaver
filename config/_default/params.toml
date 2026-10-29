@@ -1,55 +1,33 @@
-colorScheme = "blognaver-blue"
-defaultAppearance = "dark"
-autoSwitchAppearance = true
-enableSearch = true
-enableCodeCopy = true
-enableStructuredBreadcrumbs = true
-disableImageOptimization = false
-defaultBackgroundImage = "images/blognaver-aurora.svg"
-backgroundCanvas = true
-mainSections = ["posts"]
+version = "0.4.X"
+description = "BlogNaver — Công nghệ, du lịch và những câu chuyện đáng kể."
+keywords = ["BlogNaver", "du lịch", "công nghệ"]
+defaultTheme = "auto"
+dateFormat = "02/01/2006"
+[author]
+name = "BlogNaver"
+link = "https://duynguyenaver.github.io/blognaver/"
 [header]
-  layout = "fixed"
+desktopMode = "fixed"
+mobileMode = "auto"
 [footer]
-  showCopyright = true
-  showThemeAttribution = false
-  showAppearanceSwitcher = true
-  showScrollToTop = true
-[homepage]
-  layout = "custom"
-  homepageImage = "images/blognaver-aurora.svg"
-  showRecent = true
-  showRecentItems = 12
-  showMoreLink = true
-  showMoreLinkDest = "posts"
-  cardView = true
-  cardViewScreenWidth = false
-  layoutBackgroundBlur = true
-[article]
-  showDate = true
-  showDateUpdated = true
-  showBreadcrumbs = true
-  showHero = true
-  heroStyle = "background"
-  showSummary = true
-  showHeadingAnchors = true
-  showPagination = true
-  showReadingTime = true
-  showTableOfContents = true
-  showTaxonomies = true
-  showRelatedContent = true
-  relatedContentLimit = 3
-[list]
-  showHero = true
-  heroStyle = "background"
-  layoutBackgroundBlur = true
-  layoutBackgroundHeaderSpace = false
-  showBreadcrumbs = false
-  showViews = false
-  showLikes = false
-  showSummary = false
-  showTableOfContents = false
-  showCards = true
-  groupByYear = false
-  cardView = true
-  cardViewScreenWidth = false
+enable = true
+hugo = false
+copyright = true
+author = true
+since = 2026
+[home]
+rss = 10
+[home.profile]
+enable = false
+[home.posts]
+enable = true
+paginate = 9
+[page]
+hiddenFromHomePage = false
+hiddenFromSearch = false
+[page.toc]
+enable = true
+keepStatic = false
+auto = false
+[search]
+enable = false
