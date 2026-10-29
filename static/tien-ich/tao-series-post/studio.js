@@ -148,10 +148,17 @@ const QUEUE_DONE="bn_series_queue_completed_ids_v1";
 function doneQueueIds(){try{return new Set(JSON.parse(localStorage.getItem(QUEUE_DONE)||"[]"))}catch{return new Set()}}
 function markQueueDone(job){
  if(!job?.id)return;
- const ids=doneQueueIds();ids.add(job.id);
+ const ids=doneQueueIds();ids.add(job.id);ids.add(jobIdentity(job));
  try{localStorage.setItem(QUEUE_DONE,JSON.stringify([...ids].slice(-1500)))}catch{}
 }
-function isQueueDone(job){return Boolean(job?.id&&doneQueueIds().has(job.id)||isCommittedCheckpoint(job?.checkpoint))}
+function jobIdentity(job){
+ if(!job)return "";
+ const url=String(job.sourceUrl||"").trim().toLowerCase();
+ const source=String(job.source||"").trim();
+ return url?"url:"+url:"source:"+source.slice(0,1400)+":"+source.length;
+}
+function sameQueueJob(a,b){return Boolean(a&&b&&(a.id&&a.id===b.id||jobIdentity(a)&&jobIdentity(a)===jobIdentity(b)))}
+function isQueueDone(job){const done=doneQueueIds();return Boolean(job&&(job.id&&done.has(job.id)||done.has(jobIdentity(job))||isCommittedCheckpoint(job.checkpoint)))}
 
 function githubQueueToken(){return window.BNAuth?.read?.()||clean($("#githubManual")?.value)}
 function b64(bytes){let result="";for(let i=0;i<bytes.length;i+=32768)result+=String.fromCharCode(...bytes.subarray(i,i+32768));return btoa(result)}
@@ -185,7 +192,7 @@ function cloudQueueItems(){
  if(working&&activeSource?.source&&!lastCommitProof?.sha){
   const data={...runData,source:activeSource.source,sourceUrl:activeSource.sourceUrl||"",
    series:activeSource.series,angle:activeSource.angle||"",markdown:rawMarkdown,commitProof:null};
-  if(!items.some(x=>x.id===activeSource.id))items.unshift({...activeSource,checkpoint:data});
+  if(!items.some(x=>sameQueueJob(x,activeSource)))items.unshift({...activeSource,checkpoint:data});
  }
  return items.filter(x=>x?.source&&!isQueueDone(x));
 }
@@ -237,11 +244,11 @@ async function pullQueueCloud(autoRun=true){
   const plain=await crypto.subtle.decrypt({name:"AES-GCM",iv:unb64(encrypted.iv)},await queueCipherKey(),unb64(encrypted.data));
   const parsed=JSON.parse(new TextDecoder().decode(plain));
   if(!Array.isArray(parsed.items))throw Error("Bản sao GitHub không chứa hàng đợi hợp lệ.");
-  const seen=new Set(queue.map(x=>x.id)),added=[];
+  const seen=new Set(queue.map(x=>jobIdentity(x))),added=[];
   for(const item of parsed.items){
-   if(!item?.id||typeof item.source!=="string"||item.source.length<700||isQueueDone(item)||seen.has(item.id)||activeSource?.id===item.id)continue;
+   if(!item?.id||typeof item.source!=="string"||item.source.length<700||isQueueDone(item)||seen.has(jobIdentity(item))||sameQueueJob(activeSource,item))continue;
    if(!SERIES[item.series])SERIES[item.series]={name:item.series,tag:item.series,category:"Nghiên cứu"};
-   seen.add(item.id);added.push(item);
+   seen.add(jobIdentity(item));added.push(item);
   }
   // Existing local drafts win on conflict; avoid clobbering live work.
   const previous=[...queue];queue.push(...added);
@@ -257,6 +264,7 @@ async function pullQueueCloud(autoRun=true){
  }finally{button.disabled=false}
 }
 
+let queueHydrated=false;
 let queueWriteChain=Promise.resolve();
 function queuePersist(items){
  const snapshot=structuredClone(items);
@@ -276,11 +284,12 @@ async function hydrateQueue(){
   queue=combined.filter(job=>{
    if(!job||typeof job.source!=="string"||job.source.length<700||isQueueDone(job))return false;
    if(job.series&&!SERIES[job.series])SERIES[job.series]={name:job.series,tag:job.series,category:"Nghiên cứu"};
-   const id=job.id||job.sourceUrl||job.source;
+   const id=jobIdentity(job);
    if(seen.has(id))return false;
    seen.add(id);return true;
   }).slice(0,30);
   await queuePersist(queue);
+  queueHydrated=true;
   // Do not erase the crash-recovery record during hydration: a refresh during
   // migration must not destroy the only copy of the active article.
   if(active&&queue.some(job=>job.id===active.id))await queueDisk("active",null,"delete");
@@ -336,7 +345,7 @@ function restoreFailedFromDraft(){
  try{
   const d=JSON.parse(localStorage.getItem(DRAFT)||"null");
   if(!d?.source||d.commitProof?.sha||isCommittedCheckpoint(d)||!["failed","waiting","stopped","running"].includes(d.runStatus))return;
-  if(queue.some(x=>x.sourceUrl&&d.sourceUrl&&x.sourceUrl===d.sourceUrl||x.source===d.source))return;
+  if(queue.some(x=>sameQueueJob(x,d))||sameQueueJob(activeSource,d))return;
   const job={id:"recovered-"+(d.at||Date.now()),at:d.at||Date.now(),failedAt:d.at||Date.now(),failed:true,retryAt:Number(d.retryAt)||0,source:d.source,sourceUrl:d.sourceUrl||"",series:d.series,angle:d.angle||"",autoPublish:d.autoPublish!==false,checkpoint:{...d}};
   if(SERIES[job.series]){queue.unshift(job);failedFirst();/* persisted on startup after hydration */}
  }catch{}
@@ -437,6 +446,8 @@ function populateJob(job){
  $("#sourceStats").textContent=job.source.length.toLocaleString("vi-VN")+" ký tự";
 }
 function dispatchNext(force=false){
+ if(!queueHydrated)return;
+ if(queueRetryTimer){clearTimeout(queueRetryTimer);queueRetryTimer=null}
  if(working||queueBusy||!queue.length)return;
  const index=force?0:nextRunnableIndex();
  if(index<0){
@@ -1174,7 +1185,7 @@ async function start(e,restore=false,queuedJob=null){
    // then begin a fresh round while other queued jobs continue immediately.
    const retryAt=0; // No provider cooldown; capped per-job to prevent infinite retries.
    const failedJob={...job,failed:true,failedAt:job.failedAt||Date.now(),retryCount:attempts,retryExhausted:attempts>=3,retryAt,checkpoint:snapshot};
-   if(!queue.some(item=>item.id===failedJob.id)){queue.push(failedJob);await saveQueue()}
+   if(!queue.some(item=>sameQueueJob(item,failedJob))){queue.push(failedJob);await saveQueue()}
    queuedForRetry=true;
    try{localStorage.removeItem(DRAFT)}catch{}
    runData={runStatus:"completed"};setPublishEvidence(null);
