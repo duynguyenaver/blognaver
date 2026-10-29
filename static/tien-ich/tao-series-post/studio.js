@@ -129,6 +129,7 @@ function waitForRetry(ms,signal){
 async function coolDown(signal){
  const until=window.BNQuota?.retryAt?.()||0;
  if(until<=Date.now())return;
+ runtime("waiting",currentModel||"Gemini","Gemini 429 · chờ cooldown","Không có request Groq đang xử lý. Nếu Groq đã xác thực và bật fallback, request tiếp theo sẽ thử Groq.");
  checkpoint({runStatus:"waiting",retryAt:until});
  const update=()=>{
   const remaining=Math.max(0,Math.ceil((until-Date.now())/1000));
@@ -151,6 +152,18 @@ function recordModel(providerName,modelName){
  if(!Array.isArray(runData.models))runData.models=[];
  if(!runData.models.includes(name))runData.models.push(name);
  checkpoint({models:runData.models});
+}
+function runtime(providerName,modelName,stateName,note=""){
+ const panel=$("#aiRuntime");if(!panel)return;
+ const valid=["gemini","groq","waiting","error","idle"];
+ panel.dataset.provider=valid.includes(providerName)?providerName:"idle";
+ const names={gemini:"Gemini",groq:"Groq",waiting:"Đang chờ",error:"Lỗi",idle:"Chưa chạy"};
+ $("#runtimeProvider").textContent=names[providerName]||providerName;
+ $("#runtimeModel").textContent=modelName||"—";
+ $("#runtimeState").textContent=stateName;
+ $("#runtimeBadge").textContent=stateName;
+ $("#runtimeNote").textContent=note||"Chưa có request AI đang hoạt động.";
+ $("#runtimeFallback").textContent=canUseGroq()?"Groq đã xác thực · bật":groqVerified?"Groq đã xác thực · tắt":"Groq chưa sẵn sàng";
 }
 function provider(text,isError=false){$("#providerStatus").textContent=text;$("#providerStatus").classList.toggle("error",isError)}
 async function verifyGroq(){
@@ -176,6 +189,7 @@ async function groqGenerate(prompt,signal,maxTokens){
  if(signal?.aborted)throw Error("Đã dừng theo yêu cầu");
  signal?.addEventListener("abort",onAbort,{once:true});
  const timeout=setTimeout(()=>controller.abort(),90000);
+ runtime("groq",groqModel,"Đang gửi request","Groq đang xử lý request hiện tại. Các phần bài đã hoàn thành không viết lại.");
  try{
   const response=await fetch("https://api.groq.com/openai/v1/chat/completions",{
    method:"POST",signal:controller.signal,
@@ -194,6 +208,7 @@ async function groqGenerate(prompt,signal,maxTokens){
   recordModel("Groq",groqModel);
   runData.groqRequests=(runData.groqRequests||0)+1;runData.groqTokens=(runData.groqTokens||0)+(Number(data.usage?.total_tokens)||0);
   checkpoint({groqRequests:runData.groqRequests,groqTokens:runData.groqTokens});
+  runtime("groq",groqModel,"Đã phản hồi","Groq đã xử lý thành công request; "+runData.groqRequests+" request Groq trong phiên.");
   provider("Đang dùng Groq · "+groqModel+" · đã dự phòng "+runData.groqRequests+" request");
   return output;
  }finally{clearTimeout(timeout);signal?.removeEventListener("abort",onAbort)}
@@ -308,6 +323,7 @@ async function generate(prompt,signal,maxTokens=6500){
  const useGroq=canUseGroq();
  if(useGroq&&(window.BNQuota?.retryAt?.()||0)>Date.now()){
   state("Gemini đang cooldown · chuyển request hiện tại sang Groq.");
+  runtime("groq",groqModel,"Đang chuyển dự phòng","Gemini còn trong thời gian chờ, đang chuyển request sang Groq.");
   try{return await groqGenerate(prompt,signal,maxTokens)}
   catch(e){if([400,401,403].includes(e.code))throw e;provider("Groq không khả dụng. Giữ checkpoint và chờ Gemini tự retry.",true)}
  }
@@ -321,6 +337,7 @@ async function generate(prompt,signal,maxTokens=6500){
   }
  }
  try{
+  runtime("gemini",currentModel,"Đang gửi request","Đang gửi nội dung bước hiện tại tới Gemini.");
   const data=await geminiRequest("https://generativelanguage.googleapis.com/v1beta/"+currentModel+":generateContent",{
    systemInstruction:{parts:[{text:SYSTEM_EDITOR}]},
    contents:[{role:"user",parts:[{text:prompt}]}],
@@ -329,10 +346,12 @@ async function generate(prompt,signal,maxTokens=6500){
   const result=(data.candidates?.[0]?.content?.parts||[]).map(p=>p.text||"").join("").trim();
   if(!result)throw Error("Gemini trả về nội dung trống"+(data.candidates?.[0]?.finishReason?" ("+data.candidates[0].finishReason+")":""));
   recordModel("Gemini",currentModel);
+  runtime("gemini",currentModel,"Đã phản hồi","Gemini đã tạo xong nội dung bước hiện tại.");
   provider("Gemini · "+currentModel+" · hoạt động bình thường");
   return result
  }catch(e){
   if(!canUseGroq()||![429,500,502,503,504].includes(e.code)||signal?.aborted)throw e;
+  runtime("groq",groqModel,"Đang chuyển dự phòng","Gemini "+e.code+"; thử request còn dở qua Groq.");
   state("Gemini "+e.code+" · chuyển đúng request đang dở sang Groq. Các phần đã viết được giữ nguyên.");
   try{return await groqGenerate(prompt,signal,maxTokens)}
   catch(fallbackError){
@@ -483,6 +502,7 @@ async function start(e,restore=false){
  }else{checkpoint({runStatus:"completed"});window.BNSeriesInsights?.record({slug:d.slug,title:d.title,series:d.series,state:"draft",durationMs:Date.now()-startedAt,live:false,quota:window.BNQuota?.runSummary()});progress(100,"Hoàn thành bản thảo; chưa đăng",4);state("Đã tạo bản thảo Markdown. Bạn có thể copy hoặc xuất file; chưa ghi lên GitHub.")}
  succeeded=true;
  }catch(e){
+  runtime("error",null,"Đã dừng do lỗi",e.message);
   state("Không hoàn tất: "+e.message,true);
   checkpoint({runStatus:abort?.signal.aborted?"stopped":"failed",error:e.message,retryAt:window.BNQuota?.retryAt?.()||0})
  }
@@ -490,7 +510,7 @@ async function start(e,restore=false){
   window.BNQuota?.finishRun(Boolean(lastCommitProof?.sha));working=false;
   $("#cancelBtn").disabled=true;abort=null;activeSource=null;
   renderQueue();
-  if(succeeded){$("#queueMessage").textContent="Đã hoàn tất phiên vừa chạy. "+queue.length+" bài còn lại sẽ tự tiếp tục.";dispatchNext()}
+  if(succeeded){runtime("idle",null,"Hoàn thành","Bài đã xử lý xong. Xem thông tin Models trong Smart Insights.");$("#queueMessage").textContent="Đã hoàn tất phiên vừa chạy. "+queue.length+" bài còn lại sẽ tự tiếp tục.";dispatchNext()}
   else $("#queueMessage").textContent="Phiên hiện tại dừng vì lỗi. Bài đang chờ vẫn được lưu; hãy tiếp tục phiên trước để xử lý hàng đợi.";
 }
 }
