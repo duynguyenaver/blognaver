@@ -143,7 +143,7 @@ function queueDisk(key,value,mode="put"){
 }
 
 const CLOUD_QUEUE_BRANCH="research-studio-queue-backup",CLOUD_QUEUE_FILE="queue.encrypted.json";
-let cloudSynced=new Set(),cloudSyncTimer=null,cloudWrite=Promise.resolve(),cloudSyncError="";
+let cloudSynced=new Set(),cloudSyncTimer=null,cloudWrite=Promise.resolve(),cloudSyncError="",cloudInitialized=false;
 function githubQueueToken(){return window.BNAuth?.read?.()||clean($("#githubManual")?.value)}
 function b64(bytes){let result="";for(let i=0;i<bytes.length;i+=32768)result+=String.fromCharCode(...bytes.subarray(i,i+32768));return btoa(result)}
 function unb64(value){return Uint8Array.from(atob(value),c=>c.charCodeAt(0))}
@@ -203,6 +203,7 @@ async function pushQueueCloud(){
  cloudSynced=new Set(items.map(x=>x.id));cloudSyncError="";queueCloudStatus();
 }
 function scheduleCloudQueueSync(){
+ if(!cloudInitialized)return;
  if(cloudSyncTimer)clearTimeout(cloudSyncTimer);
  cloudSyncTimer=setTimeout(()=>{
   cloudSyncTimer=null;
@@ -217,7 +218,9 @@ async function pullQueueCloud(){
   // Finish queued local writes before merging cloud state.
   if(cloudSyncTimer){clearTimeout(cloudSyncTimer);cloudSyncTimer=null}
   await cloudWrite.catch(()=>{});
-  const file=await cloudQueueRequest("contents/"+CLOUD_QUEUE_FILE+"?ref="+CLOUD_QUEUE_BRANCH);
+  let file;
+  try{file=await cloudQueueRequest("contents/"+CLOUD_QUEUE_FILE+"?ref="+CLOUD_QUEUE_BRANCH)}
+  catch(e){if(e.status!==404)throw e;cloudInitialized=true;$("#queueMessage").textContent="Chưa có bản sao GitHub. Hàng đợi cục bộ vẫn được giữ.";scheduleCloudQueueSync();return}
   const encrypted=JSON.parse(new TextDecoder().decode(unb64((file.content||"").replace(/\s/g,""))));
   if(encrypted.version!==1||encrypted.algorithm!=="AES-256-GCM")throw Error("Định dạng bản sao không hỗ trợ.");
   const plain=await crypto.subtle.decrypt({name:"AES-GCM",iv:unb64(encrypted.iv)},await queueCipherKey(),unb64(encrypted.data));
@@ -232,7 +235,9 @@ async function pullQueueCloud(){
   // Existing local drafts win on conflict; avoid clobbering live work.
   const previous=[...queue];queue.push(...added);
   if(!await saveQueue()){queue=previous;throw Error("Không lưu được hàng đợi đã tải vào IndexedDB.")}
+  cloudInitialized=true;
   cloudSynced=new Set([...cloudSynced,...added.map(x=>x.id)]);
+  if(queue.length!==parsed.items.length||added.length)scheduleCloudQueueSync();
   renderQueue();queueCloudStatus();
   $("#queueMessage").textContent="Đã tải "+added.length+" bài chưa có trên máy từ GitHub. Tự chạy bài chờ tiếp theo.";
   if(!working)dispatchNext();
@@ -379,6 +384,7 @@ function renderQueue(){
   remove.onclick=async()=>{const previous=queue;queue=queue.filter(x=>x.id!==job.id);if(!await saveQueue())queue=previous;renderQueue()};
   li.append(label,remove);target.append(li);
  });
+ queueCloudStatus();
  $("#startBtn").disabled=false;
  // Keep the step 04 action label stable; submit while working enqueues via start().
  $("#startBtn").firstChild.textContent="Viết nghiên cứu & đăng bài ";
@@ -1347,6 +1353,7 @@ try{
 }catch{}
 Promise.all([hydrateQueue(),connectionReady]).then(async()=>{
  restoreFailedFromDraft();
+ if(githubQueueToken())await pullQueueCloud();
  if(queue.length){
   // The previously running draft has been folded into the durable queue.
   // Never allow stale resumePending/runData to block the restored queue.
