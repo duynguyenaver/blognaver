@@ -4,16 +4,10 @@
     {{- /* Featured image */ -}}
     {{- $image := "" -}}
     {{- if ($.Site.Params.home.posts.imagePreview | default true) -}}
-        {{- /* Prefer the first actual article image, preserving DoIt's featured image fallback. */ -}}
-        {{- $matches := findRE `(?i)<img[^>]+src=["'][^"']+["']` .Content 1 -}}
-        {{- with $matches -}}
-            {{- $image = replaceRE `(?i)^.*?src=["']([^"']+)["'].*{{- $params := .Params | merge .Site.Params.page -}}
-
-<article class="single summary">
-    {{- /* Featured image */ -}}
-    {{- $image := "" -}}
- "$1" (index . 0) -}}
-            {{- $image = htmlUnescape $image -}}
+        {{- /* Use first rendered image; retain DoIt fallback and crop sizing. */ -}}
+        {{- $images := findRE `(?i)<img[^>]*src=["'][^"']+["']` .Content 1 -}}
+        {{- with $images -}}
+            {{- $image = replaceRE `(?i)^[^>]*src=["']([^"']+)["'][^>]*` "$1" (index . 0) -}}
         {{- end -}}
         {{- if not $image -}}
             {{- $image = $params.featuredImagePreview | default $params.featuredImage -}}
