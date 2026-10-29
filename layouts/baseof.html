@@ -22,6 +22,39 @@
     {{- partial "head/meta.html" . -}}
     {{- partial "head/link.html" . -}}
     {{- partial "head/seo.html" . -}}
+    <style id="duy-editorial-nav">
+      /* Applied in active layouts/baseof.html, not the unused extend-head hook. */
+      body > header nav a, body > header nav span,
+      header nav a, header nav .menu-item, header nav .menu-item a,
+      header .menu a, header .menu-inner a,
+      header a[href*="/posts/"], header a[href*="/gioi-thieu/"],
+      header a[href*="/resume/"], header a[href*="/tien-ich/"],
+      header a[href*="/cms/"] {
+        text-transform: uppercase !important;
+        font-weight: 800 !important;
+        letter-spacing: .035em !important;
+      }
+      header [id*="theme" i], header [class*="theme-switch" i],
+      header [aria-label*="theme" i], header [title*="theme" i],
+      header [aria-label*="dark" i], header [title*="dark" i] {
+        display: none !important;
+      }
+    </style>
+    <script>
+      /* The public blog intentionally offers only the light appearance. */
+      try { localStorage.setItem("theme", "light"); } catch (_) {}
+      document.documentElement.setAttribute("data-theme", "light");
+      document.addEventListener("DOMContentLoaded", function () {
+        document.documentElement.setAttribute("data-theme", "light");
+        document.querySelectorAll('header [aria-label],header [title],header [id],header [class]').forEach(function (el) {
+          const hint = [el.getAttribute("aria-label"),el.getAttribute("title"),el.id].filter(Boolean).join(" ");
+          if (/theme|dark.mode|light.mode|chế độ (sáng|tối)/i.test(hint)) {
+            const control = el.closest("button, a, .menu-item") || el;
+            control.remove();
+          }
+        });
+      });
+    </script>
     <link rel="stylesheet" href="{{ "access-gate.css" | relURL }}">
     <script src="{{ "access-gate.js" | relURL }}"></script>
 </head>
