@@ -11,7 +11,7 @@ const decode=str=>new TextDecoder().decode(Uint8Array.from(atob(str.replace(/\s/
 const state=(message,error=false)=>{$("#status").textContent=message;$("#status").style.color=error?"#b33b52":"#52708b"};
 function progress(n,phase,step){$("#progressFill").style.width=n+"%";$("#percent").textContent=n+"%";$("#phase").textContent=phase;[...$("#steps").children].forEach((e,i)=>e.className=i<step?"done":i===step?"active":"")}
 function checkpoint(extra){try{localStorage.setItem(DRAFT,JSON.stringify({at:Date.now(),series:$("#series").value,source:$("#transcript").value,sourceUrl:$("#sourceUrl").value,angle:$("#angle").value,markdown:rawMarkdown,...extra}))}catch{state("Bộ nhớ trình duyệt đầy. Bài vẫn trong trang; hãy tải Markdown để sao lưu.")}}
-function available(){if(working)throw Error("Đang viết bài, vui lòng hoàn tất hoặc dừng");key=clean($("#geminiKey").value)||sessionStorage.getItem(KEYSTORE)||"";if(!key)throw Error("Bạn cần nhập Gemini API key mới. Key chỉ dùng trong phiên này.");sessionStorage.setItem(KEYSTORE,key);return key}
+function available(){key=clean($("#geminiKey").value)||sessionStorage.getItem(KEYSTORE)||"";if(!key)throw Error("Bạn cần nhập Gemini API key mới. Key chỉ dùng trong phiên này.");sessionStorage.setItem(KEYSTORE,key);return key}
 async function geminiRequest(url,body=null,signal=null){
  const token=availableKey();let last;
  for(let attempt=0;attempt<3;attempt++){
@@ -105,7 +105,7 @@ async function start(e){
  if(src.length<700)throw Error("Phụ đề quá ngắn. Hãy dán ít nhất 700 ký tự tiếng Anh.");
  if(src.length>350000)throw Error("Nguồn quá dài. Chia phụ đề thành file nhỏ hơn 350.000 ký tự.");
  if(url&&!/^https:\/\//i.test(url))throw Error("Đường dẫn nguồn phải là HTTPS.");
- available();if(!currentModel)await models();
+ available();if($("#autoPublish").checked&&!window.BNAuth?.read?.()&&!clean($("#githubManual").value))throw Error("Để tự đăng, hãy kết nối GitHub token chung của CMS trước.");if(!currentModel)await models();
  progress(4,"Đọc nguồn và lập dàn ý",0);
  const chunks=chunkSource(src),briefs=[];
  for(let i=0;i<chunks.length;i++){
