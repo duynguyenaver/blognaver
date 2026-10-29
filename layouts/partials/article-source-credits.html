@@ -1,0 +1,30 @@
+{{- $seen := slice -}}
+{{- $references := slice -}}
+{{- range (findRE `(?s)<a\b[^>]*\bhref="[^"]+"[^>]*>.*?</a>` .Content) -}}
+  {{- $url := replaceRE `(?s)^.*?\bhref="([^"]+)".*$` "$1" . -}}
+  {{- $name := . | plainify | htmlUnescape | strings.TrimSpace -}}
+  {{- if and (or (hasPrefix $url "https://") (hasPrefix $url "http://")) (not (in $seen $url)) (not (in $url "duynguyenaver.github.io")) -}}
+    {{- $seen = $seen | append $url -}}
+    {{- $references = $references | append (dict "url" $url "name" ($name | default $url)) -}}
+  {{- end -}}
+{{- end -}}
+{{- range (slice (.Params.sourceUrl | default "") (.Params.source | default "") (.Params.originalUrl | default "")) -}}
+  {{- $url := printf "%v" . -}}
+  {{- if and (hasPrefix $url "https://") (not (in $seen $url)) (not (in $url "duynguyenaver.github.io")) -}}
+    {{- $seen = $seen | append $url -}}
+    {{- $references = $references | append (dict "url" $url "name" "Nguồn gốc khai báo trong metadata") -}}
+  {{- end -}}
+{{- end -}}
+<section class="bn-metadata-section bn-source-credits" aria-labelledby="bn-sources-heading">
+  <div class="bn-metadata-heading"><span class="bn-section-kicker">TRÍCH DẪN &amp; GHI CÔNG</span><h2 id="bn-sources-heading">Bản quyền và dẫn nguồn</h2></div>
+  <p class="bn-license-note">© {{ .Date.Year }} {{ .Params.author | default site.Params.author.name | default site.Title }}. Nội dung biên tập thuộc trách nhiệm của tác giả; bản quyền nội dung, hình ảnh và tư liệu bên thứ ba vẫn thuộc chủ sở hữu tương ứng. Dẫn nguồn không đồng nghĩa với được cấp phép tái sử dụng.</p>
+  <h3 class="bn-source-subtitle">Các nguồn liên kết trong bài</h3>
+  {{- with $references -}}
+    <ol class="bn-source-list">{{- range . -}}
+      <li><a href="{{ .url | safeURL }}" target="_blank" rel="noopener noreferrer nofollow">{{ .name | truncate 130 }}</a></li>
+    {{- end -}}</ol>
+  {{- else -}}
+    <p class="bn-metadata-empty">Bài viết này chưa khai báo liên kết nguồn bên ngoài.</p>
+  {{- end -}}
+  <p class="bn-source-disclaimer">Danh sách tự động lấy từ liên kết trong bài, không chứng nhận độc lập tính chính xác hoặc quyền sử dụng của nguồn.</p>
+</section>

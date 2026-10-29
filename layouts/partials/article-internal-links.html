@@ -1,0 +1,29 @@
+{{- $seen := slice -}}
+{{- $links := slice -}}
+{{- range (findRE `(?s)<a\b[^>]*\bhref="[^"]+"[^>]*>.*?</a>` .Content) -}}
+  {{- $url := replaceRE `(?s)^.*?\bhref="([^"]+)".*$` "$1" . -}}
+  {{- $path := $url -}}
+  {{- if hasPrefix $url site.Home.Permalink -}}
+    {{- $path = printf "/%s" (strings.TrimPrefix site.Home.Permalink $url) -}}
+  {{- end -}}
+  {{- if or (hasPrefix $path "/") (and (not (hasPrefix $path "http")) (not (hasPrefix $path "#")) (not (hasPrefix $path "mailto:"))) -}}
+    {{- $path = replaceRE `[?#].*$` "" $path -}}
+    {{- $path = printf "/%s" (strings.TrimPrefix site.Home.RelPermalink $path) -}}
+    {{- $path = replaceRE `//+` "/" $path -}}
+    {{- $page := site.GetPage $path -}}
+    {{- if and $page (ne $page.RelPermalink $.RelPermalink) (not (in $seen $page.RelPermalink)) -}}
+      {{- $seen = $seen | append $page.RelPermalink -}}
+      {{- $links = $links | append (dict "url" $page.RelPermalink "name" $page.Title "desc" ($page.Description | default "")) -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+<section class="bn-metadata-section bn-internal-links" aria-labelledby="bn-internal-heading">
+  <div class="bn-metadata-heading"><span class="bn-section-kicker">ĐIỀU HƯỚNG TRONG WEBSITE</span><h2 id="bn-internal-heading">Internal links · Liên kết nội bộ</h2></div>
+  {{- with $links -}}
+    <ul class="bn-metadata-links">{{- range . -}}
+      <li><a href="{{ .url }}"><strong>{{ .name }}</strong>{{ with .desc }}<span>{{ . | plainify | truncate 110 }}</span>{{ end }}</a></li>
+    {{- end -}}</ul>
+  {{- else -}}
+    <p class="bn-metadata-empty">Bài viết này hiện chưa có liên kết nội bộ đến trang khác trên BlogNaver.</p>
+  {{- end -}}
+</section>
