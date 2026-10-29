@@ -26,6 +26,7 @@ function loadRememberedAIKeys(){
  $("#rememberGithub").checked=Boolean(localStorage.getItem("blognaver_github_auth_v1"));
 }
 
+let quotaResumedNotice=false;
 let abort=null,working=false,rawMarkdown="",currentModel="",key="",lastSlug="",lastCommitProof=null,startedAt=0,geminiVerified=false,githubVerified=false,groqVerified=false,groqModel="openai/gpt-oss-120b",runData={},resumePending=false;
 const CUSTOM_SERIES_STORE="bn_series_custom_names_v1";
 try{const saved=JSON.parse(localStorage.getItem(CUSTOM_SERIES_STORE)||"{}");for(const [id,name] of Object.entries(saved)){if(/^[a-z0-9-]{2,75}$/.test(id)&&typeof name==="string"&&name.trim())SERIES[id]={name:name.trim(),tag:name.trim(),category:"Nghiên cứu"}}}catch{}
@@ -109,8 +110,8 @@ function renderQueue(){
  $("#queueCount").textContent=queue.length+" bài";
  $("#queueActive").textContent=working?(activeSource?describeJob(activeSource):"Đang khôi phục"):"Chưa có";
  const runningBadge=$("#queueRunningBadge");
- if(runningBadge){runningBadge.hidden=!working;runningBadge.textContent="ĐANG CHẠY RỒI NHA"}
- $("#queueStatus").textContent=working?"Đang xử lý":queue.length?"Đang chờ":"Sẵn sàng";
+ if(runningBadge){runningBadge.hidden=!(working&&quotaResumedNotice);runningBadge.textContent="ĐANG CHẠY RỒI NHA"}
+ $("#queueStatus").textContent=working?(quotaResumedNotice?"Đã tự chạy lại sau khi chờ quota":"Đang xử lý bài hiện tại"):queue.length?"Đang chờ":"Sẵn sàng";
  if(!queue.length){const empty=document.createElement("li");empty.className="queue-empty";empty.textContent="Chưa có bài nào trong hàng đợi.";target.append(empty)}
  queue.forEach((job,index)=>{
   const li=document.createElement("li");li.className="queue-entry";
@@ -242,6 +243,8 @@ async function coolDown(signal){
  const ticker=setInterval(update,1000);
  try{await waitForRetry(until-Date.now(),signal)}finally{clearInterval(ticker)}
  checkpoint({runStatus:"running",retryAt:0});
+ quotaResumedNotice=true;
+ renderQueue();
  state("Đã hết thời gian chờ Gemini · tiếp tục đúng bước trước đó.");
 }
 function openCredentials(message){$("#credentialsDetails").open=true;$("#credentialsStatus").textContent=message||"Cần xác thực";$("#credentialsStatus").dataset.status="error"}
@@ -580,6 +583,8 @@ async function start(e,restore=false,queuedJob=null){
   }else job=queuedJob?{...queuedJob}:formJob();
  }catch(err){state("Không thể bắt đầu: "+err.message,true);return}
  if(!restore&&!queuedJob&&checkDuplicateYoutube(job))return;
+ const resumedQuotaRun=restore&&runData.runStatus==="waiting"&&(runData.retryAt||window.BNQuota?.retryAt?.()||0)<=Date.now();
+ quotaResumedNotice=false;
  activeSource={...job};rotationRequested=false;publishingCommit=false;
  if(!restore){runData={};rawMarkdown="";resumePending=false;clearSourceForm()}
  else{runData={...runData,source:job.source,sourceUrl:job.sourceUrl,series:job.series,angle:job.angle,autoPublish:job.autoPublish}}
@@ -588,6 +593,7 @@ async function start(e,restore=false,queuedJob=null){
  if(!restore){$("#resultLinks").replaceChildren();setPublishEvidence(null)}
  renderQueue();
  checkpoint({runStatus:restore&&(window.BNQuota?.retryAt?.()||0)>Date.now()?"waiting":"running",autoPublish:job.autoPublish});
+ if(resumedQuotaRun){quotaResumedNotice=true;renderQueue()}
  let succeeded=false;
  try{
  const src=rawSource(job.source),url=clean(job.sourceUrl),series=job.series,angle=clean(job.angle);
@@ -648,7 +654,7 @@ async function start(e,restore=false,queuedJob=null){
   }
  }
  finally{
-  stopStallWatch();window.BNQuota?.finishRun(Boolean(lastCommitProof?.sha));working=false;
+  stopStallWatch();window.BNQuota?.finishRun(Boolean(lastCommitProof?.sha));working=false;quotaResumedNotice=false;
   $("#cancelBtn").disabled=true;abort=null;activeSource=null;
   renderQueue();
   if(succeeded){runtime("idle",null,"Hoàn thành","Bài đã xử lý xong. Xem thông tin model trong metadata bài viết.");$("#queueMessage").textContent="Đã hoàn tất phiên vừa chạy. "+queue.length+" bài còn lại sẽ tự tiếp tục.";dispatchNext()}
