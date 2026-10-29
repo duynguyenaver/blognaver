@@ -281,6 +281,7 @@ async function coolDown(signal){
  if(until<=Date.now())return;
  runtime("waiting",currentModel||"Gemini","Gemini 429 · chờ cooldown","Không có request Groq đang xử lý. Nếu Groq đã xác thực và bật fallback, request tiếp theo sẽ thử Groq.");
  checkpoint({runStatus:"waiting",retryAt:until});
+ syncManualModelSwitch();
  const update=()=>{
   const remaining=Math.max(0,Math.ceil((until-Date.now())/1000));
   const mins=Math.floor(remaining/60),secs=String(remaining%60).padStart(2,"0");
@@ -384,6 +385,7 @@ async function geminiRequest(url,body=null,signal=null){
   if(manualModelOverride?.provider==="groq")throw Object.assign(Error("Manual model switch"),{code:"MANUAL_SWITCH"});
   if(manualModelOverride?.provider!=="gemini")await coolDown(signal);
   if(manualModelOverride?.provider==="groq")throw Object.assign(Error("Manual model switch"),{code:"MANUAL_SWITCH"});
+  if(manualModelOverride?.provider==="gemini"&&url.includes(":generateContent"))url="https://generativelanguage.googleapis.com/v1beta/"+manualModelOverride.model+":generateContent";
   let response,controller,timeout;
   try{
    controller=new AbortController();
