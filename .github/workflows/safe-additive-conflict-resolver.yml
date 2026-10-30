@@ -1,0 +1,55 @@
+name: Safe additive HTML conflict resolver
+
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: write
+  pull-requests: read
+
+concurrency:
+  group: safe-additive-conflict-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  resolve:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.base.ref == 'main' && !github.event.pull_request.draft
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Checkout trusted main
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Merge main into PR branch when conflict is additive-only
+        env:
+          PR_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_BRANCH: ${{ github.event.pull_request.head.ref }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main "$PR_SHA"
+          git checkout --detach "$PR_SHA"
+          if git merge-base --is-ancestor origin/main HEAD; then exit 0; fi
+          set +e
+          git merge --no-commit --no-ff origin/main
+          rc=$?
+          set -e
+          if [ "$rc" -eq 0 ]; then
+            git merge --abort
+            echo "No conflict; leave clean PR unchanged."
+            exit 0
+          fi
+          conflicts="$(git diff --name-only --diff-filter=U)"
+          if [ "$conflicts" != 'layouts/baseof.html' ]; then
+            echo "::warning::Conflict is not a safe additive-only baseof.html case: $conflicts"
+            exit 0
+          fi
+          python3 scripts/resolve-additive-baseof-conflict.py || exit 0
+          test -z "$(git diff --name-only --diff-filter=U)"
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'fix(ci): preserve independent additive header changes'
+          git push origin "HEAD:refs/heads/$PR_BRANCH"
+          echo "Merged current main into PR; CI must re-run before auto-merge."
