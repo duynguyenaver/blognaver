@@ -1,0 +1,34 @@
+/* BlogNaver HB-inspired visual system. This is a switchable visual skin, not the HB Hugo module runtime. */
+html[data-bn-visual-theme="hb"]{
+ --bn-hb-brand:#0d6efd;--bn-hb-ink:#233449;--bn-hb-subtle:#62758d;
+ --bn-hb-paper:#ffffff;--bn-hb-background:#f5f7fb;--bn-hb-border:#e2e8f0;
+ --blognaver-accent:#0d6efd;
+}
+html[data-bn-visual-theme="hb"] body{background:var(--bn-hb-background)!important;color:var(--bn-hb-ink)!important;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+html[data-bn-visual-theme="hb"] main.tw-mx-4{max-width:1320px;margin-inline:auto}
+html[data-bn-visual-theme="hb"] #header,
+html[data-bn-visual-theme="hb"] body>header{background:#fff!important;border-bottom:1px solid var(--bn-hb-border)!important;box-shadow:0 2px 12px rgba(36,59,86,.035)!important}
+html[data-bn-visual-theme="hb"] #header .header-title,
+html[data-bn-visual-theme="hb"] #header .menu,
+html[data-bn-visual-theme="hb"] body>header a{color:#24364b!important}
+html[data-bn-visual-theme="hb"] body>header a:hover,
+html[data-bn-visual-theme="hb"] #header nav a:hover{color:var(--bn-hb-brand)!important;background:#eff6ff!important}
+html[data-bn-visual-theme="hb"] :is(.home,.page,.single,.archive,.terms,.list){color:var(--bn-hb-ink)}
+html[data-bn-visual-theme="hb"] :is(.home-posts,.home .summary,.single.summary,.archive-item,.article-card,.post-card){background:#fff!important;border:1px solid var(--bn-hb-border);border-radius:14px!important;box-shadow:0 6px 22px rgba(39,66,97,.045);overflow:hidden}
+html[data-bn-visual-theme="hb"] .home .summary,
+html[data-bn-visual-theme="hb"] .single.summary{padding:20px 24px!important;margin-bottom:18px}
+html[data-bn-visual-theme="hb"] :is(.single-title,.home .summary .single-title){font-family:system-ui,-apple-system,"Segoe UI",sans-serif;font-weight:750;letter-spacing:-.025em;line-height:1.3}
+html[data-bn-visual-theme="hb"] :is(.post-meta,.single .post-meta,.summary .post-meta){color:var(--bn-hb-subtle)!important}
+html[data-bn-visual-theme="hb"] :is(.single,.summary,.home) a:not(.bn-theme-option){text-underline-offset:3px}
+html[data-bn-visual-theme="hb"] :is(.single,.summary,.home) a:hover{color:var(--bn-hb-brand)!important}
+html[data-bn-visual-theme="hb"] article.page.single{background:var(--bn-hb-paper);padding:clamp(18px,3vw,40px);border:1px solid var(--bn-hb-border);border-radius:16px;box-shadow:0 8px 26px rgba(39,66,97,.04)}
+html[data-bn-visual-theme="hb"] article.page.single :is(h1,h2,h3){letter-spacing:-.02em}
+html[data-bn-visual-theme="hb"] article.page.single :is(blockquote,pre){border-radius:10px}
+html[data-bn-visual-theme="hb"] .bn-series-identification{border-color:#d8e6fd!important;color:#0a58ca!important;background:#f7fbff!important}
+html[data-bn-visual-theme="hb"] :is(footer,.footer){border-top:1px solid var(--bn-hb-border);background:#fff!important}
+.bn-theme-switcher{position:fixed;right:22px;bottom:26px;z-index:1000;display:flex;gap:5px;padding:5px;border:1px solid #cbd9e8;border-radius:999px;background:#fff;box-shadow:0 7px 24px rgba(19,47,78,.14);font:600 12px/1.2 system-ui,-apple-system,"Segoe UI",sans-serif}
+.bn-theme-option{appearance:none;border:0;border-radius:999px;padding:9px 12px;cursor:pointer;background:transparent;color:#456079;min-height:35px}
+.bn-theme-option[aria-pressed="true"]{background:#196fb9;color:white}
+.bn-theme-option:focus-visible{outline:3px solid #91c6ff;outline-offset:2px}
+@media(max-width:700px){.bn-theme-switcher{right:10px;bottom:12px}.bn-theme-option{padding:8px 10px;font-size:11px}html[data-bn-visual-theme="hb"] article.page.single{padding:15px}}
+@media(prefers-reduced-motion:reduce){.bn-theme-option{transition:none!important}}
