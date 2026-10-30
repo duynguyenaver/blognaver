@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-30T07:09:17.017Z",
+  "updatedAt": "2026-10-30T07:09:53.437Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -1013,6 +1013,23 @@
         "tokens": 16902,
         "inputTokens": 11444,
         "outputTokens": 5458
+      },
+      "models": [
+        "Gemini · models/gemini-3.1-flash-lite"
+      ]
+    },
+    {
+      "slug": "cnbc-original-cuoc-khung-hoang-kim-cuong-khi-gia-tri-nhan-tao-dinh-nghia-lai-thi-truong-x-2026-10-30",
+      "title": "Cuộc khủng hoảng kim cương: Khi giá trị nhân tạo định nghĩa lại thị trường xa xỉ",
+      "series": "cnbc-original",
+      "sha": "29187c583bb6125f933aa3f9d38ffda4432b9874",
+      "commitAt": "2026-10-30T07:09:20Z",
+      "durationMs": 33468,
+      "quota": {
+        "requests": 8,
+        "tokens": 17694,
+        "inputTokens": 11953,
+        "outputTokens": 5741
       },
       "models": [
         "Gemini · models/gemini-3.1-flash-lite"
