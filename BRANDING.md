@@ -35,3 +35,10 @@ Header/nav text and icons must remain #F8FBFF on dark/navy/blue hero and transpa
 ## Current owner override — 2026-10-29
 
 The current Hugo theme is DoIt, not Blowfish. The site should remain in light mode with no visible public theme switch; main navigation should be uppercase and bold while retaining its existing text colors. Previous dark-first/Blowfish requirements above are retained for historical context only and are not blocking requirements. Owner-requested theme and layout changes are permitted. Validate the active `layouts/baseof.html` integration and production rendering before claiming completion.
+
+## Shared utility UI and UX contract (2026-10-30)
+- Reusable disclosure sections: secondary/configuration sections closed by default, visible chevron and semantic `<details>/<summary>` or equivalent keyboard-accessible control. Primary task, required actions and urgent notices remain visible.
+- Cloud connection settings collapse automatically after a verified successful save, with persistent status outside the disclosure; failures reopen the section.
+- Consistent blue palette, text hierarchy, compact forms, progress/error/success states, mobile tap targets, focus-visible, reduced-motion and accessible contrast. Feature-specific exceptions are allowed when documented and justified.
+- Data/identity behavior is specified in AGENTS.md: one remembered device credential per provider, GitHub-first personal data, encrypted private cloud records, bounded IndexedDB fallback and honest sync evidence.
+- Every new utility must follow the common patterns and test both first use and returning-device use. Documentation does not imply existing pages were automatically migrated.
