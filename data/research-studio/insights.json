@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-30T07:02:33.603Z",
+  "updatedAt": "2026-10-30T07:03:31.903Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -911,7 +911,8 @@
         "Groq · openai/gpt-oss-20b",
         "Groq · qwen/qwen3.8-27b",
         "Gemini · models/gemini-3.1-flash-lite"
-      ]
+      ],
+      "live": true
     },
     {
       "slug": "the-wall-street-journal-tac-dong-cua-xung-dot-trung-ong-den-hanh-vi-cu-tri-tai-cac-vung-chien-luoc--2026-10-30",
@@ -925,6 +926,23 @@
         "tokens": 21343,
         "inputTokens": 15671,
         "outputTokens": 5672
+      },
+      "models": [
+        "Gemini · models/gemini-3.1-flash-lite"
+      ]
+    },
+    {
+      "slug": "the-wall-street-journal-wework-va-bai-hoc-ve-su-sup-do-cua-mo-hinh-tang-truong-bang-moi-gia-2026-10-30",
+      "title": "WeWork và bài học về sự sụp đổ của mô hình tăng trưởng bằng mọi giá",
+      "series": "the-wall-street-journal",
+      "sha": "a6a4916685c2ddb3773e67f0031e534b726b934f",
+      "commitAt": "2026-10-30T07:03:02Z",
+      "durationMs": 27085,
+      "quota": {
+        "requests": 8,
+        "tokens": 15969,
+        "inputTokens": 10420,
+        "outputTokens": 5549
       },
       "models": [
         "Gemini · models/gemini-3.1-flash-lite"
