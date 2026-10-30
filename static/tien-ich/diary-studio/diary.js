@@ -1,0 +1,29 @@
+(()=>{"use strict";
+const $=s=>document.querySelector(s),lang=document.body.dataset.lang==="ko"?"ko":"en",KEY="bn_diary_"+lang+"_v1",API="https://api.groq.com/openai/v1/chat/completions";
+const ui={title:$("#title"),date:$("#date"),text:$("#diaryText"),result:$("#result"),status:$("#status"),history:$("#history"),api:$("#apiKey"),save:$("#save"),check:$("#check"),apply:$("#apply"),copy:$("#copy")};
+let entries=[],lastCorrected="",saving=false;
+const stamp=()=>new Date().toLocaleDateString("en-CA");
+ui.date.value=stamp();ui.text.lang=lang;ui.text.spellcheck=true;
+const notify=(s,error=false)=>{ui.status.textContent=s;ui.status.className=error?"muted error":"muted"};
+try{const data=JSON.parse(localStorage.getItem(KEY)||"[]");if(Array.isArray(data))entries=data}catch{}
+const draftKey=KEY+"_draft";
+try{const draft=JSON.parse(localStorage.getItem(draftKey)||"null");if(draft){ui.title.value=draft.title||"";ui.date.value=draft.date||stamp();ui.text.value=draft.text||""}}catch{}
+function persist(){localStorage.setItem(KEY,JSON.stringify(entries))}
+function render(){ui.history.replaceChildren();if(!entries.length){ui.history.textContent="Chưa có nhật ký.";return}entries.slice().reverse().forEach(item=>{const div=document.createElement("div");div.className="entry";const h=document.createElement("strong");h.textContent=(item.date||"")+" · "+(item.title||"Không có tiêu đề");const p=document.createElement("p");p.textContent=item.text;const btn=document.createElement("button");btn.className="secondary";btn.textContent="Mở lại";btn.onclick=()=>{ui.title.value=item.title||"";ui.date.value=item.date||stamp();ui.text.value=item.text||"";notify("Đã mở lại bản lưu. Nhấn Lưu để cập nhật nhật ký.");window.scrollTo({top:0,behavior:"smooth"})};div.append(h,p,btn);ui.history.append(div)})}
+const draft=()=>{try{localStorage.setItem(draftKey,JSON.stringify({title:ui.title.value,date:ui.date.value,text:ui.text.value}))}catch{notify("Dung lượng lưu cục bộ đã đầy.",true)}};
+[ui.title,ui.date,ui.text].forEach(el=>el.addEventListener("input",draft));
+ui.save.onclick=()=>{const text=ui.text.value.trim();if(!text){notify("Hãy nhập nội dung nhật ký.",true);return}try{const id=ui.date.value+"::"+ui.title.value.trim(),item={date:ui.date.value,title:ui.title.value.trim(),text,edited:Date.now()};const index=entries.findIndex(x=>x.date+"::"+x.title===id);if(index>=0)entries[index]=item;else entries.push(item);persist();render();notify("Đã lưu nhật ký trên thiết bị này.")}catch(e){notify("Không thể lưu: "+e.message,true)}};
+function extract(raw){const m=raw.match(/\{[\s\S]*\}/);if(!m)throw Error("AI không trả JSON hợp lệ.");const obj=JSON.parse(m[0]);if(typeof obj.corrected!=="string"||!obj.corrected.trim())throw Error("Không có bản sửa hợp lệ.");return obj}
+ui.check.onclick=async()=>{if(saving)return;const text=ui.text.value.trim();if(text.length<15){notify("Nhập ít nhất 15 ký tự để kiểm tra.",true);return}
+const key=ui.api.value.trim();if(!key){notify("Hãy nhập Groq API key để kiểm tra chính tả và ngữ pháp.",true);return}
+saving=true;ui.check.disabled=true;notify("Đang gọi Groq API để sửa lỗi chính tả, ngữ pháp và cách diễn đạt…");ui.result.textContent="Đang phân tích…";
+const c=new AbortController(),timeout=setTimeout(()=>c.abort(),30000);
+try{const resp=await fetch(API,{method:"POST",signal:c.signal,headers:{"Content-Type":"application/json",Authorization:"Bearer "+key},body:JSON.stringify({model:"openai/gpt-oss-20b",temperature:.15,max_completion_tokens:2500,messages:[{role:"system",content:lang==="ko"?"Bạn là người biên tập tiếng Hàn. Chỉ sửa lỗi chính tả, 띄어쓰기, ngữ pháp, kính ngữ và độ tự nhiên của nhật ký. Giữ nguyên sự kiện và giọng văn. Chỉ trả JSON có đúng hai khóa: corrected (văn bản tiếng Hàn đã sửa), explanation (giải thích lỗi bằng tiếng Việt).":"You are an English writing tutor. Correct spelling, punctuation, grammar and unnatural wording in the diary. Preserve events, intent and personal tone. Return ONLY JSON with keys corrected (corrected English diary) and explanation (Vietnamese explanation)."}, {role:"user",content:text.slice(0,12000)}]})});
+const data=await resp.json().catch(()=>({}));if(!resp.ok)throw Error("Groq HTTP "+resp.status+": "+(data.error?.message||"API không khả dụng"));
+const obj=extract(data.choices?.[0]?.message?.content||"");lastCorrected=obj.corrected;ui.result.textContent="BẢN CHỈNH SỬA\n\n"+obj.corrected+"\n\nGIẢI THÍCH (TIẾNG VIỆT)\n"+(obj.explanation||"Không có giải thích.");ui.apply.disabled=false;ui.copy.disabled=false;notify("Đã kiểm tra bằng Groq API. Xem lại bản sửa trước khi áp dụng.")}catch(e){ui.result.textContent="Không thể kiểm tra lần này.";notify("Kiểm tra thất bại: "+e.message,true)}finally{clearTimeout(timeout);saving=false;ui.check.disabled=false}};
+ui.apply.onclick=()=>{if(!lastCorrected)return;ui.text.value=lastCorrected;draft();notify("Đã áp dụng bản sửa. Nhấn Lưu để ghi vào lịch sử.")};
+ui.copy.onclick=async()=>{if(!lastCorrected)return;try{await navigator.clipboard.writeText(lastCorrected);notify("Đã sao chép bản sửa.")}catch{notify("Không thể sao chép tự động.",true)}};
+$("#newEntry").onclick=()=>{ui.title.value="";ui.date.value=stamp();ui.text.value="";lastCorrected="";ui.result.textContent="Bản sửa sẽ xuất hiện tại đây.";ui.apply.disabled=true;ui.copy.disabled=true;draft();notify("Đã mở bản nhật ký mới.")};
+$("#exportEntries").onclick=()=>{const blob=new Blob([JSON.stringify(entries,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="blognaver-diary-"+lang+".json";a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
+render();
+})();
