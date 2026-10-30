@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-30T06:50:44.970Z",
+  "updatedAt": "2026-10-30T06:54:48.533Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -868,6 +868,23 @@
         "tokens": 28102,
         "inputTokens": 22006,
         "outputTokens": 6096
+      },
+      "models": [
+        "Gemini · models/gemini-3.1-flash-lite"
+      ]
+    },
+    {
+      "slug": "banking-giai-ma-ha-tang-tai-chinh-tai-sao-chuyen-tien-quoc-te-van-la-mot-nut-that-2026-10-30",
+      "title": "Giải mã hạ tầng tài chính: Tại sao chuyển tiền quốc tế vẫn là một nút thắt?",
+      "series": "banking",
+      "sha": "4da4ebd2bbc95a9462420ce07b82cab9034b237b",
+      "commitAt": "2026-10-30T06:54:17Z",
+      "durationMs": 28619,
+      "quota": {
+        "requests": 7,
+        "tokens": 14490,
+        "inputTokens": 9881,
+        "outputTokens": 4609
       },
       "models": [
         "Gemini · models/gemini-3.1-flash-lite"
