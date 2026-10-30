@@ -52,7 +52,7 @@
           a.textContent = aliases[key] || key.replace(/-/g, " ");
           bar.append(a);
         });
-        header.insertAdjacentElement("afterend", bar);
+        header.appendChild(bar);
       });
     </script>
     {{- end -}}
