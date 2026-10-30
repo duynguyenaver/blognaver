@@ -91,3 +91,23 @@ footer .footer-container a { letter-spacing: .025em; }
   .bn-home-tagline { padding: 18px 20px; margin-bottom: 24px; }
   .bn-home-tagline p { text-align: left; line-height: 1.75; }
 }
+
+/* Wider modern reading index; applies to homepage and its paginated copies only. */
+@media (min-width: 900px) {
+  body:has(.home) main.tw-mx-4,
+  body:has(.home) main.tw-mx-4 > .home {
+    width: calc(100% - 48px) !important;
+    max-width: 1240px !important;
+    margin-inline: auto !important;
+  }
+  body:has(.home) .home .home-posts,
+  body:has(.home) .home .summary {
+    max-width: none !important;
+    width: 100%;
+    box-sizing: border-box;
+  }
+}
+@media (min-width: 900px) and (max-width: 1350px) {
+  body:has(.home) main.tw-mx-4,
+  body:has(.home) main.tw-mx-4 > .home { width: calc(100% - 48px) !important; }
+}
