@@ -1143,6 +1143,19 @@ async function publish(d){
  rawMarkdown=rawMarkdown.replace(/^---\n/,"---\nresearchStudio: "+JSON.stringify(metrics)+"\n");
  $("#preview").textContent=rawMarkdown;
  checkpoint({productionMetrics:metrics});
+ const source=runData.source||"";
+ const checker=window.BNSourceFidelity;
+ if(!checker)throw Error("Không tải được bộ kiểm định nguồn. Dừng commit để tránh xuất bản bài sai.");
+ const seriesResult=checker.checkSeries(source,SERIES[d.series]?.name||d.series);
+ const fidelityResult=checker.fidelity(source,[d.title,d.description,d.body].join("\n"));
+ if(!seriesResult.ok||!fidelityResult.ok){
+  const reason=[!seriesResult.ok?seriesResult.reason:"",!fidelityResult.ok?fidelityResult.reason:""].filter(Boolean).join(" | ");
+  checkpoint({published:false,runStatus:"failed",source,slug:d.slug,qualityGate:{blocked:true,reason}});
+  state("ĐÃ CHẶN XUẤT BẢN VÌ LỆCH NGUỒN: "+reason+". Bản nháp vẫn ở Preview.",true);
+  const failure=Error("Kiểm định nội dung không đạt: "+reason+". Chưa commit; xem bản nháp trong Preview.");
+  failure.code="SOURCE_FIDELITY_BLOCK";
+  throw failure;
+ }
  const created=await github("contents/"+file,"PUT",{message:"content(series-ai): publish "+d.series+" research "+d.slug,branch:"main",content:encode(rawMarkdown)});
  const proof={sha:created.commit.sha,path:file,deployDispatched:false};
  setPublishEvidence(proof);
