@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-30T07:24:14.234Z",
+  "updatedAt": "2026-10-30T07:25:09.831Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -1057,6 +1057,26 @@
         "Gemini · models/gemini-3.1-flash-lite"
       ],
       "live": true
+    },
+    {
+      "slug": "cold-fusion-ha-tang-moon-base-vai-tro-cua-cac-rover-trong-chien-luoc-kham-pha-cuc-nam-m-2026-10-30",
+      "title": "Hạ tầng Moon Base: Vai trò của các rover trong chiến lược khám phá cực Nam mặt trăng",
+      "series": "cold-fusion",
+      "sha": "b77051dfe52a9d5217cc25741fbf49565540daa0",
+      "commitAt": "2026-10-30T07:24:42Z",
+      "durationMs": 32938,
+      "quota": {
+        "requests": 1,
+        "tokens": 4944,
+        "inputTokens": 3620,
+        "outputTokens": 1324
+      },
+      "models": [
+        "Groq · openai/gpt-oss-120b",
+        "Groq · openai/gpt-oss-20b",
+        "Groq · qwen/qwen3.8-27b",
+        "Gemini · models/gemini-3.1-flash-lite"
+      ]
     }
   ]
 }
