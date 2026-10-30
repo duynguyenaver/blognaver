@@ -472,3 +472,19 @@
 }
 #researchPostsPanel .bn-series-disclosure .bn-chevron,
 #seriesCatalogPanel .bn-series-disclosure .bn-chevron{flex:0 0 auto;margin-left:12px}
+
+
+/* Two compact Research Studio utility cards, with independent disclosure state. */
+.bn-research-duo{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;gap:18px;width:100%;margin:24px 0}
+.bn-research-duo>.bn-series-section{width:100%!important;min-width:0!important;max-width:none!important;margin:0!important;align-self:start}
+.bn-research-duo .bn-series-disclosure>summary{padding:16px 18px!important;min-height:86px!important;gap:9px!important}
+.bn-research-duo .bn-series-disclosure>summary>.step{min-width:0!important;gap:11px!important;flex:1 1 auto!important;align-items:center!important}
+.bn-research-duo .bn-series-disclosure>summary>.step>span:first-child{width:42px!important;height:42px!important;flex:0 0 42px!important;font-size:17px!important}
+.bn-research-duo .bn-series-disclosure>summary>.step>span:last-child{min-width:0!important;flex:1 1 auto!important}
+.bn-research-duo .bn-series-disclosure strong{font-size:clamp(15px,1.35vw,18px)!important;line-height:1.35!important}
+.bn-research-duo .bn-series-disclosure small{font-size:11px!important;line-height:1.45!important;margin-top:3px}
+.bn-research-duo .bn-series-disclosure .bn-chevron{margin-left:5px!important;font-size:20px}
+.bn-research-duo .bn-series-body{padding:17px 18px 22px!important;min-width:0}
+.bn-research-duo .bn-series-body .actions{gap:8px}
+.bn-research-duo .bn-series-body .actions>*{font-size:12px;max-width:100%}
+@media(max-width:790px){.bn-research-duo{grid-template-columns:minmax(0,1fr);gap:14px;margin:20px 0}}
