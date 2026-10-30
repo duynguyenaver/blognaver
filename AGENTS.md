@@ -28,16 +28,25 @@ Applies to every existing and new BlogNaver utility, CMS tool and integration, e
 - **One independent change = one feature branch = one normal (non-Draft) PR**, unless the owner explicitly requests Draft. Follow the repository's required checks/approval automation; never push directly to main or bypass branch protection. Do not mark success without actual checks or production evidence.
 - Audit existing tools against this standard and create separate scoped implementation PRs. Documentation is an acceptance contract, not proof that the entire site already complies.
 
+## PERMANENT OWNER RULE: Green CI means automatic merge and deployment (2026-10-30)
+
+- **Standing authorization from the repository owner:** Any non-Draft PR to `main` that passes every required CI/build/security check on its current head SHA, has no pending or failing required checks, and is mergeable **MUST be merged automatically** without asking the owner to click Approve, Ready for review, or Merge.
+- Reviews may be submitted by **any GitHub account or authorized bot permitted by GitHub**. The identity of an approver is not an additional application-level condition. **Do not require an APPROVE review at all unless GitHub's actual branch-protection/ruleset settings require one.** If rules require a reviewer, accept any approval that GitHub itself considers valid; do not impose a named-user or bot-only filter.
+- A successful check is not enough if it covers an outdated SHA, is only partial, or another required check is pending/failed. Re-check PR state, conflict/mergeability, current SHA and all required checks immediately before merge. Never bypass GitHub branch protection or fake a green result.
+- Do not create Draft PRs by default. One independent change = one normal PR. Prefer workflow-triggered merge after CI success, using the permitted GitHub API, then dispatch production deployment if the merge token does not trigger push workflows.
+- If GitHub refuses the merge due to permissions, required approvals, branch rules, or a failed/pending check, report the precise blocker and fix permitted repository/workflow settings through a separate PR where possible. **Never silently fall back to manual approval as the intended workflow** or claim the deployment succeeded.
+- This owner policy supersedes older AGENTS.md passages requiring manual approval, manual merge, a particular reviewer, or prohibiting safe CI-gated auto-merge. Keep independent security and data-safety gates in force.
+
 ## MANDATORY: Pull request first (project owner policy, 2026-10-30)
 
 All changes to this repository MUST be made on a dedicated branch and submitted via a Pull Request targeting `main`. This includes UI/UX, application code, blog content, documentation, workflows, configuration, and hotfixes.
 
 - **NEVER push or commit directly to `main`**, even for small edits, emergencies, or blog publishing.
 - Create a new branch from the latest `main`, commit changes to that branch, then open a Pull Request.
-- **Do not merge the Pull Request until the owner explicitly authorizes the merge.** Creating the PR is not merge authorization.
+- **Owner standing authorization (2026-10-30): automatically merge each non-Draft PR once the latest SHA passes the required CI gates, all known checks are completed successfully, and GitHub reports it mergeable.** No manual APPROVE is required unless GitHub branch rules explicitly require one; never bypass those protections.
 - Keep PRs scoped and include a clear explanation, changed files, checks, and any deployment impact.
 - If unable to create a branch or PR, report the blocker and do not substitute a direct push.
-- When work is complete, provide the PR URL and honestly state that production remains unchanged until approved and merged.
+- Provide the PR URL and actual CI, merge, and deploy state. CI-green PRs should automatically merge via the approved workflow; do not claim production deployment before confirmed.
 - Never infer ongoing authorization to bypass this process from earlier direct-push requests.
 
 
@@ -59,17 +68,17 @@ Recognize the exact pattern before applying a fix:
 2. Confirm the active target theme is Blowfish: `config/_default/module.toml` imports `github.com/nunocoracao/blowfish/v3`. Blowfish uses `layouts/partials/extend-footer.html`, not Stack's `layouts/_partials/footer/custom.html`.
 3. For this specific conflict only: preserve deletion of the obsolete Stack footer, preserve/bring over the NEWER dashboard implementation from `main` in `layouts/partials/extend-footer.html`, `static/js/commit-status.js`, and `static/css/commit-dashboard.css`; keep the rollback's Blowfish configuration and content.
 4. Merge the current `main` into the PR branch with BOTH parents recorded (or git merge with an explicit per-file resolution); never force-push, reset `main`, or discard unrelated later main changes. Re-fetch GitHub mergeability and rerun Bug Checker on the resulting branch.
-5. Auto-fix scope: only the above verified **obsolete Stack footer vs Blowfish footer** path mapping. For any other conflict or conflicting edits in the active footer, fail with an actionable message and require a human review. Never auto-merge or auto-approve PRs. PASS checks permit *manual* approval only.
+5. Auto-fix scope: only the above verified **obsolete Stack footer vs Blowfish footer** path mapping. For any other conflict or conflicting edits in the active footer, fail with an actionable message and require a human review. Never auto-repair a conflict by bypassing CI. Auto-merge applies only after a new successful check on the resolved head.
 
 Prevention: one feature = one branch/PR; rebase or merge latest `main` before review; use the PR Bug Checker (up to 3 attempts) and do not promote changes from a conflicting or failing PR. Keep a native theme-specific footer adapter instead of directly editing multiple theme internals.
 
 
-## PR quality gate (CI auto-review, no auto-merge)
+## PR quality gate (CI-gated auto-merge, owner authorization 2026-10-30)
 
-- Each independent change gets its own PR, using a feature branch. Never push feature changes directly to main or merge automatically.
+- Each independent change gets its own PR, using a feature branch. Never push feature changes directly to main; merge only through CI-gated automation.
 - `PR Bug Checker` runs one initial build/check and retries at most twice (3 attempts total). It classifies familiar Hugo config, Dart Sass, and module retrieval failures using verified historical playbooks. Diagnostic messages are advisory, **not evidence that a code fix was applied**. Unknown failures halt after the retry limit, with logs available for manual diagnosis and external documentation research.
-- The `Auto-review after Bug Checker` workflow may submit an explicit GitHub APPROVE review **only** after the linked PR's Bug Checker run succeeds, the checked SHA still equals the PR head, and no known check has failed. The dedicated auto-approve.yml workflow conditionally merges the verified SHA and dispatches the production build; it never force-pushes.
-- GitHub may refuse automatic reviews until Settings → Actions → General → Workflow permissions → Allow GitHub Actions to create and approve pull requests is enabled; authors cannot approve their own PRs. The workflow logs that limitation and leaves human approval as fallback.
+- The `Auto-review after Bug Checker` workflow may submit an explicit GitHub APPROVE review **only** after the linked PR's Bug Checker run succeeds, the checked SHA still equals the PR head, and no known check has failed. The dedicated auto-approve.yml workflow merges the verified SHA without demanding a self-approval review and dispatches production; it never force-pushes.
+- GitHub may refuse automatic reviews until Settings → Actions → General → Workflow permissions → Allow GitHub Actions to create and approve pull requests is enabled; authors cannot approve their own PRs. Auto-merge does not depend on a bot self-review; GitHub still enforces any independently configured required reviews.
 - An automated CI approval is not the same as a human security/content review. The repository owner has explicitly authorized automated merge after checks; GitHub permissions and branch protection still apply. New commits require fresh checks.
 
 ## Safe automatic conflict repair
@@ -83,7 +92,7 @@ Other conflicts are intentionally left for human resolution to avoid deleting re
 
 - `data/ci/bug-knowledge.json` maintains curated, documented Hugo / Blowfish / Go Modules / GitHub Actions / GitHub Pages / static CMS failure signatures and past BlogNaver incidents. `scripts/ci-classify-failure.py` detects candidate causes from real CI output and points to remedies and documentation. It is heuristic, **not** proof of root cause or an autonomous AI engine.
 - `scripts/test-ci-knowledge.py` supplies regression fixtures so changes to classification rules must pass deterministic tests. New cases require an authentic failure signature, minimal reproducer or real log, reliable documentation, and preferably a verified successful fix.
-- No web access, model API, secrets or untrusted generated code is executed in the pull-request check. If a failure remains unknown, retain logs, stop after the existing retry limit, and investigate with official sources separately. Never auto-merge. The auto-review workflow may approve only verified-green checks when GitHub allows it.
+- No web access, model API, secrets or untrusted generated code is executed in the pull-request check. If a failure remains unknown, retain logs, stop after the existing retry limit, and investigate with official sources separately. Never auto-merge. Automatic merge requires verified-green checks; a bot APPROVE review is not a prerequisite.
 
 ## Bug Checker coverage and evidence rules (2026-10-29)
 
@@ -91,7 +100,7 @@ Project-specific CI rules are implemented in `scripts/pr-bug-checker.sh` and `sc
 
 Failures must be distinguished by category: `missing-output`, `invalid-html`, `permalink`, `missing-asset`, `js-syntax`, `tooling`, Hugo template/module configuration errors, and transient infrastructure/network failures. Link diagnoses to real logs and successful fixes. Do not claim "AI/big data self-fix" without a tested deterministic fixer.
 
-Retry transient failures at most twice (three checks total). Deterministic syntax, missing file and template failures normally require a source change; retrying alone is not a repair. Never download/execute suggested fixes from a search result. Never auto-merge main. PR mergeability and Bug Checker PASS are independent: a PR can pass CI while still having a merge conflict.
+Retry transient failures at most twice (three checks total). Deterministic syntax, missing file and template failures normally require a source change; retrying alone is not a repair. Never download/execute suggested fixes from a search result. Never bypass CI, conflict checks or GitHub branch protection when auto-merging. PR mergeability and Bug Checker PASS are independent: a PR can pass CI while still having a merge conflict.
 
 The source of truth for conflict resolution is the actual current PR merge state and the latest main head. Preserve both sides' nonconflicting edits, re-run checks, and never overwrite newer AGENTS.md policies.
 
