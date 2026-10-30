@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-30T04:09:35.595Z",
+  "updatedAt": "2026-10-30T04:57:49.309Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -668,7 +668,8 @@
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
-      ]
+      ],
+      "live": true
     },
     {
       "slug": "khoa-hoc-vu-tru-tieu-chuan-tuyen-chon-va-huan-luyen-phi-hanh-gia-nasa-tu-lich-su-den-hien-t-2026-10-30",
@@ -685,7 +686,8 @@
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
-      ]
+      ],
+      "live": true
     },
     {
       "slug": "khoa-hoc-vu-tru-tram-vu-tru-quoc-te-gioi-han-sinh-hoc-va-tuong-lai-cua-su-hien-dien-con-ngu-2026-10-30",
@@ -702,7 +704,8 @@
       },
       "models": [
         "Gemini · models/gemini-3.1-flash-lite"
-      ]
+      ],
+      "live": true
     },
     {
       "slug": "khoa-hoc-vu-tru-tram-vu-tru-quoc-te-gioi-han-sinh-hoc-va-thach-thuc-van-hanh-trong-moi-truo-2026-10-30",
@@ -719,7 +722,8 @@
       },
       "models": [
         "Gemini · models/gemini-3.1-flash-lite"
-      ]
+      ],
+      "live": true
     }
   ]
 }
