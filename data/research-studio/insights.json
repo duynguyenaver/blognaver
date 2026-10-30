@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-30T04:03:55.253Z",
+  "updatedAt": "2026-10-30T04:04:25.024Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -577,7 +577,8 @@
       },
       "models": [
         "Gemini · models/gemini-3.1-flash-lite"
-      ]
+      ],
+      "live": true
     },
     {
       "slug": "wechat-chien-luoc-ai-cua-tencent-giua-ap-luc-tang-truong-va-su-on-dinh-cua-he-sinh-2026-10-30",
@@ -594,7 +595,8 @@
       },
       "models": [
         "Gemini · models/gemini-3.1-flash-lite"
-      ]
+      ],
+      "live": true
     },
     {
       "slug": "cold-fusion-giai-ma-quy-trinh-dat-ve-may-bay-truc-tuyen-tu-du-lieu-den-trai-nghiem-hanh-2026-10-30",
@@ -612,7 +614,8 @@
       "models": [
         "Gemini · models/gemini-3.1-flash-lite",
         "Gemini · models/gemini-3.5-flash-lite"
-      ]
+      ],
+      "live": true
     },
     {
       "slug": "khoa-hoc-vu-tru-co-hoc-quy-dao-va-bai-toan-khong-gian-giai-ma-khoa-hoc-dang-sau-ve-tinh-dia-2026-10-30",
@@ -626,6 +629,23 @@
         "tokens": 29152,
         "inputTokens": 22445,
         "outputTokens": 6707
+      },
+      "models": [
+        "Gemini · models/gemini-3.5-flash-lite"
+      ]
+    },
+    {
+      "slug": "khoa-hoc-vu-tru-co-che-vat-ly-quy-dao-va-bai-toan-duy-tri-ve-tinh-nhan-tao-trong-ky-nguyen--2026-10-30",
+      "title": "Cơ chế vật lý quỹ đạo và bài toán duy trì vệ tinh nhân tạo trong kỷ nguyên không gian",
+      "series": "khoa-hoc-vu-tru",
+      "sha": "01fd2e31fc9669aa7897eb201a4830a5de0ae3c7",
+      "commitAt": "2026-10-30T04:03:59Z",
+      "durationMs": 29667,
+      "quota": {
+        "requests": 8,
+        "tokens": 18249,
+        "inputTokens": 12516,
+        "outputTokens": 5733
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
