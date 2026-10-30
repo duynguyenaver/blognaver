@@ -1140,9 +1140,9 @@ function setPublishEvidence(proof){
  link.href="https://github.com/"+REPO+"/actions/workflows/hugo.yml";
  link.hidden=false;panel.hidden=false;
  $("#publishCommitLink").href=commitUrl;
- $("#publishFileLink").href="https://github.com/"+REPO+"/blob/main/"+proof.path;
- $("#publishEvidenceTitle").textContent=proof.deployDispatched?"Đã ghi commit · Deploy đã được yêu cầu":"Đã ghi commit · Chưa xác nhận kích hoạt deploy";
- $("#publishEvidenceDetail").textContent="Commit "+sha.slice(0,10)+" · "+proof.path+". GitHub đã xác nhận thao tác ghi file; cần kiểm tra Hugo workflow thành công trước khi coi bài đã xuất bản.";
+ $("#publishFileLink").href=proof.prUrl||"https://github.com/"+REPO+"/blob/main/"+proof.path;
+ $("#publishEvidenceTitle").textContent=proof.prUrl?"PR đã tạo · chờ CI tự merge":proof.deployDispatched?"Đã ghi commit · Deploy đã được yêu cầu":"Đã ghi commit · Chưa xác nhận kích hoạt deploy";
+ $("#publishEvidenceDetail").textContent=proof.prUrl?"PR #"+proof.prNumber+" · "+proof.path+". Chưa đăng main; CI xanh sẽ tự merge và deploy.":"Commit "+sha.slice(0,10)+" · "+proof.path+". Cần kiểm tra Hugo workflow thành công.";
 }
 function addLink(label,url){const a=document.createElement("a");a.href=url;a.target="_blank";a.rel="noopener noreferrer";a.textContent=label;$("#resultLinks").append(a)}
 async function publish(d){
@@ -1168,16 +1168,27 @@ async function publish(d){
   d.series="khac";
   SERIES.khac={name:"Khác",tag:"Khác",category:"Nghiên cứu"};
  }
- const created=await github("contents/"+file,"PUT",{message:"content(series-ai): publish "+d.series+" research "+d.slug,branch:"main",content:encode(rawMarkdown)});
- const proof={sha:created.commit.sha,path:file,deployDispatched:false};
+ const branch="content/research-"+d.slug;
+ // A previous queued job or retry must never publish a duplicate PR or overwrite a post.
+ let branchExists=false;
+ try{await github("git/ref/heads/"+branch);branchExists=true}catch(e){if(e.status!==404)throw e}
+ if(!branchExists){
+  const main=await github("git/ref/heads/main");
+  await github("git/refs","POST",{ref:"refs/heads/"+branch,sha:main.object.sha});
+ }
+ let branchFileExists=false;
+ try{await github("contents/"+file+"?ref="+encodeURIComponent(branch));branchFileExists=true}catch(e){if(e.status!==404)throw e}
+ if(!branchFileExists)await github("contents/"+file,"PUT",{message:"content(series-ai): propose "+d.series+" research "+d.slug,branch,content:encode(rawMarkdown)});
+ const results=await github("pulls?state=open&head="+encodeURIComponent(REPO.split("/")[0]+":"+branch)+"&base=main");
+ let pr=results[0];
+ if(!pr)pr=await github("pulls","POST",{title:"content(series-ai): "+(d.title||d.slug),head:branch,base:"main",draft:false,body:"Research Studio generated article. CI must pass before the repository's standard auto-merge and Hugo deployment."});
+ const proof={sha:pr.head.sha,path:file,deployDispatched:false,prUrl:pr.html_url,prNumber:pr.number};
  setPublishEvidence(proof);
- window.dispatchEvent(new CustomEvent("bn:research-article-committed",{detail:{sha:proof.sha,path:proof.path}}));
- checkpoint({published:false,commitProof:proof,slug:d.slug});window.BNSeriesInsights?.record({slug:d.slug,title:d.title,series:d.series,state:"committed",sha:proof.sha,commitAt:created.commit?.committer?.date||new Date().toISOString(),models:metrics.models,durationMs:metrics.durationMs,live:false,quota:{requests:metrics.geminiRequests,tokens:metrics.geminiTokens,inputTokens:metrics.inputTokens,outputTokens:metrics.outputTokens}});
- addLink("Xem commit GitHub ↗",created.commit.html_url||"https://github.com/"+REPO+"/commit/"+created.commit.sha);
- addLink("Mở bài trên blog sau khi deploy ↗",SITE+"bai-viet/"+d.slug+"/");
- try{await github("actions/workflows/hugo.yml/dispatches","POST",{ref:"main"});proof.deployDispatched=true;setPublishEvidence(proof);checkpoint({published:true,commitProof:proof,slug:d.slug});window.BNSeriesInsights?.record({slug:d.slug,title:d.title,series:d.series,state:"committed",sha:proof.sha,durationMs:metrics.durationMs,live:false,quota:{requests:metrics.geminiRequests,tokens:metrics.geminiTokens,inputTokens:metrics.inputTokens,outputTokens:metrics.outputTokens}});state("Đã commit bài "+created.commit.sha.slice(0,9)+" và kích hoạt GitHub Pages. Đợi trạng thái deploy thành công trước khi coi là đã xuất bản trên website.");}
- catch(e){state("Bài đã commit lên main, nhưng chưa gọi được deploy: "+e.message+". Vào GitHub Actions để chạy Hugo Deploy bằng workflow_dispatch.",true)}
- return created
+ checkpoint({published:false,commitProof:proof,slug:d.slug});
+ window.BNSeriesInsights?.record({slug:d.slug,title:d.title,series:d.series,state:"pr-open",sha:proof.sha,commitAt:new Date().toISOString(),models:metrics.models,durationMs:metrics.durationMs,live:false,quota:{requests:metrics.geminiRequests,tokens:metrics.geminiTokens,inputTokens:metrics.inputTokens,outputTokens:metrics.outputTokens}});
+ addLink("Xem Pull Request #"+pr.number+" ↗",pr.html_url);
+ state("Đã tạo PR #"+pr.number+". GitHub sẽ kiểm tra CI, sau khi xanh hệ thống tự merge và deploy. Chưa xuất bản trên main.");
+ return pr;
 }
 async function start(e,restore=false,queuedJob=null){
  e.preventDefault();
@@ -1289,7 +1300,7 @@ async function start(e,restore=false,queuedJob=null){
  rawMarkdown=makeArticle(d);lastSlug=d.slug;$("#preview").textContent=rawMarkdown;$("#resultTitle").textContent=title;
  progress(88,"Đã hoàn thiện bản nghiên cứu",2);checkpoint({outline,published:false,slug:d.slug});
  if(job.autoPublish){
-  progress(92,"Commit bài lên GitHub",3);publishingCommit=true;stopStallWatch();await publish(d);progress(100,"Đã commit (kiểm tra Pages deploy riêng)",4);// Keep the publish proof and draft preview but clear the English source for a NEW job.
+  progress(92,"Tạo Pull Request GitHub",3);publishingCommit=true;stopStallWatch();await publish(d);progress(100,"PR đã tạo · chờ CI tự merge",4);// Keep the publish proof and draft preview but clear the English source for a NEW job.
   // Source inputs were reset at the START of this run, so later incoming queue entries are never erased.
   checkpoint({published:true,runStatus:"completed",slug:d.slug,source:"",sourceUrl:"",angle:"",commitProof:lastCommitProof,productionMetrics:runData.productionMetrics||null,briefs:[],pieces:[],outline:null,retryAt:0});
   state($("#status").textContent+"\nBiểu mẫu nguồn sẵn sàng cho bài mới. Hàng đợi sẽ chạy tiếp nếu có.");
