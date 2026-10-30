@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-30T07:03:31.903Z",
+  "updatedAt": "2026-10-30T07:08:08.289Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -929,7 +929,8 @@
       },
       "models": [
         "Gemini · models/gemini-3.1-flash-lite"
-      ]
+      ],
+      "live": true
     },
     {
       "slug": "the-wall-street-journal-wework-va-bai-hoc-ve-su-sup-do-cua-mo-hinh-tang-truong-bang-moi-gia-2026-10-30",
@@ -943,6 +944,41 @@
         "tokens": 15969,
         "inputTokens": 10420,
         "outputTokens": 5549
+      },
+      "models": [
+        "Gemini · models/gemini-3.1-flash-lite"
+      ],
+      "live": true
+    },
+    {
+      "slug": "cnbc-original-soi-va-bai-toan-niem-tin-khi-he-thong-y-te-cong-cong-my-dung-truoc-nguong-c-2026-10-30",
+      "title": "Sởi và bài toán niềm tin: Khi hệ thống y tế công cộng Mỹ đứng trước ngưỡng cửa suy yếu",
+      "series": "cnbc-original",
+      "sha": "637d9116ff736fbc2425a63d9b25e968e5f1874c",
+      "commitAt": "2026-10-30T07:07:37Z",
+      "durationMs": 28726,
+      "quota": {
+        "requests": 8,
+        "tokens": 16414,
+        "inputTokens": 10936,
+        "outputTokens": 5478
+      },
+      "models": [
+        "Gemini · models/gemini-3.1-flash-lite"
+      ]
+    },
+    {
+      "slug": "cnbc-original-ngan-hang-cong-tai-north-dakota-mo-hinh-tai-chinh-nghich-ly-giua-long-nuoc--2026-10-30",
+      "title": "Ngân hàng công tại North Dakota: Mô hình tài chính nghịch lý giữa lòng nước Mỹ",
+      "series": "cnbc-original",
+      "sha": "c2a42c8f6d740d7e1897e14e5919205421e38886",
+      "commitAt": "2026-10-30T07:07:04Z",
+      "durationMs": 31786,
+      "quota": {
+        "requests": 8,
+        "tokens": 21429,
+        "inputTokens": 15698,
+        "outputTokens": 5731
       },
       "models": [
         "Gemini · models/gemini-3.1-flash-lite"
