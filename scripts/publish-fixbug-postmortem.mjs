@@ -151,15 +151,25 @@ const lines=[
 ];
 const content=lines.join("\n");
 if(process.env.DRY_RUN==="1"){console.log("DRY RUN: "+target+" chars="+content.length);process.exit(0)}
-let saved=null;
-for(let i=0;i<3;i++){
- if(await api("/contents/"+target+"?ref=main","GET",null,true))await skip("Already published on retry");
- try{saved=await api("/contents/"+target,"PUT",{branch:"main",message:"content(fixbug): publish verified CI recovery PR #"+number,content:Buffer.from(content).toString("base64")});break}
- catch(e){if(i===2||!/\b409\b|\b422\b/.test(String(e)))throw e;await new Promise(r=>setTimeout(r,(i+1)*800))}
+
+const publishBranch="content/fixbug-2026-pr-"+number;
+const existingRef=await api("/git/ref/heads/"+publishBranch,"GET",null,true);
+if(!existingRef){
+ const mainRef=await api("/git/ref/heads/main");
+ await api("/git/refs","POST",{ref:"refs/heads/"+publishBranch,sha:mainRef.object.sha});
 }
-console.log("PUBLISHED "+target+" @ "+saved.commit.sha);
-await mark("fixbug:published");
-summary("PUBLISHED","Created file and committed to main",web+"/blob/main/"+target);
-// GITHUB_TOKEN commit does not trigger push workflows. workflow_dispatch is an exception.
-await api("/actions/workflows/hugo.yml/dispatches","POST",{ref:"main"});
-console.log("DEPLOY DISPATCHED for "+target);
+const article=await api("/contents/"+target+"?ref="+publishBranch,"GET",null,true);
+if(!article)await api("/contents/"+target,"PUT",{
+ branch:publishBranch,
+ message:"content(fixbug): propose verified CI recovery PR #"+number,
+ content:Buffer.from(content).toString("base64")
+});
+const openPRs=await api("/pulls?state=open&head="+encodeURIComponent(repo.split("/")[0]+":"+publishBranch)+"&base=main");
+let proposed=openPRs[0];
+if(!proposed)proposed=await api("/pulls","POST",{
+ title:"content(fixbug): verified CI recovery PR #"+number,
+ head:publishBranch,base:"main",draft:false,
+ body:"Evidence-backed Fix Bug 2026 article for PR #"+number+". Publish only after CI passes through standard auto-merge."
+});
+console.log("CASE STUDY PR CREATED "+proposed.html_url);
+summary("PR CREATED","Article awaits CI and auto-merge",proposed.html_url);
