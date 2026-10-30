@@ -114,13 +114,29 @@ $("#manualModelTry").addEventListener("click",testManualModelSwitch);
 let abort=null,working=false,rawMarkdown="",currentModel="",key="",lastSlug="",lastCommitProof=null,startedAt=0,geminiVerified=false,githubVerified=false,groqVerified=false,groqModel="openai/gpt-oss-120b",runData={},resumePending=false;
 const CUSTOM_SERIES_STORE="bn_series_custom_names_v1";
 try{const saved=JSON.parse(localStorage.getItem(CUSTOM_SERIES_STORE)||"{}");for(const [id,name] of Object.entries(saved)){if(/^[a-z0-9-]{2,75}$/.test(id)&&typeof name==="string"&&name.trim())SERIES[id]={name:name.trim(),tag:name.trim(),category:"Nghiên cứu"}}}catch{}
+let seriesLastAction="dropdown";
+function rememberSeriesAction(){
+ const dropdown=$("#series"),custom=$("#customSeries");
+ dropdown?.addEventListener("change",()=>{seriesLastAction="dropdown";if(custom)custom.value=""});
+ custom?.addEventListener("input",()=>{seriesLastAction=custom.value.trim()?"manual":"dropdown"});
+ window.addEventListener("bn:series-catalog-updated",()=>{if(!custom?.value.trim())seriesLastAction="dropdown"});
+}
+rememberSeriesAction();
 function selectedSeries(){
- const custom=document.querySelector("#customSeries")?.value.trim()||"";
- if(!custom){const id=$("#series").value; if(id==="khac"&&!SERIES.khac)SERIES.khac={name:"Khác",tag:"Khác",category:"Nghiên cứu"};if(!SERIES[id]){const names=JSON.parse(localStorage.getItem(CUSTOM_SERIES_STORE)||"{}");if(names[id])SERIES[id]={name:names[id],tag:names[id],category:"Nghiên cứu"}}return id;}
- const id=slug(custom);
- if(id.length<2)throw Error("Tên series mới cần ít nhất 2 ký tự hợp lệ.");
- if(!SERIES[id])SERIES[id]={name:custom,tag:custom,category:"Nghiên cứu"};window.BNSeriesCatalog?.register(custom,true);
- try{const names=JSON.parse(localStorage.getItem(CUSTOM_SERIES_STORE)||"{}");names[id]=custom;localStorage.setItem(CUSTOM_SERIES_STORE,JSON.stringify(names))}catch{}
+ const custom=$("#customSeries").value.trim();
+ if(seriesLastAction==="manual"&&custom){
+  const id=slug(custom);
+  if(id.length<2)throw Error("Tên series phải có ít nhất 2 ký tự hợp lệ.");
+  SERIES[id]={name:custom,tag:custom,category:"Nghiên cứu"};
+  window.BNSeriesCatalog?.register(custom,true);
+  return id;
+ }
+ const id=$("#series").value;
+ if(id==="khac")SERIES.khac={name:"Khác",tag:"Khác",category:"Nghiên cứu"};
+ if(!SERIES[id]){
+  const names=JSON.parse(localStorage.getItem(CUSTOM_SERIES_STORE)||"{}");
+  if(names[id])SERIES[id]={name:names[id],tag:names[id],category:"Nghiên cứu"};
+ }
  return id;
 }
 const QUEUE_STORE="bn_series_research_fifo_queue_v1";
@@ -501,11 +517,6 @@ function clearSourceForm(){
 function formJob(){
  const job={id:Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,8),at:Date.now(),series:selectedSeries(),source:$("#transcript").value,sourceUrl:$("#sourceUrl").value,angle:$("#angle").value,autoPublish:$("#autoPublish").checked};
  if(!SERIES[job.series])throw Error("Series không hợp lệ");
- const guard=window.BNSourceFidelity;
- if(!guard)throw Error("Không tải được bộ kiểm định chủ đề; không thể thêm bài vào hàng đợi.");
- const review=guard.checkSeries(job.source,SERIES[job.series].name);
- if(!review.ok){job.series="khac";SERIES.khac={name:"Khác",tag:"Khác",category:"Nghiên cứu"};$("#series").value="khac";state("Chưa phù hợp series hiện có; tự chuyển sang Khác. Bạn có thể chỉnh ở Section 07 sau.",false)}
-
  if(rawSource(job.source).length<700)throw Error("Phụ đề cần ít nhất 700 ký tự tiếng Anh.");
  if(rawSource(job.source).length>350000)throw Error("Phụ đề dài quá 350.000 ký tự.");
  if(job.sourceUrl&&!/^https:\/\//i.test(job.sourceUrl))throw Error("URL nguồn phải dùng HTTPS.");
@@ -1151,7 +1162,7 @@ async function publish(d){
  const source=runData.source||"";
  const checker=window.BNSourceFidelity;
  if(!checker)throw Error("Không tải được bộ kiểm định nguồn. Dừng commit để tránh xuất bản bài sai.");
- const seriesResult=d.series==="khac"?{ok:true,reason:"Đã dùng series Khác"}:checker.checkSeries(source,SERIES[d.series]?.name||d.series);
+ const seriesResult={ok:true}; // The last user-selected series is authoritative; do not reclassify it.
  const fidelityResult=checker.fidelity(source,[d.title,d.description,d.body].join("\n"));
  if(!seriesResult.ok||!fidelityResult.ok){
   const reason=[!seriesResult.ok?seriesResult.reason:"",!fidelityResult.ok?fidelityResult.reason:""].filter(Boolean).join(" | ");
@@ -1340,7 +1351,7 @@ async function start(e,restore=false,queuedJob=null){
    // One attempt per turn. After 3 unsuccessful turns, park for 60 seconds,
    // then begin a fresh round while other queued jobs continue immediately.
    const retryAt=0; // No provider cooldown; capped per-job to prevent infinite retries.
-   const failedJob={...job,failed:true,failedAt:job.failedAt||Date.now(),retryCount:Math.min(3,attempts),retryExhausted:attempts>=3||e.code==="DUPLICATE_SLUG",retryAt,checkpoint:snapshot};
+   const failedJob={...job,failed:true,failedAt:job.failedAt||Date.now(),retryCount:Math.min(3,attempts),retryExhausted:attempts>=3||e.code==="DUPLICATE_SLUG"||e.code==="SOURCE_FIDELITY_BLOCK",retryAt,checkpoint:snapshot};
    const existing=queue.find(item=>sameQueueJob(item,failedJob));
    if(existing){Object.assign(existing,failedJob);await saveQueue()}
    else{queue.push(failedJob);await saveQueue()}
