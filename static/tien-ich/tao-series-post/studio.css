@@ -501,3 +501,16 @@
 #writingPublishPanel .bn-writing-disclosure[open] .bn-writing-arrow{transform:rotate(180deg)}
 #writingPublishPanel .bn-writing-content{padding:18px 22px 24px;border-top:1px solid #d1e3f5}
 @media(max-width:640px){#writingPublishPanel .bn-writing-disclosure>summary{padding:15px}#writingPublishPanel .bn-writing-content{padding:15px}}
+
+
+/* Section 03 quality controls: collapsed on first load, stays in DOM. */
+#qualityPanel{padding:0;overflow:hidden}
+#qualityPanel .bn-quality-disclosure>summary{list-style:none;display:flex;justify-content:space-between;align-items:center;gap:14px;padding:18px 22px;cursor:pointer;background:#f2f8ff}
+#qualityPanel .bn-quality-disclosure>summary::-webkit-details-marker{display:none}
+#qualityPanel .bn-quality-disclosure>summary .step{margin:0;min-width:0;flex:1 1 auto;align-items:center}
+#qualityPanel .bn-quality-disclosure>summary .step>div{min-width:0}
+#qualityPanel .bn-quality-disclosure>summary h2{margin:0 0 4px}
+#qualityPanel .bn-quality-chevron{font-size:24px;flex:0 0 auto;color:#286da8;transition:transform .18s}
+#qualityPanel .bn-quality-disclosure[open] .bn-quality-chevron{transform:rotate(180deg)}
+#qualityPanel .bn-quality-body{padding:18px 22px 24px;border-top:1px solid #d1e3f5}
+@media(max-width:640px){#qualityPanel .bn-quality-disclosure>summary{padding:15px}#qualityPanel .bn-quality-body{padding:15px}}
