@@ -47,6 +47,22 @@ markup:
     lineNos: true
     lineNumbersInTable: false
 EOF
+# Compatibility shim: upstream hugomods/giscus v0.1.1 uses removed Hugo getJSON.
+# Override only that deprecated partial using the current resources.GetRemote API.
+mkdir -p layouts/partials/giscus
+cat > layouts/partials/giscus/repo-id.html <<'EOF'
+{{- $repoID := "" -}}
+{{- with . -}}
+  {{- $url := printf "https://api.github.com/repos/%s" . -}}
+  {{- with try (resources.GetRemote $url) -}}
+    {{- with .Value -}}
+      {{- $data := . | transform.Unmarshal -}}
+      {{- $repoID = $data.node_id | default "" -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- return $repoID -}}
+EOF
 # Keep upstream module settings and remove theme demo navigation/content.
 rm -f config/_default/menus.en.yaml config/_default/menus.zh-hans.yaml
 mkdir -p layouts/partials/hugopress/modules/hb-custom/hooks
