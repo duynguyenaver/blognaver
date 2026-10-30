@@ -1,16 +1,10 @@
 {
-  "version": 2,
-  "updatedAt": "2026-10-30T11:49:26.264Z",
-  "records": {
-    "2026-10-30": {
-      "status": "work",
-      "note": "",
-      "updatedAt": "2026-10-30T11:45:44.989Z"
-    },
-    "2026-10-10": {
-      "status": "annual",
-      "note": "Half AL lên Saigon chơi với Ngân",
-      "updatedAt": "2026-10-30T11:46:12.464Z"
-    }
-  }
+  "format": "blognaver-attendance-encrypted",
+  "version": 3,
+  "kdf": "PBKDF2-SHA256",
+  "iterations": 600000,
+  "cipher": "AES-256-GCM",
+  "salt": "9wyVMkVqDPj8ahfGMlKBnA==",
+  "iv": "de0/rcTk06bH4ays",
+  "ciphertext": "QLz4EzqJNmWq81VPUgVrd2vXhs+6HPIydCdQ0HTHJhKexk7lh/6MZTGW8nQIkCohB1x7zKtlx+uo28EVPqs5adHQ1ek9NY3g3f8TzEM7Uk4L1RbDdnhme4JfSbcHGWX+5rA2FvUXmQ5ffyNEDWJ9hFeGlTmvXZ9Ctm3XW/ScWXo4oF2KiVVXA7bCHXcEwbL+iT1xE7OHfuYxgqWOKjihnR1+0Xx3YucVIIXIrGLe5bEyVIInz9Tr+17FwgwHRJ4xhSG7AXf3IY1zOiGJmy0Dxc7iOyIWJ4nlBI0I0rJn5ne6IXQXVWR4susBZIlN6GN8"
 }
