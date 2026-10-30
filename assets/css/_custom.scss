@@ -96,7 +96,7 @@ footer .footer-container a { letter-spacing: .025em; }
 @media (min-width: 900px) {
   body:has(.home) main.tw-mx-4,
   body:has(.home) main.tw-mx-4 > .home {
-    width: min(100% - 48px, 1240px) !important;
+    width: calc(100% - 48px) !important;
     max-width: 1240px !important;
     margin-inline: auto !important;
   }
