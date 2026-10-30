@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-30T03:11:48.374Z",
+  "updatedAt": "2026-10-30T03:12:22.153Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -574,6 +574,23 @@
         "tokens": 20263,
         "inputTokens": 14591,
         "outputTokens": 5672
+      },
+      "models": [
+        "Gemini · models/gemini-3.1-flash-lite"
+      ]
+    },
+    {
+      "slug": "wechat-chien-luoc-ai-cua-tencent-giua-ap-luc-tang-truong-va-su-on-dinh-cua-he-sinh-2026-10-30",
+      "title": "Chiến lược AI của Tencent: Giữa áp lực tăng trưởng và sự ổn định của hệ sinh thái WeChat",
+      "series": "wechat",
+      "sha": "b0579c0b5a4b863866f062466c006a85d44e240c",
+      "commitAt": "2026-10-30T03:11:56Z",
+      "durationMs": 30151,
+      "quota": {
+        "requests": 8,
+        "tokens": 19182,
+        "inputTokens": 13505,
+        "outputTokens": 5677
       },
       "models": [
         "Gemini · models/gemini-3.1-flash-lite"
