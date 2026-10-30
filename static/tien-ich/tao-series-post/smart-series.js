@@ -18,12 +18,26 @@ if(source.value.trim()&&transcript.value.trim().length<100){try{
  try{const res=await fetch("https://noembed.com/embed?url="+encodeURIComponent(u.href),{signal:ctl.signal});if(res.ok){const data=await res.json();if(data.title)context+="\\nVideo title: "+data.title}}finally{clearTimeout(tid)}
  }}catch{}}
 const classified=window.BNSourceFidelity?.classify(context);
-let choices=classified?.clear?[classified.label,...classified.ranked.filter(x=>x.score>=2&&x.id!==classified.topic).slice(0,2).map(x=>x.name)]:[];
-const key=$("groqKey")?.value.trim();
-if(key&&explicit){const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),12000);try{
-const res=await fetch("https://api.groq.com/openai/v1/chat/completions",{method:"POST",signal:ctl.signal,headers:{"Content-Type":"application/json",Authorization:"Bearer "+key},body:JSON.stringify({model:"openai/gpt-oss-20b",max_completion_tokens:200,temperature:.3,messages:[{role:"system",content:"Đề xuất đúng 3 tên series blog tiếng Việt có dấu, không suy diễn dữ kiện. Ưu tiên tái dùng series có sẵn nếu phù hợp. Trả về JSON array 3 chuỗi, không thêm văn bản."},{role:"user",content:"Series có sẵn: "+existing.map(x=>x.name).join("; ")+"\nURL và phụ đề:\n"+text.slice(0,6000)}]})});
-if(res.ok){const data=await res.json(),txt=data.choices?.[0]?.message?.content||"",match=txt.match(/\[[\s\S]*?\]/);if(match){const arr=JSON.parse(match[0]);if(Array.isArray(arr))choices=[...arr.filter(x=>typeof x==="string"&&x.length>=4&&x.length<=90),...choices].slice(0,3)}}}catch{}finally{clearTimeout(timer)}}
-if(seq!==request||(!explicit&&manual))return;choices=[...new Set(choices)];if(!choices.length){status.textContent="Chưa đủ bằng chứng xác định chủ đề; không tự gợi ý series không liên quan. Hãy bổ sung phụ đề hoặc kiểm tra thủ công.";list.replaceChildren();return}show(choices,existing);status.textContent="Có "+choices.length+" gợi ý. Bấm chọn để sử dụng."}
+const fallback=classified?.clear?[classified.label,...classified.ranked.filter(x=>x.score>=2&&x.id!==classified.topic).slice(0,2).map(x=>x.name)]:[];
+const prompt="Phân tích chủ đề TRUNG TÂM của nội dung. KHÔNG phân loại chỉ vì từ travel hay booking xuất hiện ngẫu nhiên. Đề xuất 3 tên series blog BẰNG TIẾNG VIỆT CÓ DẤU, tự nhiên, bao quát; chỉ tái sử dụng series cũ khi cùng chủ đề. Chỉ trả về JSON array của 3 chuỗi.";
+const input="Series hiện có: "+existing.map(x=>x.name).join("; ")+"\nNguồn:\n"+context.slice(0,10000);
+const parse=text=>{const match=String(text||"").match(/\[[\s\S]*?\]/);if(!match)throw Error("AI không trả danh sách JSON");return [...new Set(JSON.parse(match[0]).filter(x=>typeof x==="string"&&x.trim().length>=5&&x.length<=90).map(x=>x.trim()))].slice(0,3)};
+const groqKey=$("groqKey")?.value.trim(),geminiKey=$("geminiKey")?.value.trim();
+let choices=[],provider="",failure="";
+if(groqKey){try{
+ const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),20000);
+ try{const r=await fetch("https://api.groq.com/openai/v1/chat/completions",{method:"POST",signal:ctl.signal,headers:{"Content-Type":"application/json",Authorization:"Bearer "+groqKey},body:JSON.stringify({model:"openai/gpt-oss-20b",temperature:.2,max_completion_tokens:450,messages:[{role:"system",content:prompt},{role:"user",content:input}]})});const d=await r.json().catch(()=>({}));if(!r.ok)throw Error("HTTP "+r.status+" "+(d.error?.message||""));choices=parse(d.choices?.[0]?.message?.content);provider="Groq"}finally{clearTimeout(timer)}
+}catch(e){failure="Groq: "+e.message}}
+if(!choices.length&&geminiKey){try{
+ const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),22000);
+ try{const discovery=await fetch("https://generativelanguage.googleapis.com/v1beta/models?key="+encodeURIComponent(geminiKey),{signal:ctl.signal});const models=await discovery.json();if(!discovery.ok)throw Error("Models HTTP "+discovery.status);const available=(models.models||[]).filter(m=>(m.supportedGenerationMethods||[]).includes("generateContent")&&/flash/i.test(m.name)&&!/preview|experimental|deprecated/i.test(m.name)).sort((a,b)=>b.name.localeCompare(a.name,undefined,{numeric:true}));if(!available.length)throw Error("Không tìm thấy Gemini Flash hoạt động");const r=await fetch("https://generativelanguage.googleapis.com/v1beta/"+available[0].name+":generateContent?key="+encodeURIComponent(geminiKey),{method:"POST",signal:ctl.signal,headers:{"Content-Type":"application/json"},body:JSON.stringify({contents:[{parts:[{text:prompt+"\n"+input}]}],generationConfig:{temperature:.2,maxOutputTokens:450}})});const d=await r.json().catch(()=>({}));if(!r.ok)throw Error("HTTP "+r.status+" "+(d.error?.message||""));choices=parse((d.candidates?.[0]?.content?.parts||[]).map(p=>p.text||"").join(""));provider="Gemini"}finally{clearTimeout(timer)}
+}catch(e){failure+=(failure?" | ":"")+"Gemini: "+e.message}}
+if(seq!==request||(!explicit&&manual))return;
+if(!choices.length)choices=fallback;
+if(!choices.length){status.textContent=failure?"AI gặp lỗi: "+failure+". Bộ phân loại dự phòng cũng chưa đủ thông tin.": "Chưa kết nối Groq/Gemini; hãy kết nối AI để phân tích ngữ nghĩa thay vì chỉ dùng từ khóa.";list.replaceChildren();return}
+show(choices,existing);
+status.textContent="Có "+choices.length+" gợi ý · "+(provider?"AI "+provider:"phân loại dự phòng")+(failure&&!provider?" · "+failure:"")+". Bấm chọn để sử dụng.";
+}
 function schedule(){clearTimeout(timer);timer=setTimeout(()=>suggest(false),900)}
 source.addEventListener("input",schedule);transcript.addEventListener("input",schedule);name.addEventListener("input",()=>manual=!!name.value.trim());$("suggestSeriesBtn").addEventListener("click",()=>{manual=false;suggest(true)});
 })();
