@@ -25,12 +25,15 @@ languageCode: vi-VN
 defaultContentLanguage: vi
 defaultContentLanguageInSubdir: false
 enableRobotsTXT: true
+# The upstream HB blog RSS template still references the removed site.Author API.
+# Disable only legacy HB RSS until the upstream template supports Hugo 0.162.
+disableKinds: [RSS]
 timeout: 180s
 enableEmoji: true
 permalinks:
   blog: /bai-viet/:slug/
 outputs:
-  home: [HTML, Offline, RSS, SearchIndex, WebAppManifest]
+  home: [HTML, Offline, SearchIndex, WebAppManifest]
 taxonomies:
   authors: authors
   tags: tags
