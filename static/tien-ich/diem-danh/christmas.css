@@ -27,3 +27,10 @@
 .recent-records[open]>summary .chevron{transform:rotate(180deg)}
 .recent-records>summary:focus-visible{outline:3px solid #4e96dd;outline-offset:5px;border-radius:8px}
 .recent-records>summary+.note{margin-top:18px!important}
+
+.github-details>summary.github-summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:16px;font-size:21px;font-weight:780;color:#1c456c;min-height:36px}
+.github-details>summary.github-summary::-webkit-details-marker{display:none}
+.github-details>summary .chevron{display:grid;place-items:center;width:36px;height:36px;border-radius:50%;background:#edf5fc;color:#276aa2;font-size:24px;transition:transform .2s}
+.github-details[open]>summary .chevron{transform:rotate(180deg)}
+.github-details>summary:focus-visible{outline:3px solid #4e96dd;outline-offset:5px;border-radius:8px}
+.github-details>summary+.note{margin-top:20px!important}
