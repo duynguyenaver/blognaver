@@ -2,38 +2,9 @@
 :root { --blognaver-accent: #387dde; }
 a:hover { color: var(--blognaver-accent); }
 
-/* Blog post previews: visually separate adjacent articles without changing article content. */
-.home .summary,
-.page.archive .archive-item,
-.page.archive .summary {
-  position: relative;
-  background: rgba(90, 139, 198, .14);
-  border: 1px solid rgba(116, 156, 207, .31);
-  border-radius: 14px;
-  padding: 22px 26px;
-  margin-bottom: 26px;
-  box-shadow: 0 5px 22px rgba(0, 0, 0, .035);
-}
-.home .summary + .summary { margin-top: 8px; }
-.home .summary::after,
-.page.archive .summary::after { display: none; }
-@media (prefers-color-scheme: dark) {
-  .home .summary,
-  .page.archive .archive-item,
-  .page.archive .summary {
-    background: rgba(105, 155, 219, .17);
-    border-color: rgba(147, 185, 231, .32);
-  }
-}
-@media (max-width: 680px) {
-  .home .summary,
-  .page.archive .archive-item,
-  .page.archive .summary {
-    padding: 17px 18px;
-    margin-bottom: 20px;
-    border-radius: 12px;
-  }
-}
+/* Card surfaces and metadata are owned by blog-editorial.css. */
+.home .summary,.page.archive .archive-item,.page.archive .summary { position:relative; }
+.home .summary::after,.page.archive .summary::after { display:none; }
 
 /* Commit Status now lives in Smart Insights, not the public homepage footer. */
 [data-commit-status] { display: none !important; }
