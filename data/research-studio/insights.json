@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-30T07:38:19.179Z",
+  "updatedAt": "2026-10-30T09:26:11.647Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -1130,7 +1130,8 @@
       },
       "models": [
         "Gemini · models/gemini-3.1-flash-lite"
-      ]
+      ],
+      "live": true
     },
     {
       "slug": "a24-film-company-su-va-cham-giua-ban-nang-va-ky-thuat-giai-ma-tu-duy-sang-tao-cua-ari-aster--2026-10-30",
