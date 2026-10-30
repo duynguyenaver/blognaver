@@ -12,5 +12,23 @@ function show(item){current=item;$("#viewerTitle").textContent=(item.title||"Vid
 function render(){clearUrls();const root=$("#gallery");root.replaceChildren();const type=$("#filter").value,query=$("#search").value.trim().toLocaleLowerCase("vi-VN");const filtered=items.filter(x=>(type==="all"||x.kind===type)&&(x.title||"").toLocaleLowerCase("vi-VN").includes(query));$("#total").textContent=items.length+" ảnh";$("#usage").textContent="Đang hiển thị "+filtered.length+" biến thể";if(!filtered.length){root.append(el("div","gallery-empty","Không có ảnh phù hợp. Hãy tạo thumbnail hoặc cover trong Visual Studio."));return}
  for(const item of filtered){const card=el("article","gallery-asset"),prev=el("button","gallery-preview");prev.type="button";prev.setAttribute("aria-label","Xem lớn ảnh "+(item.title||""));const img=el("img");img.src=url(item.blob);img.alt="Ảnh "+item.kind+" của "+(item.title||"video");img.loading="lazy";prev.append(img);prev.onclick=()=>show(item);const body=el("div","gallery-body"),h=el("h2","",item.title||"Video chưa đặt tên"),meta=el("p","",(item.kind==="cover"?"Cover · 1600×900":"Thumbnail · 1280×720")+" · "+new Date(item.at||0).toLocaleString("vi-VN")),buttons=el("div","gallery-actions");const a=el("button","primary","Tải PNG ↓");a.onclick=()=>download(item);const del=el("button","subtle danger","Xóa");del.onclick=async()=>{if(!confirm("Xóa vĩnh viễn biến thể này khỏi Gallery trên thiết bị?"))return;try{await remove(item.id);items=items.filter(x=>x.id!==item.id);render();$("#status").textContent="Đã xóa một ảnh khỏi Gallery."}catch(e){$("#status").textContent="Xóa thất bại: "+e.message}};buttons.append(a,del);body.append(h,meta,buttons);card.append(prev,body);root.append(card)}}
 async function refresh(){try{items=(await all()).filter(x=>x?.blob instanceof Blob).sort((a,b)=>(b.at||0)-(a.at||0));render();$("#status").textContent="Thư viện đã cập nhật."}catch(e){$("#status").textContent="Không đọc được Gallery: "+e.message}}
-$("#filter").addEventListener("change",render);$("#search").addEventListener("input",render);$("#refresh").onclick=refresh;$("#closeViewer").onclick=()=>$("#viewer").close();$("#viewerDownload").onclick=()=>current&&download(current);$("#viewer").addEventListener("close",()=>{current=null;$("#viewerImage").removeAttribute("src")});refresh();
+async function loadCloud(){const status=$("#status");try{
+ status.textContent="Đang tải ảnh từ GitHub…";
+ const cloud=window.BNVisualCloud;if(!cloud)return;
+ const remotes=await cloud.getRemote(),known=new Set(items.map(x=>String(x.id)));
+ let loaded=0,failed=0;
+ for(const remote of remotes){
+  if(known.has(String(remote.id)))continue;
+  try{const response=await fetch(remote.url,{cache:"no-store"});if(!response.ok)throw Error("HTTP "+response.status);
+   const blob=await response.blob();if(!blob.type.startsWith("image/"))throw Error("Dữ liệu không phải ảnh");
+   const item={...remote,blob};await cloud.put(item);items.push(item);known.add(String(item.id));loaded++;
+  }catch(e){failed++}
+ }
+ items.sort((a,b)=>(b.at||0)-(a.at||0));render();
+ status.textContent="GitHub: "+remotes.length+" ảnh · tải mới "+loaded+(failed?" · "+failed+" ảnh chưa tải được":"")+".";
+ }catch(e){status.textContent="Không tải được Gallery từ GitHub: "+e.message+". Ảnh local vẫn được giữ."}
+}
+$("#connectGithub").onclick=async()=>{const b=$("#connectGithub");b.disabled=true;try{await window.BNVisualCloud.connect($("#githubToken").value,msg=>$("#status").textContent=msg);$("#githubToken").value="";await loadCloud()}catch(e){$("#status").textContent="Kết nối thất bại: "+e.message}finally{b.disabled=false}};
+$("#reloadCloud").onclick=loadCloud;
+$("#filter").addEventListener("change",render);$("#search").addEventListener("input",render);$("#refresh").onclick=refresh;$("#closeViewer").onclick=()=>$("#viewer").close();$("#viewerDownload").onclick=()=>current&&download(current);$("#viewer").addEventListener("close",()=>{current=null;$("#viewerImage").removeAttribute("src")});refresh().then(loadCloud);
 })();
