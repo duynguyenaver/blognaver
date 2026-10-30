@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-30T06:58:27.033Z",
+  "updatedAt": "2026-10-30T07:02:33.603Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -890,7 +890,8 @@
       },
       "models": [
         "Gemini · models/gemini-3.1-flash-lite"
-      ]
+      ],
+      "live": true
     },
     {
       "slug": "tiktok-thuat-toan-tiktok-tu-danh-gia-den-dinh-huong-noi-dung-2026-10-30",
@@ -909,6 +910,23 @@
         "Groq · openai/gpt-oss-120b",
         "Groq · openai/gpt-oss-20b",
         "Groq · qwen/qwen3.8-27b",
+        "Gemini · models/gemini-3.1-flash-lite"
+      ]
+    },
+    {
+      "slug": "the-wall-street-journal-tac-dong-cua-xung-dot-trung-ong-den-hanh-vi-cu-tri-tai-cac-vung-chien-luoc--2026-10-30",
+      "title": "Tác động của xung đột Trung Đông đến hành vi cử tri tại các vùng chiến lược Mỹ",
+      "series": "the-wall-street-journal",
+      "sha": "c5f6d0efd61d4af4085ed625960e2964108de299",
+      "commitAt": "2026-10-30T07:02:00Z",
+      "durationMs": 28941,
+      "quota": {
+        "requests": 8,
+        "tokens": 21343,
+        "inputTokens": 15671,
+        "outputTokens": 5672
+      },
+      "models": [
         "Gemini · models/gemini-3.1-flash-lite"
       ]
     }
