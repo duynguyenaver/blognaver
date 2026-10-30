@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-30T07:25:09.831Z",
+  "updatedAt": "2026-10-30T07:27:47.953Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -1075,6 +1075,23 @@
         "Groq · openai/gpt-oss-120b",
         "Groq · openai/gpt-oss-20b",
         "Groq · qwen/qwen3.8-27b",
+        "Gemini · models/gemini-3.1-flash-lite"
+      ]
+    },
+    {
+      "slug": "nasa-2024-yr4-va-bai-hoc-thuc-te-tu-he-thong-phong-thu-hanh-tinh-cua-nasa-2026-10-30",
+      "title": "2024 YR4 và bài học thực tế từ hệ thống phòng thủ hành tinh của NASA",
+      "series": "nasa",
+      "sha": "a63e24f2bb2780fa8380d8054e27a6263abbcba1",
+      "commitAt": "2026-10-30T07:27:20Z",
+      "durationMs": 46564,
+      "quota": {
+        "requests": 8,
+        "tokens": 22711,
+        "inputTokens": 16808,
+        "outputTokens": 5903
+      },
+      "models": [
         "Gemini · models/gemini-3.1-flash-lite"
       ]
     }
