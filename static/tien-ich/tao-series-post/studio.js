@@ -375,7 +375,7 @@ function failedFirst(){return queue}
 let manualQueueSession=false;
 function nextRunnableIndex(){
  const now=Date.now();
- return queue.findIndex(x=>(manualQueueSession||!x.manualOnly)&&Number(x.retryCount||0)<3&&!x.retryExhausted&&!(Number(x.retryAt)>now));
+ return queue.findIndex(x=>Number(x.retryCount||0)<3&&!x.retryExhausted&&!(Number(x.retryAt)>now));
 }
 function scheduleQueueRetry(at){
  if(queueRetryTimer)clearTimeout(queueRetryTimer);
@@ -550,7 +550,7 @@ function dispatchNext(force=false){
  if(working||queueBusy||!queue.length)return;
  const index=force?0:nextRunnableIndex();
  if(index<0){
-  const eligible=queue.filter(x=>(manualQueueSession||!x.manualOnly)&&!x.retryExhausted&&Number(x.retryCount||0)<3);
+  const eligible=queue.filter(x=>!x.retryExhausted&&Number(x.retryCount||0)<3);
   if(!eligible.length){manualQueueSession=false;$("#queueMessage").textContent="Hàng đợi đã xử lý hết các bài đủ điều kiện. Bài xếp thủ công còn lại chỉ chạy khi bấm Chạy bài ở hàng đợi.";renderQueue();return}
   const earliest=Math.min(...eligible.map(x=>Number(x.retryAt)||Date.now()+60000));
   $("#queueMessage").textContent="Các bài lỗi sẽ luân phiên thử model lại tự động; không chờ cooldown API.";
@@ -561,7 +561,7 @@ function dispatchNext(force=false){
   $("#queueMessage").textContent="Hàng đợi đã lưu an toàn. Kết nối lại Gemini"+(upcoming.autoPublish!==false?" và GitHub":"")+" để tiếp tục; bài chờ chưa bị lấy ra.";
   openCredentials("Cần kết nối để chạy hàng đợi");renderQueue();return;
  }
- if(!force&&["failed","stopped","waiting","running"].includes(runData.runStatus)&&runData.source&&!lastCommitProof?.sha&&!queue.some(item=>item.source===runData.source)){
+ if(!force&&working&&["failed","stopped","waiting","running"].includes(runData.runStatus)&&runData.source&&!lastCommitProof?.sha&&!queue.some(item=>item.source===runData.source)){
   $("#queueMessage").textContent="Phiên trước chưa hoàn thành; tiếp tục phiên này trước khi chạy hàng đợi.";
   renderQueue();return;
  }
@@ -1367,6 +1367,11 @@ async function start(e,restore=false,queuedJob=null){
    markQueueDone(job);queue=queue.filter(item=>!sameQueueJob(item,job));await saveQueue();
    await checkpointWrite.catch(()=>{});await queueDisk("checkpoint",null,"delete").catch(()=>{});try{localStorage.removeItem(DRAFT)}catch{};scheduleCloudQueueSync()}
   if(queuedJob&&(succeeded||hasCommitProof(lastCommitProof)||queuedForRetry||rotationRequested))queueDisk("active",null,"delete").catch(()=>{});
+  if(succeeded||hasCommitProof(lastCommitProof)){
+   // Clear stale previous-run status before selecting next FIFO item.
+   runData={runStatus:"completed"};
+   resumePending=false;
+  }
   renderQueue();
   if(checkpointStorageFailed){$("#queueMessage").textContent="Bộ nhớ checkpoint đầy · đang giữ hàng đợi và bản thảo trong tab. Hãy sao lưu JSON.";dispatchNext()}
   else if(succeeded){runtime("idle",null,alreadyPublished?"Đã đăng từ trước":"Hoàn thành",alreadyPublished?"Video đã có bài trên main; không gọi AI.":"Bài đã xử lý xong. Xem thông tin model trong metadata bài viết.");$("#queueMessage").textContent="Đã hoàn tất phiên vừa chạy. "+queue.length+" bài còn lại sẽ tự tiếp tục.";dispatchNext()}
