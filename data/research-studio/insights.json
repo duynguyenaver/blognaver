@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-30T06:47:38.302Z",
+  "updatedAt": "2026-10-30T06:50:10.998Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -833,6 +833,23 @@
         "tokens": 16563,
         "inputTokens": 11290,
         "outputTokens": 5273
+      },
+      "models": [
+        "Gemini · models/gemini-3.1-flash-lite"
+      ]
+    },
+    {
+      "slug": "banking-giai-ma-swift-cau-truc-ha-tang-va-co-che-van-hanh-cua-he-thong-thanh-toan-t-2026-10-30",
+      "title": "Giải mã SWIFT: Cấu trúc hạ tầng và cơ chế vận hành của hệ thống thanh toán toàn cầu",
+      "series": "banking",
+      "sha": "e35a8f47243a2be07fa2673a46830f917927205c",
+      "commitAt": "2026-10-30T06:49:42Z",
+      "durationMs": 26976,
+      "quota": {
+        "requests": 8,
+        "tokens": 15370,
+        "inputTokens": 10225,
+        "outputTokens": 5145
       },
       "models": [
         "Gemini · models/gemini-3.1-flash-lite"
