@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-30T06:54:48.533Z",
+  "updatedAt": "2026-10-30T06:55:16.819Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -854,7 +854,8 @@
       },
       "models": [
         "Gemini · models/gemini-3.1-flash-lite"
-      ]
+      ],
+      "live": true
     },
     {
       "slug": "cong-nghe-dat-ve-va-du-lich-truc-tuyen-tai-dinh-nghia-quan-tri-chi-phi-cong-tac-tu-kiem-soat-thu-cong-den-tri-tue--2026-10-30",
@@ -871,7 +872,8 @@
       },
       "models": [
         "Gemini · models/gemini-3.1-flash-lite"
-      ]
+      ],
+      "live": true
     },
     {
       "slug": "banking-giai-ma-ha-tang-tai-chinh-tai-sao-chuyen-tien-quoc-te-van-la-mot-nut-that-2026-10-30",
