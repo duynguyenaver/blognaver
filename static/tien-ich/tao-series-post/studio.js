@@ -116,10 +116,10 @@ const CUSTOM_SERIES_STORE="bn_series_custom_names_v1";
 try{const saved=JSON.parse(localStorage.getItem(CUSTOM_SERIES_STORE)||"{}");for(const [id,name] of Object.entries(saved)){if(/^[a-z0-9-]{2,75}$/.test(id)&&typeof name==="string"&&name.trim())SERIES[id]={name:name.trim(),tag:name.trim(),category:"Nghiên cứu"}}}catch{}
 function selectedSeries(){
  const custom=document.querySelector("#customSeries")?.value.trim()||"";
- if(!custom)return $("#series").value;
+ if(!custom){const id=$("#series").value; if(id==="khac"&&!SERIES.khac)SERIES.khac={name:"Khác",tag:"Khác",category:"Nghiên cứu"};if(!SERIES[id]){const names=JSON.parse(localStorage.getItem(CUSTOM_SERIES_STORE)||"{}");if(names[id])SERIES[id]={name:names[id],tag:names[id],category:"Nghiên cứu"}}return id;}
  const id=slug(custom);
  if(id.length<2)throw Error("Tên series mới cần ít nhất 2 ký tự hợp lệ.");
- if(!SERIES[id])SERIES[id]={name:custom,tag:custom,category:"Nghiên cứu"};
+ if(!SERIES[id])SERIES[id]={name:custom,tag:custom,category:"Nghiên cứu"};window.BNSeriesCatalog?.register(custom,true);
  try{const names=JSON.parse(localStorage.getItem(CUSTOM_SERIES_STORE)||"{}");names[id]=custom;localStorage.setItem(CUSTOM_SERIES_STORE,JSON.stringify(names))}catch{}
  return id;
 }
@@ -504,7 +504,7 @@ function formJob(){
  const guard=window.BNSourceFidelity;
  if(!guard)throw Error("Không tải được bộ kiểm định chủ đề; không thể thêm bài vào hàng đợi.");
  const review=guard.checkSeries(job.source,SERIES[job.series].name);
- if(!review.ok)throw Error("Chặn bài lệch chủ đề trước khi chạy AI: "+review.reason);
+ if(!review.ok){job.series="khac";SERIES.khac={name:"Khác",tag:"Khác",category:"Nghiên cứu"};$("#series").value="khac";state("Chưa phù hợp series hiện có; tự chuyển sang Khác. Bạn có thể chỉnh ở Section 07 sau.",false)}
 
  if(rawSource(job.source).length<700)throw Error("Phụ đề cần ít nhất 700 ký tự tiếng Anh.");
  if(rawSource(job.source).length>350000)throw Error("Phụ đề dài quá 350.000 ký tự.");
@@ -1151,7 +1151,7 @@ async function publish(d){
  const source=runData.source||"";
  const checker=window.BNSourceFidelity;
  if(!checker)throw Error("Không tải được bộ kiểm định nguồn. Dừng commit để tránh xuất bản bài sai.");
- const seriesResult=checker.checkSeries(source,SERIES[d.series]?.name||d.series);
+ const seriesResult=d.series==="khac"?{ok:true,reason:"Đã dùng series Khác"}:checker.checkSeries(source,SERIES[d.series]?.name||d.series);
  const fidelityResult=checker.fidelity(source,[d.title,d.description,d.body].join("\n"));
  if(!seriesResult.ok||!fidelityResult.ok){
   const reason=[!seriesResult.ok?seriesResult.reason:"",!fidelityResult.ok?fidelityResult.reason:""].filter(Boolean).join(" | ");
