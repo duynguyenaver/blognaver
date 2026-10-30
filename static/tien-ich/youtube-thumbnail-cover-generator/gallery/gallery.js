@@ -30,5 +30,5 @@ async function loadCloud(){const status=$("#status");try{
 }
 $("#connectGithub").onclick=async()=>{const b=$("#connectGithub");b.disabled=true;try{await window.BNVisualCloud.connect($("#githubToken").value,msg=>$("#status").textContent=msg);$("#githubToken").value="";await loadCloud()}catch(e){$("#status").textContent="Kết nối thất bại: "+e.message}finally{b.disabled=false}};
 $("#reloadCloud").onclick=loadCloud;
-$("#filter").addEventListener("change",render);$("#search").addEventListener("input",render);$("#refresh").onclick=refresh;$("#closeViewer").onclick=()=>$("#viewer").close();$("#viewerDownload").onclick=()=>current&&download(current);$("#viewer").addEventListener("close",()=>{current=null;$("#viewerImage").removeAttribute("src")});refresh().then(loadCloud);
+$("#filter").addEventListener("change",render);$("#search").addEventListener("input",render);$("#refresh").onclick=refresh;$("#closeViewer").onclick=()=>$("#viewer").close();$("#viewerDownload").onclick=()=>current&&download(current);$("#viewer").addEventListener("close",()=>{current=null;$("#viewerImage").removeAttribute("src")});refresh().then(async()=>{if(window.BNVisualCloud?.token()){try{await window.BNVisualCloud.sync(msg=>$("#status").textContent=msg)}catch(e){$("#status").textContent="Đồng bộ ảnh chờ thất bại: "+e.message}}await loadCloud()});
 })();
