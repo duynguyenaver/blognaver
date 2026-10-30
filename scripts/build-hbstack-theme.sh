@@ -63,6 +63,12 @@ cat > layouts/partials/giscus/repo-id.html <<'EOF'
 {{- end -}}
 {{- return $repoID -}}
 EOF
+# Some upstream meta versions omit the Fuse.js module mount expected by HB search.
+# Import the official hugomods/fuse-js module, which mounts Fuse dist under assets/mods/fuse.
+cat >> config/_default/module.yaml <<'EOF'
+
+  - path: github.com/hugomods/fuse-js
+EOF
 # Keep upstream module settings and remove theme demo navigation/content.
 rm -f config/_default/menus.en.yaml config/_default/menus.zh-hans.yaml
 mkdir -p layouts/partials/hugopress/modules/hb-custom/hooks
