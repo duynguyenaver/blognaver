@@ -84,12 +84,12 @@ cat > layouts/partials/hugopress/modules/hb-custom/hooks/body-end.html <<'EOF'
 EOF
 npm ci --no-audit --no-fund
 # HB's SCSS pipeline requires the Dart Sass executable, not only Hugo extended.
-npm install --no-save --no-audit --no-fund sass fuse.js@7
+npm install --no-save --no-audit --no-fund sass@1.93.3 fuse.js@7
 # Hugo esbuild resolves this ES module from the local assets overlay.
 mkdir -p assets/mods/fuse
 cp node_modules/fuse.js/dist/fuse.mjs assets/mods/fuse/fuse.js
 export PATH="$HB_DIR/node_modules/.bin:$PATH"
 sass --version
-hugo --gc --minify --environment production --baseURL https://duynguyenaver.github.io/blognaver/hb/ --destination "$ROOT/hb-build"
+NODE_OPTIONS=--max-old-space-size=4096 hugo --parallelism 1 --gc --minify --environment production --baseURL https://duynguyenaver.github.io/blognaver/hb/ --destination "$ROOT/hb-build"
 test -f "$ROOT/hb-build/index.html"
 printf 'HB official upstream commit: %s\n' "$UPSTREAM_SHA"
