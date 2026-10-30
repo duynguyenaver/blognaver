@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-30T04:59:09.190Z",
+  "updatedAt": "2026-10-30T05:00:45.566Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -742,6 +742,23 @@
         "Groq · allam-2-7b",
         "Groq · openai/gpt-oss-120b",
         "Groq · openai/gpt-oss-20b"
+      ]
+    },
+    {
+      "slug": "cold-fusion-giai-ma-hien-tuong-hai-dang-ma-khi-nao-bo-kien-tao-thuc-tai-trong-bong-toi-2026-10-30",
+      "title": "Giải mã hiện tượng 'Hải đăng ma': Khi não bộ kiến tạo thực tại trong bóng tối",
+      "series": "cold-fusion",
+      "sha": "76c5be9fa2950531117aaee9748e40f438f980d9",
+      "commitAt": "2026-10-30T05:00:19Z",
+      "durationMs": 29949,
+      "quota": {
+        "requests": 8,
+        "tokens": 14683,
+        "inputTokens": 9310,
+        "outputTokens": 5373
+      },
+      "models": [
+        "Gemini · models/gemini-3.1-flash-lite"
       ]
     }
   ]
