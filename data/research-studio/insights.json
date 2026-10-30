@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-30T04:08:46.854Z",
+  "updatedAt": "2026-10-30T04:09:35.595Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -699,6 +699,23 @@
         "tokens": 21300,
         "inputTokens": 15900,
         "outputTokens": 5400
+      },
+      "models": [
+        "Gemini · models/gemini-3.1-flash-lite"
+      ]
+    },
+    {
+      "slug": "khoa-hoc-vu-tru-tram-vu-tru-quoc-te-gioi-han-sinh-hoc-va-thach-thuc-van-hanh-trong-moi-truo-2026-10-30",
+      "title": "Trạm Vũ trụ Quốc tế: Giới hạn sinh học và thách thức vận hành trong môi trường vi trọng lực",
+      "series": "khoa-hoc-vu-tru",
+      "sha": "8a56e38eed96b44663405fa1b5ef18d8052c142c",
+      "commitAt": "2026-10-30T04:09:09Z",
+      "durationMs": 27866,
+      "quota": {
+        "requests": 8,
+        "tokens": 21664,
+        "inputTokens": 16120,
+        "outputTokens": 5544
       },
       "models": [
         "Gemini · models/gemini-3.1-flash-lite"
