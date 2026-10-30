@@ -42,3 +42,50 @@ article.page.single .content :is(pre,code,table,figcaption,h1,h2,h3,h4,h5,h6){
 @media (min-width: 900px) and (max-width: 1200px) {
   body:has(article.page.single) main.tw-mx-4 { width: calc(100% - 40px); }
 }
+
+
+/* Keep the reading column and right-side TOC in distinct lanes on wide screens. */
+@media (min-width: 1200px) {
+  body:has(article.page.single) main.tw-mx-4 {
+    width: calc(100% - 64px) !important;
+    max-width: 1360px !important;
+    margin-inline: auto !important;
+  }
+  body:has(article.page.single) article.page.single {
+    position: relative;
+    width: 100% !important;
+    max-width: none !important;
+    box-sizing: border-box;
+  }
+  body:has(article.page.single) article.page.single :is(.content,#content) {
+    width: calc(100% - 312px) !important;
+    max-width: none !important;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+  body:has(article.page.single) :is(#toc-auto,.toc-auto) {
+    width: 260px !important;
+    max-width: 260px !important;
+    right: 0 !important;
+    left: auto !important;
+    box-sizing: border-box;
+  }
+  body:has(article.page.single) article.page.single :is(.single-title,.post-meta,.bn-series-identification) {
+    width: 100%;
+    max-width: none;
+    box-sizing: border-box;
+  }
+}
+@media (min-width: 900px) and (max-width: 1199px) {
+  body:has(article.page.single) :is(#toc-auto,.toc-auto) { display: none !important; }
+  body:has(article.page.single) article.page.single :is(.content,#content) {
+    width: 100% !important;max-width: none !important;
+  }
+}
+article.page.single .single-title {font-size:clamp(1.65rem,2.5vw,2.45rem);line-height:1.28;letter-spacing:-.025em}
+article.page.single .post-meta{display:flex;flex-wrap:wrap;align-items:center;gap:5px 12px;line-height:1.6}
+.bn-series-identification{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin:14px 0 18px;padding:12px 16px;border:1px solid #bbd6ef;border-left:4px solid #2878bb;border-radius:10px;background:#f2f8ff;color:#19476f;font-size:14px}
+.bn-series-identification strong{font-weight:800}
+.bn-series-identification a{color:#125d9a;font-weight:700;text-decoration:none}
+.bn-series-identification a:hover{text-decoration:underline}
+@media(max-width:899px){body:has(article.page.single) article.page.single :is(.content,#content){width:100%!important;max-width:none!important}}
