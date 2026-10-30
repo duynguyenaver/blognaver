@@ -122,6 +122,50 @@ article.page.single .post-meta .bn-series-identification a:hover{text-decoration
 @media(max-width:899px){body:has(article.page.single) article.page.single :is(.content,#content){width:100%!important;max-width:none!important}}
 
 
+/* 2026-10-30: reserve a safe title lane below floating article controls.
+   Only full article pages; never modify the global header or post cards. */
+main article.page.single:not(.summary) {
+  display: flow-root; /* contain floated toolbar buttons without clipping content */
+}
+main article.page.single:not(.summary) > :is(.single-title,h1),
+main article.page.single:not(.summary) > .post-header :is(.single-title,h1) {
+  position: relative;
+  clear: both;
+  margin-block-start: max(64px, 1.75rem) !important;
+  padding-inline: 0 !important;
+  max-width: 100%;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
+}
+main article.page.single:not(.summary) > .post-header {
+  display: flow-root;
+  min-width: 0;
+}
+/* Keep icon controls visually separated; they must not be layered above the H1. */
+main article.page.single:not(.summary) :is(.post-actions,.article-actions,.post-tools,.single-actions,.post-toolbar) {
+  display: flex;
+  position: relative;
+  inset: auto;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  margin-block-end: 16px;
+}
+@media (max-width: 767px) {
+  main article.page.single:not(.summary) > :is(.single-title,h1),
+  main article.page.single:not(.summary) > .post-header :is(.single-title,h1) {
+    margin-block-start: 72px !important;
+    font-size: clamp(1.85rem, 6vw, 2.2rem);
+    line-height: 1.2;
+  }
+  main article.page.single:not(.summary) :is(.post-actions,.article-actions,.post-tools,.single-actions,.post-toolbar) {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
 /* BlogNaver reading measure and type scale — single published article only.
    Overrides the older wide-reading-column rules above; TOC keeps its own lane. */
 body:has(article.page.single) article.page.single :is(.content,#content) {

@@ -42,3 +42,7 @@ The current Hugo theme is DoIt, not Blowfish. The site should remain in light mo
 - Consistent blue palette, text hierarchy, compact forms, progress/error/success states, mobile tap targets, focus-visible, reduced-motion and accessible contrast. Feature-specific exceptions are allowed when documented and justified.
 - Data/identity behavior is specified in AGENTS.md: one remembered device credential per provider, GitHub-first personal data, encrypted private cloud records, bounded IndexedDB fallback and honest sync evidence.
 - Every new utility must follow the common patterns and test both first use and returning-device use. Documentation does not imply existing pages were automatically migrated.
+
+## Editorial pill and metadata system (2026-10-30)
+
+Public article metadata, Series labels, category/tag badges and article-list cards use a unified quiet blue pill language. Implementation: `static/css/blog-editorial-pills.css`. Use 8px rounded labels, 1px subtle border, translucent blue-grey surface, navy typography, 13px aligned icons, 6–8px metadata gaps, and restrained card shadows. Avoid applying editorial badge rules to CMS or utilities. Preserve dark-theme contrast, keyboard focus and mobile wrapping. Changes to tokens require updating this section.
