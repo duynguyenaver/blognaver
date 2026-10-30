@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-30T07:08:08.289Z",
+  "updatedAt": "2026-10-30T07:09:17.017Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -979,6 +979,40 @@
         "tokens": 21429,
         "inputTokens": 15698,
         "outputTokens": 5731
+      },
+      "models": [
+        "Gemini · models/gemini-3.1-flash-lite"
+      ]
+    },
+    {
+      "slug": "cnbc-original-cuoc-dua-ha-tang-ai-su-phu-thuoc-nghich-ly-giua-my-va-trung-quoc-2026-10-30",
+      "title": "Cuộc đua hạ tầng AI: Sự phụ thuộc nghịch lý giữa Mỹ và Trung Quốc",
+      "series": "cnbc-original",
+      "sha": "ccb8d8c6b6662ab73d7988d583065d132cfc34fe",
+      "commitAt": "2026-10-30T07:08:43Z",
+      "durationMs": 30092,
+      "quota": {
+        "requests": 8,
+        "tokens": 20864,
+        "inputTokens": 15272,
+        "outputTokens": 5592
+      },
+      "models": [
+        "Gemini · models/gemini-3.1-flash-lite"
+      ]
+    },
+    {
+      "slug": "cnbc-original-cuoc-cach-mang-nhan-ke-ky-thuat-so-tai-walmart-hieu-qua-van-hanh-hay-rui-ro-2026-10-30",
+      "title": "Cuộc cách mạng nhãn kệ kỹ thuật số tại Walmart: Hiệu quả vận hành hay rủi ro định giá?",
+      "series": "cnbc-original",
+      "sha": "0955fc30070d13fa56382c9ee0818c2577ac7367",
+      "commitAt": "2026-10-30T07:08:10Z",
+      "durationMs": 29766,
+      "quota": {
+        "requests": 8,
+        "tokens": 16902,
+        "inputTokens": 11444,
+        "outputTokens": 5458
       },
       "models": [
         "Gemini · models/gemini-3.1-flash-lite"
