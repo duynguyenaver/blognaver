@@ -387,3 +387,28 @@
 #recentCommitsPanel .recent-latest-primary:hover{background:#155f9d}
 #recentCommitsPanel .recent-latest-meta{font-size:12px;color:#617b94;margin:15px 0 0}
 #recentCommitsPanel #recentCommitsStatus{font-size:12px;font-weight:500;color:#65829a}
+
+
+/* Research Studio: smart series suggestions + concise recent posts section */
+.smart-series-ui{margin-top:12px;padding:15px;border:1px solid #c8dcf0;border-radius:12px;background:#f6faff}
+.smart-series-ui .actions{margin:0 0 8px}
+#seriesSuggestionStatus{font-size:13px;color:#54728f;line-height:1.6;margin:5px 0 10px}
+.series-suggestion-list{display:flex;gap:9px;flex-wrap:wrap;margin:6px 0 12px}
+.smart-series-option{font-size:13px;white-space:normal;text-align:left;line-height:1.5}
+.smart-series-ui small{color:#647f97;line-height:1.55}
+.bn-legacy-panels-off,.bn-legacy-panels-off[hidden]{display:none!important}
+#researchPostsPanel .actions{display:flex;gap:12px;flex-wrap:wrap}
+#researchPostsPanel .actions a{display:inline-flex;align-items:center;text-decoration:none}
+#researchPostsStatus{color:#5f7791;font-size:13px;line-height:1.6;margin:10px 0 18px}
+.studio-posts-list{display:grid;gap:15px}
+.studio-post-card{padding:17px 20px;border:1px solid #c6dbf0;border-radius:14px;background:#f8fbff;min-width:0}
+.studio-post-card h3{margin:0 0 8px;line-height:1.45;font-size:17px;color:#143d65}
+.studio-post-caption{font-size:12px;color:#6a809b;margin:0 0 12px}
+.studio-post-meta{display:grid;gap:10px}
+.studio-post-meta-row{display:grid;gap:4px;min-width:0}
+.studio-post-meta-label{font-size:12px;font-weight:750;color:#536e89}
+.studio-post-meta-row a{font-size:13px;color:#19699f;overflow-wrap:anywhere;word-break:break-word;text-decoration:underline}
+.studio-link-pending{font-size:12px;color:#6d7e91}
+.studio-post-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:14px}
+.studio-post-actions a{font-size:12px;padding:9px 12px;text-decoration:none}
+.studio-empty{padding:16px;border:1px dashed #b5cee9;border-radius:12px;color:#67819b}
