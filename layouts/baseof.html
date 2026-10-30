@@ -70,26 +70,27 @@
         font-weight: 800 !important;
         letter-spacing: .035em !important;
       }
-      header [id*="theme" i], header [class*="theme-switch" i],
-      header [aria-label*="theme" i], header [title*="theme" i],
-      header [aria-label*="dark" i], header [title*="dark" i] {
-        display: none !important;
-      }
+    </style>
+    <style>
+      .bn-theme-toggle{appearance:none;background:transparent;color:inherit;border:1px solid rgba(56,125,222,.35);border-radius:12px;cursor:pointer;width:44px;height:44px;display:inline-grid;place-items:center;margin-inline:8px}
+      .bn-theme-toggle:hover,.bn-theme-toggle:focus-visible{background:rgba(56,125,222,.14);outline-offset:3px}
     </style>
     <script>
-      /* The public blog intentionally offers only the light appearance. */
-      try { localStorage.setItem("theme", "light"); } catch (_) {}
-      document.documentElement.setAttribute("data-theme", "light");
-      document.addEventListener("DOMContentLoaded", function () {
-        document.documentElement.setAttribute("data-theme", "light");
-        document.querySelectorAll('header [aria-label],header [title],header [id],header [class]').forEach(function (el) {
-          const hint = [el.getAttribute("aria-label"),el.getAttribute("title"),el.id].filter(Boolean).join(" ");
-          if (/theme|dark.mode|light.mode|chế độ (sáng|tối)/i.test(hint)) {
-            const control = el.closest("button, a, .menu-item") || el;
-            control.remove();
-          }
+      (function(){
+        var key="blognaver_theme_preference_v1";
+        var stored;try{stored=localStorage.getItem(key)}catch(e){}
+        var initial=stored==="dark"||stored==="light"?stored:(window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");
+        document.documentElement.setAttribute("data-theme",initial);
+        document.addEventListener("DOMContentLoaded",function(){
+          var header=document.querySelector("#header,body > header,header");
+          if(!header||header.querySelector(".bn-theme-toggle"))return;
+          var btn=document.createElement("button");btn.type="button";btn.className="bn-theme-toggle";
+          btn.setAttribute("aria-label","Đổi chế độ sáng tối");
+          function render(){var dark=document.documentElement.getAttribute("data-theme")==="dark";btn.textContent=dark?"☀":"☾";btn.setAttribute("aria-pressed",String(dark));btn.title=dark?"Chuyển sang chế độ sáng":"Chuyển sang chế độ tối"}
+          btn.addEventListener("click",function(){var next=document.documentElement.getAttribute("data-theme")==="dark"?"light":"dark";document.documentElement.setAttribute("data-theme",next);try{localStorage.setItem(key,next)}catch(e){}render()});
+          var nav=header.querySelector("nav")||header;nav.appendChild(btn);render();
         });
-      });
+      })();
     </script>
     <style id="bn-nav-soft-background">
       /* Editorial navigation highlights: light blue surfaces, original text colors. */
