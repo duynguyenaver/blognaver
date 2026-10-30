@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-30T06:03:31.896Z",
+  "updatedAt": "2026-10-30T06:04:59.785Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -757,6 +757,24 @@
         "tokens": 14683,
         "inputTokens": 9310,
         "outputTokens": 5373
+      },
+      "models": [
+        "Gemini · models/gemini-3.1-flash-lite"
+      ],
+      "live": true
+    },
+    {
+      "slug": "khoa-hoc-thi-giac-va-nhung-hien-tuong-quang-hoc-co-che-du-doan-cua-nao-bo-va-hien-tuong-ngon-hai-dang-ma-tai-dao-lady-ellio-2026-10-30",
+      "title": "Cơ chế dự đoán của não bộ và hiện tượng 'Ngọn hải đăng ma' tại đảo Lady Elliot",
+      "series": "khoa-hoc-thi-giac-va-nhung-hien-tuong-quang-hoc",
+      "sha": "f5f8479022899be824ce4e5798bf9e2e4eb0e835",
+      "commitAt": "2026-10-30T06:04:31Z",
+      "durationMs": 7592,
+      "quota": {
+        "requests": 1,
+        "tokens": 3505,
+        "inputTokens": 2100,
+        "outputTokens": 1405
       },
       "models": [
         "Gemini · models/gemini-3.1-flash-lite"
