@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-30T03:00:04.476Z",
+  "updatedAt": "2026-10-30T03:00:48.444Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -540,6 +540,23 @@
       },
       "models": [
         "Gemini · models/gemini-3-flash-preview",
+        "Gemini · models/gemini-3.1-flash-lite"
+      ]
+    },
+    {
+      "slug": "cold-fusion-giai-ma-chien-luoc-dinh-gia-hang-khong-tu-thuat-toan-truyen-thong-den-ky-ng-2026-10-30",
+      "title": "Giải mã chiến lược định giá hàng không: Từ thuật toán truyền thống đến kỷ nguyên cá nhân hóa",
+      "series": "cold-fusion",
+      "sha": "39d326f75ac23fc7a99d01f396b66555ee98b2eb",
+      "commitAt": "2026-10-30T03:00:23Z",
+      "durationMs": 39693,
+      "quota": {
+        "requests": 8,
+        "tokens": 16829,
+        "inputTokens": 11409,
+        "outputTokens": 5420
+      },
+      "models": [
         "Gemini · models/gemini-3.1-flash-lite"
       ]
     }
