@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-30T07:09:53.437Z",
+  "updatedAt": "2026-10-30T07:13:46.815Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -965,7 +965,8 @@
       },
       "models": [
         "Gemini · models/gemini-3.1-flash-lite"
-      ]
+      ],
+      "live": true
     },
     {
       "slug": "cnbc-original-ngan-hang-cong-tai-north-dakota-mo-hinh-tai-chinh-nghich-ly-giua-long-nuoc--2026-10-30",
@@ -982,7 +983,8 @@
       },
       "models": [
         "Gemini · models/gemini-3.1-flash-lite"
-      ]
+      ],
+      "live": true
     },
     {
       "slug": "cnbc-original-cuoc-dua-ha-tang-ai-su-phu-thuoc-nghich-ly-giua-my-va-trung-quoc-2026-10-30",
@@ -999,7 +1001,8 @@
       },
       "models": [
         "Gemini · models/gemini-3.1-flash-lite"
-      ]
+      ],
+      "live": true
     },
     {
       "slug": "cnbc-original-cuoc-cach-mang-nhan-ke-ky-thuat-so-tai-walmart-hieu-qua-van-hanh-hay-rui-ro-2026-10-30",
@@ -1016,7 +1019,8 @@
       },
       "models": [
         "Gemini · models/gemini-3.1-flash-lite"
-      ]
+      ],
+      "live": true
     },
     {
       "slug": "cnbc-original-cuoc-khung-hoang-kim-cuong-khi-gia-tri-nhan-tao-dinh-nghia-lai-thi-truong-x-2026-10-30",
@@ -1030,6 +1034,24 @@
         "tokens": 17694,
         "inputTokens": 11953,
         "outputTokens": 5741
+      },
+      "models": [
+        "Gemini · models/gemini-3.1-flash-lite"
+      ],
+      "live": true
+    },
+    {
+      "slug": "the-wall-street-journal-thuong-mai-dien-tu-va-lo-hong-an-toan-trong-chuoi-cung-ung-toan-cau-2026-10-30",
+      "title": "Thương mại điện tử và lỗ hổng an toàn trong chuỗi cung ứng toàn cầu",
+      "series": "the-wall-street-journal",
+      "sha": "905cc9cb65e42ed064a48381696b6d41ecd957f7",
+      "commitAt": "2026-10-30T07:13:16Z",
+      "durationMs": 54587,
+      "quota": {
+        "requests": 8,
+        "tokens": 20279,
+        "inputTokens": 14547,
+        "outputTokens": 5732
       },
       "models": [
         "Gemini · models/gemini-3.1-flash-lite"
