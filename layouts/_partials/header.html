@@ -3,7 +3,8 @@
 <header class="desktop print:!tw-hidden" id="header-desktop">
     <div class="header-wrapper">
         <div class="header-title">
-            <a href="{{ .Site.Home.RelPermalink }}" title="{{ .Site.Title }}">
+            <a class="bn-brand" href="{{ .Site.Home.RelPermalink }}" title="{{ .Site.Title }}">
+                <span class="bn-logo-dot" aria-hidden="true"></span>
                 {{- with .Site.Params.header.title -}}
                 {{- $alt := .name | default $.Site.Title -}}
                 {{- with .logo -}}
@@ -77,7 +78,8 @@
     <div class="header-container">
         <div class="header-wrapper">
             <div class="header-title">
-                <a href="{{ .Site.Home.RelPermalink }}" title="{{ .Site.Title }}">
+                <a class="bn-brand" href="{{ .Site.Home.RelPermalink }}" title="{{ .Site.Title }}">
+                <span class="bn-logo-dot" aria-hidden="true"></span>
                     {{- with .Site.Params.header.title -}}
                     {{- $alt := .name | default $.Site.Title -}}
                     {{- with .logo -}}

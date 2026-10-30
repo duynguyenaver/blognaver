@@ -50,3 +50,7 @@ Public article metadata, Series labels, category/tag badges and article-list car
 
 ## Article controls and TOC lanes — 2026-10-30
 Public headers have no Search or theme controls; remove their markup and custom injection, not merely their visibility. Public pages use light mode, independent of previously stored dark preferences. Article layouts use a 720px reading column plus a 260px in-flow sticky TOC with a 48px gap at 1200px and above. The entire article, including H1, category/Series metadata and footer, stays in the reading column. Below 1200px, the static in-article TOC is available instead. Long labels wrap; tables scroll within the article. Avoid absolute/fixed TOC positioning and artificial H1 margins used to dodge removed controls.
+
+
+## Minimal red brand mark — 2026-10-30
+Header branding uses a solid #bc002d circle, 14px diameter, 50% radius and 8px spacing before “Duy Nguyen”. Render it in the desktop and mobile header templates; center with inline-flex and prevent shrinking. The decorative dot is aria-hidden. Remove the former DN badge and its JavaScript injection. This owner-approved logo accent is an exception to the blue interface palette.
