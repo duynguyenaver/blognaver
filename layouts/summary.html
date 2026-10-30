@@ -30,53 +30,43 @@
         <a href="{{ .RelPermalink }}">{{ .Title }}</a>
     </h1>
 
-    {{- /* Meta */ -}}
-    <div class="post-meta">
-        <span class="post-author">
-            {{- partial "meta/author" . }}
-        </span>
-
-        {{- with .Site.Params.dateFormat | default "2006-01-02" | .PublishDate.Format -}}
-            &nbsp;<span class="post-publish">
-                {{- printf `<time datetime="%v">%v</time>` . . | dict "Date" | T "publishedOnDate" | safeHTML -}}
-            </span>
+    {{- /* Compact, accessible metadata: never rely on a per-series leaf page. */ -}}
+    <div class="post-meta bn-summary-meta">
+        <div class="bn-meta-byline">
+            <span class="post-author">{{ partial "meta/author" . }}</span>
+            {{- with .PublishDate -}}
+                <span class="bn-meta-separator" aria-hidden="true">·</span>
+                <time datetime="{{ .Format "2006-01-02" }}">{{ .Format "02/01/2006" }}</time>
+            {{- end -}}
+        </div>
+        {{- with .Params.categories -}}
+          <div class="bn-meta-group">
+            <span class="bn-meta-label">Chuyên mục</span>
+            <div class="bn-meta-chips">
+            {{- range . -}}
+              {{- $category := partialCached "function/path.html" . . | printf "/categories/%v" | $.Site.GetPage -}}
+              {{- with $category -}}<a href="{{ .RelPermalink }}">{{ .Title }}</a>{{- else -}}<span>{{ . }}</span>{{- end -}}
+            {{- end -}}
+            </div>
+          </div>
         {{- end -}}
-
-        {{- with (or (.Params.categories) (.Params.series)) -}}
-        &nbsp;<span class="post-category">
-            {{- T "includedIn" | safeHTML -}}
-        </span>
-    {{- end -}}
-    
-    {{- $categories := slice -}}
-    {{- range .Params.categories -}}
-        {{- $category := partialCached "function/path.html" . . | printf "/categories/%v" | $.Site.GetPage -}}
-        {{- $icon := partial "plugin/fontawesome.html" (dict "Style" "regular" "Icon" "folder") -}}
-        {{- $categories = $categories | append (printf `<a href="%v">%v%v</a>` $category.RelPermalink $icon $category.Title) -}}
-    {{- end -}}
-    {{- with delimit $categories "&nbsp;" -}}
-        &nbsp;<span class="post-category">
-            {{- dict "Categories" . "Count" (len $categories) | T "includedInCategories" | safeHTML -}}
-        </span>
-    {{- end -}}
-    
-    {{- with (and (.Params.categories) (.Params.series)) -}}
-        &nbsp;<span class="post-category">
-            {{- T "includedInAnd" | safeHTML -}}
-        </span>
-    {{- end -}}
-
-    {{- $series := slice -}}
-    {{- range .Params.series -}}
-        {{- $singleSeries := partialCached "function/path.html" . . | printf "/series/%v" | $.Site.GetPage -}}
-        {{- $icon := partial "plugin/fontawesome.html" (dict "Style" "regular" "Icon" "list-alt") -}}
-        {{- $series = $series | append (printf `<a href="%v">%v%v</a>` $singleSeries.RelPermalink $icon $singleSeries.Title) -}}
-    {{- end -}}
-    {{- with delimit $series "&nbsp;" -}}
-        &nbsp;<span class="post-series">
-            {{- dict "Series" . | T "includedInSeries" | safeHTML -}}
-        </span>
-    {{- end -}}
+        {{- with .Params.series -}}
+          <div class="bn-meta-group">
+            <span class="bn-meta-label">Series</span>
+            <div class="bn-meta-chips">
+            {{- range . -}}
+              {{- $id := printf "%v" . -}}
+              {{- $name := humanize (replace $id "-" " ") -}}
+              {{- range site.Data.series -}}
+                {{- if eq .id $id -}}{{- $name = .title -}}{{- end -}}
+              {{- end -}}
+              {{- if eq $id "ota-travel" -}}{{- $name = "OTA Travel" -}}{{- end -}}
+              {{- if eq $id "wechat" -}}{{- $name = "WeChat" -}}{{- end -}}
+              <a href="{{ "/series/" | relURL }}" title="Xem thư viện Series: {{ $name }}">{{ $name }}</a>
+            {{- end -}}
+            </div>
+          </div>
+        {{- end -}}
     </div>
 
     {{- /* Short, text-only excerpt: no third-party embeds or extra article images on homepage. */ -}}
