@@ -1,0 +1,18 @@
+{{/* Public blog is always light; no stored dark preference or theme control. */}}
+<script>
+  function setTheme() {
+    document.body.setAttribute('theme', 'light');
+    document.documentElement.classList.remove('dark', 'tw-dark');
+    document.documentElement.classList.add('light');
+    document.documentElement.setAttribute('data-theme', 'light');
+    document.documentElement.style.setProperty('color-scheme', 'light');
+    window.theme = 'light';
+    window.isDark = false;
+  }
+  function saveTheme() {}
+  function getMeta(name) { return document.querySelector('meta[name="' + name + '"]'); }
+  setTheme();
+  var themeColor = getMeta('theme-color');
+  if (themeColor) themeColor.content = '#f8f8f8';
+  window.switchThemeEventSet = new Set();
+</script>
