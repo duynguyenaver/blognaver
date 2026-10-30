@@ -1,0 +1,33 @@
+name: Verify official HB Starter Theme
+on:
+  pull_request:
+    paths:
+      - 'scripts/build-hbstack-theme.sh'
+      - '.github/workflows/hbstack-theme.yml'
+      - 'content/posts/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  hb-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.x'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: peaceiris/actions-hugo@v3
+        with:
+          hugo-version: '0.162.0'
+          extended: true
+      - name: Build real upstream HB template
+        run: bash scripts/build-hbstack-theme.sh
+      - name: Upload isolated HB build
+        uses: actions/upload-artifact@v4
+        with:
+          name: blognaver-real-hb-site
+          path: hb-build/
