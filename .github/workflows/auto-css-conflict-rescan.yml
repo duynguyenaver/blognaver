@@ -1,0 +1,64 @@
+name: Automatic CSS conflict rescan
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+  pull_request_target:
+    types: [opened, reopened, synchronize]
+  workflow_run:
+    workflows: ["Auto Merge PR After Green Tests"]
+    types: [completed]
+permissions:
+  contents: write
+  pull-requests: read
+concurrency:
+  group: css-conflict-rescan
+  cancel-in-progress: false
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Find and repair safe conflicting PR branches
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/safe-resolver"
+          cp scripts/resolve-additive-article-css.py "$RUNNER_TEMP/safe-resolver/resolve.py"
+          gh pr list --repo "$REPOSITORY" --state open --json number,headRefName,headRepositoryOwner,isDraft --limit 100 |
+            jq -c '.[] | select(.isDraft == false)' |
+            while IFS= read -r pr; do
+              branch="$(jq -r '.headRefName' <<< "$pr")"
+              owner="$(jq -r '.headRepositoryOwner.login' <<< "$pr")"
+              number="$(jq -r '.number' <<< "$pr")"
+              if [ "$owner" != "${REPOSITORY%%/*}" ]; then continue; fi
+              state="$(gh api "repos/$REPOSITORY/pulls/$number" --jq '.mergeable_state')"
+              if [ "$state" != dirty ]; then continue; fi
+              git fetch origin main "refs/heads/$branch"
+              sha="$(git rev-parse FETCH_HEAD)"
+              git checkout --detach "$sha"
+              set +e
+              git merge --no-ff --no-commit origin/main
+              result=$?
+              set -e
+              if [ "$result" -eq 0 ]; then git merge --abort; continue; fi
+              conflicts="$(git diff --name-only --diff-filter=U)"
+              if [ "$conflicts" = "static/css/article-justified-prose.css" ]; then
+                if python3 "$RUNNER_TEMP/safe-resolver/resolve.py" && test -z "$(git diff --name-only --diff-filter=U)"; then
+                  git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m "fix(ci): reconcile additive article CSS PR #$number"
+                  git push origin "HEAD:refs/heads/$branch" || echo "::warning::Concurrent branch update for PR #$number"
+                fi
+              else
+                echo "::warning::PR #$number has unsafe conflict paths: $conflicts"
+              fi
+              git merge --abort 2>/dev/null || true
+              git checkout --detach origin/main
+            done
