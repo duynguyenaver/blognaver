@@ -54,20 +54,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: node scripts/generate-workflow-snapshot.mjs
-      # Build the genuine HB Stack site alongside the existing DoIt site.
-      # Keep both Hugo builds separate; publish HB under /blognaver/hb/.
-      - name: Setup Node for official HB theme
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-      - name: Build official HB Stack theme
-        run: |
-          bash scripts/build-hbstack-theme.sh
-          test -s hb-build/index.html
-          mkdir -p public/hb
-          cp -a hb-build/. public/hb/
-          test -s public/hb/index.html
-          echo "Official HB Stack is included in the Pages artifact at /blognaver/hb/"
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa
         with:
