@@ -62,7 +62,7 @@
               {{- end -}}
               {{- if eq $id "ota-travel" -}}{{- $name = "OTA Travel" -}}{{- end -}}
               {{- if eq $id "wechat" -}}{{- $name = "WeChat" -}}{{- end -}}
-              <a href="{{ "/series/" | relURL }}" title="Xem thư viện Series: {{ $name }}">{{ $name }}</a>
+              <a href="{{ "series/" | relURL }}" title="Xem thư viện Series: {{ $name }}">{{ $name }}</a>
             {{- end -}}
             </div>
           </div>
