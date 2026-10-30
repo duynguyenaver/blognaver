@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-30T03:12:22.153Z",
+  "updatedAt": "2026-10-30T03:13:11.584Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -594,6 +594,24 @@
       },
       "models": [
         "Gemini · models/gemini-3.1-flash-lite"
+      ]
+    },
+    {
+      "slug": "cold-fusion-giai-ma-quy-trinh-dat-ve-may-bay-truc-tuyen-tu-du-lieu-den-trai-nghiem-hanh-2026-10-30",
+      "title": "Giải mã quy trình đặt vé máy bay trực tuyến: Từ dữ liệu đến trải nghiệm hành khách",
+      "series": "cold-fusion",
+      "sha": "436f8264ba25e593d88aa2538651ceacdaf76c0e",
+      "commitAt": "2026-10-30T03:12:44Z",
+      "durationMs": 43867,
+      "quota": {
+        "requests": 8,
+        "tokens": 18788,
+        "inputTokens": 13389,
+        "outputTokens": 5399
+      },
+      "models": [
+        "Gemini · models/gemini-3.1-flash-lite",
+        "Gemini · models/gemini-3.5-flash-lite"
       ]
     }
   ]
