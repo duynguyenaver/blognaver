@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-29T22:11:31.981Z",
+  "updatedAt": "2026-10-30T02:55:30.502Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -504,7 +504,8 @@
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
-      ]
+      ],
+      "live": true
     },
     {
       "slug": "cold-fusion-su-mo-dan-ranh-gioi-giua-hang-hang-khong-truyen-thong-va-chi-phi-thap-2026-10-29",
@@ -521,7 +522,8 @@
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
-      ]
+      ],
+      "live": true
     }
   ]
 }
