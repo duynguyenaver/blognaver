@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-30T07:34:23.022Z",
+  "updatedAt": "2026-10-30T07:38:19.179Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -1112,7 +1112,8 @@
       },
       "models": [
         "Gemini · models/gemini-3.1-flash-lite"
-      ]
+      ],
+      "live": true
     },
     {
       "slug": "usa-countryside-life-buc-tranh-nong-nghiep-hoa-ky-tu-chuyen-canh-quy-mo-lon-den-mo-hinh-kinh-te--2026-10-30",
@@ -1126,6 +1127,23 @@
         "tokens": 18932,
         "inputTokens": 13894,
         "outputTokens": 5038
+      },
+      "models": [
+        "Gemini · models/gemini-3.1-flash-lite"
+      ]
+    },
+    {
+      "slug": "a24-film-company-su-va-cham-giua-ban-nang-va-ky-thuat-giai-ma-tu-duy-sang-tao-cua-ari-aster--2026-10-30",
+      "title": "Sự va chạm giữa bản năng và kỹ thuật: Giải mã tư duy sáng tạo của Ari Aster và Bill Hader",
+      "series": "a24-film-company",
+      "sha": "116e84b1c2b616d011b15caa0e6d6644464268ec",
+      "commitAt": "2026-10-30T07:37:38Z",
+      "durationMs": 50885,
+      "quota": {
+        "requests": 11,
+        "tokens": 62159,
+        "inputTokens": 54012,
+        "outputTokens": 8147
       },
       "models": [
         "Gemini · models/gemini-3.1-flash-lite"
