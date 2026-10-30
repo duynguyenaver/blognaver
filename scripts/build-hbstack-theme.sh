@@ -97,6 +97,12 @@ sass --embedded --version
 # Hugo esbuild resolves this ES module from the local assets overlay.
 mkdir -p assets/mods/fuse
 cp node_modules/fuse.js/dist/fuse.mjs assets/mods/fuse/fuse.js
-NODE_OPTIONS=--max-old-space-size=4096 hugo --gc --minify --environment production --baseURL https://duynguyenaver.github.io/blognaver/hb/ --destination "$ROOT/hb-build"
+# HB's PurgeCSS resolves Hugo's publishDir relative to this theme workspace.
+# An absolute destination would get prefixed twice and break the runtime config.
+mkdir -p hb-build
+NODE_OPTIONS=--max-old-space-size=4096 hugo --gc --minify --environment production --baseURL https://duynguyenaver.github.io/blognaver/hb/ --destination hb-build
+test -f hb-build/index.html
+mkdir -p "$ROOT/hb-build"
+cp -a hb-build/. "$ROOT/hb-build/"
 test -f "$ROOT/hb-build/index.html"
 printf 'HB official upstream commit: %s\n' "$UPSTREAM_SHA"
