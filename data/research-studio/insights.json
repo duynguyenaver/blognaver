@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-30T07:27:47.953Z",
+  "updatedAt": "2026-10-30T07:30:53.093Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -1076,7 +1076,8 @@
         "Groq · openai/gpt-oss-20b",
         "Groq · qwen/qwen3.8-27b",
         "Gemini · models/gemini-3.1-flash-lite"
-      ]
+      ],
+      "live": true
     },
     {
       "slug": "nasa-2024-yr4-va-bai-hoc-thuc-te-tu-he-thong-phong-thu-hanh-tinh-cua-nasa-2026-10-30",
@@ -1090,6 +1091,23 @@
         "tokens": 22711,
         "inputTokens": 16808,
         "outputTokens": 5903
+      },
+      "models": [
+        "Gemini · models/gemini-3.1-flash-lite"
+      ]
+    },
+    {
+      "slug": "usa-countryside-life-tieu-hanh-tinh-2024-yr4-bai-hoc-tu-quy-trinh-ung-pho-rui-ro-thien-van-thuc--2026-10-30",
+      "title": "Tiểu hành tinh 2024 YR4: Bài học từ quy trình ứng phó rủi ro thiên văn thực tế",
+      "series": "usa-countryside-life",
+      "sha": "905e73df795a862b21e526b5597405c0549a1c7b",
+      "commitAt": "2026-10-30T07:30:23Z",
+      "durationMs": 57875,
+      "quota": {
+        "requests": 8,
+        "tokens": 22869,
+        "inputTokens": 16847,
+        "outputTokens": 6022
       },
       "models": [
         "Gemini · models/gemini-3.1-flash-lite"
