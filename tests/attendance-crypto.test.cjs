@@ -1,0 +1,20 @@
+const {test}=require('node:test');
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const vm=require('node:vm');
+const source=fs.readFileSync('static/tien-ich/diem-danh/attendance.js','utf8');
+const context=vm.createContext({crypto:require('node:crypto').webcrypto,TextEncoder,TextDecoder,Uint8Array,btoa,atob,TYPES:{work:'work'}});
+vm.runInContext(source.slice(source.indexOf('const isDate='),source.indexOf('let localReady='))+source.slice(source.indexOf('const ITERATIONS='),source.indexOf('function unlock()'))+';globalThis.api={encryptRecords,decryptRecords};',context);
+test('AES-GCM round trip, unique IV/salt and authentication failure',async()=>{
+ const records={'2026-10-30':{status:'work',note:'private',updatedAt:'2026-10-30T00:00:00.000Z'}};
+ const a=await context.api.encryptRecords(records,'test-only-password');
+ const b=await context.api.encryptRecords(records,'test-only-password');
+ assert.notEqual(a.iv,b.iv);assert.notEqual(a.salt,b.salt);
+ assert.equal(JSON.stringify(await context.api.decryptRecords(a,'test-only-password')),JSON.stringify(records));
+ await assert.rejects(context.api.decryptRecords(a,'incorrect-password'));
+ const bytes=Buffer.from(a.ciphertext,'base64');bytes[0]^=1;
+ await assert.rejects(context.api.decryptRecords({...a,ciphertext:bytes.toString('base64')},'test-only-password'));
+ const tag=Buffer.from(a.ciphertext,'base64');tag[tag.length-1]^=1;
+ await assert.rejects(context.api.decryptRecords({...a,ciphertext:tag.toString('base64')},'test-only-password'));
+ await assert.rejects(context.api.decryptRecords({...a,iterations:1},'test-only-password'));
+});
