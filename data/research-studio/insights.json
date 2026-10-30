@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-30T04:57:49.309Z",
+  "updatedAt": "2026-10-30T04:59:09.190Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -724,6 +724,25 @@
         "Gemini · models/gemini-3.1-flash-lite"
       ],
       "live": true
+    },
+    {
+      "slug": "cong-nghe-dat-ve-va-du-lich-truc-tuyen-cong-nghe-dat-ve-truc-tuyen-oi-moi-thach-thuc-va-xu-huong-tuong-lai-2026-10-30",
+      "title": "Công nghệ đặt vé trực tuyến: Đổi mới, thách thức và xu hướng tương lai",
+      "series": "cong-nghe-dat-ve-va-du-lich-truc-tuyen",
+      "sha": "ec49c39d8c501276b8ac07f9fb2105ec596709b0",
+      "commitAt": "2026-10-30T04:58:44Z",
+      "durationMs": 29020,
+      "quota": {
+        "requests": 0,
+        "tokens": 0,
+        "inputTokens": 0,
+        "outputTokens": 0
+      },
+      "models": [
+        "Groq · allam-2-7b",
+        "Groq · openai/gpt-oss-120b",
+        "Groq · openai/gpt-oss-20b"
+      ]
     }
   ]
 }
