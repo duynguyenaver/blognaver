@@ -23,6 +23,7 @@
     {{- partial "head/link.html" . -}}
     {{- partial "head/seo.html" . -}}
     <link rel="stylesheet" href="{{ "css/summary-actions.css" | relURL }}">
+    <link rel="stylesheet" href="{{ "css/blog-editorial-pills.css" | relURL }}">
     {{- if and .IsPage (eq .Section "posts") -}}
     <link rel="stylesheet" href="{{ "css/article-justified-prose.css" | relURL }}">
     {{- end -}}
