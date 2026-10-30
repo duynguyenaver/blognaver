@@ -111,5 +111,26 @@
       "source": "https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/addressing-merge-conflicts",
       "evidence": "historical-blognaver"
     }
-  ]
+  ],
+  "postmortem_schema": {
+    "required": [
+      "id",
+      "date",
+      "category",
+      "severity",
+      "symptom",
+      "root_cause",
+      "fix_solution",
+      "pr_url",
+      "tags"
+    ],
+    "severity_values": [
+      "Low",
+      "Medium",
+      "High",
+      "Critical"
+    ],
+    "id_pattern": "bug-YYYY-MM-DD-NNN",
+    "evidence_rule": "Verified cause, solution and outcome required; never derive root cause from CI success alone."
+  }
 }
