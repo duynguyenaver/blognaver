@@ -1,5 +1,33 @@
 # BlogNaver Agent Guidelines
 
+## MANDATORY: Unified utilities storage, credentials and UX (owner policy, 2026-10-30)
+
+Applies to every existing and new BlogNaver utility, CMS tool and integration, except documented feature-specific requirements. **Implement and test these rules, do not merely claim compliance.** A standards-only PR does not mean existing features are migrated.
+
+### One remembered credential per provider per trusted device
+- **GitHub: one shared authentication provider** across CMS, Research Studio and utilities. Gemini, Groq and Supadata each use one shared provider-scoped key; avoid page-specific token prompts. Read existing provider credentials before asking for a new key.
+- On the owner's trusted MacBook, explicitly opted-in credential remembrance should survive reloads, tab closures and browser restarts. Ask again only for a new device/browser profile, explicit sign-out/revoke, removed browser storage, invalid/expired credentials or other unavoidable reauthorization. Do not promise credentials survive browser data deletion.
+- Use a **single versioned device credential vault** (IndexedDB with non-extractable WebCrypto key, or a platform credential manager when available), not large localStorage/sessionStorage records. Never put provider tokens, encryption passphrases or diary/finance data in a public repo, URL, log or Git commit. Same-origin script compromise may still access browser-held secrets: show the security trade-off and allow Forget/Revoke.
+- Migrate legacy per-page keys without silently overwriting valid credentials; validate provider/key pairing before accepting, show connected identity/provider and only prompt when recovery fails. Do not save a newly entered secret unless the user has opted in; persist only for trusted devices. Never expose secret values in UI.
+- Cloud encryption passwords can be remembered only with explicit consent and local protection. Never treat a GitHub token as an encryption password or silently change an existing encryption key.
+
+### GitHub-first durable data, no quota-blocking localStorage
+- For user-authored, mutable or business-critical data, **GitHub is the source of truth**: write after Save, await API confirmation, show real states (connecting, encrypting, uploading, confirmed, failed). Never show 100% or “saved to GitHub” before confirmed success.
+- Protect private data in a public repository using authenticated encryption (e.g., AES-256-GCM with a user-controlled passphrase); use a data branch or other approved storage location without triggering production deploy for every update. Use optimistic SHA checks, conflict handling, deduplication and deletion tombstones. Never overwrite remote changes blindly.
+- Use IndexedDB only as the bounded local recovery queue/cache and migrate old localStorage records without deleting their last copy before verified cloud round-trip. On offline/error, label **pending sync**, retry safely and preserve drafts. Avoid full-size localStorage mirrors and avoid writes that can cause QuotaExceededError.
+- Not every key belongs in GitHub: UI preferences and ephemeral flags can remain locally; credentials stay in the device vault; caches may be bounded or discarded. Do not automatically upload sensitive information unencrypted or bypass explicit public-disclosure consent.
+- Budget, diary, vocabulary, attendance, subscriptions, queues and other personal tools must follow this contract; document exceptions and test reload, another device, offline/online, malformed data and concurrent edits.
+
+### Unified section, form, status and navigation patterns
+- **All optional/configuration/secondary sections default to collapsed**, rendered with accessible disclosure controls (visible chevron; click/keyboard to expand). Keep the primary task and essential warnings/actions discoverable on first visit; do not hide a required Save action or critical message behind a collapsed section. Allow feature-specific always-visible exceptions with justification.
+- Keep a stable, outside-the-disclosure status summary; on successful connection/sync auto-collapse the connection settings while retaining a green success indicator. On failure open the affected section and show the actionable error; never conceal an incomplete task.
+- Reuse shared tokens/components from BRANDING.md for spacing, typography, blue accents, field labels, 44px touch targets, focus rings, responsive cards, inline errors, progress and confirmation states. Avoid duplicate sections and inconsistent controls. Respect reduced motion and WCAG AA contrast.
+- Every new feature has a cross-device UX checklist: first-run, remembered connection, success, failure, offline, refresh, keyboard/mobile, data migration, token revocation and privacy. Validate behavior, not screenshots alone.
+
+### Delivery and enforcement
+- **One independent change = one feature branch = one normal (non-Draft) PR**, unless the owner explicitly requests Draft. Follow the repository's required checks/approval automation; never push directly to main or bypass branch protection. Do not mark success without actual checks or production evidence.
+- Audit existing tools against this standard and create separate scoped implementation PRs. Documentation is an acceptance contract, not proof that the entire site already complies.
+
 ## MANDATORY: Pull request first (project owner policy, 2026-10-30)
 
 All changes to this repository MUST be made on a dedicated branch and submitted via a Pull Request targeting `main`. This includes UI/UX, application code, blog content, documentation, workflows, configuration, and hotfixes.
