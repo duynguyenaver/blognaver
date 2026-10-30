@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-30T13:27:52.061Z",
+  "updatedAt": "2026-10-30T14:49:37.246Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -1188,6 +1188,24 @@
       "models": [
         "Gemini · models/gemini-3.5-flash-lite",
         "Gemini · models/gemini-3.1-flash-lite"
+      ],
+      "live": true
+    },
+    {
+      "slug": "cold-fusion-kien-truc-tru-so-nvidia-khi-triet-ly-thiet-ke-chip-hien-dien-trong-khong-gi-2026-10-30",
+      "title": "Kiến trúc trụ sở Nvidia: Khi triết lý thiết kế chip hiện diện trong không gian làm việc",
+      "series": "cold-fusion",
+      "sha": "55ee4a431a2f81ee0ef71728d216489aced16cfe",
+      "commitAt": "2026-10-30T14:49:04.455Z",
+      "durationMs": 71863,
+      "quota": {
+        "requests": 8,
+        "tokens": 18448,
+        "inputTokens": 13164,
+        "outputTokens": 5284
+      },
+      "models": [
+        "Gemini · models/gemini-3.5-flash-lite"
       ]
     }
   ]
