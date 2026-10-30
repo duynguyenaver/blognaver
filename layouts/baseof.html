@@ -49,7 +49,7 @@
           if (!key) return;
           const a = document.createElement("a");
           a.href = {{ "series/" | relURL | jsonify | safeJS }};
-          a.textContent = aliases[key] || key.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+          a.textContent = aliases[key] || key.replace(/-/g, " ");
           bar.append(a);
         });
         header.insertAdjacentElement("afterend", bar);
