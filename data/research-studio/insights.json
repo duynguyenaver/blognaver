@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-30T03:13:11.584Z",
+  "updatedAt": "2026-10-30T04:03:55.253Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -611,6 +611,23 @@
       },
       "models": [
         "Gemini · models/gemini-3.1-flash-lite",
+        "Gemini · models/gemini-3.5-flash-lite"
+      ]
+    },
+    {
+      "slug": "khoa-hoc-vu-tru-co-hoc-quy-dao-va-bai-toan-khong-gian-giai-ma-khoa-hoc-dang-sau-ve-tinh-dia-2026-10-30",
+      "title": "Cơ học quỹ đạo và bài toán không gian: Giải mã khoa học đằng sau vệ tinh địa tĩnh",
+      "series": "khoa-hoc-vu-tru",
+      "sha": "855d178059f0b7b429e9f68d6837bc43534459d6",
+      "commitAt": "2026-10-30T04:03:26Z",
+      "durationMs": 37247,
+      "quota": {
+        "requests": 9,
+        "tokens": 29152,
+        "inputTokens": 22445,
+        "outputTokens": 6707
+      },
+      "models": [
         "Gemini · models/gemini-3.5-flash-lite"
       ]
     }
