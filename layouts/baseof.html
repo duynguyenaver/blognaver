@@ -26,6 +26,38 @@
     {{- if and .IsPage (eq .Section "posts") -}}
     <link rel="stylesheet" href="{{ "css/article-justified-prose.css" | relURL }}">
     {{- end -}}
+    {{- if and .IsPage (eq .Section "posts") -}}
+    {{- with .Params.series -}}
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const article = document.querySelector("article.page.single, article.single:not(.summary)");
+        const header = article?.querySelector(".post-meta");
+        if (!article || !header || article.querySelector(".bn-series-identification")) return;
+        const names = {{ . | jsonify | safeJS }};
+        const aliases = {
+          {{- range site.Data.series }}
+          {{ .id | jsonify | safeJS }}: {{ .title | jsonify | safeJS }},
+          {{- end }}
+        };
+        const bar = document.createElement("div");
+        bar.className = "bn-series-identification";
+        const label = document.createElement("strong");
+        label.textContent = "SERIES";
+        bar.append(label);
+        (Array.isArray(names) ? names : [names]).forEach(function (id) {
+          const key = String(id || "");
+          if (!key) return;
+          const a = document.createElement("a");
+          a.href = {{ "series/" | relURL | jsonify | safeJS }};
+          a.textContent = aliases[key] || key.replace(/-/g, " ");
+          bar.append(a);
+        });
+        header.insertAdjacentElement("afterend", bar);
+      });
+    </script>
+    {{- end -}}
+    {{- end -}}
+
     <style id="duy-editorial-nav">
       /* Applied in active layouts/baseof.html, not the unused extend-head hook. */
       body > header nav a, body > header nav span,
