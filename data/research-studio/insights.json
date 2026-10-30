@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-30T03:00:48.444Z",
+  "updatedAt": "2026-10-30T03:11:48.374Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -541,7 +541,8 @@
       "models": [
         "Gemini · models/gemini-3-flash-preview",
         "Gemini · models/gemini-3.1-flash-lite"
-      ]
+      ],
+      "live": true
     },
     {
       "slug": "cold-fusion-giai-ma-chien-luoc-dinh-gia-hang-khong-tu-thuat-toan-truyen-thong-den-ky-ng-2026-10-30",
@@ -555,6 +556,24 @@
         "tokens": 16829,
         "inputTokens": 11409,
         "outputTokens": 5420
+      },
+      "models": [
+        "Gemini · models/gemini-3.1-flash-lite"
+      ],
+      "live": true
+    },
+    {
+      "slug": "cold-fusion-su-thong-tri-cua-gds-khi-cac-hang-hang-khong-buoc-phai-thoa-hiep-2026-10-30",
+      "title": "Sự thống trị của GDS: Khi các hãng hàng không buộc phải thỏa hiệp",
+      "series": "cold-fusion",
+      "sha": "f320e37f862db5c5dab4d627ba93148c101e7e40",
+      "commitAt": "2026-10-30T03:11:23Z",
+      "durationMs": 31138,
+      "quota": {
+        "requests": 8,
+        "tokens": 20263,
+        "inputTokens": 14591,
+        "outputTokens": 5672
       },
       "models": [
         "Gemini · models/gemini-3.1-flash-lite"
