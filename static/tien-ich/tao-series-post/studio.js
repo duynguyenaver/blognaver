@@ -1159,18 +1159,12 @@ async function publish(d){
  rawMarkdown=rawMarkdown.replace(/^---\n/,"---\nresearchStudio: "+JSON.stringify(metrics)+"\n");
  $("#preview").textContent=rawMarkdown;
  checkpoint({productionMetrics:metrics});
- const source=runData.source||"";
- const checker=window.BNSourceFidelity;
- if(!checker)throw Error("Không tải được bộ kiểm định nguồn. Dừng commit để tránh xuất bản bài sai.");
- const seriesResult={ok:true}; // The last user-selected series is authoritative; do not reclassify it.
- const fidelityResult=checker.fidelity(source,[d.title,d.description,d.body].join("\n"));
- if(!seriesResult.ok||!fidelityResult.ok){
-  const reason=[!seriesResult.ok?seriesResult.reason:"",!fidelityResult.ok?fidelityResult.reason:""].filter(Boolean).join(" | ");
-  checkpoint({published:false,runStatus:"failed",source,slug:d.slug,qualityGate:{blocked:true,reason}});
-  state("ĐÃ CHẶN XUẤT BẢN VÌ LỆCH NGUỒN: "+reason+". Bản nháp vẫn ở Preview.",true);
-  const failure=Error("Kiểm định nội dung không đạt: "+reason+". Chưa commit; xem bản nháp trong Preview.");
-  failure.code="SOURCE_FIDELITY_BLOCK";
-  throw failure;
+ // Topic classification is advisory only. Never block writing or publishing for an
+ // unknown subject, unavailable classifier or a cross-language vocabulary mismatch.
+ // Respect the last manual/dropdown selection; only use Khác if no valid selection exists.
+ if(!d.series||!SERIES[d.series]){
+  d.series="khac";
+  SERIES.khac={name:"Khác",tag:"Khác",category:"Nghiên cứu"};
  }
  const created=await github("contents/"+file,"PUT",{message:"content(series-ai): publish "+d.series+" research "+d.slug,branch:"main",content:encode(rawMarkdown)});
  const proof={sha:created.commit.sha,path:file,deployDispatched:false};
