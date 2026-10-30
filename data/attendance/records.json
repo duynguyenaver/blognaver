@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "updatedAt": "2026-10-30T11:49:26.264Z",
+  "records": {
+    "2026-10-30": {
+      "status": "work",
+      "note": "",
+      "updatedAt": "2026-10-30T11:45:44.989Z"
+    },
+    "2026-10-10": {
+      "status": "annual",
+      "note": "Half AL lên Saigon chơi với Ngân",
+      "updatedAt": "2026-10-30T11:46:12.464Z"
+    }
+  }
+}
