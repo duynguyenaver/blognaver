@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-30T07:30:53.093Z",
+  "updatedAt": "2026-10-30T07:34:23.022Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -1094,7 +1094,8 @@
       },
       "models": [
         "Gemini · models/gemini-3.1-flash-lite"
-      ]
+      ],
+      "live": true
     },
     {
       "slug": "usa-countryside-life-tieu-hanh-tinh-2024-yr4-bai-hoc-tu-quy-trinh-ung-pho-rui-ro-thien-van-thuc--2026-10-30",
@@ -1108,6 +1109,23 @@
         "tokens": 22869,
         "inputTokens": 16847,
         "outputTokens": 6022
+      },
+      "models": [
+        "Gemini · models/gemini-3.1-flash-lite"
+      ]
+    },
+    {
+      "slug": "usa-countryside-life-buc-tranh-nong-nghiep-hoa-ky-tu-chuyen-canh-quy-mo-lon-den-mo-hinh-kinh-te--2026-10-30",
+      "title": "Bức tranh nông nghiệp Hoa Kỳ: Từ chuyên canh quy mô lớn đến mô hình kinh tế nông thôn đa dạng",
+      "series": "usa-countryside-life",
+      "sha": "721382e71e08569aec5a7138f445b2c70d0d78f7",
+      "commitAt": "2026-10-30T07:33:54Z",
+      "durationMs": 27588,
+      "quota": {
+        "requests": 7,
+        "tokens": 18932,
+        "inputTokens": 13894,
+        "outputTokens": 5038
       },
       "models": [
         "Gemini · models/gemini-3.1-flash-lite"
