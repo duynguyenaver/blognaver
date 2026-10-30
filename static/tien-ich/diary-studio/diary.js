@@ -8,11 +8,11 @@ const notify=(s,error=false)=>{ui.status.textContent=s;ui.status.className=error
 try{const data=JSON.parse(localStorage.getItem(KEY)||"[]");if(Array.isArray(data))entries=data}catch{}
 const draftKey=KEY+"_draft";
 try{const draft=JSON.parse(localStorage.getItem(draftKey)||"null");if(draft){ui.title.value=draft.title||"";ui.date.value=draft.date||stamp();ui.text.value=draft.text||""}}catch{}
-function persist(){localStorage.setItem(KEY,JSON.stringify(entries))}
+function persist(){localStorage.setItem(KEY,JSON.stringify(entries));window.dispatchEvent(new Event("bn:personal-cloud-change"))}
 function render(){ui.history.replaceChildren();if(!entries.length){ui.history.textContent="Chưa có nhật ký.";return}entries.slice().reverse().forEach(item=>{const div=document.createElement("div");div.className="entry";const h=document.createElement("strong");h.textContent=(item.date||"")+" · "+(item.title||"Không có tiêu đề");const p=document.createElement("p");p.textContent=item.text;const btn=document.createElement("button");btn.className="secondary";btn.textContent="Mở lại";btn.onclick=()=>{ui.title.value=item.title||"";ui.date.value=item.date||stamp();ui.text.value=item.text||"";notify("Đã mở lại bản lưu. Nhấn Lưu để cập nhật nhật ký.");window.scrollTo({top:0,behavior:"smooth"})};div.append(h,p,btn);ui.history.append(div)})}
 const draft=()=>{try{localStorage.setItem(draftKey,JSON.stringify({title:ui.title.value,date:ui.date.value,text:ui.text.value}))}catch{notify("Dung lượng lưu cục bộ đã đầy.",true)}};
 [ui.title,ui.date,ui.text].forEach(el=>el.addEventListener("input",draft));
-ui.save.onclick=()=>{const text=ui.text.value.trim();if(!text){notify("Hãy nhập nội dung nhật ký.",true);return}try{const id=ui.date.value+"::"+ui.title.value.trim(),item={date:ui.date.value,title:ui.title.value.trim(),text,edited:Date.now()};const index=entries.findIndex(x=>x.date+"::"+x.title===id);if(index>=0)entries[index]=item;else entries.push(item);persist();render();notify("Đã lưu nhật ký trên thiết bị này.")}catch(e){notify("Không thể lưu: "+e.message,true)}};
+ui.save.onclick=()=>{const text=ui.text.value.trim();if(!text){notify("Hãy nhập nội dung nhật ký.",true);return}try{const key=ui.date.value+"::"+ui.title.value.trim(),index=entries.findIndex(x=>x.date+"::"+x.title===key);const item={id:index>=0?entries[index].id:crypto.randomUUID(),date:ui.date.value,title:ui.title.value.trim(),text,edited:Date.now(),updated:Date.now()};if(index>=0)entries[index]=item;else entries.push(item);persist();render();notify("Đã lưu nhật ký trên thiết bị này.")}catch(e){notify("Không thể lưu: "+e.message,true)}};
 function extract(raw){const m=raw.match(/\{[\s\S]*\}/);if(!m)throw Error("AI không trả JSON hợp lệ.");const obj=JSON.parse(m[0]);if(typeof obj.corrected!=="string"||!obj.corrected.trim())throw Error("Không có bản sửa hợp lệ.");return obj}
 ui.check.onclick=async()=>{if(saving)return;const text=ui.text.value.trim();if(text.length<15){notify("Nhập ít nhất 15 ký tự để kiểm tra.",true);return}
 const key=ui.api.value.trim();if(!key){notify("Hãy nhập Groq API key để kiểm tra chính tả và ngữ pháp.",true);return}
@@ -24,6 +24,8 @@ const obj=extract(data.choices?.[0]?.message?.content||"");lastCorrected=obj.cor
 ui.apply.onclick=()=>{if(!lastCorrected)return;ui.text.value=lastCorrected;draft();notify("Đã áp dụng bản sửa. Nhấn Lưu để ghi vào lịch sử.")};
 ui.copy.onclick=async()=>{if(!lastCorrected)return;try{await navigator.clipboard.writeText(lastCorrected);notify("Đã sao chép bản sửa.")}catch{notify("Không thể sao chép tự động.",true)}};
 $("#newEntry").onclick=()=>{ui.title.value="";ui.date.value=stamp();ui.text.value="";lastCorrected="";ui.result.textContent="Bản sửa sẽ xuất hiện tại đây.";ui.apply.disabled=true;ui.copy.disabled=true;draft();notify("Đã mở bản nhật ký mới.")};
-$("#exportEntries").onclick=()=>{const blob=new Blob([JSON.stringify(entries,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="blognaver-diary-"+lang+".json";a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
+// Preserve stable IDs for existing saved diaries so merging never duplicates them.
+let normalized=false;for(const item of entries){if(!item.id){item.id="legacy-"+lang+"-"+String(item.date||"")+"-"+String(item.title||"").normalize("NFD").replace(/[^a-zA-Z0-9]+/g,"-").slice(0,48);normalized=true}if(!item.updated){item.updated=Number(item.edited)||Date.now();normalized=true}}if(normalized)localStorage.setItem(KEY,JSON.stringify(entries));
+window.BNPersonalData={read:()=>({items:entries}),apply:data=>{entries=data.items;localStorage.setItem(KEY,JSON.stringify(entries));render()}};
 render();
 })();
