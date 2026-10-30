@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-30T04:07:30.882Z",
+  "updatedAt": "2026-10-30T04:08:09.916Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -632,7 +632,8 @@
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
-      ]
+      ],
+      "live": true
     },
     {
       "slug": "khoa-hoc-vu-tru-co-che-vat-ly-quy-dao-va-bai-toan-duy-tri-ve-tinh-nhan-tao-trong-ky-nguyen--2026-10-30",
@@ -649,7 +650,8 @@
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
-      ]
+      ],
+      "live": true
     },
     {
       "slug": "khoa-hoc-vu-tru-co-che-hoat-dong-cua-mang-luoi-khong-gian-sau-va-song-vo-tuyen-2026-10-30",
@@ -663,6 +665,23 @@
         "tokens": 16422,
         "inputTokens": 11068,
         "outputTokens": 5354
+      },
+      "models": [
+        "Gemini · models/gemini-3.5-flash-lite"
+      ]
+    },
+    {
+      "slug": "khoa-hoc-vu-tru-tieu-chuan-tuyen-chon-va-huan-luyen-phi-hanh-gia-nasa-tu-lich-su-den-hien-t-2026-10-30",
+      "title": "Tiêu chuẩn tuyển chọn và huấn luyện phi hành gia NASA: Từ lịch sử đến hiện tại",
+      "series": "khoa-hoc-vu-tru",
+      "sha": "43624ad5264cd3cd676993b2cc7ef82e9a8979f9",
+      "commitAt": "2026-10-30T04:07:43Z",
+      "durationMs": 34825,
+      "quota": {
+        "requests": 8,
+        "tokens": 24367,
+        "inputTokens": 17514,
+        "outputTokens": 6853
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
