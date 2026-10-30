@@ -23,3 +23,22 @@ article.page.single .content :is(pre,code,table,figcaption,h1,h2,h3,h4,h5,h6){
     word-spacing:normal;
   }
 }
+
+/* Give published articles more desktop reading space, without widening homepage summaries. */
+@media (min-width: 900px) {
+  body:has(article.page.single) main.tw-mx-4 {
+    width: calc(100% - 64px);
+    max-width: 1160px;
+    margin-inline: auto;
+  }
+  body:has(article.page.single) article.page.single,
+  body:has(article.page.single) article.page.single > .content,
+  body:has(article.page.single) article.page.single #content {
+    width: 100%;
+    max-width: none;
+    box-sizing: border-box;
+  }
+}
+@media (min-width: 900px) and (max-width: 1200px) {
+  body:has(article.page.single) main.tw-mx-4 { width: calc(100% - 40px); }
+}
