@@ -46,3 +46,7 @@ The current Hugo theme is DoIt, not Blowfish. The site should remain in light mo
 ## Editorial pill and metadata system (2026-10-30)
 
 Public article metadata, Series labels, category/tag badges and article-list cards use a unified quiet blue pill language. Implementation: `static/css/blog-editorial-pills.css`. Use 8px rounded labels, 1px subtle border, translucent blue-grey surface, navy typography, 13px aligned icons, 6–8px metadata gaps, and restrained card shadows. Avoid applying editorial badge rules to CMS or utilities. Preserve dark-theme contrast, keyboard focus and mobile wrapping. Changes to tokens require updating this section.
+
+
+## Article controls and TOC lanes — 2026-10-30
+Public headers have no Search or theme controls; remove their markup and custom injection, not merely their visibility. Public pages use light mode, independent of previously stored dark preferences. Article layouts use a 720px reading column plus a 260px in-flow sticky TOC with a 48px gap at 1200px and above. The entire article, including H1, category/Series metadata and footer, stays in the reading column. Below 1200px, the static in-article TOC is available instead. Long labels wrap; tables scroll within the article. Avoid absolute/fixed TOC positioning and artificial H1 margins used to dodge removed controls.

@@ -1,4 +1,5 @@
 {{- partial "init.html" . -}}
+{{- .Scratch.Set "this" (dict "config" (dict "search" false)) -}}
 
 <!DOCTYPE html>
 <html lang="{{ .Site.LanguageCode }}">
@@ -72,27 +73,6 @@
         letter-spacing: .035em !important;
       }
     </style>
-    <style>
-      .bn-theme-toggle{appearance:none;background:transparent;color:inherit;border:1px solid rgba(56,125,222,.35);border-radius:12px;cursor:pointer;width:44px;height:44px;display:inline-grid;place-items:center;margin-inline:8px}
-      .bn-theme-toggle:hover,.bn-theme-toggle:focus-visible{background:rgba(56,125,222,.14);outline-offset:3px}
-    </style>
-    <script>
-      (function(){
-        var key="blognaver_theme_preference_v1";
-        var stored;try{stored=localStorage.getItem(key)}catch(e){}
-        var initial=stored==="dark"||stored==="light"?stored:(window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");
-        document.documentElement.setAttribute("data-theme",initial);
-        document.addEventListener("DOMContentLoaded",function(){
-          var header=document.querySelector("#header,body > header,header");
-          if(!header||header.querySelector(".bn-theme-toggle"))return;
-          var btn=document.createElement("button");btn.type="button";btn.className="bn-theme-toggle";
-          btn.setAttribute("aria-label","Đổi chế độ sáng tối");
-          function render(){var dark=document.documentElement.getAttribute("data-theme")==="dark";btn.textContent=dark?"☀":"☾";btn.setAttribute("aria-pressed",String(dark));btn.title=dark?"Chuyển sang chế độ sáng":"Chuyển sang chế độ tối"}
-          btn.addEventListener("click",function(){var next=document.documentElement.getAttribute("data-theme")==="dark"?"light":"dark";document.documentElement.setAttribute("data-theme",next);try{localStorage.setItem(key,next)}catch(e){}render()});
-          var nav=header.querySelector("nav")||header;nav.appendChild(btn);render();
-        });
-      })();
-    </script>
     <style id="bn-nav-soft-background">
       /* Editorial navigation highlights: light blue surfaces, original text colors. */
       header nav a, header .menu a, header .menu-inner a, #header .menu a {
@@ -112,8 +92,6 @@
       }
     </style>
     <link rel="stylesheet" href="{{ "css/blog-card-polish.css" | relURL }}">
-    <link rel="stylesheet" href="{{ "css/blog-quick-search.css" | relURL }}">
-    <script src="{{ "js/blog-quick-search.js" | relURL }}" defer></script>
     <link rel="stylesheet" href="{{ "css/mobile-nav-polish.css" | relURL }}">
     <style>
       .bn-monogram{display:inline-grid;place-items:center;width:34px;height:34px;margin-right:9px;border-radius:10px;background:#2769cb;color:white;font:800 12px/1 system-ui,sans-serif;letter-spacing:.04em;vertical-align:middle;flex-shrink:0}
@@ -148,7 +126,6 @@
     {{- partial "site-commit-dashboard.html" . -}}
     {{- partial "footer.html" . -}}
     {{- partial "controls.html" . -}}
-    {{- .Scratch.Set "this" (dict "script" (slice) "style" (slice) "commentScript" (slice)) -}}
     {{- partial "assets.html" . -}}
     {{- partial "speculationrules.html" . -}}
 </body>

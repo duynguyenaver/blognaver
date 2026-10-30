@@ -94,3 +94,8 @@ Không sao chép logo, hình ảnh, nhận dạng cá nhân hoặc nội dung c�
 - `BRANDING.md`: bản Markdown nguồn dành cho developer/AI agents.
 
 Tài liệu được cập nhật khi có thay đổi thực sự về thiết kế. Mọi trang mới phải được kiểm tra theo checklist trên trước khi merge.
+
+
+## Cập nhật giao diện bài viết · 30/10/2026
+
+Blog công khai dùng giao diện sáng và không còn nút Dark Mode/Search trên header. Đây là quy định hiện hành thay thế hướng dẫn chuyển giao diện ở trên. Từ 1200px, toàn bộ bài viết nằm trong cột đọc tối đa 720px; mục lục có cột riêng 260px và khoảng cách 48px. Màn hình hẹp dùng mục lục trong bài, không dùng khung nổi đè lên tiêu đề hoặc thẻ bài viết.
