@@ -501,6 +501,11 @@ function clearSourceForm(){
 function formJob(){
  const job={id:Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,8),at:Date.now(),series:selectedSeries(),source:$("#transcript").value,sourceUrl:$("#sourceUrl").value,angle:$("#angle").value,autoPublish:$("#autoPublish").checked};
  if(!SERIES[job.series])throw Error("Series không hợp lệ");
+ const guard=window.BNSourceFidelity;
+ if(!guard)throw Error("Không tải được bộ kiểm định chủ đề; không thể thêm bài vào hàng đợi.");
+ const review=guard.checkSeries(job.source,SERIES[job.series].name);
+ if(!review.ok)throw Error("Chặn bài lệch chủ đề trước khi chạy AI: "+review.reason);
+
  if(rawSource(job.source).length<700)throw Error("Phụ đề cần ít nhất 700 ký tự tiếng Anh.");
  if(rawSource(job.source).length>350000)throw Error("Phụ đề dài quá 350.000 ký tự.");
  if(job.sourceUrl&&!/^https:\/\//i.test(job.sourceUrl))throw Error("URL nguồn phải dùng HTTPS.");
