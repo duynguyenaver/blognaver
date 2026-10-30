@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-30T06:24:02.822Z",
+  "updatedAt": "2026-10-30T06:42:11.183Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -780,6 +780,44 @@
         "Gemini · models/gemini-3.1-flash-lite"
       ],
       "live": true
+    },
+    {
+      "slug": "khac-alphagenome-buoc-tien-tu-mo-hinh-chuyen-biet-den-he-thong-giai-ma-bo-gen-th-2026-10-30",
+      "title": "AlphaGenome: Bước tiến từ mô hình chuyên biệt đến hệ thống giải mã bộ gen thống nhất",
+      "series": "khac",
+      "sha": "274fdbe48c9750ca13abf76c0ee4660558d4908a",
+      "commitAt": "2026-10-30T06:42:06Z",
+      "durationMs": 7443,
+      "quota": {
+        "requests": 1,
+        "tokens": 3583,
+        "inputTokens": 2069,
+        "outputTokens": 1514
+      },
+      "models": [
+        "Gemini · models/gemini-3.1-flash-lite",
+        "Groq · openai/gpt-oss-120b"
+      ]
+    },
+    {
+      "slug": "khac-alphagenome-khi-ai-vuot-qua-gioi-han-98-genome-khong-ma-hoa-2026-10-30",
+      "title": "AlphaGenome: Khi AI vượt qua giới hạn 98% genome không mã hóa",
+      "series": "khac",
+      "sha": "d81bd13a7e0f211b06e663123e4c54d8e3d39cf0",
+      "commitAt": "2026-10-30T06:41:44Z",
+      "durationMs": 9695,
+      "quota": {
+        "requests": 1,
+        "tokens": 6141,
+        "inputTokens": 4747,
+        "outputTokens": 1394
+      },
+      "models": [
+        "Groq · openai/gpt-oss-120b",
+        "Groq · openai/gpt-oss-20b",
+        "Groq · qwen/qwen3.8-27b",
+        "Gemini · models/gemini-3.1-flash-lite"
+      ]
     }
   ]
 }
