@@ -28,6 +28,15 @@ Applies to every existing and new BlogNaver utility, CMS tool and integration, e
 - **One independent change = one feature branch = one normal (non-Draft) PR**, unless the owner explicitly requests Draft. Follow the repository's required checks/approval automation; never push directly to main or bypass branch protection. Do not mark success without actual checks or production evidence.
 - Audit existing tools against this standard and create separate scoped implementation PRs. Documentation is an acceptance contract, not proof that the entire site already complies.
 
+## PERMANENT OWNER RULE: Green CI means automatic merge and deployment (2026-10-30)
+
+- **Standing authorization from the repository owner:** Any non-Draft PR to `main` that passes every required CI/build/security check on its current head SHA, has no pending or failing required checks, and is mergeable **MUST be merged automatically** without asking the owner to click Approve, Ready for review, or Merge.
+- Reviews may be submitted by **any GitHub account or authorized bot permitted by GitHub**. The identity of an approver is not an additional application-level condition. **Do not require an APPROVE review at all unless GitHub's actual branch-protection/ruleset settings require one.** If rules require a reviewer, accept any approval that GitHub itself considers valid; do not impose a named-user or bot-only filter.
+- A successful check is not enough if it covers an outdated SHA, is only partial, or another required check is pending/failed. Re-check PR state, conflict/mergeability, current SHA and all required checks immediately before merge. Never bypass GitHub branch protection or fake a green result.
+- Do not create Draft PRs by default. One independent change = one normal PR. Prefer workflow-triggered merge after CI success, using the permitted GitHub API, then dispatch production deployment if the merge token does not trigger push workflows.
+- If GitHub refuses the merge due to permissions, required approvals, branch rules, or a failed/pending check, report the precise blocker and fix permitted repository/workflow settings through a separate PR where possible. **Never silently fall back to manual approval as the intended workflow** or claim the deployment succeeded.
+- This owner policy supersedes older AGENTS.md passages requiring manual approval, manual merge, a particular reviewer, or prohibiting safe CI-gated auto-merge. Keep independent security and data-safety gates in force.
+
 ## MANDATORY: Pull request first (project owner policy, 2026-10-30)
 
 All changes to this repository MUST be made on a dedicated branch and submitted via a Pull Request targeting `main`. This includes UI/UX, application code, blog content, documentation, workflows, configuration, and hotfixes.
