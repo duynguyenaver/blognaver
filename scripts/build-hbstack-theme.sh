@@ -90,6 +90,6 @@ mkdir -p assets/mods/fuse
 cp node_modules/fuse.js/dist/fuse.mjs assets/mods/fuse/fuse.js
 export PATH="$HB_DIR/node_modules/.bin:$PATH"
 sass --version
-NODE_OPTIONS=--max-old-space-size=4096 hugo --parallelism 1 --gc --minify --environment production --baseURL https://duynguyenaver.github.io/blognaver/hb/ --destination "$ROOT/hb-build"
+GOMAXPROCS=1 NODE_OPTIONS=--max-old-space-size=4096 hugo --gc --minify --environment production --baseURL https://duynguyenaver.github.io/blognaver/hb/ --destination "$ROOT/hb-build"
 test -f "$ROOT/hb-build/index.html"
 printf 'HB official upstream commit: %s\n' "$UPSTREAM_SHA"
