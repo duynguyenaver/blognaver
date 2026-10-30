@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-30T06:55:16.819Z",
+  "updatedAt": "2026-10-30T06:58:27.033Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -889,6 +889,26 @@
         "outputTokens": 4609
       },
       "models": [
+        "Gemini · models/gemini-3.1-flash-lite"
+      ]
+    },
+    {
+      "slug": "tiktok-thuat-toan-tiktok-tu-danh-gia-den-dinh-huong-noi-dung-2026-10-30",
+      "title": "Thuật toán TikTok: Từ “đánh giá” đến “định hướng” nội dung",
+      "series": "tiktok",
+      "sha": "158917c651bbe962c38ffd88c35628210c9295f8",
+      "commitAt": "2026-10-30T06:57:55Z",
+      "durationMs": 28857,
+      "quota": {
+        "requests": 1,
+        "tokens": 4811,
+        "inputTokens": 3325,
+        "outputTokens": 1486
+      },
+      "models": [
+        "Groq · openai/gpt-oss-120b",
+        "Groq · openai/gpt-oss-20b",
+        "Groq · qwen/qwen3.8-27b",
         "Gemini · models/gemini-3.1-flash-lite"
       ]
     }
