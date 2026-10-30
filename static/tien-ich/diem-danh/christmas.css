@@ -19,3 +19,11 @@
 .recent-actions button:focus-visible{outline:3px solid #4a9bdf;outline-offset:2px}
 @media(max-width:550px){.recent-item{align-items:flex-start;flex-direction:column}.recent-actions{width:100%}.recent-actions button{flex:1}.calendar-snow{letter-spacing:6px}}
 @media(prefers-reduced-motion:reduce){.festive-kicker,.calendar-snow{animation:none!important}}
+
+/* Bottom journal: closed by default, expandable on demand. */
+.recent-records>summary.recent-summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:16px;font-size:21px;font-weight:780;color:#1c456c;min-height:34px}
+.recent-records>summary.recent-summary::-webkit-details-marker{display:none}
+.recent-records>summary .chevron{display:grid;place-items:center;width:36px;height:36px;border-radius:50%;background:#edf5fc;color:#276aa2;font-size:24px;transition:transform .2s}
+.recent-records[open]>summary .chevron{transform:rotate(180deg)}
+.recent-records>summary:focus-visible{outline:3px solid #4e96dd;outline-offset:5px;border-radius:8px}
+.recent-records>summary+.note{margin-top:18px!important}
