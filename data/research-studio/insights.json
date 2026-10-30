@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-30T09:26:11.647Z",
+  "updatedAt": "2026-10-30T12:39:42.847Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -1148,6 +1148,27 @@
       },
       "models": [
         "Gemini · models/gemini-3.1-flash-lite"
+      ],
+      "live": true
+    },
+    {
+      "slug": "cold-fusion-tai-cau-truc-chuoi-cung-ung-chip-apple-va-su-tro-ve-cua-my-2026-10-30",
+      "title": "Tái cấu trúc chuỗi cung ứng chip: Apple và sự trở về của Mỹ",
+      "series": "cold-fusion",
+      "sha": "341ae0a70abfc4bbddabaa79275948073b10b451",
+      "commitAt": "2026-10-30T12:39:10Z",
+      "durationMs": 28446,
+      "quota": {
+        "requests": 3,
+        "tokens": 9685,
+        "inputTokens": 7450,
+        "outputTokens": 2235
+      },
+      "models": [
+        "Groq · openai/gpt-oss-20b",
+        "Groq · qwen/qwen3.8-27b",
+        "Groq · openai/gpt-oss-120b",
+        "Gemini · models/gemini-3.5-flash-lite"
       ]
     }
   ]
