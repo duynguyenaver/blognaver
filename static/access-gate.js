@@ -9,7 +9,7 @@
   const relative = path.slice(BASE.length).replace(/\/index\.html$/,"").replace(/\/+$/,"");
   const segments = relative.split("/").filter(Boolean);
   // Public: homepage, all post listing pages, and published article detail pages.
-  if (!segments.length || segments[0] === "posts" || segments[0] === "bai-viet") return;
+  if (!segments.length || segments[0] === "posts" || segments[0] === "bai-viet" || (segments[0] === "page" && segments.length === 2 && /^[1-9][0-9]*$/.test(segments[1]))) return;
   document.documentElement.classList.add("bn-pin-protected");
   const unlock = () => document.documentElement.classList.remove("bn-pin-protected");
   if (sessionStorage.getItem(KEY) === HASH) { unlock(); return; }
