@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-30T07:13:46.815Z",
+  "updatedAt": "2026-10-30T07:24:14.234Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -1055,7 +1055,8 @@
       },
       "models": [
         "Gemini · models/gemini-3.1-flash-lite"
-      ]
+      ],
+      "live": true
     }
   ]
 }
