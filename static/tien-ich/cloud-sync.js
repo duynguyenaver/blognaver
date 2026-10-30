@@ -2,7 +2,7 @@
 const kind=document.body.dataset.cloudKind;if(!["expenses","vocabulary","diary-ko","diary-en"].includes(kind)||!window.BNPersonalData)return;
 const $=id=>document.getElementById(id),REPO="duynguyenaver/blognaver",BRANCH="personal-cloud-backups",PATH="data/personal/"+kind+".enc.json",API="https://api.github.com/repos/"+REPO+"/contents/"+PATH,DELETED="bn_cloud_deleted_"+kind;
 const progress=(value,label,note,state="working")=>{if(kind==="expenses")window.dispatchEvent(new CustomEvent("bn:cloud-progress",{detail:{value,label,note,state}}))};
-const encoder=new TextEncoder(),decoder=new TextDecoder(),status=s=>{$("backupStatus").textContent=s},token=()=>window.BNAuth?.read?.()||"";
+const encoder=new TextEncoder(),decoder=new TextDecoder(),status=s=>{const el=$("backupStatus");if(el)el.textContent=s;const badge=$("cloudSyncBadge");if(!badge)return;const success=/^(?:✓|Đồng bộ thành công|Đã kết nối GitHub)/.test(s),error=/^(?:Không thể|Đồng bộ thất bại|GitHub đã lưu thành công nhưng bộ nhớ)/.test(s);badge.dataset.state=success?"success":error?"error":"pending";badge.textContent=(success?"✓ ":error?"✕ ":"● ")+s;if(success){const panel=$("cloudSyncDetails");if(panel)panel.open=false}},token=()=>window.BNAuth?.read?.()||"";
 let passphrase="",connected=false,busy=false,pending=false,debounce=0;
 const REMEMBER="bn_cloud_phrase_"+kind,DEVICE_ID="cloud-phrase:"+kind;
 const hdr=()=>({Authorization:"Bearer "+token(),Accept:"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"});
