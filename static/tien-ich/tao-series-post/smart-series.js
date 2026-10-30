@@ -20,7 +20,13 @@ return [...map.values()]}
 function show(names,existing){list.replaceChildren();for(const proposed of names){const match=existing.find(x=>slug(x.name)===slug(proposed));const btn=document.createElement("button");btn.type="button";btn.className="ghost smart-series-option";btn.textContent=proposed+(match?" · Đã có":" · Gợi ý mới");btn.onclick=()=>{if(match&&[...select.options].some(o=>o.value===match.id)){select.value=match.id;name.value=""}else{name.value=match?.name||proposed}manual=false;status.textContent="Đã chọn: "+proposed+". Bạn có thể đổi tên trước khi đăng."};list.append(btn)}}
 async function suggest(explicit){const seq=++request,text=[source.value,transcript.value].filter(Boolean).join("\n");if(text.trim().length<18){if(explicit)status.textContent="Cần thêm nội dung URL hoặc phụ đề để đề xuất.";return}if(manual&&!explicit)return;
 status.textContent="Đang phân tích nội dung…";const existing=await catalog();if(seq!==request)return;
-const input=norm(text).slice(0,22000);let choices=rules.map(r=>({name:r[0],score:r.slice(1).reduce((v,t)=>v+(input.includes(norm(t))?1:0),0)})).filter(x=>x.score).sort((a,b)=>b.score-a.score).map(x=>x.name).slice(0,3);
+let context=text;
+if(source.value.trim()&&transcript.value.trim().length<100){try{
+ const u=new URL(source.value);if(/(^|\\.)(youtube\\.com|youtu\\.be)$/.test(u.hostname)){
+ const ctl=new AbortController(),tid=setTimeout(()=>ctl.abort(),5000);
+ try{const res=await fetch("https://noembed.com/embed?url="+encodeURIComponent(u.href),{signal:ctl.signal});if(res.ok){const data=await res.json();if(data.title)context+="\\nVideo title: "+data.title}}finally{clearTimeout(tid)}
+ }}catch{}}
+const input=norm(context).slice(0,22000);let choices=rules.map(r=>({name:r[0],score:r.slice(1).reduce((v,t)=>v+(input.includes(norm(t))?1:0),0)})).filter(x=>x.score).sort((a,b)=>b.score-a.score).map(x=>x.name).slice(0,3);
 const key=$("groqKey")?.value.trim();
 if(key&&explicit){const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),12000);try{
 const res=await fetch("https://api.groq.com/openai/v1/chat/completions",{method:"POST",signal:ctl.signal,headers:{"Content-Type":"application/json",Authorization:"Bearer "+key},body:JSON.stringify({model:"openai/gpt-oss-20b",max_completion_tokens:200,temperature:.3,messages:[{role:"system",content:"Đề xuất đúng 3 tên series blog tiếng Việt có dấu, không suy diễn dữ kiện. Ưu tiên tái dùng series có sẵn nếu phù hợp. Trả về JSON array 3 chuỗi, không thêm văn bản."},{role:"user",content:"Series có sẵn: "+existing.map(x=>x.name).join("; ")+"\nURL và phụ đề:\n"+text.slice(0,6000)}]})});
