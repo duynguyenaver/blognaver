@@ -73,5 +73,5 @@ $("#refreshHistory").onclick=refreshHistory;
 $("#clearHistory").onclick=async()=>{if(!confirm("Xóa toàn bộ ảnh đã lưu trong thư viện thiết bị?"))return;const d=await db();await new Promise((resolve,reject)=>{const tx=d.transaction("images","readwrite");tx.objectStore("images").clear();tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)});d.close();refreshHistory()};
 $("#connectGithub").onclick=async()=>{const b=$("#connectGithub");b.disabled=true;try{await window.BNVisualCloud.connect($("#githubToken").value,msg=>$("#githubSyncStatus").textContent=msg);$("#githubToken").value="";$("#githubSyncStatus").textContent="GitHub đã kết nối; ảnh mới sẽ tự đồng bộ."}catch(e){$("#githubSyncStatus").textContent=e.message}finally{b.disabled=false}};
 if(window.BNVisualCloud?.token()){ $("#githubSyncStatus").textContent="Đã tìm thấy GitHub token CMS. Đang đồng bộ ảnh cục bộ…";window.BNVisualCloud.sync(msg=>$("#githubSyncStatus").textContent=msg).catch(e=>$("#githubSyncStatus").textContent=e.message)}
-loadQueue();refreshHistory();
+loadQueue();refreshHistory();window.BNVisualCloud?.hydrate(msg=>$("#githubSyncStatus").textContent=msg).then(()=>refreshHistory()).catch(e=>$("#githubSyncStatus").textContent="Không thể tải Gallery từ GitHub: "+e.message);
 })();
