@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-30T04:04:25.024Z",
+  "updatedAt": "2026-10-30T04:07:30.882Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -646,6 +646,23 @@
         "tokens": 18249,
         "inputTokens": 12516,
         "outputTokens": 5733
+      },
+      "models": [
+        "Gemini · models/gemini-3.5-flash-lite"
+      ]
+    },
+    {
+      "slug": "khoa-hoc-vu-tru-co-che-hoat-dong-cua-mang-luoi-khong-gian-sau-va-song-vo-tuyen-2026-10-30",
+      "title": "Cơ chế hoạt động của Mạng lưới Không gian Sâu và sóng vô tuyến",
+      "series": "khoa-hoc-vu-tru",
+      "sha": "f460b2eb6ed0d40f9b16d375af050f0206d29198",
+      "commitAt": "2026-10-30T04:07:05Z",
+      "durationMs": 29271,
+      "quota": {
+        "requests": 8,
+        "tokens": 16422,
+        "inputTokens": 11068,
+        "outputTokens": 5354
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
