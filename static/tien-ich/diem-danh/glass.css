@@ -44,3 +44,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sa
 @media(max-width:650px){.wrap{padding:16px 12px 60px!important}.wrap nav{margin-bottom:20px!important}.panel{padding:17px!important;border-radius:20px!important}.calendar{gap:5px!important}.day{min-height:77px!important;padding:7px!important;border-radius:11px!important;gap:6px!important}.day .number{font-size:13px!important}.day .label{font-size:9px!important;padding:3px 4px}.month-controls{max-width:100%;width:100%;justify-content:space-between}.stats{grid-template-columns:1fr!important}.stat{padding:18px!important}.intro h1{font-size:40px!important}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.day,.tools button,.month-controls button{transition:none!important}.day:hover,.tools button:hover{transform:none!important}}
 @media(prefers-reduced-transparency:reduce){.panel,.wrap nav{background:#fff!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}}
+
+/* Compact, truthful browser-storage feedback. */
+#storageStatusPanel{padding:14px 22px!important;margin-bottom:20px!important;box-shadow:none!important;background:rgba(255,255,255,.65)!important}
+#storageStatusPanel #notice{margin:0!important;font-weight:650!important}
+#storageStatusPanel #notice[data-state="success"]{color:#246748!important}
+#storageStatusPanel #notice[data-state="error"]{color:#a13e36!important;background:#fff1ee;border:1px solid #ebc1b7;border-radius:10px;padding:10px 13px}
