@@ -8,7 +8,7 @@ const rules=[]; // Centralized, evidence-based categories are loaded from source
 async function catalog(){const map=new Map();[...select.options].forEach(o=>map.set(slug(o.textContent),{id:o.value,name:o.textContent}));try{Object.entries(JSON.parse(localStorage.getItem("bn_series_custom_names_v1")||"{}")).forEach(([id,n])=>map.set(slug(n),{id,name:n}))}catch{}
 try{const r=await fetch("https://raw.githubusercontent.com/duynguyenaver/blognaver/main/data/series.yaml",{cache:"no-store"});if(r.ok){const t=await r.text();for(const m of t.matchAll(/- id:\s*([^\n]+)\n\s*title:\s*["']?([^\n"']+)/g))map.set(slug(m[2]),{id:m[1].trim(),name:m[2].trim()})}}catch{}
 return [...map.values()]}
-function show(names,existing){list.replaceChildren();for(const proposed of names){const match=existing.find(x=>slug(x.name)===slug(proposed));const btn=document.createElement("button");btn.type="button";btn.className="ghost smart-series-option";btn.textContent=proposed+(match?" · Đã có":" · Gợi ý mới");btn.onclick=()=>{if(match&&[...select.options].some(o=>o.value===match.id)){select.value=match.id;name.value=""}else{name.value=match?.name||proposed}manual=false;status.textContent="Đã chọn: "+proposed+". Bạn có thể đổi tên trước khi đăng."};list.append(btn)}}
+function show(names,existing){list.replaceChildren();for(const proposed of names){const match=existing.find(x=>slug(x.name)===slug(proposed));const btn=document.createElement("button");btn.type="button";btn.className="ghost smart-series-option";btn.textContent=proposed+(match?" · Đã có":" · Gợi ý mới");btn.onclick=()=>{if(match&&[...select.options].some(o=>o.value===match.id)){select.value=match.id;name.value=""}else{window.BNSeriesCatalog?.register(match?.name||proposed,true);name.value=""}manual=false;status.textContent="Đã chọn: "+proposed+". Bạn có thể đổi tên trước khi đăng."};list.append(btn)}}
 async function suggest(explicit){const seq=++request,text=[source.value,transcript.value].filter(Boolean).join("\n");if(text.trim().length<18){if(explicit)status.textContent="Cần thêm nội dung URL hoặc phụ đề để đề xuất.";return}if(manual&&!explicit)return;
 status.textContent="Đang phân tích nội dung…";const existing=await catalog();if(seq!==request)return;
 let context=text;
@@ -34,7 +34,7 @@ if(!choices.length&&geminiKey){try{
 }catch(e){failure+=(failure?" | ":"")+"Gemini: "+e.message}}
 if(seq!==request||(!explicit&&manual))return;
 if(!choices.length)choices=fallback;
-if(!choices.length){status.textContent=failure?"AI gặp lỗi: "+failure+". Bộ phân loại dự phòng cũng chưa đủ thông tin.": "Chưa kết nối Groq/Gemini; hãy kết nối AI để phân tích ngữ nghĩa thay vì chỉ dùng từ khóa.";list.replaceChildren();return}
+if(!choices.length){if(!manual){select.value="khac";name.value="";}status.textContent=failure?"AI gặp lỗi: "+failure+". Bộ phân loại dự phòng cũng chưa đủ thông tin.": "Chưa kết nối Groq/Gemini; hãy kết nối AI để phân tích ngữ nghĩa thay vì chỉ dùng từ khóa.";list.replaceChildren();return}
 show(choices,existing);
 status.textContent="Có "+choices.length+" gợi ý · "+(provider?"AI "+provider:"phân loại dự phòng")+(failure&&!provider?" · "+failure:"")+". Bấm chọn để sử dụng.";
 }
