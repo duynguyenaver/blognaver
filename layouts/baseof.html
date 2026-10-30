@@ -24,10 +24,6 @@
     {{- partial "head/link.html" . -}}
     {{- partial "head/seo.html" . -}}
     <link rel="stylesheet" href="{{ "css/summary-actions.css" | relURL }}">
-    <link rel="stylesheet" href="{{ "css/blog-editorial-pills.css" | relURL }}">
-    {{- if and .IsPage (eq .Section "posts") -}}
-    <link rel="stylesheet" href="{{ "css/article-justified-prose.css" | relURL }}">
-    {{- end -}}
     {{- if and .IsPage (eq .Section "posts") -}}
     {{- with .Params.series -}}
     <script>
@@ -91,14 +87,10 @@
         }
       }
     </style>
-    <link rel="stylesheet" href="{{ "css/blog-card-polish.css" | relURL }}">
     <link rel="stylesheet" href="{{ "css/mobile-nav-polish.css" | relURL }}">
-    <style id="bn-brand-logo">
-      .header-title .bn-brand{display:inline-flex;align-items:center}
-      .bn-logo-dot{display:inline-block;width:14px;height:14px;flex:0 0 14px;margin-right:8px;border-radius:50%;background:#bc002d}
-    </style>
     <link rel="stylesheet" href="{{ "access-gate.css" | relURL }}">
     <script src="{{ "access-gate.js" | relURL }}"></script>
+    <link rel="stylesheet" href="{{ "css/blog-editorial.css" | relURL }}">
 </head>
 
 {{/*  

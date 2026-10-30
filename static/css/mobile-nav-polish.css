@@ -1,7 +1,8 @@
 /* Mobile navigation refinement for the existing DoIt-style menu.
    Leave menu opening/closing to the theme's own accessible control. */
 @media(max-width:768px){
-  #mask{background:rgba(0,0,0,.3);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+  #mask{background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none}
+  .blur #mask{background:rgba(0,0,0,.3);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
   #header .menu-inner,header .menu-inner{transition:opacity .24s ease,transform .24s ease,visibility .24s ease;transform-origin:top right}
   #header .menu-inner:not(.active):not(.open),header .menu-inner:not(.active):not(.open){will-change:transform}
   #header .menu-inner a,header .menu-inner a{min-height:44px;display:inline-flex;align-items:center}

@@ -102,3 +102,8 @@ Blog công khai dùng giao diện sáng và không còn nút Dark Mode/Search tr
 
 
 **Logo header:** chấm tròn đỏ đặc `#bc002d`, đường kính 14px, cách chữ “Duy Nguyen” 8px và căn giữa theo chiều dọc. Thay thế huy hiệu DN trên cả desktop/mobile; màu đỏ chỉ là điểm nhấn logo, giao diện tiếp tục dùng xanh chủ đạo.
+
+
+## Thiết kế editorial đồng bộ · 30/10/2026
+
+Quy chuẩn mới: logo đỏ 12px, header trắng trong mờ sticky; pill bo tròn hoàn toàn với nền `#f1f5f9`, viền `#cbd5e1`, chữ navy `#1e3a8a`; nội dung 18px/1.75 và cột đọc tối đa 720px. Card trắng bo 12px, padding desktop 24px và shadow nhẹ. Trích dẫn có viền đỏ; inline code nền sáng và code block nền slate tối. Ảnh đại diện 16:9; hình minh họa trong nội dung giữ đầy đủ tỷ lệ. TOC desktop giữ cột riêng và khoảng cách 48px; mobile dùng TOC trong bài. Các quy định mới thay thế kích thước logo/pill cũ ở trên. Nguồn style thống nhất: `static/css/blog-editorial.css`.
