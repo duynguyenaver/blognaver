@@ -33,12 +33,14 @@ function keyNotice(text,isError=false){
 async function rememberAIKey(sessionName,deviceName,field,checkbox){
  const value=clean($(field).value)||sessionStorage.getItem(sessionName)||localStorage.getItem(deviceName)||"";
  if(!$(checkbox).checked){
+  try{localStorage.setItem("bn_research_remember_default_v1","0")}catch{}
   try{localStorage.removeItem(deviceName)}catch{}
   try{await deviceDB("delete",deviceName)}catch{}
   keyNotice("Đã tắt lưu trên thiết bị cho "+(deviceName===GEMINI_DEVICE?"Gemini.":"Groq."));
   return;
  }
  if(!value){keyNotice("Nhập API key trước khi bật lưu trên thiết bị.",true);return}
+ try{localStorage.removeItem("bn_research_remember_default_v1")}catch{}
  try{sessionStorage.setItem(sessionName,value)}catch{}
  // Prefer durable IndexedDB: avoids localStorage quota used by long transcripts.
  let saved=false;
@@ -56,11 +58,11 @@ async function loadRememberedAIKeys(){
   let persisted="";
   try{persisted=await deviceDB("read",deviceName)||""}catch{}
   if(!persisted)try{persisted=localStorage.getItem(deviceName)||""}catch{}
-  $(checkbox).checked=Boolean(persisted);
+  $(checkbox).checked=Boolean(persisted)||!localStorage.getItem("bn_research_remember_default_v1");
   const value=persisted||sessionStorage.getItem(sessionName)||"";
   if(value){$(field).value=value;try{sessionStorage.setItem(sessionName,value)}catch{}}
  }
- $("#rememberGithub").checked=Boolean(localStorage.getItem("blognaver_github_auth_v1"));
+ $("#rememberGithub").checked=true;
 }
 
 let quotaResumedNotice=false;
@@ -1564,6 +1566,8 @@ $("#copyDraft").onclick=()=>navigator.clipboard.writeText(rawMarkdown).then(()=>
 $("#downloadDraft").onclick=saveMarkdown;
 $("#connectGithub").onclick=async()=>{try{const value=clean($("#githubManual").value);if(value){await window.BNAuth.validate(value);window.BNAuth.save(value,$("#rememberGithub").checked);$("#githubManual").value=""}else{const t=window.BNAuth?.read();if(!t)throw Error("Chưa có token CMS. Hãy nhập token phía dưới.");await window.BNAuth.validate(t)}$("#githubState").textContent="● Đã kết nối GitHub (token CMS chung)";githubVerified=true;window.BNSeriesInsights?.setConnection(true);foldCredentials();window.BNSeriesInsights?.sync().catch(()=>{});if(queue.length&&!working)dispatchNext();}catch(e){githubVerified=false;window.BNSeriesInsights?.setConnection(false);openCredentials("Kiểm tra lại GitHub");state("Không thể kết nối GitHub: "+e.message,true)}};
 try{const t=window.BNAuth?.read?.();$("#githubState").textContent=t?"● Đã có GitHub token chung từ CMS":"○ Chưa có token CMS — cần kết nối trước khi đăng";pruneCommittedStorage();const old=JSON.parse(localStorage.getItem(DRAFT)||"null");if(old&&(old.source||old.commitProof)&&Date.now()-old.at<86400000){$("#series").value=SERIES[old.series]&&["cold-fusion","lex-fridman"].includes(old.series)?old.series:"cold-fusion";$("#customSeries").value=!["cold-fusion","lex-fridman"].includes(old.series)?SERIES[old.series]?.name||old.series||"":"";$("#transcript").value=old.source;$("#sourceUrl").value=old.sourceUrl||"";$("#angle").value=old.angle||"";rawMarkdown=old.markdown||"";runData={...old};setPublishEvidence(old.commitProof);$("#preview").textContent=rawMarkdown;$("#copyDraft").disabled=!rawMarkdown;$("#downloadDraft").disabled=!rawMarkdown;$("#transcript").dispatchEvent(new Event("input"));state(old.source?"Đã khôi phục bản nháp từ phiên viết trước.":"Biểu mẫu nguồn đã sẵn sàng cho bài mới. Kết quả xuất bản trước vẫn có thể kiểm tra bên phải.");}}catch{}
+// Remember keys on this device by default. Existing explicit opt-out still works.
+try{if(localStorage.getItem("bn_research_remember_default_v1")!=="0"){if(!localStorage.getItem("blognaver_github_auth_v1")&&window.BNAuth?.read?.())window.BNAuth.save(window.BNAuth.read(),true)}}catch{}
 const connectionReady=loadRememberedAIKeys().then(()=>verifyExistingConnections()).catch(e=>state("Không thể khôi phục key / xác thực kết nối: "+e.message,true));
 try{
  const old=JSON.parse(localStorage.getItem(DRAFT)||"null");
