@@ -1,4 +1,4 @@
-name: Auto Approve PR and Merge After Green Tests
+name: Auto Merge PR After Green Tests
 
 on:
   workflow_run:
@@ -16,8 +16,8 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  approve-and-merge:
-    name: Verify, approve and merge
+  verify-and-merge:
+    name: Verify and merge
     if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
@@ -57,7 +57,7 @@ jobs:
             let checksReady = false;
             for (let attempt=0; attempt<6; attempt++) {
               const {data: checks} = await github.rest.checks.listForRef({owner,repo,ref:pr.head.sha,per_page:100});
-              const relevant=checks.check_runs.filter(x => x.name !== 'Verify, approve and merge');
+              const relevant=checks.check_runs.filter(x => x.name !== 'Verify and merge');
               const bad=relevant.filter(x => x.status === 'completed' && !['success','neutral','skipped'].includes(x.conclusion));
               if (bad.length) { core.warning('Failed checks: '+bad.map(x=>x.name).join(', ')); return; }
               const pending=relevant.filter(x=>x.status !== 'completed');
@@ -66,22 +66,7 @@ jobs:
               await new Promise(resolve => setTimeout(resolve,10000));
             }
             if (!checksReady) return;
-            // GitHub doesn't accept self-review; Actions review permission may also be disabled.
-            try {
-              const {data: reviews}=await github.rest.pulls.listReviews({owner,repo,pull_number:number,per_page:100});
-              if (!reviews.some(x=>x.user.login==='github-actions[bot]' && x.state==='APPROVED' && x.commit_id===pr.head.sha)) {
-                await github.rest.pulls.createReview({
-                  owner,repo,pull_number:number,event:'APPROVE',
-                  commit_id:pr.head.sha,
-                  body:'Automated approval: Bug Checker and all visible checks passed on this commit. This is CI validation, not human review.'
-                });
-              }
-            } catch(e) {
-              core.warning('GitHub blocked automatic APPROVE: '+e.message+
-                '. Enable Actions approval permissions or use a separate authorized reviewer bot.');
-              return;
-            }
-            // Final compare-and-swap prevents merging code changed after checks.
+            // Owner policy: CI-green PRs merge automatically without bot approval.\n            // Required branch protection, if configured, is still enforced by GitHub.\n            // Final compare-and-swap prevents merging code changed after checks.
             const {data: latest}=await github.rest.pulls.get({owner,repo,pull_number:number});
             if (latest.head.sha!==pr.head.sha || latest.state!=='open' || latest.mergeable===false) {
               core.warning('PR moved, closed or became conflicting. No merge.'); return;
