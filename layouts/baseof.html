@@ -109,6 +109,18 @@
         }
       }
     </style>
+    <style>
+      .bn-monogram{display:inline-grid;place-items:center;width:34px;height:34px;margin-right:9px;border-radius:10px;background:#2769cb;color:white;font:800 12px/1 system-ui,sans-serif;letter-spacing:.04em;vertical-align:middle;flex-shrink:0}
+    </style>
+    <script>
+      document.addEventListener("DOMContentLoaded",function(){
+        var header=document.querySelector("#header,body > header,header");
+        if(!header||header.querySelector(".bn-monogram"))return;
+        var brand=Array.from(header.querySelectorAll("a")).find(function(a){return /duy\s*nguyen/i.test(a.textContent||"")});
+        if(!brand)return;
+        var span=document.createElement("span");span.className="bn-monogram";span.textContent="DN";span.setAttribute("aria-hidden","true");brand.prepend(span);
+      });
+    </script>
     <link rel="stylesheet" href="{{ "access-gate.css" | relURL }}">
     <script src="{{ "access-gate.js" | relURL }}"></script>
 </head>
