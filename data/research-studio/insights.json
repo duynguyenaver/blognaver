@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-30T06:42:11.183Z",
+  "updatedAt": "2026-10-30T06:47:38.302Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -797,7 +797,8 @@
       "models": [
         "Gemini · models/gemini-3.1-flash-lite",
         "Groq · openai/gpt-oss-120b"
-      ]
+      ],
+      "live": true
     },
     {
       "slug": "khac-alphagenome-khi-ai-vuot-qua-gioi-han-98-genome-khong-ma-hoa-2026-10-30",
@@ -816,6 +817,24 @@
         "Groq · openai/gpt-oss-120b",
         "Groq · openai/gpt-oss-20b",
         "Groq · qwen/qwen3.8-27b",
+        "Gemini · models/gemini-3.1-flash-lite"
+      ],
+      "live": true
+    },
+    {
+      "slug": "cold-fusion-he-thong-swift-ban-chat-van-hanh-va-nhung-thach-thuc-trong-ky-nguyen-tai-ch-2026-10-30",
+      "title": "Hệ thống SWIFT: Bản chất vận hành và những thách thức trong kỷ nguyên tài chính số",
+      "series": "cold-fusion",
+      "sha": "8f19978ce5780524705391c65e770ec721c51381",
+      "commitAt": "2026-10-30T06:47:11Z",
+      "durationMs": 29448,
+      "quota": {
+        "requests": 8,
+        "tokens": 16563,
+        "inputTokens": 11290,
+        "outputTokens": 5273
+      },
+      "models": [
         "Gemini · models/gemini-3.1-flash-lite"
       ]
     }
