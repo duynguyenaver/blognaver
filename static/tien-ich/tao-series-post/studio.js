@@ -1351,7 +1351,7 @@ async function start(e,restore=false,queuedJob=null){
    // One attempt per turn. After 3 unsuccessful turns, park for 60 seconds,
    // then begin a fresh round while other queued jobs continue immediately.
    const retryAt=0; // No provider cooldown; capped per-job to prevent infinite retries.
-   const failedJob={...job,failed:true,failedAt:job.failedAt||Date.now(),retryCount:Math.min(3,attempts),retryExhausted:attempts>=3||e.code==="DUPLICATE_SLUG",retryAt,checkpoint:snapshot};
+   const failedJob={...job,failed:true,failedAt:job.failedAt||Date.now(),retryCount:Math.min(3,attempts),retryExhausted:attempts>=3||e.code==="DUPLICATE_SLUG"||e.code==="SOURCE_FIDELITY_BLOCK",retryAt,checkpoint:snapshot};
    const existing=queue.find(item=>sameQueueJob(item,failedJob));
    if(existing){Object.assign(existing,failedJob);await saveQueue()}
    else{queue.push(failedJob);await saveQueue()}
