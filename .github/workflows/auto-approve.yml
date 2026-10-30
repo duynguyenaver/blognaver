@@ -18,7 +18,7 @@ concurrency:
 jobs:
   verify-and-merge:
     name: Verify and merge
-    if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion == 'success'
+    if: (github.event.workflow_run.event == 'pull_request' || github.event.workflow_run.event == 'workflow_dispatch') && github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
       - name: Validate PR, confirm current tests, approve, merge and dispatch Pages build

@@ -44,94 +44,7 @@ All changes to this repository MUST be made on a dedicated branch and submitted 
 - **NEVER push or commit directly to `main`**, even for small edits, emergencies, or blog publishing.
 - Create a new branch from the latest `main`, commit changes to that branch, then open a Pull Request.
 - **Owner standing authorization (2026-10-30): automatically merge each non-Draft PR once the latest SHA passes the required CI gates, all known checks are completed successfully, and GitHub reports it mergeable.** No manual APPROVE is required unless GitHub branch rules explicitly require one; never bypass those protections.
-- Keep PRs scoped and include a clear explanation, changed files, checks, and any deployment impact.
-- If unable to create a branch or PR, report the blocker and do not substitute a direct push.
-- Provide the PR URL and actual CI, merge, and deploy state. CI-green PRs should automatically merge via the approved workflow; do not claim production deployment before confirmed.
-- Never infer ongoing authorization to bypass this process from earlier direct-push requests.
-
-
-Before modifying UI/UX or building a new page, consult [BRANDING.md](BRANDING.md) for reference and update it when design decisions change. The project owner may redesign, replace, or remove theme UI and theme-switching controls without being blocked by legacy branding rules.
-
-Required: follow the design tokens, typography, responsive standards, accessibility and CMS behavior constraints there. Preserve existing functionality unless specifically requested. Update design docs alongside deliberate changes to brand rules. Check Hugo build and GitHub Pages deploy after changes; report real status without guessing.
-
-Project: Hugo + Blowfish 3, GitHub Pages via .github/workflows/hugo.yml, canonical baseURL https://duynguyenaver.github.io/blognaver/.
-
-Brand color correction: **Blue only** (navy + royal blue + cyan links). Never restore purple/pink Neon scheme. Official palette and implementation are in BRANDING.md and assets/css/schemes/blognaver-blue.css.
-
-
-## PR conflict hotfix / conflict-recognition playbook (2026-10-29)
-
-Case: a rollback PR removes an obsolete Stack-specific file `layouts/_partials/footer/custom.html`, while a later PR on `main` modifies that same file for the Commit Status dashboard. GitHub correctly reports a modify/delete merge conflict. **Never blindly use "ours" or "theirs" for the entire PR.**
-
-Recognize the exact pattern before applying a fix:
-1. Read `main` and PR heads, changed files, and GitHub PR mergeability. The conflicting path must be the *obsolete theme-specific footer*.
-2. Confirm the active target theme is Blowfish: `config/_default/module.toml` imports `github.com/nunocoracao/blowfish/v3`. Blowfish uses `layouts/partials/extend-footer.html`, not Stack's `layouts/_partials/footer/custom.html`.
-3. For this specific conflict only: preserve deletion of the obsolete Stack footer, preserve/bring over the NEWER dashboard implementation from `main` in `layouts/partials/extend-footer.html`, `static/js/commit-status.js`, and `static/css/commit-dashboard.css`; keep the rollback's Blowfish configuration and content.
-4. Merge the current `main` into the PR branch with BOTH parents recorded (or git merge with an explicit per-file resolution); never force-push, reset `main`, or discard unrelated later main changes. Re-fetch GitHub mergeability and rerun Bug Checker on the resulting branch.
-5. Auto-fix scope: only the above verified **obsolete Stack footer vs Blowfish footer** path mapping. For any other conflict or conflicting edits in the active footer, fail with an actionable message and require a human review. Never auto-repair a conflict by bypassing CI. Auto-merge applies only after a new successful check on the resolved head.
-
-Prevention: one feature = one branch/PR; rebase or merge latest `main` before review; use the PR Bug Checker (up to 3 attempts) and do not promote changes from a conflicting or failing PR. Keep a native theme-specific footer adapter instead of directly editing multiple theme internals.
-
-
-## PR quality gate (CI-gated auto-merge, owner authorization 2026-10-30)
-
-- Each independent change gets its own PR, using a feature branch. Never push feature changes directly to main; merge only through CI-gated automation.
-- `PR Bug Checker` runs one initial build/check and retries at most twice (3 attempts total). It classifies familiar Hugo config, Dart Sass, and module retrieval failures using verified historical playbooks. Diagnostic messages are advisory, **not evidence that a code fix was applied**. Unknown failures halt after the retry limit, with logs available for manual diagnosis and external documentation research.
-- The `Auto-review after Bug Checker` workflow may submit an explicit GitHub APPROVE review **only** after the linked PR's Bug Checker run succeeds, the checked SHA still equals the PR head, and no known check has failed. The dedicated auto-approve.yml workflow merges the verified SHA without demanding a self-approval review and dispatches production; it never force-pushes.
-- GitHub may refuse automatic reviews until Settings → Actions → General → Workflow permissions → Allow GitHub Actions to create and approve pull requests is enabled; authors cannot approve their own PRs. Auto-merge does not depend on a bot self-review; GitHub still enforces any independently configured required reviews.
-- An automated CI approval is not the same as a human security/content review. The repository owner has explicitly authorized automated merge after checks; GitHub permissions and branch protection still apply. New commits require fresh checks.
-
-## Safe automatic conflict repair
-
-Workflow `.github/workflows/safe-conflict-fixer.yml` listens on same-repository pull requests. It auto-repairs **only** the verified Stack footer modify/delete conflict when the PR switches to Blowfish. It checks the module import, verifies the obsolete footer exists on main but is intentionally deleted on the PR, verifies this is the **only** merge conflict, retains the Blowfish `extend-footer.html` and Commit Status dashboard, then pushes a normal fast-forward merge commit on the PR branch. It never merges to `main`, never force-pushes, and never approves a PR.
-
-Other conflicts are intentionally left for human resolution to avoid deleting recent work. Bug Checker must pass after any auto-fix and the owner must manually review and merge.
-
-
-## Evidence-based CI knowledge base (2026-10-29)
-
-- `data/ci/bug-knowledge.json` maintains curated, documented Hugo / Blowfish / Go Modules / GitHub Actions / GitHub Pages / static CMS failure signatures and past BlogNaver incidents. `scripts/ci-classify-failure.py` detects candidate causes from real CI output and points to remedies and documentation. It is heuristic, **not** proof of root cause or an autonomous AI engine.
-- `scripts/test-ci-knowledge.py` supplies regression fixtures so changes to classification rules must pass deterministic tests. New cases require an authentic failure signature, minimal reproducer or real log, reliable documentation, and preferably a verified successful fix.
-- No web access, model API, secrets or untrusted generated code is executed in the pull-request check. If a failure remains unknown, retain logs, stop after the existing retry limit, and investigate with official sources separately. Never auto-merge. Automatic merge requires verified-green checks; a bot APPROVE review is not a prerequisite.
-
-## Bug Checker coverage and evidence rules (2026-10-29)
-
-Project-specific CI rules are implemented in `scripts/pr-bug-checker.sh` and `scripts/ci-site-audit.py`. Validate: Hugo production build, CMS post index generation, key HTML routes, presence of published article outputs, first-party JS/CSS references from key pages, and syntax of changed JavaScript using `node --check`. These checks complement rather than replace UI, browser, integration, security, and editorial testing.
-
-Failures must be distinguished by category: `missing-output`, `invalid-html`, `permalink`, `missing-asset`, `js-syntax`, `tooling`, Hugo template/module configuration errors, and transient infrastructure/network failures. Link diagnoses to real logs and successful fixes. Do not claim "AI/big data self-fix" without a tested deterministic fixer.
-
-Retry transient failures at most twice (three checks total). Deterministic syntax, missing file and template failures normally require a source change; retrying alone is not a repair. Never download/execute suggested fixes from a search result. Never bypass CI, conflict checks or GitHub branch protection when auto-merging. PR mergeability and Bug Checker PASS are independent: a PR can pass CI while still having a merge conflict.
-
-The source of truth for conflict resolution is the actual current PR merge state and the latest main head. Preserve both sides' nonconflicting edits, re-run checks, and never overwrite newer AGENTS.md policies.
-
-
-### Incident: CI Git history missing on PR checkout (2026-10-29)
-
-Verified from GitHub Actions run 40786196594 / job 123159871722: Hugo generated 89 pages and the CMS index successfully, but `scripts/ci-site-audit.py` failed with `tooling: git merge-base origin/main HEAD exited 128`. GitHub's checkout did not provide `origin/main` history. This is **not** an application or JS syntax failure. Repair by configuring `actions/checkout` with `fetch-depth: 0` and explicitly fetching `refs/heads/main:refs/remotes/origin/main` before diff-based audits. Validate `git merge-base origin/main HEAD` succeeds. Classify future occurrences under `tooling/git-history` and stop rather than retrying three times without changing the checkout. The CI test should still fail if history truly cannot be fetched; never silently skip the JS audit.
-
-
-## Automated PR merge pipeline (2026-10-29)
-
-`.github/workflows/auto-approve.yml` runs only when `PR Bug Checker` completes successfully for a PR opened against main in this repository. It checks the exact current commit SHA, the Bug Checker job result, other completed check results, and PR mergeability. It attempts a GitHub review `APPROVE`, then squash-merges via a compare-and-swap of the checked head SHA. It **never merges on a failing, pending, stale, conflicted, draft or fork PR**. If GitHub blocks approval (e.g., workflow permissions or self-review restriction), it stops without merging and reports a warning.
-
-Merges done with GitHub Actions' `GITHUB_TOKEN` do not start regular `push` workflows. Immediately after successful merge, `auto-approve.yml` calls workflow_dispatch on `hugo.yml` for main to deploy the site; dispatch failures must be surfaced as errors (the merge itself has already occurred). Do not run third-party auto-approve actions directly on `pull_request.opened` because that approves before tests.
-
-
-## GitHub Actions SHA pinning incident (2026-10-29)
-
-The repository previously enforced full-length immutable commit SHAs for every `uses:` action. Workflow runs 40788272031 and PR #11 check runs failed at **Set up job**, before Hugo, CMS, or tests executed, because workflows referenced moving tags such as `actions/checkout@v4`. Fix: pin each referenced Action to its resolved, verified 40-character commit SHA. Do not delete `hugo.yml` because it is the production GitHub Pages deployment pipeline. Disabling the policy may unblock runs, but pinning is more reproducible. Record the failure as `ci-policy/sha-pinning`, not application or Hugo failure. After fixing CI, rerun/check PR workflows and production deployment.
-
-
-## Theme migration DoIt and UI gate (2026-10-29)
-
-The active Hugo theme is `github.com/HEIGE-PCloud/DoIt`. Do not restore Blowfish, Stack, Prism or their styling. Preserve custom Resume template, independent Resume CMS and blog CMS. `layouts/baseof.html` integrates the UI-only PIN gate and Commit Status component into DoIt. Homepage, post listing and individual posts are publicly readable; other pages display a SHA-256 PIN prompt. This is not secure server-side authorization: all files remain publicly fetchable, and the four-digit PIN is brute-forceable. Never place private data on public GitHub Pages relying on this gate.
-
-
-## Live Codex quota source (2026-10-29)
-
-- The public `/tien-ich/ai-agents-quota/` frontend may read quota snapshots from a user-initiated local bridge on `127.0.0.1:19473`. The bridge source is `scripts/codex-quota-bridge.py` (Python stdlib), which spawns the already authenticated local `codex app-server --listen stdio://` and calls `account/rateLimits/read`. **It never reads auth.json or sends credentials to the website or GitHub.** API response is allowlisted to usage percentages, window durations, and reset timestamps. The bridge only accepts requests from approved origins, binds loopback, is read-only, and does not launch automatically.
-- Preserve existing <link> tags for access-gate.css/access-gate.js, DoIt, and manual quota import; the live source is an additive enhancement, not replacement. Browser requests can be blocked by local-network policies; show a failed-connection state rather than claiming live data.
-- NEVER embed authenticated ChatGPT requests, browser cookies, or session tokens in public JavaScript or GitHub Actions. The Usage page at chatgpt.com is not a public cross-origin browser API.
+- Keep PRs scoped and include a clea…3194 tokens truncated…wser API.
 
 ## Theme customization freedom (2026-10-29)
 
@@ -180,3 +93,10 @@ For any bug, CI failure or hotfix, add structured PR body fields `Symptoms:`, `R
 ### Extended verified postmortem schema (owner rule, 2026-10-30)
 
 Every **verified** bug, UX/UI regression or CI/CD fix that passes the evidence gate must be recorded in both `AGENTS.md` (Symptoms, Root Cause, Solution, Severity, Verification, PR URL) and `data/ci/bug-knowledge.json` through a normal CI-gated PR. JSON cases require `id: bug-YYYY-MM-DD-NNN`, `date`, `category`, `severity` (`Low`, `Medium`, `High`, `Critical`), `symptom`, `root_cause`, `fix_solution`, `pr_url`, and `tags`. Retain the existing knowledge-base classification keys (`title`, `regex`, `kind`, `advice`, `source`, `evidence`) for compatibility; factual postmortems must use a nonmatching regex. Require the merged source PR to provide `Symptoms:`, `Root Cause:`, `Solution:`, `Severity:`, and `Verification: Verified ...` evidence; do not infer root cause from a passing build alone. Skip incomplete cases and never invent success, even if this delays knowledge recording. Never push directly to `main`.
+
+
+## Unified conflict resolver (2026-10-30)
+
+The owner authorized improving automatic repair beyond the historical footer-only rule. `.github/workflows/auto-css-conflict-rescan.yml` now runs trusted `scripts/conflict-resolver.py` from outside PR checkout, scans paginated same-repository non-Draft PRs to main on PR events, main push, auto-merge completion, schedule and dispatch. Git merge determines conflicts even when API mergeability is unknown. Supported conflicts are bounded insertion-only edits in `layouts/baseof.html` and `static/css/article-justified-prose.css`, including both paths in one merge. Replacements, deletions, nonregular files, other paths and oversized files are explicitly unsupported; never resolve them by discarding a side. This extends the older narrow playbook; the isolated legacy footer repair remains unchanged.
+
+Every repair preserves both parents, rechecks the PR head, uses a normal non-force push, and dispatches PR Bug Checker on the repaired branch. Dispatch failure is an error and a later scan recovers a missing run for the resolver commit. Auto-merge accepts successful pull_request or workflow_dispatch Bug Checker runs only after its existing current-SHA, same-repository, check and GitHub merge gates. Summary distinguishes no conflict, unsupported, resolved and failed. Purely additive CSS still needs CI and visual review where appropriate; line preservation is not proof of CSS semantics. Regression fixtures use real temporary Git merges and verify additive preservation and atomic refusal of protected paths.
