@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-30T13:22:35.755Z",
+  "updatedAt": "2026-10-30T13:27:52.061Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -1171,6 +1171,24 @@
         "Gemini · models/gemini-3.5-flash-lite"
       ],
       "live": true
+    },
+    {
+      "slug": "cold-fusion-travel-tech-2024-su-ket-thuc-cua-ky-nguyen-tang-truong-bang-moi-gia-2026-10-30",
+      "title": "Travel Tech 2024: Sự kết thúc của kỷ nguyên tăng trưởng bằng mọi giá",
+      "series": "cold-fusion",
+      "sha": "6b56e54d5ee69444eddb792e21c314020fdf561c",
+      "commitAt": "2026-10-30T13:23:00Z",
+      "durationMs": 38286,
+      "quota": {
+        "requests": 8,
+        "tokens": 25099,
+        "inputTokens": 19005,
+        "outputTokens": 6094
+      },
+      "models": [
+        "Gemini · models/gemini-3.5-flash-lite",
+        "Gemini · models/gemini-3.1-flash-lite"
+      ]
     }
   ]
 }
