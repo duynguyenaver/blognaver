@@ -172,3 +172,7 @@ Bug Checker runs at most **five checks per revision** with bounded backoff for t
 
 
 CI label smoke test (2026-10-29): conventional title `chore:` must create the gray chore label on this PR while the PR Bug Checker runs; this is a metadata-only documentation change.
+
+## MANDATORY: Verified bug lessons and evidence (2026-10-30)
+
+For any bug, CI failure or hotfix, add structured PR body fields `Symptoms:`, `Root Cause:`, `Solution:`, `Verification: Verified ...`, optionally `Category:` and `Tags:`, **only after the cause and fix have independent evidence**. A successful commit, CI or merge is not sufficient proof of a UI bug's root cause or browser resolution. The trusted post-merge recorder automatically creates a separate normal PR updating **both** `AGENTS.md` and `data/ci/bug-knowledge.json`; CI-green auto-merge handles publication. Do not write either file directly to `main`. Unverified cases remain pending and must not be presented as successfully documented. New factual entries must not be interpreted as regex signatures: use a never-matching regex and `verified-postmortem` kind unless a separately tested detector is supplied. Avoid re-triggering from knowledge documentation PRs.
