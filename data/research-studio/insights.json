@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-30T05:00:45.566Z",
+  "updatedAt": "2026-10-30T06:03:31.896Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -742,7 +742,8 @@
         "Groq · allam-2-7b",
         "Groq · openai/gpt-oss-120b",
         "Groq · openai/gpt-oss-20b"
-      ]
+      ],
+      "live": true
     },
     {
       "slug": "cold-fusion-giai-ma-hien-tuong-hai-dang-ma-khi-nao-bo-kien-tao-thuc-tai-trong-bong-toi-2026-10-30",
