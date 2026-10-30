@@ -1,6 +1,22 @@
 {{ define "content" }}
-{{ $catalog := site.Data.series }}
+{{ $catalog := site.Data.series | default (slice) }}
 {{ $pages := where site.RegularPages "Section" "posts" }}
+{{/* User-created series are stored in article frontmatter, not data/series.yaml.
+     Include only published posts; keep the curated series catalog intact. */}}
+{{ $known := slice }}
+{{ range $catalog }}{{ $known = $known | append .id }}{{ end }}
+{{ range $pages }}
+  {{ range (.Params.series | default (slice)) }}
+    {{ $id := printf "%v" . }}
+    {{ if and (ne $id "") (not (in $known $id)) }}
+      {{ $known = $known | append $id }}
+      {{ $name := humanize (replace $id "-" " ") }}
+      {{ if eq $id "ota-travel" }}{{ $name = "OTA Travel" }}{{ end }}
+      {{ if eq $id "wechat" }}{{ $name = "WeChat" }}{{ end }}
+      {{ $catalog = $catalog | append (dict "id" $id "title" $name "description" (printf "Các bài nghiên cứu thuộc series %s." $name) "category" "Nghiên cứu" "total" 0) }}
+    {{ end }}
+  {{ end }}
+{{ end }}
 {{ $published := 0 }}
 {{ $planned := 0 }}
 {{ $finished := 0 }}
