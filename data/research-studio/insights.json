@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-30T06:50:10.998Z",
+  "updatedAt": "2026-10-30T06:50:44.970Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -836,7 +836,8 @@
       },
       "models": [
         "Gemini · models/gemini-3.1-flash-lite"
-      ]
+      ],
+      "live": true
     },
     {
       "slug": "banking-giai-ma-swift-cau-truc-ha-tang-va-co-che-van-hanh-cua-he-thong-thanh-toan-t-2026-10-30",
@@ -850,6 +851,23 @@
         "tokens": 15370,
         "inputTokens": 10225,
         "outputTokens": 5145
+      },
+      "models": [
+        "Gemini · models/gemini-3.1-flash-lite"
+      ]
+    },
+    {
+      "slug": "cong-nghe-dat-ve-va-du-lich-truc-tuyen-tai-dinh-nghia-quan-tri-chi-phi-cong-tac-tu-kiem-soat-thu-cong-den-tri-tue--2026-10-30",
+      "title": "Tái định nghĩa quản trị chi phí công tác: Từ kiểm soát thủ công đến trí tuệ dự báo",
+      "series": "cong-nghe-dat-ve-va-du-lich-truc-tuyen",
+      "sha": "d72a6dd40e1a4787c86e461b5c07031901f7f21f",
+      "commitAt": "2026-10-30T06:50:17Z",
+      "durationMs": 30940,
+      "quota": {
+        "requests": 9,
+        "tokens": 28102,
+        "inputTokens": 22006,
+        "outputTokens": 6096
       },
       "models": [
         "Gemini · models/gemini-3.1-flash-lite"
