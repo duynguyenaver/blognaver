@@ -120,3 +120,34 @@
 .single.summary .single-title{line-height:1.4;margin-bottom:12px}
 .single.summary .content,.single.summary .content p{line-height:1.8}
 @media(max-width:650px){.single.summary .bn-summary-meta{align-items:flex-start;flex-direction:column;gap:12px}.single.summary .bn-meta-group{gap:7px}}
+
+
+/* Use remaining row width for tags before wrapping. */
+.single.summary .post-footer.bn-summary-actions {
+  display:flex!important;
+  flex-direction:row;
+  align-items:flex-start!important;
+  max-width:none!important;
+}
+.single.summary .post-tags.bn-summary-tags {
+  flex:1 1 0!important;
+  width:auto!important;
+  max-width:none!important;
+  min-width:0!important;
+}
+.single.summary .bn-tag-chips {
+  flex:1 1 0!important;
+  width:auto!important;
+  max-width:none!important;
+  min-width:0!important;
+  flex-wrap:wrap!important;
+}
+.single.summary .bn-tag-chips .bn-tag-chip {
+  flex:0 0 auto;
+  white-space:nowrap;
+}
+@media(max-width:650px) {
+  .single.summary .post-footer.bn-summary-actions {flex-direction:column;}
+  .single.summary .post-tags.bn-summary-tags {width:100%!important;}
+  .single.summary .bn-tag-chips .bn-tag-chip {white-space:normal;}
+}
