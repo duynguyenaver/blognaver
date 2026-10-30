@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-30T02:55:30.502Z",
+  "updatedAt": "2026-10-30T03:00:04.476Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -524,6 +524,24 @@
         "Gemini · models/gemini-3.5-flash-lite"
       ],
       "live": true
+    },
+    {
+      "slug": "cold-fusion-cuoc-chien-ndc-tai-dinh-nghia-quyen-luc-va-ha-tang-cong-nghe-nganh-hang-kho-2026-10-30",
+      "title": "Cuộc chiến NDC: Tái định nghĩa quyền lực và hạ tầng công nghệ ngành hàng không",
+      "series": "cold-fusion",
+      "sha": "fa3b718dfc3708ae12839c8e9c4e4a443d81a6cb",
+      "commitAt": "2026-10-30T02:59:40Z",
+      "durationMs": 69968,
+      "quota": {
+        "requests": 8,
+        "tokens": 29053,
+        "inputTokens": 18756,
+        "outputTokens": 6319
+      },
+      "models": [
+        "Gemini · models/gemini-3-flash-preview",
+        "Gemini · models/gemini-3.1-flash-lite"
+      ]
     }
   ]
 }
