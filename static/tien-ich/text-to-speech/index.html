@@ -52,6 +52,7 @@
 <section class="panel"><div class="toolbar"><h2>01 / Nội dung đọc</h2><small id="count">0 ký tự</small></div>
 <label class="subtle" for="script">Kịch bản lồng tiếng</label>
 <textarea id="script" spellcheck="true" maxlength="15000" placeholder="Dán kịch bản video YouTube của bạn vào đây..."></textarea>
+<div class="controls" style="margin-top:9px"><button type="button" id="sendToClip" class="secondary">↗ Gửi kịch bản sang YouTube Clip Maker</button></div>
 <div class="controls"><button id="listen" class="primary" type="button">▶ Phát âm thanh</button><button id="stop" type="button" class="secondary" disabled>■ Dừng</button><button id="record" type="button">↓ Ghi giọng đọc thành WAV</button></div>
 <p class="hint">Nút ghi WAV dùng để thu âm thanh đang phát trong tab và tải về máy. Chrome/Edge sẽ yêu cầu bạn chọn tab và bật chia sẻ âm thanh; không phải nút tải trực tiếp từ Web Speech API.</p><div class="progress-wrap" id="progressWrap" aria-live="polite"><div class="progress-row"><span id="progressLabel">Chờ bắt đầu</span><strong id="progressPct">0%</strong></div><div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progressTrack"><div class="progress-fill" id="progressFill"></div></div><p class="hint">Phần trăm ước lượng theo vị trí văn bản đang đọc; chỉ đạt 100% sau khi file WAV được tạo thành công.</p></div><div id="status" class="statusline" role="status" aria-live="polite">Sẵn sàng.</div>
 <a id="download" class="btn download" download="blognaver-voice.wav">Tải lại bản WAV vừa ghi</a>
@@ -360,4 +361,13 @@ els.record.addEventListener("click",async()=>{
 });
 window.addEventListener("pagehide",()=>{speechGeneration++;synth.cancel();cleanup();if(objectURL)URL.revokeObjectURL(objectURL)});
 })();
+</script><script>
+// Explicit same-tab bridge: no cloud upload, no API, and only when clicked.
+document.getElementById("sendToClip").addEventListener("click", () => {
+  const source=document.getElementById("script").value.trim();
+  if(!source){window.alert("Hãy nhập kịch bản TTS trước khi chuyển.");return}
+  try{sessionStorage.setItem("blognaver.clipmaker.script.v1",source)}
+  catch(e){window.alert("Trình duyệt không lưu được kịch bản. Hãy sao chép và dán thủ công vào Clip Maker.");return}
+  window.location.href="../youtube-clip-maker/";
+});
 </script><script src="voiceover-preprocess.js" defer></script><script src="voice-fixer.js" defer></script></body></html>
