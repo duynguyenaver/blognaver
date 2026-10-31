@@ -4,6 +4,7 @@ const richToolbar=document.createElement("div");richToolbar.className="v2-rich-t
 const editor=document.createElement("div");editor.className="v2-rich-editor";editor.setAttribute("aria-label","Trình soạn thảo văn bản trực quan");
 oldToolbar.before(richToolbar);richToolbar.after(editor);oldToolbar.hidden=true;source.classList.add("v2-hidden-source");
 const quill=new Quill(editor,{theme:"snow",modules:{toolbar:richToolbar},placeholder:"Bắt đầu viết bài... Bạn có thể định dạng trực tiếp bằng thanh công cụ."});
+quill.getModule("toolbar").addHandler("image",()=>{const selection=quill.getSelection()||{index:quill.getLength()-1};document.dispatchEvent(new CustomEvent("cmsv2:pick-image",{detail:{insert:url=>{if(!url.startsWith("https://"))return;quill.insertEmbed(selection.index,"image",url,"user");quill.setSelection(selection.index+1,0,"silent");quill.focus()}}}))});
 const turndown=new TurndownService({headingStyle:"atx",bulletListMarker:"-",codeBlockStyle:"fenced"});let initializing=true;
 if(source.value.trim()){try{const markup=window.marked?window.marked.parse(source.value):source.value.split("\n").map(x=>"<p>"+x.replaceAll("&","&amp;").replaceAll("<","&lt;")+"</p>").join("");const clean=window.DOMPurify?window.DOMPurify.sanitize(markup):markup;quill.clipboard.dangerouslyPasteHTML(clean,"silent")}catch(e){console.warn("CMS V2 editor migration:",e)}}
 initializing=false;
