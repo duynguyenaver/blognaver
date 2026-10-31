@@ -233,7 +233,7 @@
       content=content.replace(/^và\s+/iu,"");
       if(!content)continue;
       let text=talkshowStyle(content);
-      if(!transitions.test(text))text=makeTransition(currentHeading,index)+lowerFirstForSpeech(text);
+      if(!transitions.test(text) && !/^(?:Tại sao|Các con số nói lên điều gì\?|Vậy câu hỏi đặt ra)/iu.test(text))text=makeTransition(currentHeading,index)+lowerFirstForSpeech(text);
       const spoken=sentence(text);
       if(spoken){parts.push(spoken);index++;}
       currentHeading="";
@@ -243,6 +243,10 @@
     return [hookFor(blocks),WELCOME,body,CTA_QUESTION,CTA_INVITE,SIGNOFF].join("\n\n");
   }
   function cleanScript(value) {
+    const original=normalizeInput(value).trim();
+    // A completed script is left unchanged on repeat processing (avoid doubled hook/CTA).
+    if(Object.values(HOOKS).some(h=>original.startsWith(h+"\n\n"+WELCOME)) && original.endsWith(SIGNOFF))
+      return {text:original,removedLines:0,sections:0};
     const cleaned=stripNoise(value);
     return {text:buildNarration(cleaned.blocks),removedLines:cleaned.removedLines,
       sections:cleaned.blocks.filter(x=>x.type==="heading").length};
