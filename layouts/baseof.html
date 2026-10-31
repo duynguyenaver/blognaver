@@ -90,7 +90,7 @@
     <link rel="stylesheet" href="{{ "css/mobile-nav-polish.css" | relURL }}">
     <link rel="stylesheet" href="{{ "access-gate.css" | relURL }}">
     <script src="{{ "access-gate.js" | relURL }}"></script>
-    <link rel="stylesheet" href="{{ "css/blog-editorial.css" | relURL }}">
+    <link rel="stylesheet" href="{{ "css/blog-editorial.css" | relURL }}?v={{ readFile "static/css/blog-editorial.css" | md5 }}">
 </head>
 
 {{/*  
