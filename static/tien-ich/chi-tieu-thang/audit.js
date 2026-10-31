@@ -7,6 +7,7 @@ const toast=document.createElement("div");toast.className="audit-toast";toast.hi
 const today=new Date(),two=x=>String(x).padStart(2,"0"),date=d=>d.getFullYear()+"-"+two(d.getMonth()+1)+"-"+two(d.getDate());
 $("auditDate").value=date(today);$("auditMonth").value=date(today).slice(0,7);$("auditYear").value=today.getFullYear();
 let period="month",timer;
+function showPicker(){["auditDate","auditMonth","auditYear"].forEach((id,i)=>{const label=$(id).closest("label");label.hidden=(["day","month","year"][i]!==period)})}showPicker();
 function first(key){return period==="day"?new Date(key+"T12:00:00"):period==="month"?new Date(key+"-01T12:00:00"):new Date(+key,0,1,12)}
 function shift(d,n){const x=new Date(d);if(period==="day")x.setDate(x.getDate()+n);else if(period==="month")x.setMonth(x.getMonth()+n);else x.setFullYear(x.getFullYear()+n);return x}
 function sum(rows,kind){return rows.filter(r=>r.type===kind).reduce((v,r)=>v+(Number(r.amount)||0),0)}
@@ -26,7 +27,7 @@ const cat=$("auditCategories");cat.replaceChildren();if(!categories.size)cat.tex
 const tbody=$("auditLedgerBody");tbody.replaceChildren();for(const r of [...rows].sort((a,b)=>b.date.localeCompare(a.date))){const tr=document.createElement("tr");[r.date,r.category||"—",r.merchant||"—",r.type==="income"?"Thu":"Chi",money(r.amount),"Chưa đối soát"].forEach((v,i)=>{const td=document.createElement("td");td.textContent=v;if(i===4)td.className="money";tr.append(td)});tbody.append(tr)}
 if(!rows.length){const row=document.createElement("tr"),td=document.createElement("td");td.colSpan=6;td.textContent="Không có giao dịch trong kỳ";row.append(td);tbody.append(row)}
 }
-panel.querySelectorAll("[data-period]").forEach(b=>b.onclick=()=>{period=b.dataset.period;panel.querySelectorAll("[data-period]").forEach(x=>x.setAttribute("aria-pressed",String(b===x)));render()});
+panel.querySelectorAll("[data-period]").forEach(b=>b.onclick=()=>{period=b.dataset.period;panel.querySelectorAll("[data-period]").forEach(x=>x.setAttribute("aria-pressed",String(b===x)));showPicker();render()});
 ["auditDate","auditMonth","auditYear"].forEach(id=>$(id).addEventListener("change",render));
 new MutationObserver(render).observe($("transactions"),{childList:true});
 const status=$("status");new MutationObserver(()=>{if(status.textContent.includes("Đã lưu giao dịch")){toast.textContent="Đã lưu giao dịch trên thiết bị 🌟";toast.hidden=false;clearTimeout(timer);timer=setTimeout(()=>toast.hidden=true,4000)}render()}).observe(status,{childList:true,subtree:true});
