@@ -62,6 +62,9 @@
   function stripInlineMetadata(s) {
     let v=s.trim();
     if(!v||headerMeta.test(v)||uiOnly.test(v)||statsOnly.test(v))return "";
+    // Header strings copied from cards can lack a ':' separator.
+    if(/^(?:tác giả|author|đăng bởi)\s+(?:duy\s+nguyen|nguyễn\s+duy\s+khang)(?:\s|$)/iu.test(v) ||
+       /^(?:đăng ngày|ngày đăng|ngày xuất bản|xuất bản ngày|cập nhật ngày)\s+\d{1,4}[\/.-]/iu.test(v))return "";
     const parts=v.split(/\s*[·|•]\s*/);
     if(parts.length>1) {
       const kept=parts.filter(x=>!isMetaPiece(x));
