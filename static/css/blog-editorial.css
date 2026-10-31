@@ -147,7 +147,7 @@ body:has(article.page.single) article.page.single {
 main article.page.single #content,main article.page.single .post-content {
   width:100%;max-width:900px !important;margin:0 auto !important;padding:0;float:none !important;
 }
-main article.page.single p {
+main article.page.single p,main article.page.single #content p {
   text-align:justify;text-justify:inter-word;line-height:1.8;color:#334155;margin-bottom:1.5rem;
 }
 article.page.single :is(.single-title,.single-subtitle,.post-meta,.post-meta-line,.post-category,.post-series,.post-footer) {
@@ -197,7 +197,7 @@ body:has(article.page.single) :is(#toc-auto,#toc-static) { display:none !importa
 @media screen and (max-width:1024px) {
   body:has(article.page.single) :is(.toc,#toc-auto,#toc-static,nav#TableOfContents) { display:none !important; }
   body:has(article.page.single) article.page.single { max-width:100% !important;padding:0 16px !important; }
-  main article.page.single p { text-align:left; }
+  main article.page.single p,main article.page.single #content p { text-align:left; }
 }
 @media (prefers-reduced-motion:reduce) {
   body:has(article.page.single) :is(#toc-auto,#toc-static) { transition:none !important; }
