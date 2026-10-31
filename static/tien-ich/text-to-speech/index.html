@@ -72,20 +72,58 @@ const setUI=()=>{els.listen.disabled=speaking||recording;els.record.disabled=spe
 
 if(!synth){status("Trình duyệt không hỗ trợ Web Speech API.",true);els.listen.disabled=true;els.record.disabled=true;return}
 let userSelectedVoice=false;
-els.voice.addEventListener("change",()=>{userSelectedVoice=true});
-function loadVoices(){
- const currentName=voices[Number(els.voice.value)]?.name;
- voices=synth.getVoices();
- els.voice.replaceChildren();
- if(!voices.length){els.voice.add(new Option("Chưa tìm thấy giọng đọc",""));return}
- voices.forEach((v,i)=>els.voice.add(new Option(`${v.name} · ${v.lang}${v.localService?" · local":""}`,String(i))));
- const hoaiMy=voices.findIndex(v=>/microsoft/i.test(v.name)&&/hoai\s*my/i.test(v.name)&&/natural/i.test(v.name)&&v.lang.toLowerCase().startsWith("vi"));
- const prefer=hoaiMy>=0?hoaiMy:voices.findIndex(v=>v.lang.toLowerCase().startsWith("vi"));
- const picked=userSelectedVoice?voices.findIndex(v=>v.name===currentName):-1;
- els.voice.value=String(picked>=0?picked:prefer>=0?prefer:0);
+let selectedVoiceKey=null;
+let voiceRefreshTimer=null;
+const voiceKey=v=>v?((v.voiceURI||v.name)+"|"+v.lang):null;
+const isVietnamese=v=>/^vi(?:-|$)/i.test(v.lang||"");
+function preferredVoiceIndex(items){
+ const eligible=items.map((v,i)=>({v,i})).filter(x=>isVietnamese(x.v));
+ const hoai=eligible.find(({v})=>/hoai[\s._-]*my/i.test(v.name||""));
+ if(hoai)return hoai.i;
+ const natural=eligible.find(({v})=>/online|natural/i.test((v.name||"")+" "+(v.voiceURI||"")));
+ if(natural)return natural.i;
+ return eligible[0]?.i ?? (items.length?0:-1);
 }
-loadVoices();
-synth.addEventListener?.("voiceschanged",loadVoices);
+els.voice.addEventListener("change",()=>{
+ const index=Number(els.voice.value);
+ if(!Number.isInteger(index)||!voices[index])return;
+ userSelectedVoice=true;
+ selectedVoiceKey=voiceKey(voices[index]);
+});
+function loadVoices(){
+ const incoming=synth.getVoices();
+ if(!incoming.length){
+  if(!voices.length){els.voice.replaceChildren(new Option("Đang tải giọng đọc…",""));els.voice.disabled=true}
+  return;
+ }
+ const oldKey=selectedVoiceKey;
+ voices=incoming;
+ els.voice.disabled=false;
+ els.voice.replaceChildren();
+ voices.forEach((v,i)=>els.voice.add(new Option(`${v.name} · ${v.lang}${v.localService?" · local":""}`,String(i))));
+ const manualIndex=userSelectedVoice?voices.findIndex(v=>voiceKey(v)===oldKey):-1;
+ const index=manualIndex>=0?manualIndex:preferredVoiceIndex(voices);
+ // Keep the manually chosen voice if it remains available; otherwise reselect priority.
+ if(manualIndex<0)userSelectedVoice=false;
+ els.voice.value=String(Math.max(0,index));
+ selectedVoiceKey=voiceKey(voices[Math.max(0,index)]);
+}
+function scheduleVoiceRefresh(){
+ clearTimeout(voiceRefreshTimer);
+ loadVoices();
+ // Some browsers initially report local voices, then asynchronously add online voices.
+ // Recheck a bounded number of times; do not overwrite intentional user selection.
+ let attempt=0;
+ const retry=()=>{
+  if(++attempt>12)return;
+  loadVoices();
+  voiceRefreshTimer=setTimeout(retry,500);
+ };
+ voiceRefreshTimer=setTimeout(retry,500);
+}
+if(typeof synth.addEventListener==="function")synth.addEventListener("voiceschanged",scheduleVoiceRefresh);
+else synth.onvoiceschanged=scheduleVoiceRefresh;
+scheduleVoiceRefresh();
 els.script.addEventListener("input",()=>{$("count").textContent=els.script.value.length.toLocaleString("vi-VN")+" ký tự"});
 ["rate","pitch"].forEach(k=>els[k].addEventListener("input",()=>{$(k+"Value").textContent=Number(els[k].value).toFixed(1)+(k==="rate"?"×":"")}));
 function cleanup(){
