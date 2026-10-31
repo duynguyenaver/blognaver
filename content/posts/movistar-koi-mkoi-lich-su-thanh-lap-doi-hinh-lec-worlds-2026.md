@@ -1,6 +1,6 @@
 ---
 title: "Movistar KOI (MKOI): Từ giấc mơ của Ibai và Piqué đến thế lực Liên Minh Huyền Thoại châu Âu"
-date: "2026-11-01T20:00:00+07:00"
+date: "2026-11-01T00:00:00+07:00"
 draft: false
 slug: "movistar-koi-mkoi-lich-su-thanh-lap-doi-hinh-lec-worlds-2026"
 description: "Khám phá lịch sử Movistar KOI từ KOI của Ibai–Piqué, thương vụ MAD Lions/Movistar Riders, đội hình Elyoya–Jojopyun và hành trình LEC, Worlds 2026."
