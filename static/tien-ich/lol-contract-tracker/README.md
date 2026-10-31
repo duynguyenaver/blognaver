@@ -49,3 +49,28 @@ Never publish salaries, buyout amounts or private contractual terms from specula
 The first verified GCD snapshot contains **883 public registrations** downloaded from Riot's published regional tabs on 2026-10-31 UTC: LCK 160, LPL 76, LEC 87, LCP 70, and 490 additional academy/ERL regional entries categorized separately as OTHER with original competition labels. The original sheet update dates are **LCK 2026-08-20, LPL 2026-08-05, EMEA 2026-09-09, APAC 2026-10-21**; these reflect when Riot last updated each tab, not live November 2026 transfers. No LCS/CBLOL tab was present among the accessible published tabs during this import. The browser still offers official GCD and temporary CSV import. The first snapshot was imported on a review branch, never directly to main.
 
 The utility uses static same-origin data and relative HTML asset URLs for GitHub Pages pathprefix /blognaver/. No cross-origin browser Sheets calls or paid API required.
+
+
+## Second data source: Leaguepedia historical archive (not Riot official)
+
+Leaguepedia's community-managed [Global Contract Database Archive](https://lol.fandom.com/wiki/Archive:Global_Contract_Database) states that it has archived public GCD changes since February 2018. The wiki itself explicitly says its historical mirrors are *unofficial*, while the live GCD sheet is maintained by Riot.
+
+The tracker now keeps these sources separate:
+
+1. Official Riot contract registrations: the existing gcd.json snapshot, per-tab freshness and deadline calculations.
+2. Unofficial historical research: archive.json contains only dated links to Leaguepedia archive pages for KR/CN/EMEA/AME/APAC/VN, with filter controls. The source and CC BY-SA 3.0 attribution are displayed. It does not silently merge archive dates into the current contracts table.
+3. Dated transfer reporting: transfers.json, with individual source URLs and labels for confirmed transactions/renewals versus rumours.
+
+The index can be refreshed by scripts/update-lol-gcd-archive.py. It makes at most six region-index page requests (0.6-second separation), consults Fandom robots.txt, and stops without changing existing data if access is blocked. It extracts only verified archive-page link dates; it **does not** circumvent API restrictions, mirror thousands of wiki pages, copy biographies, or infer that a historical end date is a modern contract. Previously reviewed pointers are retained if the wiki goes offline. This means full historical player-by-player contracts are NOT locally mirrored or searchable in this version; users follow the dated links to examine the original archive.
+
+The scheduled workflow lol-gcd-refresh.yml can include both gcd.json and archive.json in a **new data PR** when a source changes. It must never commit directly to main. Network failures in the historical source must not erase or contaminate official Riot data.
+
+Offline tests:
+- python3 -m unittest scripts/test_update_lol_gcd_archive.py -v
+- node --test scripts/test-lol-contract-archive.mjs
+- node --check static/tien-ich/lol-contract-tracker/archive.js
+
+Online permissions/availability probe (no writes):
+- python3 scripts/update-lol-gcd-archive.py --check
+
+Fandom archive page content carries CC BY-SA 3.0 terms unless otherwise noted. The new data file stores link metadata only, cites the original wiki and does not claim Leaguepedia is affiliated with Riot.
