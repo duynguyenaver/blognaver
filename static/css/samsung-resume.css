@@ -53,3 +53,29 @@
  .cv-photo-cell{width:26mm}.cv-photo,.cv-photo-placeholder{width:22mm;height:28mm}
  .cv-notice{display:none!important}a[href]:after{content:none!important}
 }
+
+
+/* Print refinement: A4 content is 186mm wide after 12mm side margins.
+   Do not shrink the complete document to an artificially narrow column. */
+@media print {
+  @page{size:A4 portrait;margin:10mm 12mm 10mm 12mm}
+  html,body{width:100%!important;max-width:none!important}
+  main.cv-paper,.cv-paper,.resume-container,.cv-wrapper{
+    width:100%!important;max-width:100%!important;margin:0!important;
+    padding:0!important;box-shadow:none!important;box-sizing:border-box!important;
+  }
+  .cv-section{page-break-inside:auto;break-inside:auto}
+  .cv-section>h2{page-break-after:avoid;break-after:avoid}
+  .cv-experience,.experience-item,.education-item,.cv-table tbody tr{
+    break-inside:avoid-page;page-break-inside:avoid;
+  }
+  .cv-table{table-layout:auto!important}
+  .cv-table th,.cv-table td{overflow-wrap:break-word!important;word-break:normal!important}
+  .cv-personal .cv-photo-cell{width:26mm!important}
+  .cv-experience-description,.cv-essay-body,.cv-timeline-body{
+    white-space:pre-wrap;overflow-wrap:break-word!important;word-break:normal!important;
+    orphans:3;widows:3;
+  }
+  .cv-head{display:flex!important}
+  .cv-utility,body>header,body>footer,nav,button,.no-print{display:none!important}
+}
