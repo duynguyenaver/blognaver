@@ -113,3 +113,9 @@ Quy chuẩn mới: logo đỏ 12px, header trắng trong mờ sticky; pill bo tr
 Các trang Điểm danh, Sổ từ vựng, Nhật ký và Phỏng vấn dùng thẻ Bento nền trắng, góc 16px, chữ `#334155`, điểm nhấn `#bc002d` và khoảng cách dòng 1.8. Biểu đồ nhật ký dùng năm sắc độ từ `#f1f5f9` đến `#bc002d`.
 
 Thông báo nổi xác nhận việc lưu **trên thiết bị** sau khi thao tác ghi thành công. Trạng thái GitHub được hiển thị riêng; lưu trên máy không có nghĩa dữ liệu đã được tải lên GitHub.
+
+## Resume CMS · Bản nháp và bản in A4
+
+Biểu mẫu CV dùng thẻ bo góc 16px, label gắn với trường nhập và ô mô tả kinh nghiệm nhiều dòng. Nháp văn bản tự lưu trên máy, không chứa token hoặc ảnh upload; trạng thái này độc lập với xuất bản GitHub.
+
+Bản xem trước và CV đã xuất bản dùng chung cấu hình A4 dọc, lề trên/dưới 10mm và trái/phải 12mm. Mô tả công việc chạy toàn chiều ngang, chữ nội dung 11pt / 1.5; bảng dùng 10pt. Tiêu đề hồ sơ vẫn hiện khi in, các nút điều hướng được ẩn.
