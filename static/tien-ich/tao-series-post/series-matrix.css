@@ -1,0 +1,25 @@
+/* Isolated Series Matrix; existing research queue and publisher stay untouched. */
+body.series-editorial{--series-red:#bc002d;background:#f7f8fa;color:#334155}
+.series-editorial .panel,.series-matrix-panel{background:#fff;border:1px solid #e2e8f0;border-radius:16px;box-shadow:0 5px 20px #0f172a0a}
+.series-editorial .primary,.series-matrix-panel .matrix-primary{background:#bc002d;color:#fff;border:0;border-radius:10px}
+.series-matrix-panel{margin:18px 0 24px;padding:24px}
+.series-matrix-head{display:flex;justify-content:space-between;gap:16px;align-items:center;flex-wrap:wrap}
+.series-matrix-head h2{margin:0;font-size:23px}.series-matrix-head p{margin:6px 0;color:#64748b}
+.series-matrix-grid{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:22px;margin-top:20px}
+.series-matrix-pane{min-width:0;border:1px solid #e2e8f0;border-radius:16px;padding:19px;background:#fff}
+.series-matrix-pane label{display:block;font-weight:650;font-size:13px;margin:13px 0 4px}
+.series-matrix-pane :is(input,textarea,select){display:block;width:100%;border:1px solid #cbd5e1;border-radius:9px;padding:10px;background:#fff;color:#334155;font:inherit}
+.series-matrix-pane textarea{min-height:85px;resize:vertical}
+.series-matrix-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}.series-matrix-actions button{padding:10px 13px;cursor:pointer;border-radius:10px}
+.series-matrix-pane .matrix-primary{background:#bc002d;color:white}
+.matrix-list{display:grid;gap:10px;list-style:none;margin:15px 0;padding:0}
+.matrix-episode{display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px;border:1px solid #e2e8f0;border-radius:12px;background:#f8fafc}
+.matrix-episode[draggable=true]{cursor:grab}.matrix-episode.drag-target{border-color:#bc002d;background:#fff1f2}
+.matrix-episode strong{display:block;overflow-wrap:anywhere}.matrix-episode small{color:#64748b}
+.matrix-episode .matrix-order{font-weight:800;color:#bc002d}
+.matrix-episode button{padding:6px 10px;border:1px solid #cbd5e1;border-radius:9px;background:white;color:#334155;cursor:pointer}
+.matrix-episode input{max-width:230px}
+.matrix-search-results{max-height:220px;overflow:auto}.matrix-search-results button{display:block;width:100%;padding:9px;text-align:left;border:0;border-bottom:1px solid #e2e8f0;background:white;color:#334155;cursor:pointer}
+.matrix-feedback{position:fixed;bottom:20px;right:20px;padding:13px 17px;border-radius:12px;background:#0f172a;color:#fff;z-index:20000;box-shadow:0 9px 30px #0003;max-width:min(420px,90vw)}
+.matrix-feedback[hidden]{display:none}.series-matrix-note{font-size:12px;line-height:1.6;color:#64748b}
+@media(max-width:850px){.series-matrix-grid{grid-template-columns:1fr}.series-matrix-panel{padding:15px}}
