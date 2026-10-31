@@ -1,0 +1,46 @@
+name: LoL Contracts · Daily Riot GCD Snapshot PR
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '20 2 * * *'
+permissions:
+  contents: write
+  pull-requests: write
+concurrency:
+  group: daily-lol-gcd-snapshot
+  cancel-in-progress: false
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout latest main
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: main
+          persist-credentials: false
+      - name: Fetch public Riot GCD and validate
+        run: |
+          python3 scripts/update-lol-contracts.py
+          python3 -m unittest scripts/test_update_lol_contracts.py -q
+      - name: Create reviewed snapshot PR only if changed
+        env:
+          GH_TOKEN: ${{ secrets.BLOGNAVER_GCD_BOT_TOKEN || github.token }}
+          REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- static/tien-ich/lol-contract-tracker/gcd.json; then
+            echo "No registered contract changes. Skipping PR."
+            exit 0
+          fi
+          BRANCH="data/riot-gcd-$(date -u +%Y%m%d-%H%M%S)-$GITHUB_RUN_ID"
+          git config user.name "BlogNaver GCD Data Bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$BRANCH"
+          git add static/tien-ich/lol-contract-tracker/gcd.json
+          git commit -m "data(lol): refresh Riot GCD snapshot and candidate roster changes"
+          git -c http.extraheader="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)" push "https://github.com/$REPO.git" "HEAD:refs/heads/$BRANCH"
+          gh pr create --repo "$REPO" --base main --head "$BRANCH" \
+            --title "data(lol): refresh official Riot GCD contract snapshot" \
+            --body "Read-only download from Riot public GCD. Changes in team labels or expiry dates are NOT proof of free agency, renewal or transfer. Review tab freshness and CI before merge. Never commit directly to main."

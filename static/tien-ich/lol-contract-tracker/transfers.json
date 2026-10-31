@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "description": "Only dated, attributable transfer/extension reports. GCD diff alone is not a confirmed move.",
+  "events": [
+    {
+      "player": "Peyz",
+      "fromTeam": "JD Gaming",
+      "toTeam": "T1",
+      "status": "confirmed",
+      "date": "2025-11-19",
+      "note": "T1 công bố chiêu mộ xạ thủ Peyz cho mùa LCK 2026; sự kiện năm 2025, không phải tin chuyển nhượng mới.",
+      "sourceUrl": "https://esportsinsider.com/2025/11/peyz-joins-t1-2026-lck-league-of-legends"
+    },
+    {
+      "player": "Gumayusi",
+      "fromTeam": "T1",
+      "toTeam": "Hanwha Life Esports",
+      "status": "confirmed",
+      "date": "2025-11-23",
+      "note": "Hanwha Life Esports chính thức thông báo chiêu mộ Gumayusi ngày 23/11/2025 cho mùa 2026. Đây là thông tin lịch sử, không phải giao dịch mới.",
+      "sourceUrl": "https://escorenews.com/en/lol/news/73720-gumayusi-officially-moves-to-hanwha-life-esports-from-t1"
+    }
+  ]
+}

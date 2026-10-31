@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "source": "Riot Games LoL Esports League-Recognized Global Contract Database",
+  "sourceUrl": "https://docs.google.com/spreadsheets/d/1Y7k5kQ2AegbuyiGwEPsa62e883FYVtHqr6UVut9RC4o/pubhtml",
+  "fetchedAt": null,
+  "regions": [],
+  "rows": [],
+  "changes": [],
+  "notice": "No official GCD snapshot has been collected yet. Automated updater creates PRs; never invent contract end dates."
+}
