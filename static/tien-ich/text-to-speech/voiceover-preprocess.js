@@ -45,7 +45,7 @@
   const quantity=/^\d[\d.,]*\s*(?:từ|chữ|words?|phút(?:\s*đọc)?|mins?|minutes?)$/iu;
   const meta=/^(?:tác giả|author|đăng bởi|ngày đăng|ngày xuất bản|published|updated|cập nhật|số từ|word count|thời gian đọc|reading time|thể loại|chuyên mục|danh mục|tags?|series|sê[\s-]?ri)\s*[:：-]\s*.*$/iu;
   const sourceHeading=/^(?:nguồn và phương pháp|nguồn tham khảo|video\s*\/\s*nguồn tiếng anh gốc|video gốc|tài liệu tham khảo|references?|disclaimer|bản quyền|copyright|credits?|đọc thêm)$/iu;
-  const sourceLine=/^(?:coldfusion research|research studio|bài viết phân tích dựa trên phụ đề|ảnh nhận diện nguồn video|ảnh đại diện nguồn video|nguồn và phương pháp|video\s*\/\s*nguồn tiếng anh gốc|nguồn tham khảo|nguồn tiếng anh gốc|bản quyền|copyright|disclaimer|tuyên bố miễn trừ trách nhiệm)(?:\s|:|：|[—–-]|$)/iu;
+  const sourceLine=/^(?:coldfusion research|research studio|bài viết phân tích dựa trên phụ đề|ảnh nhận diện nguồn video|ảnh đại diện nguồn video|nguồn và phương pháp|video\s*\/\s*nguồn tiếng anh gốc|nguồn tham khảo|nguồn tiếng anh gốc|bản quyền|copyright|disclaimer|tuyên bố miễn trừ trách nhiệm)(?:\s|[.:：…—–-]|$)/iu;
   const ui=/^(?:chia sẻ|share|copy link|sao chép liên kết|mục lục|table of contents|bài viết liên quan|bài trước|bài sau|đăng ký|subscribe|xem video|mở video|về đầu trang|in bài viết)$/iu;
   function metaPart(s){const v=s.trim();return stray.test(v)||byline.test(v)||date.test(v)||quantity.test(v)||meta.test(v);}
   function isNoise(s,front) {
