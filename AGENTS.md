@@ -1,5 +1,15 @@
 # BlogNaver Agent Guidelines
 
+## GitHub OAuth private workspace rollout (2026-11-01)
+
+- **Goal:** one GitHub account login per browser session, shared by private utilities and Resume CMS; no manual PAT field once each utility is safely migrated.
+- **Strict security boundary:** GitHub Pages is public static hosting. A JavaScript login overlay/PIN is not true access control. Private tool HTML/assets and authenticated GitHub API operations must go through the Cloudflare Worker gateway with verified owner GitHub numeric ID. Do not disable the old access path or claim privacy until the Worker + the Pages redirect cutover are deployed and tested.
+- **Credentials:** never embed OAuth client secrets, GitHub tokens, AES keys or refresh tokens in client JavaScript, static assets, logs or repository. Use Worker secrets and encrypted KV session records with HttpOnly cookies. Keep OAuth PKCE + state + origin/CSRF validation.
+- **Current staged migration:** shared BNGitHubOAuth module; TTS WAV opt-in archive; encrypted personal data adapter for expenses, vocabulary and two diaries. The remaining attendance, CMS, series, resumes and other utilities require separate migration and regression tests before PAT entry fields can be fully removed. Legacy personal-token fallback must remain until the backend is provisioned.
+- **Sensitive backups:** the BlogNaver repository is public. Generic OAuth sync only permits encrypted .enc.json backups. Keep existing AES-GCM passphrase compatibility; login is not a substitute for data decryption and plaintext data must never be uploaded. Audio recordings on a public archive branch are public; keep their auto-upload opt-in.
+- **One-time login scope:** a session can persist up to 30 days, subject to GitHub revocation. Do not promise permanent sign-in, unbounded automatic synchronization, or automatic CI source pushes without PR.
+- **Rollback:** required OAuth setup (client ID/secret, KV namespace, Worker deployment and Pages cutover variables) is an owner-controlled action. Do not commit placeholder secrets to live deployments or switch the public site to a nonfunctional login.
+
 ## YouTube Voiceover Storytelling & Hoai My pronunciation (owner policy, 2026-10-31)
 
 For all future BlogNaver YouTube voiceover script generators and related editorial projects, use a source-grounded **hook → conversational narrative → insight → audience question/CTA → warm sign-off** structure.
