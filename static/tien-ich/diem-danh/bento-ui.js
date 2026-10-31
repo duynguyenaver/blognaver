@@ -19,7 +19,7 @@ $('closeUnlock').onclick=closeUnlock;
 dialog.addEventListener('close',()=>{$('unlockCode').type='password';const toggle=document.querySelector('[data-toggle-password="unlockCode"]');toggle.textContent='Hiện';toggle.setAttribute('aria-pressed','false');toggle.setAttribute('aria-label','Hiện mật khẩu')});
 $('unlockForm').onsubmit=event=>{event.preventDefault();$('openLocal').click()};
 for(const button of document.querySelectorAll('[data-toggle-password]'))button.onclick=()=>{const input=$(button.dataset.togglePassword),show=input.type==='password';input.type=show?'text':'password';button.textContent=show?'Ẩn':'Hiện';button.setAttribute('aria-pressed',String(show));button.setAttribute('aria-label',show?'Ẩn mật khẩu':'Hiện mật khẩu')};
-function toast(message,tone='success'){clearTimeout(toastTimer);$('toast').textContent=message;$('toast').dataset.tone=tone;$('toast').hidden=false;toastTimer=setTimeout(()=>{$('toast').hidden=true},5000)}
+function toast(message,tone='success'){if(window.BNFeedback){window.BNFeedback.toast(message,tone);return}clearTimeout(toastTimer);$('toast').textContent=message;$('toast').dataset.tone=tone;$('toast').hidden=false;toastTimer=setTimeout(()=>{$('toast').hidden=true},5000)}
 function update(records,today,year,month,ready){
  const data=metrics(records,today,year,month),state=!ready?'locked':data.done?'done':'pending';
  $('heroCard').dataset.state=state;$('todayDate').textContent=today.split('-').reverse().join('/');

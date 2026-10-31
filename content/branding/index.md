@@ -107,3 +107,9 @@ Blog công khai dùng giao diện sáng và không còn nút Dark Mode/Search tr
 ## Thiết kế editorial đồng bộ · 30/10/2026
 
 Quy chuẩn mới: logo đỏ 12px, header trắng trong mờ sticky; pill bo tròn hoàn toàn với nền `#f1f5f9`, viền `#cbd5e1`, chữ navy `#1e3a8a`; nội dung 18px/1.75 và cột đọc tối đa 720px. Card trắng bo 12px, padding desktop 24px và shadow nhẹ. Trích dẫn có viền đỏ; inline code nền sáng và code block nền slate tối. Ảnh đại diện 16:9; hình minh họa trong nội dung giữ đầy đủ tỷ lệ. TOC desktop giữ cột riêng và khoảng cách 48px; mobile dùng TOC trong bài. Các quy định mới thay thế kích thước logo/pill cũ ở trên. Nguồn style thống nhất: `static/css/blog-editorial.css`.
+
+## Editorial Tech · Các trang tiện ích
+
+Các trang Điểm danh, Sổ từ vựng, Nhật ký và Phỏng vấn dùng thẻ Bento nền trắng, góc 16px, chữ `#334155`, điểm nhấn `#bc002d` và khoảng cách dòng 1.8. Biểu đồ nhật ký dùng năm sắc độ từ `#f1f5f9` đến `#bc002d`.
+
+Thông báo nổi xác nhận việc lưu **trên thiết bị** sau khi thao tác ghi thành công. Trạng thái GitHub được hiển thị riêng; lưu trên máy không có nghĩa dữ liệu đã được tải lên GitHub.
