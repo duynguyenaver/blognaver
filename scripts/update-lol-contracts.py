@@ -25,7 +25,7 @@ OUTPUT = pathlib.Path("static/tien-ich/lol-contract-tracker/gcd.json")
 USER_AGENT = "Mozilla/5.0 (compatible; BlogNaver-Contract-Index/1.0; read-only)"
 # Confirmed tab pointers discovered from published community links.
 # Labels from the actual HTML tab menu override these fallback guesses.
-KNOWN_GIDS = {"940656680": "LCK", "594163931": "LPL"}
+KNOWN_GIDS = {"940656680": "OTHER", "594163931": "LPL", "148326031": "LEC", "905624073": "LCK", "1177719586": "LCP"}
 REGIONS = ("LCK", "LPL", "LEC", "LCS", "CBLOL", "LCP", "OTHER")
 
 
@@ -96,7 +96,10 @@ def normal(s: str) -> str:
 
 def locate_header(rows):
     synonyms = {
-        "handle": ("ingamename", "summonername", "playername", "playerid", "handle", "ign", "nickname", "gamename"),
+        "handle": ("officialsummonername", "ingamename", "summonername", "playername", "playerid", "handle", "ign", "nickname", "gamename"),
+        "league": ("league", "region"),
+        "legalFirst": ("legalfirstname",),
+        "legalFamily": ("legalfamilyname", "legallastname"),
         "team": ("teamname", "team", "organization"),
         "endDate": ("contractenddate", "contractexpirydate", "contractexpiration", "expirationdate", "expirydate", "enddate", "contractend"),
         "legalName": ("realname", "legalname", "fullname"),
@@ -132,14 +135,22 @@ def rows_from_csv(text: str, region: str, source: str):
     found = {}
     for line in rows[header + 1:]:
         def cell(key):
-            i = cols[key]
+            i = cols.get(key, -1)
             return line[i].strip() if i >= 0 and i < len(line) else ""
         handle, team = cell("handle"), cell("team")
         if not handle or not team or len(handle) > 120 or len(team) > 150: continue
         if normal(handle) in ("player", "name", "total", "notes", "lastupdated"): continue
-        key = "|".join((region, handle.casefold(), team.casefold()))
-        found[key] = {"id": key, "league": region, "team": team,
-                      "handle": handle, "legalName": cell("legalName"),
+        # The actual Riot tabs share a League column. Use it instead of guessing
+        # from a potentially missing tab label (LCK/LEC/LCS/CBLOL/LPL/LCP).
+        recorded_region = league_from_label(cell("league"))
+        actual_region = recorded_region if recorded_region != "OTHER" else region
+        if actual_region == "OTHER":
+            continue
+        first, family = cell("legalFirst"), cell("legalFamily")
+        legal_name = cell("legalName") or " ".join(x for x in (first, family) if x)
+        key = "|".join((actual_region, handle.casefold(), team.casefold()))
+        found[key] = {"id": key, "league": actual_region, "team": team,
+                      "handle": handle, "legalName": legal_name,
                       "position": cell("position"), "endDate": parse_date(cell("endDate")),
                       "sourceUrl": source}
     return list(found.values())
@@ -237,14 +248,17 @@ def main():
     # Deduplicate a league if Google advertises separate informational tabs with similar names.
     found_regions = set()
     for gid, region in tabs.items():
-        if region not in REGIONS or region == "OTHER" or region in found_regions:
+        if region not in REGIONS:
             continue
         try:
             records = fetch_tab(gid, region)
-            found_regions.add(region)
             all_rows.extend(records)
-            metadata.append({"league": region, "gid": gid, "count": len(records), "url": PUBLIC_URL+"#gid="+gid})
-            print("OK", region, gid, len(records))
+            for recorded_region in sorted({r["league"] for r in records}):
+                count = sum(r["league"] == recorded_region for r in records)
+                found_regions.add(recorded_region)
+                metadata.append({"league": recorded_region, "gid": gid, "count": count,
+                                 "url": PUBLIC_URL+"#gid="+gid})
+                print("OK", recorded_region, gid, count)
         except RuntimeError as exc:
             issues.append(str(exc))
             print("WARN", region, gid, str(exc)[:300], file=sys.stderr)
