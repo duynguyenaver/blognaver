@@ -2,7 +2,7 @@
 const $=id=>document.getElementById(id),KEY="bn_vocab_trilingual_v1";
 let items=[],deleted={};try{items=JSON.parse(localStorage.getItem(KEY)||"[]");if(!Array.isArray(items))items=[]}catch{}
 const today=()=>new Date().toISOString().slice(0,10),norm=s=>String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim();
-const save=async()=>{await window.BNDiaryStore.set(KEY,{items,deleted});if(window.BNCloudSync?.isConnected()){try{await window.BNCloudSync.saveNow();return "cloud"}catch(e){return "pending: "+e.message}}return "device"},status=s=>{$("status").textContent=s};
+const save=async()=>{await window.BNDiaryStore.set(KEY,{items,deleted});window.BNFeedback?.toast('Đã lưu dữ liệu từ vựng vào bộ nhớ máy thành công! 🌟');if(window.BNCloudSync?.isConnected()){try{await window.BNCloudSync.saveNow();return "cloud"}catch(e){return "pending: "+e.message}}return "device"},status=s=>{$("status").textContent=s};
 const el=(tag,text,cls)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n};
 const due=x=>!x.next||x.next<=today();
 function clear(){ $("vocabForm").reset();$("editing").value="";$("save").textContent="Lưu từ vựng"}

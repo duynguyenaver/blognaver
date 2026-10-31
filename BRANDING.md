@@ -62,3 +62,8 @@ Header branding uses a solid #bc002d circle, 14px diameter, 50% radius and 8px s
 
 ## Left slide-out article TOC — owner update 2026-10-31
 Article detail pages now use one centered 900px frame with 20px internal padding and justified paragraphs at 1.8 line height. Above 1024px, the outer `#toc-auto` panel (or `#toc-static` only when no auto panel exists) is fixed to the left, centered vertically, and translated offscreen except for a 12px red right edge. Hover or keyboard focus within the panel reveals it. Keep the nested TOC nav static; never create multiple floating surfaces or labels. At 1024px and below hide TOCs and left-align paragraphs with 16px internal padding. Respect reduced motion and hide TOCs in print. This supersedes the earlier right-side reserved TOC lane; listing cards and app pages retain their layouts.
+
+## Editorial utility alignment (2026-10-31)
+- Attendance, vocabulary, journals and interview tracking share `static/tien-ich/editorial-ui.css` and `editorial-ui.js`: white Bento surfaces, 16px corners, #334155 copy, #bc002d focus/accent, 1.8 line height. Functional calendar cells retain compact corners.
+- Use `BNFeedback.toast` only after local storage commits successfully; GitHub confirmation remains a separate status. Never infer remote success from a local write.
+- Diary heatmaps use real entries over the most recent 365 days, Monday-first columns (53 columns including partial boundary weeks), with levels #f1f5f9 / #fca5a5 / #ef4444 / #dc2626 / #bc002d.
