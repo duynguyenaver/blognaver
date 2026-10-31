@@ -1,6 +1,6 @@
 {
   "schema": "blognaver-bug-knowledge-v1",
-  "updated": "2026-10-29",
+  "updated": "2026-11-01",
   "policy": "Evidence-based diagnostics; pattern matching is not proof of root cause; no autonomous fixes or external commands.",
   "cases": [
     {
@@ -17,7 +17,7 @@
       "title": "Hugo template or partial missing",
       "regex": "partial .*not found|template .* not defined|failed to render pages|render of .* failed",
       "kind": "deterministic",
-      "advice": "Inspect first nested template error, check layouts override precedence and version compatibility",
+      "advice": "Inspect the FIRST nested Hugo template/partial/Sass error and correct the actual file. Validate template override precedence and theme version; if Sass mixes incompatible numeric units, inspect calc() or syntax rather than assuming a missing partial. CI signal is not a proven root cause (Fix Bug 2026 PR #124).",
       "source": "https://gohugo.io/templates/",
       "evidence": "general"
     },
@@ -62,7 +62,7 @@
       "title": "JavaScript parse error",
       "regex": "js-syntax|SyntaxError:|Unexpected token|Unexpected end of input",
       "kind": "deterministic",
-      "advice": "Run node --check on changed JavaScript; inspect source and avoid retrying unchanged code",
+      "advice": "Check first parser error and the changed script/event/prompt assembly. Run node --check on changed JS/MJS (and validate inline scripts separately), make a new correcting commit, then rerun Bug Checker. Never retry unchanged deterministic syntax errors as a fix. See Fix Bug 2026 PR #54/#227.",
       "source": "https://nodejs.org/api/cli.html",
       "evidence": "general"
     },
@@ -132,5 +132,126 @@
     ],
     "id_pattern": "bug-YYYY-MM-DD-NNN",
     "evidence_rule": "Verified cause, solution and outcome required; never derive root cause from CI success alone."
+  },
+  "series_casebook": {
+    "title": "Fix Bug 2026 — evidence-calibrated CI and product repair lessons",
+    "policy": "Lessons derived from the eight authored Fix Bug 2026 posts. These are read-only investigation playbooks; casebook references do not independently prove root cause or warrant automatic source changes.",
+    "lesson_count": 8,
+    "classification_note": "ci-recovery = earlier failing and later passing CI on different commits reported by source article; engineering-postmortem = code-backed change and passing CI without proven CI red→green. Never automatically classify an unverified root cause.",
+    "lessons": [
+      {
+        "id": "fixbug-2026-pr-54",
+        "evidence_mode": "ci-recovery",
+        "title": "JavaScript syntax when building AI Series Studio",
+        "observed_signal": "The PR blog identifies JavaScript parse error in an earlier failed Bug Checker run; the PR includes a follow-up fix for prompt concatenation.",
+        "reusable_action": "Run `node --check` on changed standalone JS; inspect first syntax failure and the concatenation near changed prompt strings before rerunning on a new commit SHA.",
+        "regression_check": "Confirm latest SHA passes JS checks and Bug Checker; do not treat a retry of unchanged source as a repair.",
+        "classifier_case_ids": [
+          "javascript"
+        ],
+        "pr_url": "https://github.com/duynguyenaver/blognaver/pull/54",
+        "article_path": "content/posts/fixbug-2026-pr-54.md",
+        "failed_ci_url": "https://github.com/duynguyenaver/blognaver/actions/runs/40894384822",
+        "passing_ci_url": "https://github.com/duynguyenaver/blognaver/actions/runs/40895625226",
+        "evidence_limit": "CI red→green is documented; no individual faulty line is proven solely by the posts."
+      },
+      {
+        "id": "fixbug-2026-pr-124",
+        "evidence_mode": "ci-recovery",
+        "title": "Hugo render/Sass mixed-unit expression triage",
+        "observed_signal": "The series report classified a Hugo template/partial signal; PR history also contains a change replacing a mixed-unit Sass min expression with CSS calc.",
+        "reusable_action": "Read the first nested Hugo/Sass error, confirm the actual stylesheet/template location, check mixed-unit Sass math and prefer valid CSS `calc()` where appropriate; do not assume the classifier title is the root cause.",
+        "regression_check": "Run the Hugo build and route audit on a fresh PR revision; verify responsive layout where CSS was changed.",
+        "classifier_case_ids": [
+          "hugo-template-missing"
+        ],
+        "pr_url": "https://github.com/duynguyenaver/blognaver/pull/124",
+        "article_path": "content/posts/fixbug-2026-pr-124.md",
+        "failed_ci_url": "https://github.com/duynguyenaver/blognaver/actions/runs/40999752139",
+        "passing_ci_url": "https://github.com/duynguyenaver/blognaver/actions/runs/40999994043",
+        "evidence_limit": "Classifier label is generic; Sass-specific explanation is inferred from named fix commit, not independently verified from raw failed log."
+      },
+      {
+        "id": "fixbug-2026-pr-227",
+        "evidence_mode": "ci-recovery",
+        "title": "CMS V2 Integration event JavaScript syntax",
+        "observed_signal": "An earlier Bug Checker was classified as a JavaScript parse error; the PR records a repair to an Integration status event.",
+        "reusable_action": "Parse all modified Integration/CMS V2 scripts with `node --check`; inspect braces, event handler syntax and script load order; do not retry deterministic parse errors unchanged.",
+        "regression_check": "Run Bug Checker on the corrected head; then smoke-test Integration status updates in browser.",
+        "classifier_case_ids": [
+          "javascript"
+        ],
+        "pr_url": "https://github.com/duynguyenaver/blognaver/pull/227",
+        "article_path": "content/posts/fixbug-2026-pr-227.md",
+        "failed_ci_url": "https://github.com/duynguyenaver/blognaver/actions/runs/41176125518",
+        "passing_ci_url": "https://github.com/duynguyenaver/blognaver/actions/runs/41176449305",
+        "evidence_limit": "Only signature and red→green runs are substantiated by the series; runtime behavior requires separate browser validation."
+      },
+      {
+        "id": "fixbug-2026-pr-232",
+        "evidence_mode": "engineering-postmortem",
+        "title": "Malformed GitHub Actions YAML and brittle CMS router test",
+        "observed_signal": "The PR reports literal backslash-n escapes embedded in an Actions YAML step and a fragile router-function parsing test.",
+        "reusable_action": "Ensure workflow YAML uses real line breaks and parse it with a proper YAML/Actions linter; test the complete router function boundary without fragile regex escape assumptions.",
+        "regression_check": "Check that GitHub can schedule jobs at all, then run `node scripts/test-cms-v2-router.mjs` and current Bug Checker.",
+        "classifier_case_ids": [],
+        "pr_url": "https://github.com/duynguyenaver/blognaver/pull/232",
+        "article_path": "content/posts/fixbug-2026-pr-232.md",
+        "passing_ci_url": "https://github.com/duynguyenaver/blognaver/actions/runs/41179512394",
+        "evidence_limit": "Source PR cites a prior run, but the published article did not establish an independently linked failed→passing CI revision pair."
+      },
+      {
+        "id": "fixbug-2026-pr-237",
+        "evidence_mode": "engineering-postmortem",
+        "title": "CMS V2 viewport overflow and sticky controls",
+        "observed_signal": "PR description documents hidden Markdown source min-height producing an oversized editor and an incorrectly scoped sticky toolbar; browser measurements are reported by the author.",
+        "reusable_action": "Scope the fix to the CMS V2 workspace. Inspect hidden source min-height and positioning, choose a bounded scroll container, make sticky toolbar relative to that container, and keep mobile natural flow.",
+        "regression_check": "Test desktop and mobile viewport heights, long-editor scrolling, toolbar reachability, keyboard navigation and route navigation; CI alone cannot verify layout.",
+        "classifier_case_ids": [],
+        "pr_url": "https://github.com/duynguyenaver/blognaver/pull/237",
+        "article_path": "content/posts/fixbug-2026-pr-237.md",
+        "passing_ci_url": "https://github.com/duynguyenaver/blognaver/actions/runs/41206902863",
+        "evidence_limit": "The PR includes browser QA claims; the article itself has no confirmed failed CI run for this change."
+      },
+      {
+        "id": "fixbug-2026-pr-244",
+        "evidence_mode": "engineering-postmortem",
+        "title": "Provider model discovery and actionable API failures",
+        "observed_signal": "PR describes a model filter that excluded supported `preview` identifiers plus ambiguous authentication/quota/network errors.",
+        "reusable_action": "When an AI integration exists, discover models by actual API-supported methods/capabilities instead of excluding all preview IDs; distinguish 400, 401/403, 404, 429 and network/CORS errors.",
+        "regression_check": "Mock model discovery, unsupported model and throttling/auth conditions; validate with an authorized test key without exposing secrets. Do NOT reintroduce previously removed Gemini TTS UI.",
+        "classifier_case_ids": [],
+        "pr_url": "https://github.com/duynguyenaver/blognaver/pull/244",
+        "article_path": "content/posts/fixbug-2026-pr-244.md",
+        "passing_ci_url": "https://github.com/duynguyenaver/blognaver/actions/runs/41211540770",
+        "evidence_limit": "Product-fix report only; no prior failed CI run was established."
+      },
+      {
+        "id": "fixbug-2026-pr-249",
+        "evidence_mode": "engineering-postmortem",
+        "title": "Late online speech voices overriding a local default",
+        "observed_signal": "PR describes Web Speech `getVoices()` loading local voices before Microsoft Hoai My Online Natural.",
+        "reusable_action": "Listen for `voiceschanged`, refresh with a finite retry budget, rank Hoai My → other Vietnamese Online/Natural → Vietnamese local, update selection, and preserve user manual choice.",
+        "regression_check": "Test local-first voice enumeration, late online voice arrival, no Hoai My, repeated events and manual override on the target browser.",
+        "classifier_case_ids": [],
+        "pr_url": "https://github.com/duynguyenaver/blognaver/pull/249",
+        "article_path": "content/posts/fixbug-2026-pr-249.md",
+        "passing_ci_url": "https://github.com/duynguyenaver/blognaver/actions/runs/41213304963",
+        "evidence_limit": "Browser engine/platform-dependent behavior cannot be guaranteed by passing CI."
+      },
+      {
+        "id": "fixbug-2026-pr-258",
+        "evidence_mode": "engineering-postmortem",
+        "title": "Voiceover metadata dates and UI debris leaking into TTS",
+        "observed_signal": "PR describes publication dates, read-time stats and pasted UI fragments bypassing a line-only filter and being converted to spoken numbers.",
+        "reusable_action": "Clean HTML controls, metadata and calendar dates before number-to-Vietnamese-word and phonetic conversion; remove orphan connectors while preserving meaningful durations and facts as explicitly required.",
+        "regression_check": "Run `node --test scripts/test-voiceover-preprocess.mjs` on inline and standalone date formats, labels, sources, `GPU`, `3D`, and real expressions like `30 năm`.",
+        "classifier_case_ids": [],
+        "pr_url": "https://github.com/duynguyenaver/blognaver/pull/258",
+        "article_path": "content/posts/fixbug-2026-pr-258.md",
+        "passing_ci_url": "https://github.com/duynguyenaver/blognaver/actions/runs/41218508065",
+        "evidence_limit": "CI green and PR description do not independently establish production browser correctness."
+      }
+    ]
   }
 }
