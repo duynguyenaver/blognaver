@@ -6,7 +6,22 @@
 <style>
 :root{--tts-radius:16px}body{min-width:0}.studio{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(280px,1fr);gap:18px;align-items:start}.studio>.panel{margin:0;min-width:0;border-radius:var(--tts-radius)}.studio textarea{font:16px/1.75 system-ui,-apple-system,sans-serif;min-height:310px;height:43vh;max-height:650px;resize:vertical;border-radius:12px;background:rgba(4,14,30,.35)}.control{margin:18px 0}.control label{display:block;margin-bottom:7px;font-weight:700;font-size:13px}.control select,.control input{width:100%;background:#0b1c32;color:var(--text);border:1px solid #476487;border-radius:10px;padding:11px}.hint{font-size:12px;color:var(--muted)}.primary{background:#347ebd;border-color:#5daced}.controls{display:flex;flex-wrap:wrap;gap:10px}.controls button{padding:12px 15px}.controls button:disabled{opacity:.48;cursor:not-allowed}.panel h2{margin-top:0}.note{border-left:3px solid var(--blue);padding:12px 14px;border-radius:8px;background:#10243c;color:var(--muted);font-size:13px;margin-top:16px}.statusline{margin:14px 0;font-weight:650;min-height:24px}.statusline.error{color:#ffadba}.toolbar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}.toolbar small{color:var(--muted)}.download{display:none;margin-top:12px;word-break:break-all}.download.visible{display:inline-block}select:focus-visible{outline:3px solid #9ed7ff;outline-offset:3px}audio{width:100%;margin-top:15px}footer{padding:28px 0;color:var(--muted);font-size:12px}@media(max-width:760px){.studio{grid-template-columns:1fr}.studio textarea{height:260px;min-height:240px}.controls button{flex:1 1 130px}}
 @media(prefers-color-scheme:light){body.tts-light{background:#f4f7fb;color:#15243a}body.tts-light .panel{background:#fff;color:#15243a;border-color:#d6e2ed}body.tts-light .hint,body.tts-light .note,body.tts-light p{color:#54657b}body.tts-light textarea,body.tts-light select,body.tts-light input{background:#f8fbff;color:#15243a;border-color:#a9bfd3}body.tts-light .note{background:#edf5ff}}
-.progress-wrap{margin:15px 0;display:none}.progress-wrap.visible{display:block}.progress-track{height:12px;background:#1b3354;border-radius:50px;overflow:hidden;border:1px solid #385a7b}.progress-fill{height:100%;width:0;background:#38bdf8;transition:width .25s}.progress-row{display:flex;justify-content:space-between;color:var(--muted);font-size:13px;margin:5px 0}.cloud{border:1px solid var(--line);border-radius:16px;padding:17px;margin-top:18px}.cloud details summary{cursor:pointer;font-weight:750}.cloud label{display:block;margin:9px 0}.cloud input[type=password]{width:100%;font:inherit}.cloud input[type=checkbox]{width:auto}.cloud .hint{line-height:1.6}.cloudstatus{font-size:13px;margin-top:8px;overflow-wrap:anywhere}</style></head>
+.progress-wrap{margin:15px 0;display:none}.progress-wrap.visible{display:block}.progress-track{height:12px;background:#1b3354;border-radius:50px;overflow:hidden;border:1px solid #385a7b}.progress-fill{height:100%;width:0;background:#38bdf8;transition:width .25s}.progress-row{display:flex;justify-content:space-between;color:var(--muted);font-size:13px;margin:5px 0}.cloud{border:1px solid var(--line);border-radius:16px;padding:17px;margin-top:18px}.cloud details summary{cursor:pointer;font-weight:750}.cloud label{display:block;margin:9px 0}.cloud input[type=password]{width:100%;font:inherit}.cloud input[type=checkbox]{width:auto}.cloud .hint{line-height:1.6}.cloudstatus{font-size:13px;margin-top:8px;overflow-wrap:anywhere}
+/* Section 2 · YouTube voiceover prep */
+#voiceoverPreprocessor{margin:22px 0 26px;border-radius:16px;padding:clamp(18px,3vw,28px)}
+#voiceoverPreprocessor .prep-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+#voiceoverPreprocessor .prep-head h2{margin:2px 0 8px}
+#voiceoverPreprocessor .prep-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+#voiceoverPreprocessor .prep-col{min-width:0}
+#voiceoverPreprocessor .prep-col label{display:block;font-weight:700;margin-bottom:8px}
+#voiceoverPreprocessor textarea{width:100%;min-height:260px;height:340px;max-height:680px;resize:vertical;line-height:1.7;font-size:15px;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:#0b1c32;color:var(--text);border:1px solid #476487;border-radius:12px;padding:15px}
+#voiceoverPreprocessor .prep-actions{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0 10px}
+#voiceoverPreprocessor .prep-actions button{padding:12px 16px}
+#voiceoverPreprocessor .prep-status{font-size:13px;color:var(--muted);min-height:22px;margin-top:12px}
+#voiceoverPreprocessor .prep-status.bad{color:#ffb1bb}
+#voiceoverPreprocessor .prep-label{color:var(--blue);font-weight:800;font-size:11px;letter-spacing:.1em;text-transform:uppercase}
+@media(max-width:760px){#voiceoverPreprocessor .prep-grid{grid-template-columns:1fr}#voiceoverPreprocessor textarea{height:245px;min-height:200px}#voiceoverPreprocessor .prep-actions button{flex:1 1 145px}}
+</style></head>
 <body><main class="shell">
 <nav><a href="../">← Tiện ích</a><span>EDITORIAL / AUDIO LAB</span></nav>
 <header><div class="eyebrow">BLOGNAVER · FREE BROWSER TOOL</div><h1>Text to Speech Studio</h1><p>Chuyển văn bản thành giọng đọc, nghe thử và ghi thành WAV để dựng video. Không cần đăng nhập hoặc gửi nội dung lên máy chủ BlogNaver.</p></header>
@@ -19,13 +34,42 @@
 <a id="download" class="btn download" download="blognaver-voice.wav">Tải lại bản WAV vừa ghi</a>
 <audio id="preview" controls class="hidden" aria-label="Nghe lại file WAV"></audio><section class="cloud"><details><summary>Đồng bộ WAV lên GitHub (tùy chọn)</summary><label for="ghToken">GitHub token có quyền Contents: Read and write của repository</label><input id="ghToken" type="password" autocomplete="off" spellcheck="false" placeholder="Dán GitHub token (không lưu localStorage)"><label><input id="autoSync" type="checkbox"> Tự đồng bộ mỗi file WAV đã ghi lên GitHub</label><p class="hint">Tệp sẽ được lưu trên nhánh <code>tts-audio-archive</code>, dưới thư mục <code>data/tts-audio/</code>. Repository công khai có thể khiến tệp âm thanh được người khác truy cập. Không bật nếu kịch bản riêng tư. Giới hạn file đồng bộ 8 MB. Token chỉ ở bộ nhớ tab và không đưa vào URL.</p><button id="syncWav" type="button" class="secondary" disabled>Đồng bộ file WAV hiện tại</button><p id="cloudStatus" class="cloudstatus" role="status" aria-live="polite">Chưa có file WAV.</p></details></section>
 </section>
-<aside class="panel"><h2>02 / Thiết lập giọng đọc</h2>
+<aside class="panel"><h2>Thiết lập giọng đọc</h2>
 <div class="control"><label for="voice">Giọng đọc hệ thống</label><select id="voice"><option value="">Đang tìm giọng đọc…</option></select><div class="hint">Mặc định ưu tiên Microsoft Hoai My Online (Natural) – Vietnamese khi có sẵn; nếu không, chọn giọng tiếng Việt khác.</div></div>
 <div class="control"><label for="rate">Tốc độ · <output id="rateValue">1.0×</output></label><input type="range" id="rate" min="0.6" max="1.6" step="0.1" value="1"></div>
 <div class="control"><label for="pitch">Cao độ · <output id="pitchValue">1.0</output></label><input type="range" id="pitch" min="0.7" max="1.3" step="0.1" value="1"></div>
 <div class="note"><strong>Điều kiện ghi WAV:</strong> Trình duyệt phải hỗ trợ chia sẻ âm thanh của tab. Khi được hỏi, hãy chọn <strong>tab hiện tại</strong> và bật <strong>Chia sẻ âm thanh tab / Share tab audio</strong>. Không chọn toàn màn hình. Nếu trình duyệt không cung cấp audio track, bạn vẫn dùng được chức năng nghe thử nhưng không thể xuất WAV bằng giọng hệ thống theo cách này.</div>
 <p class="hint">Tính năng WAV ghi âm thanh tab bằng quyền bạn cấp, không ghi micro và không tải âm thanh lên server. Nên dùng Chrome/Edge desktop. Phụ thuộc chính sách trình duyệt và loại giọng đọc.</p>
 </aside></div>
+
+<section id="voiceoverPreprocessor" class="panel" aria-labelledby="voiceoverTitle">
+ <div class="prep-head">
+  <div><span class="prep-label">SECTION 02 / YOUTUBE VOICEOVER</span>
+   <h2 id="voiceoverTitle">02 / Tiền xử lý kịch bản Voiceover YouTube</h2>
+   <p>Dán bài blog thô, lọc metadata và chuyển thành kịch bản dễ đọc. Xử lý ngay trên trình duyệt, không cần API hoặc gửi dữ liệu ra ngoài.</p>
+  </div>
+  <span class="tag">100% Client-side</span>
+ </div>
+ <div class="prep-grid">
+  <div class="prep-col">
+   <label for="voiceoverRaw">Văn bản gốc</label>
+   <textarea id="voiceoverRaw" spellcheck="true" placeholder="Dán bài viết blog thô vào đây..." maxlength="100000"></textarea>
+   <p class="hint">Có thể dán văn bản thuần, Markdown hoặc HTML đã sao chép từ bài blog.</p>
+  </div>
+  <div class="prep-col">
+   <label for="voiceoverOutput">Kịch bản đã tiền xử lý (có thể chỉnh sửa)</label>
+   <textarea id="voiceoverOutput" spellcheck="true" placeholder="Kịch bản đã làm sạch sẽ xuất hiện tại đây. Bạn có thể chỉnh sửa trước khi chuyển sang TTS."></textarea>
+   <p class="hint">Bộ lọc dùng quy tắc Regex, không thể hiểu mọi ngữ cảnh. Hãy xem lại tên riêng, dữ kiện và từ nối.</p>
+  </div>
+ </div>
+ <div class="prep-actions">
+  <button type="button" class="primary" id="voiceoverProcess">✨ Tiền xử lý kịch bản</button>
+  <button type="button" id="voiceoverCopy" class="secondary" disabled>Sao chép</button>
+  <button type="button" id="voiceoverToTts" disabled>↑ Gửi sang khung đọc TTS</button>
+ </div>
+ <div id="voiceoverStatus" class="prep-status" role="status" aria-live="polite">Sẵn sàng tiền xử lý.</div>
+</section>
+
 <footer>© BlogNaver · Audio xử lý cục bộ trên thiết bị. Kiểm tra điều khoản sử dụng của từng giọng đọc trước khi dùng thương mại.</footer>
 </main>
 <script>
@@ -205,4 +249,4 @@ els.record.addEventListener("click",async()=>{
 });
 window.addEventListener("pagehide",()=>{synth.cancel();cleanup();if(objectURL)URL.revokeObjectURL(objectURL)});
 })();
-</script></body></html>
+</script><script src="voiceover-preprocess.js" defer></script></body></html>
