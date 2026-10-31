@@ -37,144 +37,178 @@
       .replace(/^`?([^\n`]+)`?$/gm, "$1");
   }
 
-  const dateRe = /^\d{1,2}[\/-]\d{1,2}[\/-]\d{4}(?:\s+\d{1,2}:\d{2})?$/;
-  const wordCountRe = /^\d[\d.,]*\s*(?:từ|chữ|words?)$/i;
-  const readingTimeRe = /^(?:\d+\s*(?:phút|minutes?|mins?)(?:\s*đọc)?|thời gian đọc\s*:?\s*\d+\s*phút)$/i;
-  const titleMetaRe = /^(?:tác giả|author|đăng bởi|biên tập|ngày đăng|ngày xuất bản|published|updated|cập nhật|số từ|word count|thời gian đọc|reading time|chuyên mục|danh mục|tags?|series)\s*[:：-]\s*.+$/i;
-  const sourceLineRe = /^(?:ảnh nhận diện nguồn video|ảnh đại diện nguồn video|video\s*\/\s*nguồn tiếng anh gốc|video gốc|nguồn tiếng anh gốc|coldfusion research|nguồn và phương pháp|nguồn tham khảo|tuyên bố miễn trừ trách nhiệm|disclaimer|bản quyền|copyright)(?:\s*[:：–—-].*)?$/i;
-  const sourceSectionRe = /^(?:nguồn và phương pháp|nguồn tham khảo|video\s*\/\s*nguồn tiếng anh gốc|video gốc|tài liệu tham khảo|references?|disclaimer|bản quyền|credits?|đọc thêm)$/i;
-  const uiLineRe = /^(?:chia sẻ|share|copy link|sao chép liên kết|đọc tiếp|xem thêm|quay lại|về đầu trang|mục lục|table of contents|bài viết liên quan|bài trước|bài sau|đăng ký|subscribe|xem video|mở video|trở về trang chủ|trang chủ|in bài viết|print|mở rộng|thu gọn)$/i;
-  const onlyLabelRe = /^(?:series|tags?|categories|danh mục|chuyên mục|nguồn|source)\s*[:：]?$/i;
 
-  function isMetaPart(segment) {
-    const s = segment.trim();
-    return dateRe.test(s) || wordCountRe.test(s) || readingTimeRe.test(s)
-      || /^(?:duy\s+nguyen|nguyễn\s+duy\s+khang)$/i.test(s)
-      || /^(?:series|coldfusion research|nguồn|source)$/i.test(s);
-  }
-
-  function isNoise(line, index) {
-    const s = line.replace(/^(?:>\s*)+/, "").trim();
-    if (!s || /^[-*_═─]{3,}$/.test(s)) return true;
-    if (sourceLineRe.test(s) || uiLineRe.test(s) || onlyLabelRe.test(s)) return true;
-    if (/^\s*(?:©|all rights reserved\b)/i.test(s)) return true;
-    if (titleMetaRe.test(s)) return true;
-    if (/^(?:https?:\/\/|www\.)\S+$/i.test(s)) return true;
-    // Dates and bylines are metadata only in the article's opening.
-    if (index < 24) {
-      if (isMetaPart(s)) return true;
-      const pieces = s.split(/\s*[·|•]\s*/);
-      if (pieces.length > 1 && pieces.every(isMetaPart)) return true;
-      if (/^SERIES\s+[A-Z\d\s-]{2,}$/i.test(s) && s.length < 72) return true;
-    }
+  // STEP 1: remove UI fragments, frontmatter and source/footer sections.
+  const stray=/^(?:trong|và|sê[\s-]?ri|series|thể loại|danh mục|chuyên mục|tags?|nguồn|đọc tiếp|xem thêm)[.!,;:\s]*$/iu;
+  const byline=/^(?:(?:tác giả|author|đăng bởi)\s*[:：-]\s*)?(?:duy\s+nguyen|nguyễn\s+duy\s+khang)$/iu;
+  const date=/^\d{1,2}[/-]\d{1,2}[/-]\d{4}$/;
+  const quantity=/^\d[\d.,]*\s*(?:từ|chữ|words?|phút(?:\s*đọc)?|mins?|minutes?)$/iu;
+  const meta=/^(?:tác giả|author|đăng bởi|ngày đăng|ngày xuất bản|published|updated|cập nhật|số từ|word count|thời gian đọc|reading time|thể loại|chuyên mục|danh mục|tags?|series|sê[\s-]?ri)\s*[:：-]\s*.*$/iu;
+  const sourceHeading=/^(?:nguồn và phương pháp|nguồn tham khảo|video\s*\/\s*nguồn tiếng anh gốc|video gốc|tài liệu tham khảo|references?|disclaimer|bản quyền|copyright|credits?|đọc thêm)$/iu;
+  const sourceLine=/^(?:coldfusion research|research studio|bài viết phân tích dựa trên phụ đề|ảnh nhận diện nguồn video|ảnh đại diện nguồn video|nguồn và phương pháp|video\s*\/\s*nguồn tiếng anh gốc|nguồn tham khảo|nguồn tiếng anh gốc|bản quyền|copyright|disclaimer|tuyên bố miễn trừ trách nhiệm)(?:\s|[.:：…—–-]|$)/iu;
+  const ui=/^(?:chia sẻ|share|copy link|sao chép liên kết|mục lục|table of contents|bài viết liên quan|bài trước|bài sau|đăng ký|subscribe|xem video|mở video|về đầu trang|in bài viết)$/iu;
+  function metaPart(s){const v=s.trim();return stray.test(v)||byline.test(v)||date.test(v)||quantity.test(v)||meta.test(v);}
+  function isNoise(s,front) {
+    if (!s||/^[-*_═─]{3,}$/.test(s))return true;
+    if (stray.test(s)||byline.test(s)||meta.test(s)||ui.test(s)||sourceLine.test(s))return true;
+    if (/^(?:©|all rights reserved)/iu.test(s)||/^(?:https?:\/\/|www\.)\S+$/iu.test(s))return true;
+    if (front&&(date.test(s)||quantity.test(s)))return true;
+    if (front&&/[·|•]/.test(s)&&s.split(/\s*[·|•]\s*/).every(metaPart))return true;
     return false;
   }
-
-  function spokenSymbols(value) {
-    return value
-      .replace(/(\d[\d.,]*)\s*°\s*C\b/gi, "$1 độ C")
-      .replace(/(\d[\d.,]*)\s*°\s*F\b/gi, "$1 độ F")
-      .replace(/\bkm\s*\/\s*h\b/gi, "ki lô mét trên giờ")
-      .replace(/\b([A-Za-zÀ-ỹ]+(?:bits?|bytes?)?|TB|GB|MB|Gb|Mb)\s*\/\s*(?:giây|s)\b/gi, "$1 trên giây")
-      .replace(/(\d[\d.,]*)\s*%/g, "$1 phần trăm")
-      .replace(/\s+&\s+/g, " và ")
-      .replace(/\s*→\s*/g, " sang ")
-      .replace(/[ \t]{2,}/g, " ")
-      .replace(/\s+([,.;!?])/g, "$1")
-      .trim();
+  function headingOf(s,beforeBlank,afterBlank) {
+    const md=s.match(/^(#{1,6})\s+(.+?)\s*#*$/);
+    if(md)return {level:md[1].length,text:md[2]};
+    if(beforeBlank&&afterBlank&&s.length>=5&&s.length<=55&&s.split(/\s+/).length<=6
+       &&/^[A-ZÀ-Ỹ0-9]/u.test(s)&&!/[,:;.!?…]$/u.test(s))return {level:2,text:s};
+    return null;
   }
-
-  function textSentence(value) {
-    const text = spokenSymbols(value).replace(/[:：]\s*$/, "");
-    if (!text) return "";
-    return /[.!?…]["”']?$/.test(text) ? text : text + ".";
-  }
-
-  function headingNarration(title, index, total) {
-    const t = spokenSymbols(title.replace(/[#:]+$/g, ""));
-    if (!t) return "";
-    const lower = t.charAt(0).toLocaleLowerCase("vi-VN") + t.slice(1);
-    if (/^(?:kết luận|tổng kết|nhìn chung|lời kết)$/i.test(t)) return "Nhìn chung,";
-    if (/^(?:thách thức|rủi ro|khó khăn)/i.test(t)) return "Một vấn đề đáng chú ý là " + lower + ".";
-    if (index === 0) return "Đầu tiên là " + lower + ".";
-    if (index === total - 1 && total >= 3) return "Cuối cùng là " + lower + ".";
-    return index % 2 ? "Tiếp theo là " + lower + "." : "Chuyển sang " + lower + ".";
-  }
-
-  function cleanScript(text) {
-    const input = normalizeInput(text);
-    const lines = input.split("\n");
-    const blocks = [];
-    let buffer = [];
-    let omitted = 0;
-    let skippingSources = false;
-    const flush = () => {
-      const paragraph = buffer.join(" ").replace(/\s+/g, " ").trim();
-      if (paragraph) blocks.push({ kind: "paragraph", text: paragraph });
-      buffer = [];
+  function stripNoise(input) {
+    const lines=normalizeInput(input).split("\n");
+    const blocks=[];let pending=[],removedLines=0,front=true,inSources=false;
+    const flush=()=>{
+      const p=pending.join(" ").replace(/\s+/g," ").trim();pending=[];
+      if(p){blocks.push({type:"paragraph",text:p});if(p.length>=28||p.split(/\s+/).length>=6)front=false;}
     };
-
-    lines.forEach((rawLine, lineIndex) => {
-      const trimmed = rawLine.trim();
-      const h = trimmed.match(/^(#{1,6})\s+(.+?)\s*#*$/);
-      const headingText = h?.[2]?.trim() || "";
-      if (h) {
-        flush();
-        if (sourceSectionRe.test(headingText)) {
-          skippingSources = true; omitted++; return;
-        }
-        if (skippingSources && h[1].length <= 2) skippingSources = false;
-        if (skippingSources) { omitted++; return; }
-        if (isNoise(headingText, lineIndex)) { omitted++; return; }
-        blocks.push({ kind: h[1].length === 1 ? "title" : "heading", text: headingText });
-        return;
+    lines.forEach((raw,i)=>{
+      const s=raw.trim(),prev=i===0||!lines[i-1].trim(),next=i===lines.length-1||!lines[i+1].trim();
+      const heading=headingOf(s,prev,next);
+      const label=(heading?heading.text:s).replace(/[.:：\s]+$/g,"");
+      if(sourceHeading.test(label)){flush();inSources=true;removedLines++;return;}
+      if(inSources&&heading&&heading.level<=2)inSources=false;
+      if(inSources){removedLines++;return;}
+      if(!s){flush();return;}
+      if(isNoise(s,front)){removedLines++;return;}
+      if(heading){flush();if(isNoise(heading.text,front)){removedLines++;return;}
+        blocks.push({type:heading.level===1&&front?"title":"heading",text:heading.text});return;
       }
-      if (sourceSectionRe.test(trimmed)) {
-        flush(); skippingSources = true; omitted++; return;
-      }
-      if (skippingSources) {
-        omitted++; return;
-      }
-      if (!trimmed) { flush(); return; }
-      if (isNoise(trimmed, lineIndex)) { omitted++; return; }
-      // Markdown bullet lines are kept as separate voiced sentences, not discarded.
-      const withoutBullet = trimmed.replace(/^\s*(?:[-*+]\s+|\d+[.)]\s+)/, "");
-      buffer.push(withoutBullet);
+      const text=s.replace(/^\s*(?:[-*+]\s+|\d+[.)]\s+)/,"").trim();
+      if(text)pending.push(text);
+      if(next)flush();
     });
-    flush();
-
-    const headingCount = blocks.filter(b => b.kind === "heading").length;
-    const paragraphCount = blocks.filter(b => b.kind === "paragraph").length;
-    let headingIndex = 0, paragraphIndex = 0;
-    let nextParagraphPrefix = "";
-    const narration = [];
-    for (const b of blocks) {
-      if (b.kind === "title") {
-        narration.push(textSentence(b.text));
-      } else if (b.kind === "heading") {
-        const heading = headingNarration(b.text, headingIndex++, headingCount);
-        if (heading === "Nhìn chung,") nextParagraphPrefix = "Nhìn chung, ";
-        else narration.push(heading);
-      } else {
-        let paragraph = spokenSymbols(b.text);
-        // Conservative connective phrases, only for longer standalone paragraphs
-        // without headings and only if the paragraph has no existing transition.
-        const startsWithTransition = /^(?:đầu tiên|trước hết|tiếp theo|bên cạnh đó|ngoài ra|mặt khác|cuối cùng|nhìn chung|tuy nhiên|vì vậy|do đó|đồng thời|theo đó)\b/i.test(paragraph);
-        if (!headingCount && paragraphCount >= 3 && paragraph.length >= 65 && !startsWithTransition) {
-          if (paragraphIndex === 1) paragraph = "Tiếp theo, " + paragraph.charAt(0).toLocaleLowerCase("vi-VN") + paragraph.slice(1);
-          else if (paragraphIndex === paragraphCount - 1 && /^(?:kết luận|tóm lại|tổng kết|như vậy)/i.test(paragraph)) paragraph = "Nhìn chung, " + paragraph.charAt(0).toLocaleLowerCase("vi-VN") + paragraph.slice(1);
-        }
-        if (nextParagraphPrefix) {
-          paragraph = nextParagraphPrefix + paragraph.charAt(0).toLocaleLowerCase("vi-VN") + paragraph.slice(1);
-          nextParagraphPrefix = "";
-        }
-        narration.push(textSentence(paragraph));
-        paragraphIndex++;
-      }
-    }
-    return { text: narration.filter(Boolean).join("\n\n").trim(), removedLines: omitted, sections: headingCount };
+    flush();return {blocks,removedLines};
   }
-
+  // STEP 2: Vietnamese number reading with 3-digit groups; never modify URLs or IDs.
+  const DIGIT=["không","một","hai","ba","bốn","năm","sáu","bảy","tám","chín"];
+  function triplet(n,higher=false){
+    const h=Math.floor(n/100),t=Math.floor(n/10)%10,u=n%10,r=[];
+    if(h)r.push(DIGIT[h],"trăm");else if(higher&&n<100)r.push("không","trăm");
+    if(t>=2){r.push(DIGIT[t],"mươi");if(u)r.push(u===1?"mốt":u===5?"lăm":DIGIT[u]);}
+    else if(t===1){r.push("mười");if(u)r.push(u===5?"lăm":DIGIT[u]);}
+    else if(u){if(h||higher)r.push("linh");r.push(DIGIT[u]);}
+    return r.join(" ");
+  }
+  const SCALES=["","nghìn","triệu","tỷ","nghìn tỷ","triệu tỷ"];
+  function integerWords(value){
+    if(!Number.isSafeInteger(value)||value<0||value>=1e18)return null;
+    if(value===0)return DIGIT[0];
+    const groups=[];let n=value;
+    while(n){groups.unshift(n%1000);n=Math.floor(n/1000);}
+    const pieces=[];
+    for(let i=0;i<groups.length;i++){const g=groups[i];if(!g)continue;
+      pieces.push(triplet(g,pieces.length>0&&g<100)+(SCALES[groups.length-1-i]?" "+SCALES[groups.length-1-i]:""));
+    }
+    return pieces.join(" ");
+  }
+  const terms=[
+    ["Apricot Forest","A-pri-cot Pho-rét",true],["Internet of Things","In-tơ-nét off Thing-sơ",true],
+    ["Santa Clara","San-ta Cờ-la-ra",true],["feet vuông","phít vuông",true],
+    ["California","Ca-li-phót-ni-a",true],["Endeavor","En-đê-vơ",true],
+    ["Voyager","Voi-ơ-jơ",true],["Nvidia","En-vi-đi-a",true],
+    ["Gigabytes","Gi-ga-bay",true],["Gigabits","Gi-ga-bít",true],
+    ["Terabits","Tê-ra-bít",true],["Bluetooth","Bơ-lu-tút",true],
+    ["Wi-Fi","Quay-Phay",true],["Fudan","Phúc Đán",true],
+    ["Intel","In-tel",true],["Drone","Đơ-ron",true],["feet","phít",true],
+    ["3D","Ba Đê",true],["USD","đô-la Mỹ",false],
+    ["MIT","Em-Ai-Ti",false],["DJI","Đi-Ji-Ai",false],["IoT","Ai-Ô-Tê",false],
+    ["GPS","Gi-Pi-Ép",false],["VLC","Vê-Ép-Cê",false],["QR","Kiu-A",false],
+    ["LED","Lét",false],["AI","Ei-Ai",false]
+  ];
+  function escapeRegex(s){return s.replace(/[\\^$.*+?()[\]{}|]/g,"\\$&");}
+  const rules=terms.map(([term,reading,ci])=>({reading,
+    re:new RegExp("(?<![\\p{L}\\p{N}_])"+escapeRegex(term)+"(?![\\p{L}\\p{N}_])",ci?"giu":"gu")}));
+  function applyPhonetics(s){
+    let v=s;for(const r of rules)v=v.replace(r.re,()=>r.reading);return v;
+  }
+  function symbols(s){return s
+    .replace(/(\d[\d.,]*)\s*°\s*C\b/giu,"$1 độ C")
+    .replace(/(\d[\d.,]*)\s*°\s*F\b/giu,"$1 độ F")
+    .replace(/\bkm\s*\/\s*h\b/giu,"ki lô mét trên giờ")
+    .replace(/([A-Za-zÀ-ỹ]+(?:bits?|bytes?)?|TB|GB|MB)\s*\/\s*(?:giây|s)\b/giu,"$1 trên giây")
+    .replace(/(\d[\d.,]*)\s*%/gu,"$1 phần trăm")
+    .replace(/\s+&\s+/g," và ").replace(/\s*→\s*/g," sang ");
+  }
+  function numbers(s){
+    let v=s.replace(/(?:ngày\s+)?(\d{1,2})\/(\d{1,2})\/(\d{4})/giu,(all,day,month,year)=>{
+      const d=Number(day),m=Number(month),y=Number(year);
+      if(d<1||d>31||m<1||m>12||y<1000||y>9999)return all;
+      return "ngày "+integerWords(d)+" tháng "+integerWords(m)+" năm "+integerWords(y);
+    });
+    return v.replace(/(?<![\p{L}\p{N}_:/.-])(\d{1,3}(?:\.\d{3})+|\d+)(?:,(\d+))?(?![\p{L}\p{N}_:/.-])/gu,
+      (all,number,decimal)=>{
+        const words=integerWords(Number(number.replace(/\./g,"")));
+        return words?(decimal?words+" phẩy "+Array.from(decimal,n=>DIGIT[Number(n)]).join(" "):words):all;
+      });
+  }
+  function outsideProtected(s,fn) {
+    const pattern=/\x60{3}[\s\S]*?\x60{3}|\x60[^\x60\n]+\x60|(?:https?:\/\/|www\.)[^\s<>"']+|[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}/g;
+    let result="",last=0;
+    for(const m of s.matchAll(pattern)){result+=fn(s.slice(last,m.index))+m[0];last=m.index+m[0].length;}
+    return result+fn(s.slice(last));
+  }
+  function toSpoken(text){
+    return outsideProtected(text,s=>numbers(applyPhonetics(symbols(s)))
+      .replace(/[ \t]{2,}/g," ").replace(/\s+([,.;!?])/g,"$1").trim());
+  }
+  // STEP 3: narrate the actual body with contextual paragraph transitions.
+  const transitions=/^(?:đầu tiên|trước hết|tiếp theo|bên cạnh đó|ngoài ra|mặt khác|cuối cùng|nhìn chung|tuy nhiên|vì vậy|do đó|đồng thời|tóm lại|nói về|dưới lăng kính|dưới góc độ|chuyển sang|theo đó)/iu;
+  function makeTransition(heading,index){
+    const h=(heading||"").toLocaleLowerCase("vi-VN");
+    if(/^(?:kết luận|tổng kết|tóm lại|lời kết|nhìn chung)/iu.test(h))return "Tóm lại, ";
+    if(/kiến trúc|trụ sở|tòa nhà|thiết kế|xây dựng/iu.test(h))return "Nói về kiến trúc, ";
+    if(/tổ chức|văn hóa|nhân sự|đội ngũ|con người/iu.test(h))return "Dưới lăng kính phân tích tổ chức, ";
+    if(/thách thức|khó khăn|rủi ro|trở ngại|hạn chế/iu.test(h))return "Tuy nhiên, ";
+    if(index===0)return "Đầu tiên, ";
+    return index%2?"Tiếp theo, ":"Bên cạnh đó, ";
+  }
+  function sentence(value) {
+    const result=toSpoken(value).replace(/^(?:nhìn chung,\s*kết luận|tóm lại,\s*kết luận)[,.:]?\s*/iu,"Tóm lại, ")
+      .replace(/[:：\s]+$/g,"").replace(/[ \t]{2,}/g," ").trim();
+    if(!result||stray.test(result)||/^(?:tóm lại|nhìn chung)[,.;\s]*$/iu.test(result))return "";
+    return /[.!?…]["”']?$/u.test(result)?result:result+".";
+  }
+  function lowerFirstForSpeech(text){
+    // Lowercase ordinary sentence starts, never proper names or initialisms.
+    if (/^(?:Nvidia|Santa Clara|California|Voyager|Endeavor|Intel|Fudan|Apricot Forest|Drone|Wi-Fi|Bluetooth|Terabits|Gigabits|Gigabytes|MIT|DJI|IoT|GPS|VLC|QR|LED|AI)(?=\s|[.,;:!?]|$)/u.test(text)) return text;
+    if (/^[A-ZĐ]{2,}(?=\s|[.,;:!?]|$)/u.test(text)) return text;
+    return text.charAt(0).toLocaleLowerCase("vi-VN")+text.slice(1);
+  }
+  function buildNarration(blocks){
+    const paragraphs=blocks.filter(b=>b.type==="paragraph"),parts=[];
+    const title=blocks.find(b=>b.type==="title");
+    if(title)parts.push(sentence(title.text));
+    let currentHeading="",index=0;
+    for(const b of blocks){
+      if(b.type==="heading"){currentHeading=b.text;continue;}
+      if(b.type!=="paragraph")continue;
+      let text=b.text.trim().replace(/^và\s+/iu,"");
+      if (/^(?:chào mừng các bạn quay trở lại với góc nhìn công nghệ hôm nay|cảm ơn các bạn đã theo dõi)[.!?\s]*$/iu.test(text))continue;
+      if(!transitions.test(text))text=makeTransition(currentHeading,index)+lowerFirstForSpeech(text);
+      const spoken=sentence(text);if(spoken){parts.push(spoken);index++;}
+      currentHeading="";
+    }
+    if(!paragraphs.length)return "";
+    const body=parts.filter(Boolean).join("\n\n");
+    const intro="Chào mừng các bạn quay trở lại với góc nhìn công nghệ hôm nay!";
+    const outro="Cảm ơn các bạn đã theo dõi!";
+    return [/^chào mừng các bạn quay trở lại/iu.test(body)?"":intro,body,
+      /cảm ơn các bạn đã theo dõi[.!?\s]*$/iu.test(body)?"":outro].filter(Boolean).join("\n\n");
+  }
+  function cleanScript(value) {
+    const cleaned=stripNoise(value);
+    return {text:buildNarration(cleaned.blocks),removedLines:cleaned.removedLines,
+      sections:cleaned.blocks.filter(x=>x.type==="heading").length};
+  }
   function message(value, isError = false) {
     feedback.textContent = value;
     feedback.classList.toggle("bad", isError);
