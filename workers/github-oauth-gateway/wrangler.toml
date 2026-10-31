@@ -1,0 +1,26 @@
+name = "blognaver-private"
+main = "worker.js"
+compatibility_date = "2026-11-01"
+workers_dev = true
+
+# Replace the KV id with the ID returned by: npx wrangler kv namespace create SESSIONS
+[[kv_namespaces]]
+binding = "SESSIONS"
+id = "SET_KV_NAMESPACE_ID"
+
+# Cloudflare serves the Hugo static tool source only through the Worker.
+# IMPORTANT: run_worker_first prevents direct asset access bypassing authentication.
+[assets]
+directory = "../../static"
+binding = "ASSETS"
+run_worker_first = true
+
+[vars]
+# Replace after creating the Worker and GitHub OAuth App.
+PUBLIC_ORIGIN = "https://YOUR-WORKER.YOUR-SUBDOMAIN.workers.dev"
+GITHUB_OWNER_ID = "349135289"
+
+# Never put GITHUB_CLIENT_SECRET or TOKEN_ENCRYPTION_KEY in this file.
+# Use npx wrangler secret put GITHUB_CLIENT_ID
+#     npx wrangler secret put GITHUB_CLIENT_SECRET
+#     npx wrangler secret put TOKEN_ENCRYPTION_KEY
