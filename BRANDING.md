@@ -67,3 +67,6 @@ Article detail pages now use one centered 900px frame with 20px internal padding
 - Attendance, vocabulary, journals and interview tracking share `static/tien-ich/editorial-ui.css` and `editorial-ui.js`: white Bento surfaces, 16px corners, #334155 copy, #bc002d focus/accent, 1.8 line height. Functional calendar cells retain compact corners.
 - Use `BNFeedback.toast` only after local storage commits successfully; GitHub confirmation remains a separate status. Never infer remote success from a local write.
 - Diary heatmaps use real entries over the most recent 365 days, Monday-first columns (53 columns including partial boundary weeks), with levels #f1f5f9 / #fca5a5 / #ef4444 / #dc2626 / #bc002d.
+
+## Resume editor and A4 typography (2026-10-31)
+Resume CMS uses 16px cards, 44px controls, associated labels and full-width multiline experience descriptions. The shared preview/published stylesheet prints a 186mm content lane on A4 (10mm vertical / 12mm horizontal margins), 11pt narrative text at 1.5 line height and 10pt table data. Personal-info columns reserve space for the portrait; long email addresses wrap inside the cell. Short entries stay together while long essays can continue on another page. Hide utility chrome, preserve the document title.

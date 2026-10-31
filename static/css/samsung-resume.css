@@ -29,5 +29,27 @@
 .cv-stat{margin:12px 0;color:#566a7e;font-size:11px}
 .cv-paper a{color:inherit;text-decoration:none}
 @media(max-width:850px){.cv-paper{width:100%;padding:18px 14px;min-height:0}.cv-utility{padding:0 12px}.cv-split{grid-template-columns:1fr}.cv-table{font-size:10px}.cv-table th,.cv-table td{padding:6px}.cv-photo-cell{width:85px}.cv-photo,.cv-photo-placeholder{width:70px;height:90px}}
-@page{size:A4;margin:11mm 11mm 13mm}
-@media print{html,body{background:#fff!important;color:#111!important}.cv-paper{width:auto;max-width:none;min-height:0;padding:0;box-shadow:none;margin:0}.cv-utility{display:none!important}.cv-section{margin:13px 0 16px}.cv-table th,.cv-table td{padding:6px;font-size:9.5px}.cv-essay{break-inside:avoid}.cv-essay-body{min-height:48px}.cv-head{margin-bottom:11px}a[href]:after{content:none!important}}
+
+.cv-personal{table-layout:fixed!important}.cv-personal .cv-pair-label,.cv-personal .cv-pair-value{width:auto}.cv-personal td{overflow-wrap:anywhere}
+.cv-experience{border:1px solid #cbd5e1;padding:14px 16px;margin:0 0 12px;border-radius:8px;break-inside:avoid}
+.cv-experience-heading{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}.cv-experience-heading h3{margin:0;font-size:15px;color:#15263d}.cv-experience-heading span{font-size:12px;color:#475569}
+.cv-experience-role{font-weight:650;margin:5px 0 8px;font-size:12px}.cv-experience-description{white-space:pre-wrap;font-size:13px;line-height:1.8;overflow-wrap:break-word;word-break:normal}
+@media print{
+ @page{size:A4 portrait;margin:10mm 12mm}
+ html,body{background:#fff!important;color:#111!important;margin:0!important;padding:0!important;font-size:11pt;line-height:1.5}
+ .cv-paper{width:100%!important;max-width:100%!important;min-height:0!important;margin:0!important;padding:0!important;box-shadow:none!important;transform:none!important}
+ .cv-utility,.no-print,nav,body>header,body>footer,button{display:none!important}
+ /* Preserve the CV's own header; hiding every header would remove its title. */
+ .cv-head{display:flex!important;break-inside:avoid;margin-bottom:12pt}.cv-head h1{font-size:17pt}.cv-head p,.cv-meta{font-size:9pt}
+ .cv-section{margin:12pt 0 15pt;break-inside:auto}.cv-section h2{font-size:12pt;break-after:avoid}
+ .cv-table{width:100%!important;max-width:100%!important;font-size:10pt;line-height:1.5;table-layout:auto}
+ .cv-table th,.cv-table td{padding:5pt;word-break:normal;overflow-wrap:break-word;hyphens:none}
+ .cv-personal td{overflow-wrap:anywhere}
+ .cv-table thead{display:table-header-group}.cv-table tr,.cv-experience,.education-item{break-inside:avoid;page-break-inside:avoid}
+ .cv-experience{padding:9pt 10pt;margin-bottom:10pt}.cv-experience-heading h3{font-size:11pt}.cv-experience-heading span,.cv-experience-role{font-size:10pt}.cv-experience-description{font-size:11pt;line-height:1.5;max-width:none}
+ .cv-split{display:block}.cv-split>.cv-table{margin-bottom:8pt}
+ .cv-essay,.cv-timeline{break-inside:auto}.cv-essay-title,.cv-timeline-header{break-after:avoid;font-size:10pt}
+ .cv-essay-body,.cv-timeline-body,.cv-list{font-size:11pt;line-height:1.5;min-height:0;orphans:3;widows:3;overflow-wrap:break-word}
+ .cv-photo-cell{width:26mm}.cv-photo,.cv-photo-placeholder{width:22mm;height:28mm}
+ .cv-notice{display:none!important}a[href]:after{content:none!important}
+}

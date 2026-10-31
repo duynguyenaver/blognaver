@@ -7,7 +7,7 @@
 <title>{{ .Title }} · Hồ sơ ứng tuyển</title>
 <meta name="description" content="{{ .Params.resume.headline | default .Title }}">
 <link rel="canonical" href="{{ .Permalink }}">
-<link rel="stylesheet" href="{{ "css/samsung-resume.css" | relURL }}">
+<link rel="stylesheet" href="{{ "css/samsung-resume.css" | relURL }}?v={{ readFile "static/css/samsung-resume.css" | md5 }}">
 </head>
 <body>
 {{ $r := .Params.resume }}
@@ -20,7 +20,7 @@
 </header>
 <section class="cv-section">
 <h2>01 · 인적사항 | THÔNG TIN CÁ NHÂN</h2>
-<table class="cv-table"><tbody>
+<table class="cv-table cv-personal"><colgroup><col style="width:14%"><col style="width:26%"><col style="width:14%"><col style="width:28%"><col style="width:18%"></colgroup><tbody>
 <tr><th class="cv-pair-label">성명</th><td class="cv-pair-value">{{ $r.koreanname | default $r.name | default "—" }}</td><th class="cv-pair-label">영문성명</th><td>{{ $r.englishname | default $r.name | default "—" }}</td><td class="cv-photo-cell" rowspan="5">
 {{ with $r.avatar }}<img class="cv-photo" src="{{ . | safeURL }}" alt="Ảnh chân dung">{{ else }}<span class="cv-photo-placeholder">Ảnh chân dung<br>증명사진</span>{{ end }}
 </td></tr>
@@ -37,8 +37,7 @@
 </section>
 <section class="cv-section">
 <h2>03 · 경력사항 | KINH NGHIỆM</h2>
-<table class="cv-table"><thead><tr><th>근무기간</th><th>근무처</th><th>최종직급</th><th>직무(담당업무)</th><th>정규/계약</th></tr></thead>
-<tbody>{{ range $r.experience }}<tr><td>{{ .dates }}</td><td>{{ .company }}</td><td>{{ .role }}</td><td>{{ .description }}</td><td>{{ .employmenttype | default .mode }}</td></tr>{{ else }}<tr><td colspan="5">Chưa có kinh nghiệm</td></tr>{{ end }}</tbody></table>
+{{ range $r.experience }}<article class="cv-experience experience-item"><div class="cv-experience-heading"><h3>{{ .company }}</h3><span>{{ .dates }}</span></div><p class="cv-experience-role">{{ .role }}{{ with .employmenttype | default .mode }} · {{ . }}{{ end }}{{ with .location }} · {{ . }}{{ end }}</p><div class="cv-experience-description">{{ .description }}</div></article>{{ else }}<p>Chưa có kinh nghiệm</p>{{ end }}
 </section>
 <section class="cv-section">
 <h2>04 · 자격/어학 | CHỨNG CHỈ & NGOẠI NGỮ</h2>
