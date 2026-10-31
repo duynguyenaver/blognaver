@@ -70,6 +70,7 @@
       }
     } catch (_) { /* OAuth not provisioned yet; preserve existing access path. */ }
     if(gateway)showGithubSignIn(gateway);
+    else if(segments[0]==="resume-cms")unlock(); // Preserve the previously public CMS until real Worker cutover.
     else showLegacyPin();
   }
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot,{once:true});
