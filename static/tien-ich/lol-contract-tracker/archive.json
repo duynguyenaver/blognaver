@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "source": "Leaguepedia/Fandom Global Contract Database Archive",
+  "sourceType": "unofficial-community-history",
+  "sourceUrl": "https://lol.fandom.com/wiki/Archive:Global_Contract_Database",
+  "license": "CC BY-SA 3.0 for wiki content; this index stores only page links/dates",
+  "checkedAt": null,
+  "regions": [
+    {
+      "code": "KR",
+      "name": "Hàn Quốc",
+      "league": "LCK",
+      "indexUrl": "https://lol.fandom.com/wiki/Archive:Global_Contract_Database/KR",
+      "currentMirrorUrl": "https://lol.fandom.com/wiki/Archive:Global_Contract_Database/KR/Current",
+      "dates": [],
+      "lastIndexedAt": null
+    },
+    {
+      "code": "CN",
+      "name": "Trung Quốc",
+      "league": "LPL",
+      "indexUrl": "https://lol.fandom.com/wiki/Archive:Global_Contract_Database/CN",
+      "currentMirrorUrl": "https://lol.fandom.com/wiki/Archive:Global_Contract_Database/CN/Current",
+      "dates": [],
+      "lastIndexedAt": null
+    },
+    {
+      "code": "EMEA",
+      "name": "EMEA",
+      "league": "LEC/ERL",
+      "indexUrl": "https://lol.fandom.com/wiki/Archive:Global_Contract_Database/EMEA",
+      "currentMirrorUrl": "https://lol.fandom.com/wiki/Archive:Global_Contract_Database/EMEA/Current",
+      "dates": [],
+      "lastIndexedAt": null
+    },
+    {
+      "code": "AME",
+      "name": "Châu Mỹ",
+      "league": "LCS/CBLOL",
+      "indexUrl": "https://lol.fandom.com/wiki/Archive:Global_Contract_Database/AME",
+      "currentMirrorUrl": "https://lol.fandom.com/wiki/Archive:Global_Contract_Database/AME/Current",
+      "dates": [],
+      "lastIndexedAt": null
+    },
+    {
+      "code": "APAC",
+      "name": "Châu Á–Thái Bình Dương",
+      "league": "LCP",
+      "indexUrl": "https://lol.fandom.com/wiki/Archive:Global_Contract_Database/APAC",
+      "currentMirrorUrl": "https://lol.fandom.com/wiki/Archive:Global_Contract_Database/APAC/Current",
+      "dates": [],
+      "lastIndexedAt": null
+    },
+    {
+      "code": "VN",
+      "name": "Việt Nam (lịch sử)",
+      "league": "VCS",
+      "indexUrl": "https://lol.fandom.com/wiki/Archive:Global_Contract_Database/VN",
+      "currentMirrorUrl": "https://lol.fandom.com/wiki/Archive:Global_Contract_Database/VN/Current",
+      "dates": [],
+      "lastIndexedAt": null
+    }
+  ],
+  "notes": "Archive history pointers, not official contracts. Historical data must not overwrite Riot."
+}
