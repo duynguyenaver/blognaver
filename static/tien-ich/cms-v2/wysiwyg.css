@@ -1,0 +1,15 @@
+/* Vietnamese-safe UI typography, original navy palette unchanged */
+.article-title,.subtitle,.article-body,.ql-editor,.ql-toolbar,.preview-content{font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans",Arial,sans-serif!important;font-kerning:normal;letter-spacing:normal;overflow-wrap:anywhere}
+.article-title{font-weight:750!important;line-height:1.35!important}.subtitle{font-size:19px!important;line-height:1.65!important}
+.article-title::placeholder,.subtitle::placeholder{opacity:1}
+.v2-rich-toolbar.ql-toolbar.ql-snow{display:flex;flex-wrap:wrap;gap:5px;border:1px solid var(--border);border-radius:10px 10px 0 0;background:var(--panel2);padding:10px}
+.v2-rich-toolbar .ql-formats{margin-right:5px!important}
+.v2-rich-toolbar .ql-stroke{stroke:var(--text)!important}.v2-rich-toolbar .ql-fill{fill:var(--text)!important}.v2-rich-toolbar .ql-picker,.v2-rich-toolbar .ql-picker-label{color:var(--text)!important}
+.v2-rich-editor.ql-container.ql-snow{border:1px solid var(--border);border-top:0;background:var(--bg);color:var(--text);border-radius:0 0 10px 10px}
+.v2-rich-editor .ql-editor{min-height:440px;font-size:17px;line-height:1.9;padding:25px 15px;color:var(--text)}
+.v2-rich-editor .ql-editor.ql-blank::before{color:var(--muted);font-style:normal}
+.v2-rich-editor .ql-editor h1,.v2-rich-editor .ql-editor h2,.v2-rich-editor .ql-editor h3{color:var(--text);line-height:1.4}
+.v2-rich-toolbar .ql-picker-options{background:var(--panel2)!important;color:var(--text)!important;border-color:var(--border)!important}
+.v2-rich-toolbar button:hover,.v2-rich-toolbar button:focus-visible,.v2-rich-toolbar .ql-active{background:var(--panel)!important;border-radius:5px}
+.v2-hidden-source{position:absolute!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important;overflow:hidden!important}
+@media(max-width:760px){.v2-rich-editor .ql-editor{min-height:330px;padding:16px;font-size:16px}}
