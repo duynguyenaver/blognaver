@@ -70,3 +70,6 @@ Article detail pages now use one centered 900px frame with 20px internal padding
 
 ## Resume editor and A4 typography (2026-10-31)
 Resume CMS uses 16px cards, 44px controls, associated labels and full-width multiline experience descriptions. The shared preview/published stylesheet prints a 186mm content lane on A4 (10mm vertical / 12mm horizontal margins), 11pt narrative text at 1.5 line height and 10pt table data. Personal-info columns reserve space for the portrait; long email addresses wrap inside the cell. Short entries stay together while long essays can continue on another page. Hide utility chrome, preserve the document title.
+
+## CMS V2 viewport layout (2026-10-31)
+The standalone `.cms-v2-app` shell uses the dynamic viewport height on desktop, with separate scrolling for navigation, workspace, document body and metadata. Keep the action bar inside the workspace at top:0; never reuse the old page-level 66px sticky offset inside that scroll region. At short desktop heights the workspace remains scrollable. Narrow/mobile layouts use natural document flow for virtual keyboards. Hidden Markdown source must have min-height:0 and a 1px clipped box positioned inside `.editor-main`; it must not inherit the visible editor's minimum height or create trailing overflow. Scope layout CSS to CMS V2, preserving CMS V1/public UI.

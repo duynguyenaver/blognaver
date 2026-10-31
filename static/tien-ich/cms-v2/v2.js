@@ -12,6 +12,7 @@ function page(name,{updateUrl=true}={}){
  if(name==="posts")loadPosts();
  if(name==="media")loadMedia();
  window.scrollTo(0,0);
+ document.querySelector(".main")?.scrollTo(0,0);
 }
 $$("[data-page]").forEach(b=>b.onclick=()=>page(b.dataset.page));$$("[data-go]").forEach(b=>b.onclick=()=>page(b.dataset.go));$("dashNew").onclick=()=>page("editor");
 async function call(path,opts={}){const h={Accept:"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"};if(token)h.Authorization="Bearer "+token;if(opts.body)h["Content-Type"]="application/json";const r=await fetch(API+path,{...opts,headers:h,cache:"no-store"});if(!r.ok)throw Error("GitHub HTTP "+r.status+" · "+path);return r.status===204?null:r.json()}
