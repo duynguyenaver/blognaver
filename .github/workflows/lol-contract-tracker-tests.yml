@@ -46,6 +46,20 @@ jobs:
       - name: Probe Riot public GCD source (read-only, non-blocking)
         continue-on-error: true
         run: python3 scripts/update-lol-contracts.py --check
+      - name: Generate initial public GCD snapshot for review (temporary)
+        run: |
+          python3 scripts/update-lol-contracts.py
+          python3 - <<'PY'
+          import json
+          file="static/tien-ich/lol-contract-tracker/gcd.json"
+          data=json.load(open(file,encoding="utf-8"))
+          if len(data["rows"])<100: raise SystemExit("Not enough verified Riot records; refusing initial snapshot")
+          payload=json.dumps(data,ensure_ascii=True,separators=(",",":"))
+          print("BN_GCD_PAYLOAD_BEGIN",len(payload))
+          for start in range(0,len(payload),2500):
+              print("BN_GCD_PAYLOAD_PART",start//2500,payload[start:start+2500])
+          print("BN_GCD_PAYLOAD_END",len(data["rows"]))
+          PY
       - name: Check JSON schema and attribution
         run: |
           python3 - <<'PY'
