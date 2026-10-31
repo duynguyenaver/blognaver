@@ -24,9 +24,6 @@
     {{- partial "head/link.html" . -}}
     {{- partial "head/seo.html" . -}}
     <link rel="stylesheet" href="{{ "css/summary-actions.css" | relURL }}">
-    {{- if eq .RelPermalink ("about/" | relURL) -}}
-    <link rel="stylesheet" href="{{ "css/about-bento.css" | relURL }}">
-    {{- end -}}
     {{- if and .IsPage (eq .Section "posts") -}}
     {{- with .Params.series -}}
     <script>
@@ -64,7 +61,7 @@
       body > header nav a, body > header nav span,
       header nav a, header nav .menu-item, header nav .menu-item a,
       header .menu a, header .menu-inner a,
-      header a[href*="/posts/"], header a[href*="/gioi-thieu/"],
+      header a[href*="/posts/"],
       header a[href*="/resume/"], header a[href*="/tien-ich/"],
       header a[href*="/cms/"] {
         text-transform: uppercase !important;
