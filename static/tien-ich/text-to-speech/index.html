@@ -39,15 +39,17 @@ const status=(msg,error=false)=>{els.status.textContent=msg;els.status.classList
 const setUI=()=>{els.listen.disabled=speaking||recording;els.record.disabled=speaking||recording;els.stop.disabled=!speaking&&!recording};
 
 if(!synth){status("Trình duyệt không hỗ trợ Web Speech API.",true);els.listen.disabled=true;els.record.disabled=true;return}
+let userSelectedVoice=false;
+els.voice.addEventListener("change",()=>{userSelectedVoice=true});
 function loadVoices(){
- const current=els.voice.value;
+ const currentName=voices[Number(els.voice.value)]?.name;
  voices=synth.getVoices();
  els.voice.replaceChildren();
  if(!voices.length){els.voice.add(new Option("Chưa tìm thấy giọng đọc",""));return}
  voices.forEach((v,i)=>els.voice.add(new Option(`${v.name} · ${v.lang}${v.localService?" · local":""}`,String(i))));
  const hoaiMy=voices.findIndex(v=>/microsoft/i.test(v.name)&&/hoai\s*my/i.test(v.name)&&/natural/i.test(v.name)&&v.lang.toLowerCase().startsWith("vi"));
  const prefer=hoaiMy>=0?hoaiMy:voices.findIndex(v=>v.lang.toLowerCase().startsWith("vi"));
- const picked=voices.findIndex((v,i)=>String(i)===current);
+ const picked=userSelectedVoice?voices.findIndex(v=>v.name===currentName):-1;
  els.voice.value=String(picked>=0?picked:prefer>=0?prefer:0);
 }
 loadVoices();
