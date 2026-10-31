@@ -473,5 +473,15 @@
    audioCtx?.close().catch(()=>{});
  });
  window.BNClipMakerCore=Object.freeze({makeCueLines,chooseMime,fmt});
- sizeCanvas();labelSettings();syncDuration();report("Sẵn sàng. Nhập ảnh, voiceover và bấm phát để xem trước.");
+ sizeCanvas();labelSettings();syncDuration();
+ report("Sẵn sàng. Nhập ảnh, voiceover và bấm phát để xem trước.");
+ try {
+   const incoming=sessionStorage.getItem("blognaver.clipmaker.script.v1");
+   if(incoming) {
+     ui.script.value=incoming;
+     createCues(false);
+     sessionStorage.removeItem("blognaver.clipmaker.script.v1");
+     report("Đã nhận "+incoming.length.toLocaleString("vi-VN")+" ký tự kịch bản từ TTS. Hãy kiểm tra phụ đề và nhập file WAV/MP3.");
+   }
+ } catch(e) { /* Storage may be disabled: manual paste remains available. */ }
 })();
