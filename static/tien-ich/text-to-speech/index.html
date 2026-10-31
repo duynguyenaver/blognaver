@@ -21,6 +21,29 @@
 #voiceoverPreprocessor .prep-status.bad{color:#ffb1bb}
 #voiceoverPreprocessor .prep-label{color:var(--blue);font-weight:800;font-size:11px;letter-spacing:.1em;text-transform:uppercase}
 @media(max-width:760px){#voiceoverPreprocessor .prep-grid{grid-template-columns:1fr}#voiceoverPreprocessor textarea{height:245px;min-height:200px}#voiceoverPreprocessor .prep-actions button{flex:1 1 145px}}
+
+/* Section 3: Voice Fixer / Natural Rhythm */
+#voiceFixer{margin:22px 0 26px;border-radius:16px;padding:clamp(18px,3vw,28px)}
+#voiceFixer .fixer-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:15px;flex-wrap:wrap}
+#voiceFixer .fixer-kicker{font-size:11px;letter-spacing:.12em;font-weight:800;color:var(--blue);text-transform:uppercase}
+#voiceFixer h2{margin:4px 0 10px}
+#voiceFixer .fixer-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin:18px 0}
+#voiceFixer .fixer-column{min-width:0}
+#voiceFixer .fixer-label{display:block;font-size:13px;font-weight:700;margin-bottom:8px}
+#voiceFixer .fixer-toolbar{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+#voiceFixer .fixer-toolbar .fixer-label{margin:0}
+#voiceFixer textarea{width:100%;min-height:220px;height:300px;max-height:650px;resize:vertical;border:1px solid #476487;border-radius:12px;background:#0b1c32;color:var(--text);padding:14px;font:15px/1.75 system-ui,-apple-system,"Segoe UI",sans-serif}
+#voiceFixer .fixer-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+#voiceFixer .fixer-option{display:flex;align-items:flex-start;gap:11px;background:rgba(56,189,248,.045);border:1px solid var(--line);border-radius:12px;padding:14px;cursor:pointer;min-width:0}
+#voiceFixer .fixer-option input{width:18px;height:18px;flex:none;margin:3px 0;accent-color:#6366f1}
+#voiceFixer .fixer-option strong{display:block;font-size:13px;color:var(--text)}
+#voiceFixer .fixer-option small{display:block;color:var(--muted);line-height:1.55}
+#voiceFixer .fixer-actions{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 6px}
+#voiceFixer .fixer-actions button{padding:12px 16px}
+#voiceFixer .fixer-status{font-size:13px;color:var(--muted);margin:10px 0;min-height:23px}
+#voiceFixer .fixer-status.bad{color:#ffb1bb}
+#voiceFixer .fixer-notice{font-size:12px;color:var(--muted);border-left:3px solid var(--blue);padding:11px 14px;border-radius:8px;background:#10243c;margin-top:12px}
+@media(max-width:760px){#voiceFixer .fixer-grid,#voiceFixer .fixer-options{grid-template-columns:1fr}#voiceFixer textarea{height:240px;min-height:180px}#voiceFixer .fixer-actions button{flex:1 1 150px}}
 </style></head>
 <body><main class="shell">
 <nav><a href="../">← Tiện ích</a><span>EDITORIAL / AUDIO LAB</span></nav>
@@ -68,6 +91,45 @@
   <button type="button" id="voiceoverToTts" disabled>↑ Gửi sang khung đọc TTS</button>
  </div>
  <div id="voiceoverStatus" class="prep-status" role="status" aria-live="polite">Sẵn sàng tiền xử lý.</div>
+</section>
+
+<section id="voiceFixer" class="panel" aria-labelledby="voiceFixerTitle">
+  <div class="fixer-heading">
+    <div>
+      <span class="fixer-kicker">SECTION 03 / NATURAL VOICE FIXER</span>
+      <h2 id="voiceFixerTitle">03 / Voice Fixer &amp; Nhịp điệu tự nhiên</h2>
+      <p>Tối ưu nhịp nghỉ và Việt hóa một số từ công nghệ tiếng Anh để giọng Hoài My đọc mượt hơn. Không cần Gemini, API key hoặc backend.</p>
+    </div>
+    <span class="tag">Offline · Browser-only</span>
+  </div>
+  <div class="fixer-grid">
+    <div class="fixer-column">
+      <div class="fixer-toolbar"><label for="voiceFixerInput" class="fixer-label">Kịch bản cần sửa</label>
+      <button type="button" id="voiceFixerFromSection2" class="secondary">↓ Lấy từ Section 2</button></div>
+      <textarea id="voiceFixerInput" spellcheck="true" placeholder="Dán kịch bản voiceover vào đây hoặc lấy kết quả từ Section 2..."></textarea>
+    </div>
+    <div class="fixer-column">
+      <label for="voiceFixerOutput" class="fixer-label">Kết quả Voice Fixer · Có thể chỉnh sửa</label>
+      <textarea id="voiceFixerOutput" spellcheck="true" placeholder="Văn bản sau xử lý sẽ xuất hiện ở đây. Có thể chỉnh sửa cách phát âm trước khi gửi sang TTS."></textarea>
+    </div>
+  </div>
+  <div class="fixer-options" role="group" aria-label="Tùy chọn tối ưu giọng đọc">
+    <label class="fixer-option" for="voiceFixerPacing">
+      <input id="voiceFixerPacing" type="checkbox" checked>
+      <span><strong>Ngắt nhịp tự nhiên</strong><small>Thêm dấu phẩy ở từ nối và vị trí chuyển ý phù hợp; tránh ngắt giữa thuật ngữ, con số.</small></span>
+    </label>
+    <label class="fixer-option" for="voiceFixerEnglish">
+      <input id="voiceFixerEnglish" type="checkbox" checked>
+      <span><strong>Việt hóa phát âm tiếng Anh</strong><small>Chuyển Wi-Fi, Terabits, Gigabytes, IoT, Drone, Bluetooth, AI… thành cách viết dễ đọc hơn.</small></span>
+    </label>
+  </div>
+  <div class="fixer-actions">
+    <button type="button" class="primary" id="voiceFixerProcess">✨ Tối ưu giọng đọc (Voice Fixer)</button>
+    <button type="button" id="voiceFixerToTts" disabled>↑ Chuyển sang TTS để đọc</button>
+    <button type="button" id="voiceFixerListen" class="secondary" disabled>▶ Nghe thử ngay</button>
+  </div>
+  <div id="voiceFixerStatus" class="fixer-status" role="status" aria-live="polite">Sẵn sàng. Hai bộ lọc đều bật theo mặc định.</div>
+  <div class="fixer-notice">Bộ từ điển sử dụng âm đọc xấp xỉ và dấu câu, không thay đổi engine giọng đọc. Kết quả được tự gửi lên Section 1 sau khi xử lý thành công; nếu TTS đang đọc/ghi hoặc có kịch bản cần bảo vệ, bạn sẽ được thông báo trước khi thay thế. Hãy nghe thử, kiểm tra tên riêng và số liệu trước khi xuất WAV.</div>
 </section>
 
 <footer>© BlogNaver · Audio xử lý cục bộ trên thiết bị. Kiểm tra điều khoản sử dụng của từng giọng đọc trước khi dùng thương mại.</footer>
@@ -249,4 +311,4 @@ els.record.addEventListener("click",async()=>{
 });
 window.addEventListener("pagehide",()=>{synth.cancel();cleanup();if(objectURL)URL.revokeObjectURL(objectURL)});
 })();
-</script><script src="voiceover-preprocess.js" defer></script></body></html>
+</script><script src="voiceover-preprocess.js" defer></script><script src="voice-fixer.js" defer></script></body></html>
