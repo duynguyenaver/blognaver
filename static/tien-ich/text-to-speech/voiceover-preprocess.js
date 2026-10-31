@@ -85,7 +85,7 @@
   }
 
   function textSentence(value) {
-    const text = spokenSymbols(value);
+    const text = spokenSymbols(value).replace(/[:：]\s*$/, "");
     if (!text) return "";
     return /[.!?…]["”']?$/.test(text) ? text : text + ".";
   }
@@ -94,7 +94,7 @@
     const t = spokenSymbols(title.replace(/[#:]+$/g, ""));
     if (!t) return "";
     const lower = t.charAt(0).toLocaleLowerCase("vi-VN") + t.slice(1);
-    if (/^(?:kết luận|tổng kết|nhìn chung|lời kết)/i.test(t)) return "Nhìn chung, " + lower + ".";
+    if (/^(?:kết luận|tổng kết|nhìn chung|lời kết)$/i.test(t)) return "Nhìn chung,";
     if (/^(?:thách thức|rủi ro|khó khăn)/i.test(t)) return "Một vấn đề đáng chú ý là " + lower + ".";
     if (index === 0) return "Đầu tiên là " + lower + ".";
     if (index === total - 1 && total >= 3) return "Cuối cùng là " + lower + ".";
@@ -146,12 +146,15 @@
     const headingCount = blocks.filter(b => b.kind === "heading").length;
     const paragraphCount = blocks.filter(b => b.kind === "paragraph").length;
     let headingIndex = 0, paragraphIndex = 0;
+    let nextParagraphPrefix = "";
     const narration = [];
     for (const b of blocks) {
       if (b.kind === "title") {
         narration.push(textSentence(b.text));
       } else if (b.kind === "heading") {
-        narration.push(headingNarration(b.text, headingIndex++, headingCount));
+        const heading = headingNarration(b.text, headingIndex++, headingCount);
+        if (heading === "Nhìn chung,") nextParagraphPrefix = "Nhìn chung, ";
+        else narration.push(heading);
       } else {
         let paragraph = spokenSymbols(b.text);
         // Conservative connective phrases, only for longer standalone paragraphs
@@ -160,6 +163,10 @@
         if (!headingCount && paragraphCount >= 3 && paragraph.length >= 65 && !startsWithTransition) {
           if (paragraphIndex === 1) paragraph = "Tiếp theo, " + paragraph.charAt(0).toLocaleLowerCase("vi-VN") + paragraph.slice(1);
           else if (paragraphIndex === paragraphCount - 1 && /^(?:kết luận|tóm lại|tổng kết|như vậy)/i.test(paragraph)) paragraph = "Nhìn chung, " + paragraph.charAt(0).toLocaleLowerCase("vi-VN") + paragraph.slice(1);
+        }
+        if (nextParagraphPrefix) {
+          paragraph = nextParagraphPrefix + paragraph.charAt(0).toLocaleLowerCase("vi-VN") + paragraph.slice(1);
+          nextParagraphPrefix = "";
         }
         narration.push(textSentence(paragraph));
         paragraphIndex++;
