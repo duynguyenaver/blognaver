@@ -1,8 +1,6 @@
 /* UI-only PIN gate. Not a security boundary on a public static site. */
 (() => {
   "use strict";
-  // Set only by authenticated HTML responses of the private Worker gateway.
-  if (window.__BN_OAUTH_AUTHENTICATED === true) return;
   const BASE = "/blognaver/";
   const HASH = "46eaa26621e4955c1675b55d446c6d03325f458b59a465f898d42924010e7286";
   const KEY = "blognaver.ui-gate.v1";
@@ -12,13 +10,11 @@
   const segments = relative.split("/").filter(Boolean);
   // Public: homepage, posts, published articles, Resume listings/details, and Resume CMS.
   // This only bypasses the UI PIN. GitHub write operations still require authentication.
-  if (!segments.length || segments[0] === "posts" || segments[0] === "bai-viet" || segments[0] === "resume" || segments[0] === "cms" || (segments[0] === "page" && segments.length === 2 && /^[1-9][0-9]*$/.test(segments[1]))) return;
+  if (!segments.length || segments[0] === "posts" || segments[0] === "bai-viet" || segments[0] === "resume" || segments[0] === "resume-cms" || segments[0] === "cms" || (segments[0] === "tien-ich" && segments[1] === "tao-series-post") || (segments[0] === "page" && segments.length === 2 && /^[1-9][0-9]*$/.test(segments[1]))) return;
   document.documentElement.classList.add("bn-pin-protected");
   const unlock = () => document.documentElement.classList.remove("bn-pin-protected");
-  // Legacy PIN fallback remains active only until a real OAuth gateway is provisioned.
-  // An OAuth session on workers.dev cannot be faked by a stored PIN hash.
-  function showLegacyPin() {
-    try { if (sessionStorage.getItem(KEY) === HASH) { unlock(); return; } } catch (_) {}
+  if (sessionStorage.getItem(KEY) === HASH) { unlock(); return; }
+  function show() {
     if (document.getElementById("bn-pin-gate")) return;
     const shell = document.createElement("div");
     shell.id = "bn-pin-gate";
@@ -41,38 +37,6 @@
     });
     input.focus();
   }
-  function showGithubSignIn(gateway) {
-    if(document.getElementById("bn-pin-gate"))return;
-    const shell=document.createElement("div");
-    shell.id="bn-pin-gate";
-    shell.setAttribute("role","dialog");
-    shell.setAttribute("aria-modal","true");
-    shell.innerHTML='<div class="bn-pin-box"><div class="bn-pin-brand">BLOGNAVER · GITHUB PRIVATE WORKSPACE</div>'+
-      '<h1>Đăng nhập GitHub</h1><p>Truy cập Tiện ích và Resume CMS qua cổng đăng nhập GitHub. Không cần nhập PIN hay dán GitHub token.</p>'+
-      '<button id="bn-login-github" type="button">Đăng nhập bằng GitHub</button>'+
-      '<p id="bn-pin-message" role="status" aria-live="polite">Sau khi đăng nhập, trang được mở trên máy chủ bảo vệ thay vì GitHub Pages công khai.</p>'+
-      '<a href="/blognaver/">← Trở lại trang chủ</a></div>';
-    document.body.append(shell);
-    shell.querySelector("#bn-login-github").addEventListener("click",()=>{
-      const path=location.pathname+location.search;
-      location.assign(gateway+"/auth/start?return_to="+encodeURIComponent(path));
-    });
-  }
-  async function boot(){
-    let gateway="";
-    try {
-      const response=await fetch(BASE+"auth-config.json",{cache:"no-store"});
-      if(response.ok) {
-        const cfg=await response.json();
-        const url=new URL(cfg.gatewayOrigin||"");
-        if(url.protocol==="https:" && url.origin===url.href.replace(/\/$/,"") &&
-           !/github\.io$/i.test(url.hostname)) gateway=url.origin;
-      }
-    } catch (_) { /* OAuth not provisioned yet; preserve existing access path. */ }
-    if(gateway)showGithubSignIn(gateway);
-    else if(segments[0]==="resume-cms")unlock(); // Preserve the previously public CMS until real Worker cutover.
-    else showLegacyPin();
-  }
-  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot,{once:true});
-  else boot();
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",show,{once:true});
+  else show();
 })();
