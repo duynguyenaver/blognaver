@@ -12,8 +12,11 @@
       "league": "LCK",
       "indexUrl": "https://lol.fandom.com/wiki/Archive:Global_Contract_Database/KR",
       "currentMirrorUrl": "https://lol.fandom.com/wiki/Archive:Global_Contract_Database/KR/Current",
-      "dates": [],
-      "lastIndexedAt": null
+      "dates": [
+        "2026-01-19"
+      ],
+      "lastIndexedAt": null,
+      "seedStatus": "Publicly indexed archive pages (small verified starter links; not full history)."
     },
     {
       "code": "CN",
@@ -30,8 +33,12 @@
       "league": "LEC/ERL",
       "indexUrl": "https://lol.fandom.com/wiki/Archive:Global_Contract_Database/EMEA",
       "currentMirrorUrl": "https://lol.fandom.com/wiki/Archive:Global_Contract_Database/EMEA/Current",
-      "dates": [],
-      "lastIndexedAt": null
+      "dates": [
+        "2026-06-11",
+        "2026-06-10"
+      ],
+      "lastIndexedAt": null,
+      "seedStatus": "Publicly indexed archive pages (small verified starter links; not full history)."
     },
     {
       "code": "AME",
@@ -39,8 +46,12 @@
       "league": "LCS/CBLOL",
       "indexUrl": "https://lol.fandom.com/wiki/Archive:Global_Contract_Database/AME",
       "currentMirrorUrl": "https://lol.fandom.com/wiki/Archive:Global_Contract_Database/AME/Current",
-      "dates": [],
-      "lastIndexedAt": null
+      "dates": [
+        "2026-05-26",
+        "2026-05-04"
+      ],
+      "lastIndexedAt": null,
+      "seedStatus": "Publicly indexed archive pages (small verified starter links; not full history)."
     },
     {
       "code": "APAC",
@@ -48,8 +59,12 @@
       "league": "LCP",
       "indexUrl": "https://lol.fandom.com/wiki/Archive:Global_Contract_Database/APAC",
       "currentMirrorUrl": "https://lol.fandom.com/wiki/Archive:Global_Contract_Database/APAC/Current",
-      "dates": [],
-      "lastIndexedAt": null
+      "dates": [
+        "2026-06-12",
+        "2026-05-09"
+      ],
+      "lastIndexedAt": null,
+      "seedStatus": "Publicly indexed archive pages (small verified starter links; not full history)."
     },
     {
       "code": "VN",
@@ -57,8 +72,12 @@
       "league": "VCS",
       "indexUrl": "https://lol.fandom.com/wiki/Archive:Global_Contract_Database/VN",
       "currentMirrorUrl": "https://lol.fandom.com/wiki/Archive:Global_Contract_Database/VN/Current",
-      "dates": [],
-      "lastIndexedAt": null
+      "dates": [
+        "2024-12-06",
+        "2024-12-05"
+      ],
+      "lastIndexedAt": null,
+      "seedStatus": "Publicly indexed archive pages (small verified starter links; not full history)."
     }
   ],
   "notes": "Archive history pointers, not official contracts. Historical data must not overwrite Riot."
