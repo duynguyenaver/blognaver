@@ -212,7 +212,7 @@
    if(!asset?.media)return;
    const media=asset.media;
    const width=asset.type==="image"?media.naturalWidth:media.videoWidth, height=asset.type==="image"?media.naturalHeight:media.videoHeight;
-   if(!width||!height)return;
+   if(!width||!height||asset.type==="video"&&media.readyState<2)return;
    const w=canvas.width,h=canvas.height;
    const fill=ui.fit.value==="cover";
    const ratio=fill?Math.max(w/width,h/height):Math.min(w/width,h/height);
@@ -264,7 +264,7 @@
  function drawSubtitles(t){
    if(!ui.showSubs.checked||!cues.length)return;
    const cue=cues.find(x=>t>=x.start&&t<x.end);if(!cue)return;
-   const w=canvas.width,h=canvas.height,fontSize=Number(ui.fontSize.value)*(w/1920);
+   const w=canvas.width,h=canvas.height,fontSize=Number(ui.fontSize.value)*(ui.aspect.value==="portrait"?w/1080:w/1920);
    ctx.save();ctx.textAlign="center";ctx.textBaseline="middle";ctx.font="800 "+Math.max(18,fontSize)+"px system-ui, sans-serif";
    const lines=wrapText(cue.text,w*.82);
    const gap=fontSize*1.18;
@@ -391,8 +391,11 @@
  ui.stillDuration.addEventListener("input",()=>{if(!exporting)syncDuration()});
  ui.script.addEventListener("input",()=>{cues=[];refreshTimeline()});
  function chooseMime(){
-   const types=["video/mp4;codecs=avc1.42E01E,mp4a.40.2","video/mp4",
-     "video/webm;codecs=vp9,opus","video/webm;codecs=vp8,opus","video/webm"];
+   const withAudio=Boolean(voiceURL||bgmURL);
+   const types=withAudio?["video/mp4;codecs=avc1.42E01E,mp4a.40.2","video/mp4",
+     "video/webm;codecs=vp9,opus","video/webm;codecs=vp8,opus","video/webm"]:
+     ["video/mp4;codecs=avc1.42E01E","video/mp4",
+     "video/webm;codecs=vp9","video/webm;codecs=vp8","video/webm"];
    return types.find(x=>MediaRecorder.isTypeSupported(x))||null;
  }
  function setExportLock(lock){
@@ -466,5 +469,6 @@
    for(const item of assets)revoke(item.url);
    audioCtx?.close().catch(()=>{});
  });
+ window.BNClipMakerCore=Object.freeze({makeCueLines,chooseMime,fmt});
  sizeCanvas();labelSettings();syncDuration();report("Sẵn sàng. Nhập ảnh, voiceover và bấm phát để xem trước.");
 })();
