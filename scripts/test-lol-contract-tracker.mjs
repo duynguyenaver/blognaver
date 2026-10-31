@@ -50,6 +50,11 @@ test("snapshot is validated; false dates become unspecified rather than fabricat
   const rows=core.snapshot({rows:[{handle:"Test",team:"T1",league:"LCK",endDate:"2026-02-30"}]});
   assert.equal(rows.rows[0].endDate,"");
   assert.throws(()=>core.snapshot({rows:"bad"}),/không hợp lệ/);
-  assert.equal(bootstrap.rows.length,0);
-  assert.equal(bootstrap.fetchedAt,null);
+  assert.ok(Array.isArray(bootstrap.rows));
+  if(bootstrap.rows.length){
+    assert.ok(bootstrap.fetchedAt,"Real snapshot must disclose retrieval time");
+    assert.ok(bootstrap.regions?.length>=1,"Real snapshot must list tab sources");
+    assert.ok(bootstrap.rows.every(r=>r.sourceUrl.startsWith("https://docs.google.com/spreadsheets/")));
+    assert.ok(bootstrap.rows.every(r=>r.handle&&r.team&&r.league));
+  }
 });
