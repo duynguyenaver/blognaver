@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+<title id="title">T1 — Sáu chức vô địch thế giới, 2013 đến 2025</title>
+<desc id="desc">Poster minh họa độc lập BlogNaver: sân vận động esports đỏ đen, chiếc cúp tượng trưng, sáu ngôi sao cho sáu chức vô địch Worlds và năm bóng hình tuyển thủ. Không phải ảnh tư liệu hoặc chân dung người thật.</desc>
+<defs>
+ <radialGradient id="sky" cx=".49" cy=".33" r=".85"><stop offset="0" stop-color="#672328"/><stop offset=".4" stop-color="#210c17"/><stop offset="1" stop-color="#06070d"/></radialGradient>
+ <linearGradient id="red" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ff624d"/><stop offset=".5" stop-color="#bd1425"/><stop offset="1" stop-color="#720b21"/></linearGradient>
+ <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff3b6"/><stop offset=".31" stop-color="#d7a558"/><stop offset=".67" stop-color="#ffdc86"/><stop offset="1" stop-color="#7e421a"/></linearGradient>
+ <linearGradient id="metal" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#d6dfe8"/><stop offset=".45" stop-color="#556273"/><stop offset="1" stop-color="#1e2635"/></linearGradient>
+ <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#310c1b"/><stop offset="1" stop-color="#0b0810"/></linearGradient>
+ <pattern id="grid" width="80" height="80" patternUnits="userSpaceOnUse"><path d="M80 0H0V80" stroke="#bd2230" stroke-opacity=".12" stroke-width="1" fill="none"/></pattern>
+ <filter id="glow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="16"/></filter>
+ <filter id="soft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="4"/></filter>
+ <g id="star"><path d="M0-26 7-9 25-9 11 3 16 21 0 11-16 21-11 3-25-9-7-9Z" fill="url(#gold)" stroke="#fff0b0" stroke-width="1.4"/></g>
+ <g id="person"><ellipse cx="0" cy="0" rx="31" ry="40" fill="#12121a" stroke="#54222a" stroke-width="2"/><path d="M-35 40Q-78 48-98 155L-91 215H91L98 155Q79 48 35 40Z" fill="#11121a" stroke="#732d36" stroke-width="3"/><path d="M-42 68 0 95 42 68M-83 149H83" stroke="#e02e3b" stroke-width="7" fill="none" opacity=".75"/><path d="M-70 190H70" stroke="#5f2b3e" stroke-width="3"/></g>
+</defs>
+<rect width="1600" height="900" fill="url(#sky)"/><rect width="1600" height="900" fill="url(#grid)"/>
+<!-- stadium floodlights and towering spotlight cones -->
+<g opacity=".6"><path d="M0 48 540 660 700 650 250 0Z" fill="#ed4142" opacity=".11"/><path d="M1600 38 1080 650 940 650 1340 0Z" fill="#ffbd80" opacity=".10"/></g>
+<g stroke="#fa545b" stroke-opacity=".3" fill="none"><path d="M-50 360Q800 0 1650 360" stroke-width="9"/><path d="M-50 410Q800 90 1650 410" stroke-width="5"/><path d="M-50 480Q800 160 1650 480" stroke-width="3"/></g>
+<g fill="#fef3c7"><circle cx="80" cy="246" r="5"/><circle cx="234" cy="178" r="6"/><circle cx="392" cy="128" r="5"/><circle cx="560" cy="91" r="5"/><circle cx="1040" cy="92" r="5"/><circle cx="1210" cy="132" r="5"/><circle cx="1372" cy="186" r="6"/><circle cx="1520" cy="248" r="5"/></g>
+<g opacity=".54" stroke="#db213b" stroke-width="3" fill="none"><path d="M0 510Q390 390 800 510T1600 510"/><path d="M0 542Q390 435 800 542T1600 542"/></g>
+<!-- six champions arranged as history markers -->
+<g transform="translate(605 248)"><use href="#star" x="0"/><use href="#star" x="76"/><use href="#star" x="152"/><use href="#star" x="228"/><use href="#star" x="304"/><use href="#star" x="380"/></g>
+<text x="800" y="181" font-family="Arial,Helvetica,sans-serif" font-weight="800" letter-spacing="10" font-size="25" text-anchor="middle" fill="#fbcf86">SIX WORLD CHAMPIONSHIPS</text>
+<text x="800" y="324" font-family="Arial,Helvetica,sans-serif" font-weight="900" font-size="130" text-anchor="middle" fill="#f6e9dd" letter-spacing="3">T1</text>
+<text x="800" y="390" font-family="Arial,Helvetica,sans-serif" font-weight="800" font-size="43" text-anchor="middle" fill="#ffc7ad" letter-spacing="6">ĐẾ CHẾ BẤT TỬ</text>
+<rect x="410" y="420" width="780" height="2" fill="#ed8b69"/>
+<!-- emblematic five-member roster, deliberately anonymous -->
+<g opacity=".92">
+ <use href="#person" transform="translate(415 550) scale(.88)"/>
+ <use href="#person" transform="translate(600 515) scale(1.04)"/>
+ <use href="#person" transform="translate(800 490) scale(1.19)"/>
+ <use href="#person" transform="translate(1000 515) scale(1.04)"/>
+ <use href="#person" transform="translate(1185 550) scale(.88)"/>
+</g>
+<!-- original symbolic trophy layered in front -->
+<ellipse cx="800" cy="730" rx="220" ry="34" fill="#e52c38" opacity=".35" filter="url(#glow)"/>
+<g transform="translate(800 625)">
+ <path d="M-69-78H69L54 5Q46 35 19 48V73H70V90H-70V73H-19V48Q-46 35-54 5Z" fill="url(#gold)" stroke="#fef3c7" stroke-width="3"/>
+ <path d="M-70-64Q-142-88-141-15Q-138 33-55 25M70-64Q142-88 141-15Q138 33 55 25" stroke="url(#gold)" stroke-width="14" fill="none"/>
+ <path d="M-45-47H45L33 5Q28 22 0 30Q-28 22-33 5Z" fill="#0c1420" stroke="#e7b764" stroke-width="4"/>
+ <path d="M0-24 18-4 0 16-18-4Z" fill="#f6e6af"/><path d="M-53 81H53" stroke="#fff3bb" stroke-width="3"/>
+</g>
+<!-- red angled foreground strips and editorial footer -->
+<path d="M0 755 360 707 500 900H0Z" fill="#a60a26" opacity=".77"/><path d="M1600 755 1240 707 1100 900H1600Z" fill="#a60a26" opacity=".77"/>
+<rect x="0" y="782" width="1600" height="118" fill="#070a12" opacity=".94"/>
+<text x="800" y="822" font-family="Arial,Helvetica,sans-serif" font-weight="700" font-size="23" text-anchor="middle" fill="#fff" letter-spacing="3">2013  •  2015  •  2016  •  2023  •  2024  •  2025</text>
+<text x="800" y="857" font-family="Arial,Helvetica,sans-serif" font-size="19" text-anchor="middle" fill="#f4b7b8">BLOGNAVER  /  LỊCH SỬ CÁC ĐỘI TUYỂN LOL THẾ GIỚI  /  KỲ 03</text>
+<g fill="#fff4dd" opacity=".65">
+ <circle cx="190" cy="520" r="3"/><circle cx="278" cy="620" r="2"/><circle cx="1480" cy="588" r="3"/><circle cx="1338" cy="477" r="2"/><circle cx="110" cy="640" r="4"/><circle cx="1526" cy="684" r="3"/>
+</g>
+</svg>
