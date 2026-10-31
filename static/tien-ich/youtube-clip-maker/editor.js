@@ -403,6 +403,9 @@
      ui[id].disabled=lock;
    }
    ui.cancelExport.disabled=!lock;
+   ui.pause.disabled=lock || !playing;
+   ui.restart.disabled=lock;
+   ui.scrubber.disabled=lock;
    renderAssets();
  }
  function finishCapture(){
