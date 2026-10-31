@@ -56,6 +56,14 @@ Applies to every existing and new BlogNaver utility, CMS tool and integration, e
 - If GitHub refuses the merge due to permissions, required approvals, branch rules, or a failed/pending check, report the precise blocker and fix permitted repository/workflow settings through a separate PR where possible. **Never silently fall back to manual approval as the intended workflow** or claim the deployment succeeded.
 - This owner policy supersedes older AGENTS.md passages requiring manual approval, manual merge, a particular reviewer, or prohibiting safe CI-gated auto-merge. Keep independent security and data-safety gates in force.
 
+## MANDATORY: One editorial blog post = one Pull Request (owner reminder, 2026-11-01)
+
+- **Every owner-requested blog article, including esports features, research, AI-assisted writing, new series episodes, manual CMS posts, and editorial revisions, MUST be published via a dedicated feature/content branch and its own Pull Request.** Never push, commit, upload, or write an article directly to `main`, whether using a GitHub token, REST Contents API, GitHub connector, CLI, CMS, or scheduled editorial publisher.
+- **One requested article = one separate content PR.** Related metadata, series catalog entry, licensed images, and links for that article may be included in the same PR; unrelated articles or application fixes require independent PRs.
+- Required sequence: latest `main` → `content/<descriptive-slug>` → add/edit `content/posts/*.md` with Hugo front matter, `draft: false` only when ready → open normal PR → run required content/Hugo/CI checks on the current head SHA → review/auto-merge only after checks succeed → verify GitHub Pages deployment and the final article URL.
+- Treat a commit to a feature branch as **not yet published**, and CI success/PR merge as **not evidence of live deploy**. Show the PR URL and actual state; never claim a new article is online without deployment verification.
+- This explicit editorial rule applies to the Movistar KOI-style article workflow and future analogous blog posts. Existing automated CI incident postmortem generation has separate documented controls; do not silently change it or use it as a bypass for normal editorial publishing.
+
 ## MANDATORY: Pull request first (project owner policy, 2026-10-30)
 
 All changes to this repository MUST be made on a dedicated branch and submitted via a Pull Request targeting `main`. This includes UI/UX, application code, blog content, documentation, workflows, configuration, and hotfixes.
