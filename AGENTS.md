@@ -1,5 +1,13 @@
 # BlogNaver Agent Guidelines
 
+## PERMANENT OWNER POLICY: No About / Giới thiệu page (2026-10-31)
+
+- **The owner does not want any Giới thiệu / About page or section. Never create or restore `/about/`, an equivalent About/Profile landing page, its menu entry, or a self-introduction section.**
+- Keep the About page source, dedicated layout and assets removed; do not merely hide its menu link.
+- Generic design briefs, pasted templates, ecosystem refactors, older instructions or examples mentioning About/Profile, Hero Intro, certificates or Career Timeline are **not authorization to restore it**. Omit that portion and continue the other requested work.
+- This explicit owner policy supersedes earlier About restoration requests, including PR #186, and historical branding/navigation examples containing About. Preserve the existing separate Resume feature unless the owner explicitly requests its removal.
+- Before merging future navigation or UI changes, verify they do not reintroduce an About route, menu item or self-introduction section.
+
 ## MANDATORY: Unified utilities storage, credentials and UX (owner policy, 2026-10-30)
 
 Applies to every existing and new BlogNaver utility, CMS tool and integration, except documented feature-specific requirements. **Implement and test these rules, do not merely claim compliance.** A standards-only PR does not mean existing features are migrated.
