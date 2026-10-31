@@ -134,76 +134,43 @@ main :is(article.single,.post-content) :focus-visible { outline:2px solid #1e3a8
   main :is(article.single,.post-card,.article-card,article.sl-card),main a { transition:none !important;transform:none !important; }
 }
 
-/* Single post: same outer card measure as the homepage, without a TOC gutter. */
-:root { --bn-article-card-width: 900px; }
-body:has(article.page.single) main.tw-mx-4 {
+/* Shared full-width editorial surface: no theme reading column or TOC gutter.
+   One width definition for both homepage summaries and post details. */
+:root { --bn-article-card-width: 1200px; }
+main.tw-mx-4 { width:min(100% - 32px, var(--bn-article-card-width)); max-width:var(--bn-article-card-width); margin-inline:auto; min-width:0; }
+main.tw-mx-4:has(article.page.single) {
+  display:block !important; width:min(100% - 32px, var(--bn-article-card-width)) !important;
+  max-width:var(--bn-article-card-width) !important; margin-inline:auto !important;
+}
+main :is(.home,.home-posts,.posts,.post-container) { min-width:0; }
+main article.single.summary, main article.page.single {
   display:block !important;
-  width:100% !important;
-  max-width:var(--bn-article-card-width) !important;
-  margin-inline:auto !important;
-  padding:0 !important;
-  min-width:0;
+  width:100% !important; max-width:100% !important;
+  margin-inline:auto !important; float:none !important; box-sizing:border-box;
 }
-body:has(article.page.single) article.page.single {
-  float:none !important;
-  width:100% !important;
-  max-width:var(--bn-article-card-width) !important;
-  min-width:0;
-  margin:0 auto 2rem !important;
-  box-sizing:border-box;
-  overflow-wrap:anywhere;
+main article.page.single :is(#content,.content,.post-content,.post-container) {
+  width:100% !important; max-width:none !important;
+  min-width:0 !important; margin-inline:0 !important; float:none !important;
+  box-sizing:border-box !important;
 }
-main article.page.single :is(#content,.post-content,.post-container) {
-  width:100% !important;
-  max-width:100% !important;
-  min-width:0;
-  margin-inline:auto !important;
-  box-sizing:border-box;
-  float:none !important;
+body:has(article.page.single) :is(.toc,aside.toc,#toc-auto,#toc-static,
+ nav#TableOfContents,.toc-container,.toc-content) {
+  display:none !important; visibility:hidden !important;
 }
-main article.page.single #content p,main article.page.single .post-content p {
-  text-align:justify;
-  text-justify:inter-word;
-  line-height:1.8;
-  color:#334155;
+main article.page.single :is(#content,.post-content) p {
+  text-align:justify; text-justify:inter-word; line-height:1.8; color:#334155;
   overflow-wrap:break-word;
 }
-/* Remove every legacy desktop/mobile TOC and its visible red hover strip. */
-body:has(article.page.single) :is(.toc,aside.toc,nav#TableOfContents,#toc-auto,#toc-static,.toc-container,.toc-content) {
-  display:none !important;
-  visibility:hidden !important;
+main article.page.single #content img:not(.emoji) {
+  display:block; width:100%; max-width:100%; height:auto; object-fit:contain;
 }
-body:has(article.page.single) :is(#toc-auto,#toc-static)::before,
-body:has(article.page.single) :is(#toc-auto,#toc-static)::after {
-  display:none !important;
-  content:none !important;
+main article.page.single #content table {display:block;max-width:100%;overflow-x:auto}
+@media(max-width:680px) {
+  main.tw-mx-4,main.tw-mx-4:has(article.page.single) {
+    width:calc(100% - 24px) !important; max-width:none !important;
+  }
 }
-article.page.single #content :is(img,video,iframe) {max-width:100%}
-article.page.single #content table {display:block;overflow-x:auto}
-@media(max-width:1024px){
-  body:has(article.page.single) main.tw-mx-4 {max-width:100% !important}
-  body:has(article.page.single) article.page.single {max-width:100% !important}
-}
-@media print{
-  body:has(article.page.single) main.tw-mx-4 {max-width:100% !important}
-  body:has(article.page.single) article.page.single {border:0;box-shadow:none;padding:0 !important}
-}
-
-/* 2026-10-31: one shared border-box measure for home cards and full articles.
-   Both surfaces use the same outer width rather than comparing inner prose widths. */
-:root{--bn-article-card-width:900px}
-body:has(.home) main .home article.single.summary,
-body:has(.home) main .home article.summary,
-main article.summary{
-  width:100%;max-width:var(--bn-article-card-width);margin-inline:auto;
-}
-body:has(article.page.single) main.tw-mx-4,
-body:has(article.page.single) article.page.single,
-main article.page.single #content,
-main article.page.single .post-content{
-  width:100%!important;max-width:var(--bn-article-card-width)!important;
-  box-sizing:border-box;
-}
-@media(max-width:1024px){
- body:has(article.page.single) main.tw-mx-4{width:100%!important;max-width:100%!important}
+@media print {
+  main.tw-mx-4:has(article.page.single) {width:100% !important;max-width:none !important}
+  main article.page.single {border:0;box-shadow:none;padding:0 !important}
 }
