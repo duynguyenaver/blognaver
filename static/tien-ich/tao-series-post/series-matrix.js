@@ -24,7 +24,26 @@ const unbase64=text=>new TextDecoder().decode(Uint8Array.from(atob(text.replace(
 const auth=()=>window.BNAuth?.read?.()||"";
 function cloudPath(){const id=slug($("matrixSlug").value);if(!id)throw Error("Cần slug hợp lệ để đồng bộ");return "data/series-matrix/"+id+".json"}
 async function cloudGet(){const t=auth(),res=await fetch(BASE+"/contents/"+cloudPath()+"?ref=main",{headers:{Accept:"application/vnd.github+json",...(t?{Authorization:"Bearer "+t}:{})},cache:"no-store"});if(res.status===404)return null;if(!res.ok)throw Error("GitHub read HTTP "+res.status);const body=await res.json();return {sha:body.sha,data:JSON.parse(unbase64(body.content))}}
-async function sync(){const btn=$("matrixSync");if(!auth())return notify("Cần kết nối GitHub token từ CMS để đồng bộ.");btn.disabled=true;btn.textContent="Đang đồng bộ…";try{const prior=await cloudGet();if(prior?.sha&&remoteSha!==prior.sha){notify("GitHub có thay đổi mới. Bấm Tải từ GitHub trước để tránh ghi đè.");return}const payload={schemaVersion:1,updatedAt:new Date().toISOString(),timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone,series:read()};const response=await fetch(BASE+"/contents/"+cloudPath(),{method:"PUT",headers:{Authorization:"Bearer "+auth(),Accept:"application/vnd.github+json","Content-Type":"application/json"},body:JSON.stringify({message:"data(series): sync episode matrix and schedule",branch:"main",content:utf8base64(JSON.stringify(payload,null,2)),...(prior?.sha?{sha:prior.sha}:{})})});if(!response.ok)throw Error("GitHub sync HTTP "+response.status);const saved=await response.json();remoteSha=saved.content?.sha||null;save();notify("Đã lưu lịch series và đồng bộ GitHub thành công! 🚀")}catch(e){notify("Đồng bộ thất bại: "+e.message)}finally{btn.disabled=false;btn.textContent="Lưu cấu trúc & Sync GitHub"}}
+async function sync(){
+const btn=$("matrixSync");if(!auth())return notify("Cần GitHub token từ CMS để đồng bộ.");
+btn.disabled=true;btn.textContent="Đang tạo PR…";
+try{
+ const prior=await cloudGet();
+ if(prior?.sha&&remoteSha!==prior.sha){notify("Bản GitHub mới hơn nháp. Tải từ GitHub để kiểm tra trước khi ghi.");return}
+ const payload={schemaVersion:1,updatedAt:new Date().toISOString(),timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone,series:read()};
+ const headers={Authorization:"Bearer "+auth(),Accept:"application/vnd.github+json","Content-Type":"application/json"};
+ const main=await fetch(BASE+"/git/ref/heads/main",{headers});if(!main.ok)throw Error("Không đọc được nhánh main");
+ const sha=(await main.json()).object.sha,workBranch="series/matrix-"+Date.now().toString(36);
+ const created=await fetch(BASE+"/git/refs",{method:"POST",headers,body:JSON.stringify({ref:"refs/heads/"+workBranch,sha})});if(!created.ok)throw Error("Không tạo được nhánh GitHub");
+ const response=await fetch(BASE+"/contents/"+cloudPath(),{method:"PUT",headers,body:JSON.stringify({message:"data(series): update matrix schedule",branch:workBranch,content:utf8base64(JSON.stringify(payload,null,2)),...(prior?.sha?{sha:prior.sha}:{})})});
+ if(!response.ok)throw Error("Không lưu được kế hoạch: HTTP "+response.status);
+ const pr=await fetch(BASE+"/pulls",{method:"POST",headers,body:JSON.stringify({title:"data(series): cập nhật lịch "+payload.series.slug,head:workBranch,base:"main",body:"Cập nhật thứ tự tập và lịch phát hành. Cần CI và merge để đồng bộ vào main."})});
+ if(!pr.ok)throw Error("Đã lưu lên nhánh "+workBranch+" nhưng không mở được PR");
+ const result=await pr.json();save();notify("Đã lưu kế hoạch lên GitHub · PR #"+result.number+" đang chờ merge 🚀");
+ window.open(result.html_url,"_blank","noopener");
+}catch(e){notify("Đồng bộ thất bại: "+e.message)}
+finally{btn.disabled=false;btn.textContent="Lưu cấu trúc & Sync GitHub"}
+}
 async function loadCloud(){try{const remote=await cloudGet();if(!remote)return notify("Chưa có kế hoạch series trên GitHub");if(!confirm("Thay thế nháp cục bộ bằng dữ liệu GitHub?"))return;remoteSha=remote.sha;const data=remote.data?.series||{};for(const k of ["title","slug","description","cover","tags"])$("matrix"+k[0].toUpperCase()+k.slice(1)).value=String(data[k]||"");episodes=Array.isArray(data.episodes)?data.episodes:[];render();save();notify("Đã tải cấu trúc từ GitHub")}catch(e){notify("Tải GitHub thất bại: "+e.message)}}
 $("matrixSync").onclick=sync;$("matrixLoadCloud").onclick=loadCloud;
 
