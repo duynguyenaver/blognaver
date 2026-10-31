@@ -134,80 +134,60 @@ main :is(article.single,.post-content) :focus-visible { outline:2px solid #1e3a8
   main :is(article.single,.post-card,.article-card,article.sl-card),main a { transition:none !important;transform:none !important; }
 }
 
-/* Owner update: centered 900px reading frame and one left slide-out TOC. */
+/* Single post: same outer card measure as the homepage, without a TOC gutter. */
+:root { --bn-article-card-width: 900px; }
 body:has(article.page.single) main.tw-mx-4 {
-  display:block !important;width:calc(100% - 32px) !important;
-  max-width:900px !important;margin-inline:auto !important;min-width:0;
+  display:block !important;
+  width:100% !important;
+  max-width:var(--bn-article-card-width) !important;
+  margin-inline:auto !important;
+  padding:0 !important;
+  min-width:0;
 }
 body:has(article.page.single) article.page.single {
-  float:none !important;width:100% !important;max-width:900px !important;
-  margin:0 auto 2rem !important;padding:0 20px !important;
-  min-width:0;box-sizing:border-box;overflow-wrap:anywhere;
+  float:none !important;
+  width:100% !important;
+  max-width:var(--bn-article-card-width) !important;
+  min-width:0;
+  margin:0 auto 2rem !important;
+  box-sizing:border-box;
+  overflow-wrap:anywhere;
 }
-main article.page.single #content,main article.page.single .post-content {
-  width:100%;max-width:900px !important;margin:0 auto !important;padding:0;float:none !important;
+main article.page.single :is(#content,.post-content,.post-container) {
+  width:100% !important;
+  max-width:100% !important;
+  min-width:0;
+  margin-inline:auto !important;
+  box-sizing:border-box;
+  float:none !important;
 }
-main article.page.single p,main article.page.single #content p {
-  text-align:justify;text-justify:inter-word;line-height:1.8;color:#334155;margin-bottom:1.5rem;
+main article.page.single #content p,main article.page.single .post-content p {
+  text-align:justify;
+  text-justify:inter-word;
+  line-height:1.8;
+  color:#334155;
+  overflow-wrap:break-word;
 }
-article.page.single :is(.single-title,.single-subtitle,.post-meta,.post-meta-line,.post-category,.post-series,.post-footer) {
-  min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;box-sizing:border-box;
+/* Remove every legacy desktop/mobile TOC and its visible red hover strip. */
+body:has(article.page.single) :is(.toc,aside.toc,nav#TableOfContents,#toc-auto,#toc-static,.toc-container,.toc-content) {
+  display:none !important;
+  visibility:hidden !important;
 }
-article.page.single .post-meta-line { flex-wrap:wrap; }
-article.page.single #content :is(img,video,iframe) { max-width:100%; }
-article.page.single #content table { display:block;overflow-x:auto; }
-body:has(article.page.single) :is(#toc-auto,#toc-static) { display:none !important; }
-@media screen and (min-width:1025px) {
-  body:has(article.page.single) #toc-auto,
-  body:has(article.page.single):not(:has(#toc-auto)) #toc-static {
-    display:block !important;position:fixed !important;inset:auto !important;
-    top:50% !important;left:0 !important;float:none !important;
-    transform:translateY(-50%) translateX(calc(-100% + 12px)) !important;
-    width:280px !important;max-width:280px !important;max-height:75vh;
-    margin:0 !important;box-sizing:border-box;padding:20px 16px !important;
-    overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;
-    z-index:9999 !important;background:#fff !important;
-    border:1px solid #e2e8f0 !important;border-left:4px solid #bc002d !important;
-    /* The exposed RIGHT edge is red while the rest of the panel is offscreen. */
-    border-right:12px solid #bc002d !important;border-radius:0 12px 12px 0 !important;
-    box-shadow:4px 0 20px rgb(0 0 0 / .08) !important;
-    transition:transform .3s cubic-bezier(.4,0,.2,1) !important;
-    color:#334155;font:400 14px/1.7 var(--bn-font);overflow-wrap:anywhere;
-  }
-  body:has(article.page.single) :is(#toc-auto,#toc-static):is(:hover,:focus-within) {
-    transform:translateY(-50%) translateX(0) !important;
-  }
-  body:has(article.page.single) :is(#toc-auto,#toc-static)::before {
-    content:"MỤC LỤC";display:block;font-size:.75rem;font-weight:700;
-    color:#bc002d;margin-bottom:12px;letter-spacing:.05em;
-  }
-  /* Only the outer wrapper floats. Theme scripts can never float its nested nav. */
-  body:has(article.page.single) :is(#toc-auto,#toc-static) :is(.toc,.toc-content,nav#TableOfContents) {
-    display:block !important;position:static !important;inset:auto !important;
-    transform:none !important;width:auto !important;max-width:none !important;
-    max-height:none !important;float:none !important;margin:0 !important;
-    padding:0 !important;background:transparent !important;border:0 !important;
-    box-shadow:none !important;overflow:visible !important;
-  }
-  body:has(article.page.single) :is(#toc-auto,#toc-static) .toc-title { display:none !important; }
-  body:has(article.page.single) :is(#toc-auto,#toc-static) ul { margin:0;padding-left:16px; }
-  body:has(article.page.single) :is(#toc-auto,#toc-static) a { display:block;padding:5px 0;color:#465b76;white-space:normal !important;overflow-wrap:anywhere; }
-  body:has(article.page.single) :is(#toc-auto,#toc-static) a:focus-visible { outline:2px solid #bc002d;outline-offset:2px; }
+body:has(article.page.single) :is(#toc-auto,#toc-static)::before,
+body:has(article.page.single) :is(#toc-auto,#toc-static)::after {
+  display:none !important;
+  content:none !important;
 }
-@media screen and (max-width:1024px) {
-  body:has(article.page.single) :is(.toc,#toc-auto,#toc-static,nav#TableOfContents) { display:none !important; }
-  body:has(article.page.single) article.page.single { max-width:100% !important;padding:0 16px !important; }
-  main article.page.single p,main article.page.single #content p { text-align:left; }
+article.page.single #content :is(img,video,iframe) {max-width:100%}
+article.page.single #content table {display:block;overflow-x:auto}
+@media(max-width:1024px){
+  body:has(article.page.single) main.tw-mx-4 {max-width:100% !important}
+  body:has(article.page.single) article.page.single {max-width:100% !important}
 }
-@media (prefers-reduced-motion:reduce) {
-  body:has(article.page.single) :is(#toc-auto,#toc-static) { transition:none !important; }
+@media print{
+  body:has(article.page.single) main.tw-mx-4 {max-width:100% !important}
+  body:has(article.page.single) article.page.single {border:0;box-shadow:none;padding:0 !important}
 }
-@media print {
-  body:has(article.page.single) main.tw-mx-4 { display:block !important;width:100% !important;max-width:none !important; }
-  body:has(article.page.single) :is(#toc-auto,#toc-static) { display:none !important; }
-  main article.page.single { border:0;box-shadow:none;padding:0 !important; }
-}
-
 
 /* 2026-10-31: one shared border-box measure for home cards and full articles.
    Both surfaces use the same outer width rather than comparing inner prose widths. */
