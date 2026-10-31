@@ -44,7 +44,7 @@
 #voiceFixer .fixer-status.bad{color:#ffb1bb}
 #voiceFixer .fixer-notice{font-size:12px;color:var(--muted);border-left:3px solid var(--blue);padding:11px 14px;border-radius:8px;background:#10243c;margin-top:12px}
 @media(max-width:760px){#voiceFixer .fixer-grid,#voiceFixer .fixer-options{grid-template-columns:1fr}#voiceFixer textarea{height:240px;min-height:180px}#voiceFixer .fixer-actions button{flex:1 1 150px}}
-</style></head>
+.dynamic-controls{border:1px solid #426080;border-radius:14px;padding:14px;margin:18px 0;background:rgba(56,189,248,.04)}.dynamic-toggle{display:flex!important;gap:10px;align-items:flex-start;cursor:pointer;margin:0!important}.dynamic-toggle input{width:18px!important;height:18px!important;flex:none;margin:4px 0;accent-color:#6366f1}.dynamic-controls .hint{margin:9px 0 0}.dynamic-state{margin:10px 0 0;color:var(--blue);font-size:12px;font-weight:750;min-height:18px}#rate,#pitch{transition:opacity .2s ease;accent-color:#38bdf8}#rate:disabled,#pitch:disabled{opacity:.95;cursor:default}</style></head>
 <body><main class="shell">
 <nav><a href="../">← Tiện ích</a><span>EDITORIAL / AUDIO LAB</span></nav>
 <header><div class="eyebrow">BLOGNAVER · FREE BROWSER TOOL</div><h1>Text to Speech Studio</h1><p>Chuyển văn bản thành giọng đọc, nghe thử và ghi thành WAV để dựng video. Không cần đăng nhập hoặc gửi nội dung lên máy chủ BlogNaver.</p></header>
@@ -61,6 +61,7 @@
 <div class="control"><label for="voice">Giọng đọc hệ thống</label><select id="voice"><option value="">Đang tìm giọng đọc…</option></select><div class="hint">Mặc định ưu tiên Microsoft Hoai My Online (Natural) – Vietnamese khi có sẵn; nếu không, chọn giọng tiếng Việt khác.</div></div>
 <div class="control"><label for="rate">Tốc độ · <output id="rateValue">1.0×</output></label><input type="range" id="rate" min="0.6" max="1.6" step="0.1" value="1"></div>
 <div class="control"><label for="pitch">Cao độ · <output id="pitchValue">1.0</output></label><input type="range" id="pitch" min="0.7" max="1.3" step="0.1" value="1"></div>
+<div class="control dynamic-controls"><label class="dynamic-toggle" for="dynamicVoice"><input type="checkbox" id="dynamicVoice" checked> <span>Bật Dynamic Voice (Tự động chỉnh giọng theo cảm xúc)</span></label><p class="hint">Khi bật, công cụ sẽ chia kịch bản theo câu và tự chỉnh tốc độ/cao độ. Thanh trượt hiển thị thông số câu đang được đọc; khi dừng sẽ trở về mức thủ công.</p><div id="dynamicSentenceStatus" class="dynamic-state" role="status" aria-live="polite">Dynamic Voice đã bật · Sẵn sàng phân tích ngữ cảnh.</div></div>
 <div class="note"><strong>Điều kiện ghi WAV:</strong> Trình duyệt phải hỗ trợ chia sẻ âm thanh của tab. Khi được hỏi, hãy chọn <strong>tab hiện tại</strong> và bật <strong>Chia sẻ âm thanh tab / Share tab audio</strong>. Không chọn toàn màn hình. Nếu trình duyệt không cung cấp audio track, bạn vẫn dùng được chức năng nghe thử nhưng không thể xuất WAV bằng giọng hệ thống theo cách này.</div>
 <p class="hint">Tính năng WAV ghi âm thanh tab bằng quyền bạn cấp, không ghi micro và không tải âm thanh lên server. Nên dùng Chrome/Edge desktop. Phụ thuộc chính sách trình duyệt và loại giọng đọc.</p>
 </aside></div>
@@ -135,12 +136,13 @@
 
 <footer>© BlogNaver · Audio xử lý cục bộ trên thiết bị. Kiểm tra điều khoản sử dụng của từng giọng đọc trước khi dùng thương mại.</footer>
 </main>
+<script src="dynamic-voice.js"></script>
 <script>
 (() => {
 "use strict";
 const $ = id => document.getElementById(id);
 const synth = window.speechSynthesis;
-const els = {script:$("script"),voice:$("voice"),rate:$("rate"),pitch:$("pitch"),listen:$("listen"),stop:$("stop"),record:$("record"),status:$("status"),download:$("download"),preview:$("preview")};
+const els = {script:$("script"),voice:$("voice"),rate:$("rate"),pitch:$("pitch"),dynamic:$("dynamicVoice"),dynamicStatus:$("dynamicSentenceStatus"),listen:$("listen"),stop:$("stop"),record:$("record"),status:$("status"),download:$("download"),preview:$("preview")};
 let voices=[],speaking=false,recording=false,stream=null,context=null,source=null,processor=null,silence=null,chunks=[],sampleRate=44100,objectURL=null,recordedBlob=null,recordingHasSignal=false;
 const progress={wrap:$("progressWrap"),fill:$("progressFill"),pct:$("progressPct"),label:$("progressLabel"),track:$("progressTrack")};
 function setProgress(value,label){const n=Math.max(0,Math.min(100,Math.round(value)));progress.wrap.classList.add("visible");progress.fill.style.width=n+"%";progress.pct.textContent=n+"%";progress.track.setAttribute("aria-valuenow",String(n));progress.label.textContent=label}
@@ -175,7 +177,7 @@ async function publishAudio(blob){
 }
 cloud.button.addEventListener("click",()=>{if(recordedBlob)publishAudio(recordedBlob)});
 const status=(msg,error=false)=>{els.status.textContent=msg;els.status.classList.toggle("error",error)};
-const setUI=()=>{els.listen.disabled=speaking||recording;els.record.disabled=speaking||recording;els.stop.disabled=!speaking&&!recording};
+const setUI=()=>{els.listen.disabled=speaking||recording;els.record.disabled=speaking||recording;els.stop.disabled=!speaking&&!recording;els.dynamic.disabled=speaking||recording;els.rate.disabled=speaking;els.pitch.disabled=speaking};
 
 if(!synth){status("Trình duyệt không hỗ trợ Web Speech API.",true);els.listen.disabled=true;els.record.disabled=true;return}
 let userSelectedVoice=false;
@@ -232,7 +234,9 @@ if(typeof synth.addEventListener==="function")synth.addEventListener("voiceschan
 else synth.onvoiceschanged=scheduleVoiceRefresh;
 scheduleVoiceRefresh();
 els.script.addEventListener("input",()=>{$("count").textContent=els.script.value.length.toLocaleString("vi-VN")+" ký tự"});
-["rate","pitch"].forEach(k=>els[k].addEventListener("input",()=>{$(k+"Value").textContent=Number(els[k].value).toFixed(1)+(k==="rate"?"×":"")}));
+["rate","pitch"].forEach(k=>els[k].addEventListener("input",()=>{$(k+"Value").textContent=Number(els[k].value).toFixed(2).replace(/0$/,"").replace(/\.$/,"")+(k==="rate"?"×":"")}));
+els.dynamic.addEventListener("change",()=>{els.dynamicStatus.textContent=els.dynamic.checked?"Dynamic Voice đã bật · Sẵn sàng phân tích ngữ cảnh.":"Giọng đọc cố định theo hai thanh trượt Rate / Pitch."});
+function updateVoiceSliders(rate,pitch){els.rate.value=rate;els.pitch.value=pitch;$("rateValue").textContent=Number(rate).toFixed(2).replace(/0$/,"").replace(/\.$/,"")+"×";$("pitchValue").textContent=Number(pitch).toFixed(2).replace(/0$/,"").replace(/\.$/,"")}
 function cleanup(){
  if(processor){try{processor.disconnect()}catch{} processor.onaudioprocess=null;processor=null}
  if(source){try{source.disconnect()}catch{}source=null}
@@ -250,20 +254,64 @@ function wavBuffer(pieces,sr){
  let pos=44;for(const part of pieces){for(let i=0;i<part.length;i++){const x=Math.max(-1,Math.min(1,part[i]));view.setInt16(pos,x<0?x*32768:x*32767,true);pos+=2}}
  return new Blob([ab],{type:"audio/wav"});
 }
-let finishRecording=null;
+let finishRecording=null, speechGeneration=0, currentUtterance=null;
+let manualSettings=null;
+function restoreManualSettings(){
+ if(manualSettings){updateVoiceSliders(manualSettings.rate,manualSettings.pitch);manualSettings=null}
+ if(els.dynamic.checked)els.dynamicStatus.textContent="Dynamic Voice đã bật · Sẵn sàng phân tích ngữ cảnh.";
+ else els.dynamicStatus.textContent="Giọng đọc cố định theo hai thanh trượt Rate / Pitch.";
+}
 function speak(onFinish){
- const text=els.script.value.trim();if(!text){status("Hãy nhập nội dung trước.",true);return false}
+ const text=els.script.value.trim();
+ if(!text){status("Hãy nhập nội dung trước.",true);return false}
+ const dynamic=els.dynamic.checked && Boolean(window.BNDynamicVoice);
+ const rate=Number(els.rate.value),pitch=Number(els.pitch.value);
+ const plan=dynamic ? window.BNDynamicVoice.buildPlan(text) : [{text,start:0,end:text.length,rate,pitch,label:"Chế độ thủ công"}];
+ if(!plan.length){status("Kịch bản không có câu hợp lệ.",true);return false}
+ const generation=++speechGeneration;
  synth.cancel();
- const utterance=new SpeechSynthesisUtterance(text);
- const v=voices[Number(els.voice.value)];if(v){utterance.voice=v;utterance.lang=v.lang}else utterance.lang="vi-VN";
- utterance.rate=Number(els.rate.value);utterance.pitch=Number(els.pitch.value);
+ const selectedVoice=voices[Number(els.voice.value)];
+ manualSettings={rate,pitch};
  speaking=true;setUI();
- let ended=false;
- const done=err=>{if(ended)return;ended=true;speaking=false;setUI();onFinish?.(err);if(!onFinish)status(err?"Đọc bị dừng hoặc lỗi.":"Đã đọc xong.",!!err)};
- utterance.onboundary=e=>{if(recording&&Number.isFinite(e.charIndex))setProgress(Math.min(95,e.charIndex/Math.max(1,text.length)*95),"Đang đọc và ghi âm…")};
- utterance.onend=()=>done(false);
- utterance.onerror=e=>done(e.error!=="canceled"&&e.error!=="interrupted");
- synth.speak(utterance);return true;
+ let finished=false,position=0;
+ function complete(failed){
+  if(finished||generation!==speechGeneration)return;
+  finished=true;currentUtterance=null;speaking=false;
+  restoreManualSettings();setUI();
+  if(onFinish)onFinish(failed);
+  else status(failed?"Đọc bị lỗi.":"Đã đọc xong.",failed);
+ }
+ function nextSentence(){
+  if(finished||generation!==speechGeneration)return;
+  if(position>=plan.length){complete(false);return}
+  const part=plan[position++];
+  const utterance=new SpeechSynthesisUtterance(part.text);
+  currentUtterance=utterance;
+  if(selectedVoice){utterance.voice=selectedVoice;utterance.lang=selectedVoice.lang}
+  else utterance.lang="vi-VN";
+  utterance.rate=part.rate;utterance.pitch=part.pitch;
+  utterance.onstart=()=>{
+   if(finished||generation!==speechGeneration)return;
+   updateVoiceSliders(part.rate,part.pitch);
+   els.dynamicStatus.textContent=(dynamic?"Dynamic Voice":"Thủ công")+" · Câu "+position+"/"+plan.length+" · "+part.label+" · "+part.rate.toFixed(2)+"× / "+part.pitch.toFixed(2);
+   if(recording)setProgress(Math.min(94,part.start/Math.max(text.length,1)*95),"Đang ghi âm & đọc câu "+position+"/"+plan.length+"…");
+  };
+  utterance.onboundary=e=>{
+   if(finished||generation!==speechGeneration||!recording)return;
+   if(Number.isFinite(e.charIndex))setProgress(Math.min(95,(part.start+e.charIndex)/Math.max(text.length,1)*95),"Đang ghi âm & đọc câu "+position+"/"+plan.length+"…");
+  };
+  utterance.onend=()=>{
+   if(finished||generation!==speechGeneration)return;
+   if(recording)setProgress(Math.min(95,part.end/Math.max(1,text.length)*95),"Đang ghi âm & đọc câu "+position+"/"+plan.length+"…");
+   nextSentence();
+  };
+  utterance.onerror=()=>{
+   if(finished||generation!==speechGeneration)return;
+   complete(true);
+  };
+  try{synth.speak(utterance)}catch(error){complete(true)}
+ }
+ nextSentence();return true;
 }
 els.listen.addEventListener("click",()=>{if(!recording){status("Đang đọc…");speak()}});
 async function finalize(showOutput){
@@ -282,7 +330,7 @@ async function finalize(showOutput){
   if(cloud.auto.checked)publishAudio(blob);
  }catch(e){status("Không tạo được WAV: "+e.message,true)}
 }
-els.stop.addEventListener("click",()=>{synth.cancel();if(recording){const fn=finishRecording;finishRecording=null;fn?.(true)}else{speaking=false;setUI();status("Đã dừng phát.")}});
+els.stop.addEventListener("click",()=>{speechGeneration++;synth.cancel();currentUtterance=null;speaking=false;restoreManualSettings();setUI();if(recording){const fn=finishRecording;finishRecording=null;fn?.(true)}else status("Đã dừng phát.")});
 els.record.addEventListener("click",async()=>{
  if(recording||speaking)return;
  if(!els.script.value.trim()){status("Hãy nhập nội dung trước.",true);return}
@@ -310,6 +358,6 @@ els.record.addEventListener("click",async()=>{
   if(recording)speak(err=>{const fn=finishRecording;finishRecording=null;fn?.(!err)});
  }catch(e){cleanup();recording=false;speaking=false;setUI();status("Không thể ghi WAV: "+(e.message||"Bạn đã từ chối chia sẻ tab."),true)}
 });
-window.addEventListener("pagehide",()=>{synth.cancel();cleanup();if(objectURL)URL.revokeObjectURL(objectURL)});
+window.addEventListener("pagehide",()=>{speechGeneration++;synth.cancel();cleanup();if(objectURL)URL.revokeObjectURL(objectURL)});
 })();
 </script><script src="voiceover-preprocess.js" defer></script><script src="voice-fixer.js" defer></script></body></html>
