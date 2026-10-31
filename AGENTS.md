@@ -56,6 +56,15 @@ Applies to every existing and new BlogNaver utility, CMS tool and integration, e
 - If GitHub refuses the merge due to permissions, required approvals, branch rules, or a failed/pending check, report the precise blocker and fix permitted repository/workflow settings through a separate PR where possible. **Never silently fall back to manual approval as the intended workflow** or claim the deployment succeeded.
 - This owner policy supersedes older AGENTS.md passages requiring manual approval, manual merge, a particular reviewer, or prohibiting safe CI-gated auto-merge. Keep independent security and data-safety gates in force.
 
+## League of Legends contract and transfer intelligence (2026-11-01)
+
+- The public **Riot Games League-Recognized Global Contract Database (GCD)** is the source for team registrations and listed contract end dates. The sheet is a tabbed public spreadsheet, not a live contract-renewal API. Never claim a date is a completed transfer, renewal, release, retirement or free agency by itself.
+- Cross-check roster moves and contract renewals using dated official organization/Riot announcements (or rigorously attributed reporting) before assigning **confirmed**. Rumors must have their own distinct unconfirmed label, date and source URL.
+- Keep per-region snapshot timestamps; do not imply every tab was updated at the same time or that the source is realtime. Fail closed when Google Sheets is unreachable, its headers change, or a large fraction of registrations disappears due to parsing.
+- Any automatic GCD snapshot update goes through a fresh **data branch → Pull Request → CI → review → merge**, never a direct commit to main. A new GCD expiry date is evidence requiring investigation, not proof of signing an extension.
+- Keep the LoL Contract Tracker public-data-only, no OAuth migration, no new GitHub token prompt, and do not change the existing utility PIN, PAT or AES-GCM data-security workflows.
+- Use client-side CSV import only as **unverified temporary data**, not a publication path. Never scrape private accounts or invent salaries, transfer fees and confidential contract clauses.
+
 ## MANDATORY: One editorial blog post = one Pull Request (owner reminder, 2026-11-01)
 
 - **Every owner-requested blog article, including esports features, research, AI-assisted writing, new series episodes, manual CMS posts, and editorial revisions, MUST be published via a dedicated feature/content branch and its own Pull Request.** Never push, commit, upload, or write an article directly to `main`, whether using a GitHub token, REST Contents API, GitHub connector, CLI, CMS, or scheduled editorial publisher.
