@@ -24,6 +24,9 @@
     {{- partial "head/link.html" . -}}
     {{- partial "head/seo.html" . -}}
     <link rel="stylesheet" href="{{ "css/summary-actions.css" | relURL }}">
+    {{- if eq .RelPermalink ("about/" | relURL) -}}
+    <link rel="stylesheet" href="{{ "css/about-bento.css" | relURL }}">
+    {{- end -}}
     {{- if and .IsPage (eq .Section "posts") -}}
     {{- with .Params.series -}}
     <script>
