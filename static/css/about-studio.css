@@ -299,91 +299,12 @@ body:has(.about-studio) main.tw-mx-4 {
   margin-bottom:11px
 }
 
-.about-career {
-  grid-column:span 7;
-  grid-row:span 2
+.about-stack {
+  grid-column:span 7
 }
 
-.about-stack,.about-project {
+.about-project {
   grid-column:span 5
-}
-
-.about-section-index {
-  color:#a27a85;
-  font-size:22px;
-  line-height:1.4
-}
-
-/* Career timeline */
-.about-timeline {
-  padding:0;
-  margin:0;
-  list-style:none
-}
-
-.about-timeline li {
-  position:relative;
-  padding:0 0 26px 25px;
-  border-left:1px solid #e4e7ed;
-  margin-left:5px
-}
-
-.about-timeline li:last-child {
-  padding-bottom:8px;
-  border-left-color:transparent
-}
-
-.about-timeline-dot {
-  position:absolute;
-  width:9px;
-  height:9px;
-  border:2px solid #aeb8c6;
-  border-radius:50%;
-  background:white;
-  left:-5px;
-  top:6px
-}
-
-.about-timeline .is-current .about-timeline-dot {
-  background:var(--about-red);
-  border-color:var(--about-red);
-  box-shadow:0 0 0 4px #bc002d0b
-}
-
-.about-timeline-date {
-  display:block;
-  font-size:10px;
-  line-height:1.8;
-  letter-spacing:.03em;
-  color:#657386;
-  font-weight:700;
-  margin-bottom:5px
-}
-
-.about-timeline .is-current .about-timeline-date {
-  color:#a52b47
-}
-
-.about-studio .about-timeline h3 {
-  font-size:15px;
-  line-height:1.5;
-  margin:0 0 3px;
-  color:#24364a;
-  font-weight:750
-}
-
-.about-studio .about-timeline p {
-  font-size:12px;
-  line-height:1.8;
-  color:#6a778a;
-  margin:5px 0 0
-}
-
-.about-studio .about-timeline .about-timeline-role {
-  font-size:11px;
-  font-weight:650;
-  color:#43586f;
-  margin:0
 }
 
 .about-text-link {
@@ -736,10 +657,6 @@ body:has(.about-studio) main.tw-mx-4 {
     font-size:22px
   }
 
-  .about-career .about-timeline li {
-    padding-bottom:25px
-  }
-
   .about-contact h2 {
     max-width:360px
   }
@@ -762,7 +679,7 @@ body:has(.about-studio) main.tw-mx-4 {
     min-height:46px
   }
 
-  .about-project>p,.about-studio .about-timeline p {
+  .about-project>p {
     font-size:13px
   }
 

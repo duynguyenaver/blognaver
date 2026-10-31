@@ -34,30 +34,20 @@
       </div>
     </section>
 
-    <section class="about-card about-career" aria-labelledby="about-career-title">
-      <div class="about-section-head"><div><span class="about-eyebrow">02 / CAREER JOURNEY</span><h2 id="about-career-title">Từ ngôn ngữ đến vận hành.</h2></div><span class="about-section-index" aria-hidden="true">↗</span></div>
-      <ol class="about-timeline">
-        {{ range $a.timeline }}
-        <li{{ if .current }} class="is-current"{{ end }}><span class="about-timeline-dot" aria-hidden="true"></span><span class="about-timeline-date">{{ .dates }}</span><h3>{{ .company }}</h3><p class="about-timeline-role">{{ .role }}</p><p>{{ .description }}</p></li>
-        {{ end }}
-      </ol>
-      {{ with $resume }}<a class="about-text-link" href="{{ .RelPermalink }}">Xem hồ sơ nghề nghiệp đầy đủ <span aria-hidden="true">↗</span></a>{{ end }}
-    </section>
-
     <section class="about-card about-stack" aria-labelledby="about-stack-title">
-      <div class="about-section-head"><div><span class="about-eyebrow">03 / TOOLBOX</span><h2 id="about-stack-title">Công cụ để biến ý tưởng thành việc thật.</h2></div></div>
+      <div class="about-section-head"><div><span class="about-eyebrow">02 / TOOLBOX</span><h2 id="about-stack-title">Công cụ để biến ý tưởng thành việc thật.</h2></div></div>
       {{ range $a.stack }}<div class="about-stack-group"><h3>{{ .label }}</h3><ul class="about-tags" aria-label="{{ .label }}">{{ range .tags }}<li>{{ . }}</li>{{ end }}</ul></div>{{ end }}
     </section>
 
     <section class="about-card about-project" aria-labelledby="about-project-title">
-      <div class="about-section-head"><div><span class="about-eyebrow">04 / PERSONAL PROJECT</span><h2 id="about-project-title">BlogNaver.</h2></div><span class="about-project-icon" aria-hidden="true">&lt;/&gt;</span></div>
+      <div class="about-section-head"><div><span class="about-eyebrow">03 / PERSONAL PROJECT</span><h2 id="about-project-title">BlogNaver.</h2></div><span class="about-project-icon" aria-hidden="true">&lt;/&gt;</span></div>
       <p>Một không gian viết, học và làm công cụ cá nhân. Xây dựng bằng Hugo, quản lý mã nguồn với Git và triển khai qua GitHub Pages.</p>
       <ul class="about-project-links"><li><a href="{{ "tien-ich/tu-vung-han-anh-viet/" | relURL }}">Sổ từ vựng Hàn · Anh · Việt <span aria-hidden="true">↗</span></a></li><li><a href="{{ "tien-ich/interview-tracking/" | relURL }}">Interview Tracking <span aria-hidden="true">↗</span></a></li><li><a href="{{ "tien-ich/" | relURL }}">Khám phá các công cụ <span aria-hidden="true">↗</span></a></li></ul>
       <a class="about-text-link" href="https://github.com/duynguyenaver/blognaver" target="_blank" rel="noopener noreferrer">Mã nguồn trên GitHub <span aria-hidden="true">↗</span><span class="about-sr-only"> (mở tab mới)</span></a>
     </section>
 
-    <section class="about-card about-bio" aria-labelledby="about-bio-title"><span class="about-eyebrow">05 / A LITTLE MORE</span><h2 id="about-bio-title">Rõ ràng trong lời nói.<br>Hữu ích trong cách làm.</h2><div class="about-bio-copy">{{ .Content }}</div></section>
-    <section class="about-card about-contact" aria-labelledby="about-contact-title"><span class="about-eyebrow">06 / SAY HELLO</span><h2 id="about-contact-title">Bắt đầu bằng một cuộc trao đổi.</h2><p>Về biên phiên dịch, công việc hoặc một ý tưởng công cụ hữu ích.</p>{{ with $email }}<a id="about-email" class="about-email" href="{{ printf "mailto:%s" . | safeURL }}">{{ . }}</a><div class="about-actions"><a class="about-button about-button-primary" href="{{ printf "mailto:%s" . | safeURL }}">Gửi email <span aria-hidden="true">↗</span></a><button id="about-copy-email" type="button" class="about-button" hidden>Sao chép email</button></div><p id="about-copy-status" class="about-copy-status" role="status" aria-live="polite"></p>{{ end }}</section>
+    <section class="about-card about-bio" aria-labelledby="about-bio-title"><span class="about-eyebrow">04 / A LITTLE MORE</span><h2 id="about-bio-title">Rõ ràng trong lời nói.<br>Hữu ích trong cách làm.</h2><div class="about-bio-copy">{{ .Content }}</div></section>
+    <section class="about-card about-contact" aria-labelledby="about-contact-title"><span class="about-eyebrow">05 / SAY HELLO</span><h2 id="about-contact-title">Bắt đầu bằng một cuộc trao đổi.</h2><p>Về biên phiên dịch, công việc hoặc một ý tưởng công cụ hữu ích.</p>{{ with $email }}<a id="about-email" class="about-email" href="{{ printf "mailto:%s" . | safeURL }}">{{ . }}</a><div class="about-actions"><a class="about-button about-button-primary" href="{{ printf "mailto:%s" . | safeURL }}">Gửi email <span aria-hidden="true">↗</span></a><button id="about-copy-email" type="button" class="about-button" hidden>Sao chép email</button></div><p id="about-copy-status" class="about-copy-status" role="status" aria-live="polite"></p>{{ end }}</section>
   </div>
   <footer class="about-footer"><span>Ngôn ngữ là cầu nối. Công nghệ là công cụ.</span><a href="{{ "posts/" | relURL }}">Đọc những bài viết mới <span aria-hidden="true">↗</span></a></footer>
 </article>
