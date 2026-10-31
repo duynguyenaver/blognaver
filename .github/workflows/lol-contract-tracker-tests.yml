@@ -27,6 +27,22 @@ jobs:
         run: python3 -m unittest scripts/test_update_lol_contracts.py -v
       - name: Client data and contract labels tests
         run: node --test scripts/test-lol-contract-tracker.mjs
+      - name: Diagnose published GCD headers (temporary public-data probe)
+        continue-on-error: true
+        run: |
+          python3 - <<'PY'
+          import csv,io
+          import importlib.util
+          spec=importlib.util.spec_from_file_location("gcd","scripts/update-lol-contracts.py")
+          mod=importlib.util.module_from_spec(spec);spec.loader.exec_module(mod)
+          tabs=mod.discover_tabs(mod.get(mod.PUBLIC_URL))
+          print("GCD_TABS",list(tabs.items())[:30])
+          for gid in ("940656680","594163931"):
+              try:
+                  raw=mod.get(mod.BASE+"/pub?gid="+gid+"&single=true&output=csv")
+                  print("GCD_HEADER",gid,list(csv.reader(io.StringIO(raw)))[:8])
+              except Exception as e: print("GCD_FETCH_ERROR",gid,str(e)[:200])
+          PY
       - name: Probe Riot public GCD source (read-only, non-blocking)
         continue-on-error: true
         run: python3 scripts/update-lol-contracts.py --check
