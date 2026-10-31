@@ -204,6 +204,8 @@ export default {
     if(!env.GITHUB_CLIENT_ID||!env.GITHUB_CLIENT_SECRET||!env.GITHUB_OWNER_ID||!env.TOKEN_ENCRYPTION_KEY||!env.SESSIONS||!env.ASSETS||!env.PUBLIC_ORIGIN)
       return json({error:"OAuth gateway is not provisioned"},503);
     const url=new URL(req.url),path=url.pathname;
+    // Reject encoded path tricks that could evade isPrivate() while ASSETS decodes them.
+    if(/%[0-9a-f]{2}/i.test(path)||path.includes("\\"))return json({error:"Encoded routes are not supported"},400);
     if(path==="/auth/start"&&req.method==="GET")return authStart(req,env,url);
     if(path==="/auth/callback"&&req.method==="GET")return authCallback(req,env,url);
     if(path==="/auth/logout"&&req.method==="POST"){
@@ -225,8 +227,8 @@ export default {
       return user?archiveWav(req,env,user):json({error:"Login required"},401);
     }
     if(isPrivate(path)&&(req.method==="GET"||req.method==="HEAD"))return protectedAsset(req,env,url);
-    // Shared CSS/JS outside private URLs can be served without auth.
-    if(path.startsWith(BASE) && req.method==="GET"){
+    // Only known shared bootstrap assets are public on the Worker origin.
+    if(new Set(["/blognaver/access-gate.js","/blognaver/access-gate.css","/blognaver/github-auth.js","/blognaver/auth-config.json"]).has(path) && req.method==="GET"){
       const publicAsset=new URL(req.url);publicAsset.pathname=path.replace(/^\/blognaver/,"");
       return env.ASSETS.fetch(new Request(publicAsset,req));
     }
