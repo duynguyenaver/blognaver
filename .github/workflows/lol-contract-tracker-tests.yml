@@ -7,6 +7,9 @@ on:
       - 'scripts/update-lol-contracts.py'
       - 'scripts/test_update_lol_contracts.py'
       - 'scripts/test-lol-contract-tracker.mjs'
+      - 'scripts/update-lol-gcd-archive.py'
+      - 'scripts/test_update_lol_gcd_archive.py'
+      - 'scripts/test-lol-contract-archive.mjs'
       - '.github/workflows/lol-contract-tracker-tests.yml'
   workflow_dispatch:
 permissions:
@@ -30,6 +33,12 @@ jobs:
       - name: Probe Riot public GCD source (read-only, non-blocking)
         continue-on-error: true
         run: python3 scripts/update-lol-contracts.py --check
+      - name: Historical archive index Python regression
+        run: python3 -m unittest scripts/test_update_lol_gcd_archive.py -v
+      - name: Historical archive browser regression
+        run: node --test scripts/test-lol-contract-archive.mjs
+      - name: Check historical UI JavaScript parse
+        run: node --check static/tien-ich/lol-contract-tracker/archive.js
       - name: Check JSON schema and attribution
         run: |
           python3 - <<'PY'
@@ -43,5 +52,12 @@ jobs:
               assert event["status"] in ("confirmed","renewed","rumor")
               assert event["sourceUrl"].startswith("https://")
               assert event["date"] and event["player"]
-          print("PASS: Riot GCD sources, schema and attributed transfer events")
+          archive=json.load(open(base+"archive.json",encoding="utf-8"))
+          assert archive["sourceType"]=="unofficial-community-history"
+          assert archive["sourceUrl"].startswith("https://lol.fandom.com/wiki/")
+          assert "CC BY-SA" in archive["license"]
+          for region in archive["regions"]:
+              assert region["indexUrl"].startswith("https://lol.fandom.com/wiki/Archive:Global_Contract_Database/")
+              assert len(region["dates"])<=36
+          print("PASS: Riot GCD sources, community historical provenance and attributed transfer events")
           PY
