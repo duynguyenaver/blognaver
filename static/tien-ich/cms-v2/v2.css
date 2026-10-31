@@ -9,3 +9,6 @@
 @media(min-width:761px) and (max-width:1100px){
   .view[data-view="editor"] .editor-main{justify-self:start;margin-left:0;margin-right:0;max-width:100%}
 }
+
+/* Collapsible TOOLS navigation */
+.v2-tools-menu{margin:4px 0}.v2-tools-menu>summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-radius:10px;color:var(--muted);font-weight:700}.v2-tools-menu>summary::-webkit-details-marker{display:none}.v2-tools-menu>summary:hover,.v2-tools-menu[open]>summary{background:var(--panel2);color:var(--text)}.v2-tools-menu>summary span{transition:transform .2s}.v2-tools-menu[open]>summary span{transform:rotate(180deg)}.v2-tools-items{display:grid;gap:4px;margin:5px 0 8px 12px;padding-left:8px;border-left:1px solid var(--border)}.sidebar .v2-tools-items button{padding:10px 12px;font-size:13px}.v2-tools-menu>summary:focus-visible{outline:2px solid var(--blue);outline-offset:2px}@media(max-width:760px){.sidebar nav .v2-tools-menu{flex:0 0 auto}.sidebar nav .v2-tools-items{display:grid;position:absolute;z-index:15;background:var(--panel);padding:10px;max-height:65vh;overflow:auto;border:1px solid var(--border);border-radius:10px;box-shadow:0 12px 24px #0005;margin:0}.sidebar nav .v2-tools-items button{white-space:nowrap}}@media(prefers-reduced-motion:reduce){.v2-tools-menu>summary span{transition:none}}
