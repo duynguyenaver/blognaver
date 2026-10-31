@@ -123,3 +123,9 @@ Bản xem trước và CV đã xuất bản dùng chung cấu hình A4 dọc, l�
 ## CMS V2 · Chiều cao vùng làm việc
 
 CMS V2 trên desktop sử dụng chiều cao màn hình hiện tại. Nội dung soạn thảo và metadata có vùng cuộn riêng; thanh lưu/preview/xuất bản nằm trong vùng làm việc. Màn hình nhỏ và bàn phím điện thoại sử dụng cuộn trang tự nhiên. Ô Markdown ẩn không được tạo khoảng trống phía dưới editor.
+
+## Gợi ý đọc thông minh trên trang chủ
+
+Khối “RANDOM SUGGEST POSTS” mặc định gập gọn. Khi mở, Gemini có thể chọn bài từ kho blog bằng khóa đã kết nối trên thiết bị; nếu chưa kết nối hoặc API lỗi, giao diện ghi rõ đang dùng gợi ý theo chủ đề. Thẻ bo góc 16px, không dùng dấu chấm trang trí.
+
+Cá nhân hóa lịch sử đọc là tùy chọn. Khóa mới chỉ được ghi nhớ khi người đọc bật lựa chọn thiết bị tin cậy; khóa không xuất hiện trong mã nguồn công khai.

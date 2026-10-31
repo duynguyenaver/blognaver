@@ -112,6 +112,7 @@
     {{- partial "controls.html" . -}}
     {{- partial "assets.html" . -}}
     {{- partial "speculationrules.html" . -}}
+    {{ if or .IsHome (and .IsPage (eq .Section "posts")) }}<script src="{{ "js/smart-posts.js" | relURL }}?v={{ readFile "static/js/smart-posts.js" | md5 }}" defer></script>{{ end }}
 </body>
 
 </html>
