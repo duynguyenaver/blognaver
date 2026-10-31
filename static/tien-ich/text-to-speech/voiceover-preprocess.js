@@ -177,6 +177,12 @@
     if(!result||stray.test(result)||/^(?:tóm lại|nhìn chung)[,.;\s]*$/iu.test(result))return "";
     return /[.!?…]["”']?$/u.test(result)?result:result+".";
   }
+  function lowerFirstForSpeech(text){
+    // Lowercase ordinary sentence starts, never proper names or initialisms.
+    if (/^(?:Nvidia|Santa Clara|California|Voyager|Endeavor|Intel|Fudan|Apricot Forest|Drone|Wi-Fi|Bluetooth|Terabits|Gigabits|Gigabytes|MIT|DJI|IoT|GPS|VLC|QR|LED|AI)(?=\s|[.,;:!?]|$)/u.test(text)) return text;
+    if (/^[A-ZĐ]{2,}(?=\s|[.,;:!?]|$)/u.test(text)) return text;
+    return text.charAt(0).toLocaleLowerCase("vi-VN")+text.slice(1);
+  }
   function buildNarration(blocks){
     const paragraphs=blocks.filter(b=>b.type==="paragraph"),parts=[];
     const title=blocks.find(b=>b.type==="title");
@@ -186,9 +192,10 @@
       if(b.type==="heading"){currentHeading=b.text;continue;}
       if(b.type!=="paragraph")continue;
       let text=b.text.trim().replace(/^và\s+/iu,"");
-      if(!transitions.test(text))text=makeTransition(currentHeading,index)+text.charAt(0).toLocaleLowerCase("vi-VN")+text.slice(1);
-      const spoken=sentence(text);if(spoken)parts.push(spoken);
-      currentHeading="";index++;
+      if (/^(?:chào mừng các bạn quay trở lại với góc nhìn công nghệ hôm nay|cảm ơn các bạn đã theo dõi)[.!?\s]*$/iu.test(text))continue;
+      if(!transitions.test(text))text=makeTransition(currentHeading,index)+lowerFirstForSpeech(text);
+      const spoken=sentence(text);if(spoken){parts.push(spoken);index++;}
+      currentHeading="";
     }
     if(!paragraphs.length)return "";
     const body=parts.filter(Boolean).join("\n\n");
