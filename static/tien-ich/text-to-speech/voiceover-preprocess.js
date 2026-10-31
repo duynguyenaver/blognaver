@@ -28,8 +28,8 @@
     /(?<![\p{L}\p{N}])(?:(?:trong|vào|ngày)\s+)?(?:tháng\s+)?\d{1,2}\s*[\/.-]\s*\d{4}(?![\p{L}\p{N}])/giu,
     /(?<![\p{L}\p{N}])(?:vào\s+)?năm\s+(?:19|20)\d{2}(?![\p{L}\p{N}])/giu
   ];
-  const uiOnly = /^(?:[➜→↗✓✕×•·]\s*)*(?:trong|và|từ|phút|sê[\s-]?ri|series|thể loại|tác giả|danh mục|chuyên mục|tags?|mục lục|đọc tiếp|xem thêm|đọc thêm|chia sẻ|chia sẻ bài viết|copy link|sao chép|sao chép liên kết|quay lại|trang chủ|bài viết liên quan|bài trước|bài sau|xem tất cả|tải xuống|bình luận|đăng ký|subscribe|source|nguồn)\s*[.:;!?…\-–—]*$/iu;
-  const statsOnly = /^(?:(?:số từ|thời gian đọc|reading time)\s*[:：-]\s*)?(?:(?:đọc\s+)?trong\s+)?\d[\d.,]*\s*(?:từ|chữ|words?|phút(?:\s*đọc)?|mins?|minutes?)$/iu;
+  const uiOnly = /^(?:[➜→↗✓✕×•·]\s*)*(?:trong|và|từ|phút|sê[\s-]?ri|series|thể loại|tác giả|ngày đăng|đăng ngày|ngày xuất bản|thời gian đọc|thời lượng đọc|số từ|danh mục|chuyên mục|tags?|mục lục|đọc tiếp|xem thêm|đọc thêm|chia sẻ|chia sẻ bài viết|copy link|sao chép|sao chép liên kết|quay lại|trang chủ|bài viết liên quan|bài trước|bài sau|xem tất cả|tải xuống|bình luận|đăng ký|subscribe|source|nguồn)\s*[.:;!?…\-–—]*$/iu;
+  const statsOnly = /^(?:(?:số từ|thời gian đọc|thời lượng đọc|reading time)\s*[:：-]\s*)?(?:(?:đọc\s+)?trong\s+)?\d[\d.,]*\s*(?:từ|chữ|words?|phút(?:\s*đọc)?|mins?|minutes?)(?:\s*[,/·|•]\s*\d[\d.,]*\s*(?:phút(?:\s*đọc)?|mins?|minutes?))?$/iu;
   const headerMeta = /^(?:tác giả|author|đăng bởi|đăng ngày|ngày đăng|ngày xuất bản|xuất bản|published|updated|cập nhật|số từ|word count|thời gian đọc|reading time|thể loại|chuyên mục|danh mục|tags?|series|sê[\s-]?ri)\s*[:：—–-]\s*.*$/iu;
   const bylineOrStat = /^(?:duy\s+nguyen|nguyễn\s+duy\s+khang|\d[\d.,]*\s*(?:từ|chữ|words?|phút(?:\s*đọc)?))$/iu;
   const isolatedDate = /^\d{1,2}\s*[\/.-]\s*\d{1,2}\s*[\/.-]\s*\d{2,4}$/u;
@@ -50,6 +50,8 @@
     return result.replace(/\s+([,;:.!?])(?=\s|$)/gu,"$1")
       .replace(/^\s*[,;:.!?–—-]+\s*/u,"")
       .replace(/\s+[,;:](?=\s|$)/gu,"")
+      .replace(/[.!?]\s*[,;:]+/gu,". ")
+      .replace(/[,;:]\s*[.!?]/gu,".")
       .replace(/[ \t]{2,}/gu," ").trim();
   }
   function isMetaPiece(s) {
