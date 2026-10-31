@@ -23,3 +23,9 @@ identifier = "cms"
 name = "Viết blog CMS"
 url = "/cms/"
 weight = 50
+
+[[main]]
+identifier = "about"
+name = "Giới thiệu"
+url = "/about/"
+weight = 20
