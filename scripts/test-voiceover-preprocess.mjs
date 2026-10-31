@@ -100,3 +100,13 @@ test("hotfix: completed script also removes calendar dates on reprocess",()=>{
  assert.ok(!output.includes("31/10/2026"));
  assert.equal((output.match(/Chào mừng các bạn/g)||[]).length,1);
 });
+
+
+test("hotfix: handles author and publish metadata without colon separators",()=>{
+  const raw="Tác giả Duy Nguyen 31/10/2026 1881 từ 9 phút\nĐăng ngày 30/10/2026 · Duy Nguyen\n\nNvidia giới thiệu GPU.";
+  const text=cleanScript(raw).text;
+  includesAll(text,["En-vi-đi-a","Gi-Pi-U"]);
+  ["Tác giả","Duy Nguyen","Đăng ngày","30/10/2026","31/10/2026","1881 từ","9 phút"].forEach(
+    fragment=>assert.ok(!text.includes(fragment),"Unexpected metadata: "+fragment)
+  );
+});
