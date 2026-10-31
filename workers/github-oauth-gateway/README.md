@@ -46,7 +46,7 @@ Other tools must be migrated individually; there is no magic automatic sync of l
    BN_PRIVATE_GATEWAY_LIVE=true
    BN_PRIVATE_GATEWAY_URL=PUBLIC_ORIGIN
    The protected Pages cutover script then replaces publicly hosted utility and Resume CMS files with login-redirect placeholders. Until then they remain publicly reachable on GitHub Pages.
-9. Port each legacy utility's token-based GitHub calls to BNAuth.readData/BNAuth.writeData and AES-GCM encrypted .enc.json data with conflict management. Then remove each PAT input. The login infrastructure alone cannot make every existing tool auto-sync.
+9. Port each legacy utility's token-based GitHub calls to BNGitHubOAuth.readData/BNGitHubOAuth.writeData and AES-GCM encrypted .enc.json data with conflict management. Then remove each PAT input. The login infrastructure alone cannot make every existing tool auto-sync.
 
 ## Security limits
 
