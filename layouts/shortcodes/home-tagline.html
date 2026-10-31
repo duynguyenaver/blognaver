@@ -1,29 +1,39 @@
 {{- $posts := where site.RegularPages "Section" "posts" -}}
 {{- $posts = where $posts "Draft" false -}}
 <section class="bn-random-posts" aria-labelledby="bn-random-title">
-  <h2 id="bn-random-title">RANDOM SUGGEST POSTS</h2>
-  <ul id="bn-random-posts-list">
+  <div class="bn-random-head"><h2 id="bn-random-title">RANDOM SUGGEST POSTS</h2><span class="bn-random-head-note">10 bài viết dành cho bạn</span></div>
+  <ul id="bn-random-posts-list" class="bn-random-grid">
   {{- range $posts }}
-    <li><a href="{{ .RelPermalink }}">{{ .Title }}</a></li>
+    <li class="bn-random-item"><a href="{{ .RelPermalink }}"><span class="bn-random-number" aria-hidden="true"></span><span class="bn-random-name">{{ .Title }}</span><span class="bn-random-arrow" aria-hidden="true">↗</span></a></li>
   {{- end }}
   </ul>
 </section>
 <style>
-.bn-random-posts{max-width:1200px;margin:14px auto 22px;padding:18px 22px;border:1px solid #e2e8f0;border-radius:16px;background:#fff;color:#0f172a}
-.bn-random-posts h2{font-size:1rem;letter-spacing:.065em;font-weight:800;margin:0 0 12px;color:#0f172a}
-.bn-random-posts ul{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px 22px}
-.bn-random-posts li{min-width:0;padding-left:13px;position:relative}
-.bn-random-posts li:before{content:"";position:absolute;top:.7em;left:0;width:5px;height:5px;border-radius:50%;background:#64748b}
-.bn-random-posts a{color:#2563eb;text-decoration:none;line-height:1.5;font-size:.9rem}
-.bn-random-posts a:hover,.bn-random-posts a:focus-visible{text-decoration:underline}
-.bn-random-posts li:nth-child(n+11){display:none}
-@media(max-width:680px){.bn-random-posts ul{grid-template-columns:1fr}.bn-random-posts{padding:16px}}
+.bn-random-posts{max-width:1200px;margin:14px auto 22px;padding:20px 22px;border:1px solid #e2e8f0;border-radius:16px;background:#fff;color:#0f172a}
+.bn-random-head{display:flex;align-items:baseline;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:15px}
+.bn-random-posts h2{font-size:1rem;letter-spacing:.055em;font-weight:850;margin:0;color:#0f172a}
+.bn-random-head-note{font-size:.78rem;color:#64748b}
+.bn-random-posts ul.bn-random-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 12px;list-style:none!important;list-style-type:none!important;padding:0!important;margin:0!important}
+.bn-random-posts ul.bn-random-grid>li.bn-random-item{display:block;min-width:0;list-style:none!important;list-style-type:none!important;list-style-image:none!important;padding:0!important;margin:0!important;text-indent:0!important;background:none!important}
+.bn-random-posts ul.bn-random-grid>li.bn-random-item::before,.bn-random-posts ul.bn-random-grid>li.bn-random-item::after,.bn-random-posts ul.bn-random-grid>li.bn-random-item::marker{content:none!important;display:none!important}
+.bn-random-posts .bn-random-item>a{display:flex;align-items:center;gap:12px;min-height:66px;padding:13px 14px;border:1px solid #e2e8f0;border-radius:13px;background:#f8fafc;color:#263b57;text-decoration:none!important;box-shadow:0 2px 9px #0f172a05;transition:transform .18s ease,background-color .18s ease,border-color .18s ease,box-shadow .18s ease}
+.bn-random-posts .bn-random-item>a:hover,.bn-random-posts .bn-random-item>a:focus-visible{transform:translateY(-2px);background:#eff6ff;border-color:#b9d4f6;box-shadow:0 7px 18px #1e3a8a12}
+.bn-random-posts .bn-random-number{display:grid;place-items:center;flex:0 0 32px;width:32px;height:32px;border-radius:9px;background:#e9eef7;color:#456382;font-size:.73rem;font-weight:850;font-variant-numeric:tabular-nums}
+.bn-random-posts .bn-random-name{flex:1;min-width:0;font-size:.91rem;font-weight:650;line-height:1.48;overflow-wrap:anywhere}
+.bn-random-posts .bn-random-item>a:hover .bn-random-name{color:#1d4ed8}
+.bn-random-posts .bn-random-arrow{font-size:1.05rem;color:#64748b;flex:0 0 auto}
+.bn-random-posts .bn-random-item>a:hover .bn-random-arrow{color:#2563eb}
+.bn-random-posts li:nth-child(n+11){display:none!important}
+@media(max-width:680px){.bn-random-posts ul.bn-random-grid{grid-template-columns:1fr}.bn-random-posts{padding:16px}}
+@media(prefers-reduced-motion:reduce){.bn-random-posts .bn-random-item>a{transition:none}.bn-random-posts .bn-random-item>a:hover{transform:none}}
 </style>
 <script>
 (function(){
  const ul=document.getElementById("bn-random-posts-list");if(!ul)return;
  const entries=Array.from(ul.children);
  for(let i=entries.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[entries[i],entries[j]]=[entries[j],entries[i]]}
- ul.replaceChildren(...entries.slice(0,10));
+ const chosen=entries.slice(0,10);
+ chosen.forEach((item,i)=>{const number=item.querySelector(".bn-random-number");if(number)number.textContent=String(i+1).padStart(2,"0")});
+ ul.replaceChildren(...chosen);
 })();
 </script>
