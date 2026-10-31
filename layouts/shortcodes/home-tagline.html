@@ -1,1 +1,29 @@
-<section class="bn-home-tagline" aria-label="Giới thiệu blog"><p>Khám phá những bài viết về <strong>công nghệ</strong>, <strong>du lịch</strong> và <strong>cuộc sống</strong> — được viết để chia sẻ, kết nối và truyền cảm hứng.</p></section>
+{{- $posts := where site.RegularPages "Section" "posts" -}}
+{{- $posts = where $posts "Draft" false -}}
+<section class="bn-random-posts" aria-labelledby="bn-random-title">
+  <h2 id="bn-random-title">RANDOM SUGGEST POSTS</h2>
+  <ul id="bn-random-posts-list">
+  {{- range $posts }}
+    <li><a href="{{ .RelPermalink }}">{{ .Title }}</a></li>
+  {{- end }}
+  </ul>
+</section>
+<style>
+.bn-random-posts{max-width:1200px;margin:14px auto 22px;padding:18px 22px;border:1px solid #e2e8f0;border-radius:16px;background:#fff;color:#0f172a}
+.bn-random-posts h2{font-size:1rem;letter-spacing:.065em;font-weight:800;margin:0 0 12px;color:#0f172a}
+.bn-random-posts ul{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px 22px}
+.bn-random-posts li{min-width:0;padding-left:13px;position:relative}
+.bn-random-posts li:before{content:"";position:absolute;top:.7em;left:0;width:5px;height:5px;border-radius:50%;background:#64748b}
+.bn-random-posts a{color:#2563eb;text-decoration:none;line-height:1.5;font-size:.9rem}
+.bn-random-posts a:hover,.bn-random-posts a:focus-visible{text-decoration:underline}
+.bn-random-posts li:nth-child(n+11){display:none}
+@media(max-width:680px){.bn-random-posts ul{grid-template-columns:1fr}.bn-random-posts{padding:16px}}
+</style>
+<script>
+(function(){
+ const ul=document.getElementById("bn-random-posts-list");if(!ul)return;
+ const entries=Array.from(ul.children);
+ for(let i=entries.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[entries[i],entries[j]]=[entries[j],entries[i]]}
+ ul.replaceChildren(...entries.slice(0,10));
+})();
+</script>
