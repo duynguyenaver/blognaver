@@ -1,0 +1,20 @@
+/* Substack-inspired focus workflow. Original BlogNaver navy design tokens unchanged. */
+body.cms-focus .shell{display:block}
+body.cms-focus .side{display:none!important}
+body.cms-focus .workspace{max-width:none!important;padding:0 24px 75px!important}
+body.cms-focus .workspace-top{max-width:none;margin:0 -24px 0!important;padding:10px 25px!important;top:66px;background:var(--bg);border-bottom:1px solid var(--border)}
+body.cms-focus .workspace-top>div:first-child{display:none}
+body.cms-focus .editor-grid{display:block!important;margin:auto;max-width:960px}
+body.cms-focus .main-col{max-width:860px;margin:28px auto}
+body.cms-focus .main-col>.paper:first-child{padding:32px clamp(24px,5vw,68px)!important}
+body.cms-focus .settings{display:none!important}
+body.cms-focus.cms-settings-open .settings{display:grid!important;position:fixed!important;right:16px;top:132px;bottom:16px;width:min(380px,calc(100vw - 32px));max-height:none;overflow:auto;z-index:8;background:var(--bg);padding:12px;border:1px solid var(--border);border-radius:14px;box-shadow:0 18px 50px #0005;grid-template-columns:1fr}
+.cms-focus-actions{display:flex;gap:8px;align-items:center;margin-left:auto}
+.cms-focus-actions button{border:1px solid var(--border);border-radius:10px;padding:9px 13px;color:var(--text);background:var(--panel);cursor:pointer}
+.cms-focus-actions button[aria-pressed=true]{border-color:var(--blue);box-shadow:inset 0 0 0 1px var(--blue)}
+.cms-focus-actions button:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+body.cms-focus .workspace-top .actions{margin-left:0}
+body.cms-focus .workspace-top .actions button{min-height:40px}
+body.cms-focus #toolbar{position:sticky;top:129px;z-index:3;justify-content:center}
+body.cms-focus .main-col>.paper:first-child .ql-editor{min-height:60vh}
+@media(max-width:760px){body.cms-focus .workspace{padding:0 12px 55px!important}body.cms-focus .workspace-top{margin:0 -12px!important;padding:10px 12px!important;top:60px;flex-direction:row;align-items:center;flex-wrap:wrap}body.cms-focus .workspace-top .actions{width:auto;flex:1}body.cms-focus .workspace-top .actions>button{flex:1}body.cms-focus .main-col{margin:15px auto}body.cms-focus .main-col>.paper:first-child{padding:16px!important}body.cms-focus #toolbar{top:128px}}
