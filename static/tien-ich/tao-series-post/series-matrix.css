@@ -23,3 +23,15 @@ body.series-editorial{--series-red:#bc002d;background:#f7f8fa;color:#334155}
 .matrix-feedback{position:fixed;bottom:20px;right:20px;padding:13px 17px;border-radius:12px;background:#0f172a;color:#fff;z-index:20000;box-shadow:0 9px 30px #0003;max-width:min(420px,90vw)}
 .matrix-feedback[hidden]{display:none}.series-matrix-note{font-size:12px;line-height:1.6;color:#64748b}
 @media(max-width:850px){.series-matrix-grid{grid-template-columns:1fr}.series-matrix-panel{padding:15px}}
+
+/* Episode workflow status. Schedule is a plan, not proof of deployment. */
+.matrix-status{display:inline-flex;align-items:center;width:fit-content;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:750;line-height:1.5;margin:8px 0}
+.matrix-status.published{color:#166534;background:#dcfce7}
+.matrix-status.scheduled{color:#1d4ed8;background:#dbeafe}
+.matrix-status.draft{color:#64748b;background:#f1f5f9}
+.matrix-episode:focus-within{outline:2px solid #94a3b8;outline-offset:2px}
+.matrix-episode input[type="datetime-local"]{display:block;width:min(100%,250px);margin-top:8px;padding:8px 10px}
+.series-matrix-head .series-matrix-actions{margin-top:0}
+.series-matrix-head .series-matrix-actions button{font-weight:750}
+.series-matrix-head .series-matrix-actions button:disabled{opacity:.55;cursor:wait}
+@media(max-width:750px){.series-matrix-head .series-matrix-actions{width:100%}.series-matrix-head .series-matrix-actions button{flex:1}}
