@@ -137,10 +137,11 @@ async function githubContents(req,env,user){
   if(!validContentPath(payload.path))return json({error:"Path is not an allowed data file"},400);
   const action=payload.action;
   if(action!=="read"&&action!=="write")return json({error:"Invalid action"},400);
+  const dataBranches=/^(?:main|personal-cloud-backups|attendance-backups)$/;
   const contentPath=payload.path.split("/").map(encodeURIComponent).join("/");
   const pathname="/repos/"+GITHUB_REPO+"/contents/"+contentPath;
   if(action==="read"){
-    if(!/^(main|tts-audio-archive)$/.test(payload.branch||"main"))return json({error:"Unsupported branch"},400);
+    if(!dataBranches.test(payload.branch||"main"))return json({error:"Unsupported data branch"},400);
     const res=await github(pathname+"?ref="+encodeURIComponent(payload.branch||"main"),user.token);
     return json(await res.json().catch(()=>({error:"Invalid upstream response"})),res.status);
   }
@@ -149,7 +150,16 @@ async function githubContents(req,env,user){
   if(typeof payload.sha!=="undefined"&&!/^[a-f0-9]{40}$/.test(payload.sha))return json({error:"Invalid expected blob SHA"},400);
   if(typeof payload.message!=="string"||payload.message.length>160||payload.message.length<5)return json({error:"Invalid commit message"},400);
   const allowedBranch=payload.branch||"main";
-  if(!/^(main|tts-audio-archive)$/.test(allowedBranch))return json({error:"Only designated data branches supported"},400);
+  if(!dataBranches.test(allowedBranch))return json({error:"Only designated encrypted data branches supported"},400);
+  if(allowedBranch!=="main"){
+    const branchStatus=await github("/repos/"+GITHUB_REPO+"/git/ref/heads/"+allowedBranch,user.token);
+    if(branchStatus.status===404){
+      const base=await github("/repos/"+GITHUB_REPO+"/git/ref/heads/main",user.token);
+      if(!base.ok)return json({error:"Cannot read main for data branch"},base.status);
+      const created=await github("/repos/"+GITHUB_REPO+"/git/refs",user.token,"POST",{ref:"refs/heads/"+allowedBranch,sha:(await base.json()).object.sha});
+      if(!created.ok&&created.status!==422)return json({error:"Cannot create encrypted data branch"},created.status);
+    }else if(!branchStatus.ok)return json({error:"Cannot inspect encrypted data branch"},branchStatus.status);
+  }
   const requestBody={message:payload.message,content:payload.base64,branch:allowedBranch};
   if(payload.sha)requestBody.sha=payload.sha;
   const res=await github(pathname,user.token,"PUT",requestBody);
