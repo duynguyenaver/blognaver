@@ -52,6 +52,7 @@
       .replace(/\s+[,;:](?=\s|$)/gu,"")
       .replace(/[.!?]\s*[,;:]+/gu,". ")
       .replace(/[,;:]\s*[.!?]/gu,".")
+      .replace(/([.!?]\s+)([a-zà-ỹđ])/giu,(_,space,letter)=>space+letter.toLocaleUpperCase("vi-VN"))
       .replace(/[ \t]{2,}/gu," ").trim();
   }
   function isMetaPiece(s) {
