@@ -13,6 +13,18 @@ Không phải cứ PR được merge, hay có nhãn *bug*, thì BlogNaver sẽ v
 
 Đó là khác biệt giữa thông báo “deploy thành công” và một bài học có thể đối chiếu với bằng chứng.
 
+## Cập nhật bộ lọc: Hai tuyến bằng chứng độc lập (31/10/2026)
+
+Để tăng số bài được xuất bản mà không bịa quá trình sửa lỗi, hệ thống phân biệt hai loại bài:
+
+**Tuyến A — CI Recovery:** Giữ tiêu chuẩn cũ: PR đã merge, Bug Checker xanh ở revision sau, có log CI lỗi trên revision trước, ít nhất hai commit và dấu hiệu deterministic khớp Knowledge Base. Đây mới là bài được phép nói “CI đỏ → sửa → CI xanh”.
+
+**Tuyến B — Engineering Postmortem:** Dành cho lỗi đã được ghi nhận và có bản sửa gộp vào một commit, hoặc thiếu log đỏ nhưng vẫn có dấu vết kỹ thuật. Phải có **(1)** PR đã merge; **(2)** Bug Checker thành công liên kết với PR; **(3)** tiêu đề thuộc nhóm fix/bug/hotfix; **(4)** PR ghi rõ dấu hiệu lỗi hoặc nguyên nhân và hành động sửa; **(5)** file mã nguồn thay đổi thật và có patch Git; **(6)** chưa có bài cho PR đó. Tuyến này dẫn PR, diff và CI xanh, nhưng **tuyệt đối không khẳng định từng có CI thất bại hoặc lỗi đã được xác minh trên production**.
+
+Mỗi PR chỉ được tạo một bài `fixbug-2026-pr-N.md`, bài được đề xuất qua nhánh riêng và Pull Request. Nếu thiếu bằng chứng, vẫn gắn `fixbug:github-only` và nêu lý do trong job summary. Nhãn `fixbug:evidence-confirmed` nay có thể biểu thị **một trong hai loại bằng chứng**; phải đọc nội dung bài để biết loại nào. Không đăng log thô hay thông tin nhạy cảm.
+
+Đây là **quy tắc xét xuất bản**, không phải chứng minh rằng mọi lỗi người dùng phản ánh đã được sửa triệt để.
+
 ## Chín cửa kiểm tra trước khi viết bài
 
 Bộ lọc trong `scripts/publish-fixbug-postmortem.mjs` thực hiện lần lượt:

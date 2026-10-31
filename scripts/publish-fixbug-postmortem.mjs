@@ -28,7 +28,7 @@ async function pages(path,limit=5){
  return all;
 }
 const labelSpecs={
-  "fixbug:evidence-confirmed":{color:"0969da",description:"PR had failed CI, a later passing revision and verified deterministic log evidence"},
+  "fixbug:evidence-confirmed":{color:"0969da",description:"Evidence-backed CI recovery or documented product defect with code diff and passing checks"},
   "fixbug:published":{color:"1a7f37",description:"A verified Fix Bug 2026 blog article exists on main"},
   "fixbug:github-only":{color:"9a6700",description:"No public Fix Bug article was generated; see workflow log for reason"}
 };
@@ -79,46 +79,58 @@ const runs=all.filter(r=>{
 const success=runs.filter(r=>r.status==="completed"&&r.conclusion==="success").at(-1);
 if(!success)await skip("No successful linked Bug Checker run");
 const failed=runs.filter(r=>r.conclusion==="failure"&&r.head_sha!==success.head_sha&&ts(r.created_at)<ts(success.created_at)).at(-1);
-if(!failed)await skip("No earlier failure on a different tested revision");
 const commits=await pages("/pulls/"+number+"/commits",3);
-if(commits.length<2)await skip("No fix revision in PR commit history");
-const jobs=await pages("/actions/runs/"+failed.id+"/jobs",2);
-let log="";
-for(const job of jobs.filter(j=>j.conclusion==="failure").slice(0,2)){try{log+="\n"+await readLog(job)}catch(e){console.warn("Log inaccessible:",e.message)}}
-if(!log)await skip("No failed-job log");
-const kb=JSON.parse(await readFile("data/ci/bug-knowledge.json","utf8"));
-const known=(kb.cases||[]).filter(c=>{try{return new RegExp(c.regex,"im").test(log)}catch{return false}});
-const symptom=known.find(c=>c.kind==="deterministic");
-if(!symptom)await skip("No deterministic evidence recognized in knowledge base");
-await mark("fixbug:evidence-confirmed");
-summary("EVIDENCE CONFIRMED","Failed and passing runs on different SHAs, deterministic knowledge-base log signature");
 const changes=await pages("/pulls/"+number+"/files",3);
 const files=changes.filter(c=>c.filename&&c.status!=="removed").slice(0,12);
 if(!files.length)await skip("No source files to describe");
-const title="Fix Bug 2026: "+clean(symptom.title,95)+" — PR #"+number;
+const kb=JSON.parse(await readFile("data/ci/bug-knowledge.json","utf8"));
+let symptom=null,log="",evidenceMode="ci-recovery";
+if(failed&&commits.length>=2){
+ const jobs=await pages("/actions/runs/"+failed.id+"/jobs",2);
+ for(const job of jobs.filter(j=>j.conclusion==="failure").slice(0,2)){try{log+="\\n"+await readLog(job)}catch(e){console.warn("Log inaccessible:",e.message)}}
+ const known=(kb.cases||[]).filter(c=>{try{return new RegExp(c.regex,"im").test(log)}catch{return false}});
+ symptom=known.find(c=>c.kind==="deterministic")||null;
+}
+if(!symptom){
+ // Separate evidence track: verified code change + passing CI + explicitly documented failure.
+ // A single-commit PR may qualify, but only as an engineering postmortem (not a CI recovery).
+ const body=String(pr.body||"");
+ const documented=/(root cause|confirmed failure mechanism|reproduc(?:e|tion)|steps to reproduce|nguyên nhân|lỗi đã xác nhận|bug:)/i.test(body)
+   && /(fix|repair|change|solution|khắc phục|đã sửa)/i.test(body);
+ const sourceFiles=changes.filter(c=>/^(scripts\/|static\/|layouts\/|assets\/|\.github\/workflows\/)/.test(c.filename||"")
+   && c.status!=="removed"&&c.changes>0);
+ const tangible=sourceFiles.some(c=>(c.patch||"").includes("@@")&&/^[+-](?![+-])\S/m.test(c.patch||""));
+ const defectScope=/(fix|hotfix|bug|repair)/i.test(pr.title||"");
+ if(!documented||!tangible||!defectScope||!sourceFiles.length)await skip("No deterministic CI recovery or documented code-backed product defect");
+ evidenceMode="engineering-postmortem";
+ symptom={title:"Documented product defect and code repair",advice:"Review the attributed PR description, linked code diff and successful Bug Checker; no failing CI log was established."};
+}
+await mark("fixbug:evidence-confirmed");
+summary("EVIDENCE CONFIRMED",evidenceMode==="ci-recovery"?"Failed and passing CI on different SHAs with deterministic log signature":"Documented defect, source diff and linked passing CI; no CI recovery claim");
+const title="Fix Bug 2026: "+(evidenceMode==="ci-recovery"?clean(symptom.title,95):clean(pr.title,95))+" — PR #"+number;
 const lines=[
 "---",
 "title: "+yaml(title),
 "date: "+yaml(new Date(pr.merged_at).toISOString()),
 "draft: false",
 "slug: "+yaml("fixbug-2026-pr-"+number),
-"description: "+yaml("Bài học CI lỗi và chạy lại thành công sau bản sửa của PR #"+number),
+"description: "+yaml(evidenceMode==="ci-recovery"?"Bài học CI lỗi và chạy lại thành công sau bản sửa của PR #"+number:"Engineering postmortem dựa trên PR, code diff và CI thành công cho PR #"+number),
 'categories: ["Công nghệ", "Fix Bug"]',
 'tags: ["fixbug", "series", "GitHub Actions", "Debugging", "BlogNaver"]',
 'series: ["fix-bug-2026"]',
 "seriesOrder: "+number,
 'author: "BlogNaver CI Reporter"',
 "---","",
-"*Fix Bug 2026 · Bài tự động tổng hợp từ GitHub PR, CI logs và Knowledge Base, không dùng AI tự tạo nguyên nhân.*","",
-"Trong quá trình phát triển BlogNaver, [PR #"+number+"]("+web+"/pull/"+number+") từng không vượt qua kiểm tra CI. Sau khi mã thay đổi, một lượt kiểm tra khác đã hoàn tất thành công và PR được merge. Bài ghi lại những tín hiệu có thể kiểm chứng, không khẳng định đã chứng minh được một dòng mã gây lỗi cụ thể.","",
+"*Fix Bug 2026 · Bài tự động tổng hợp từ GitHub PR, code diff và kết quả kiểm tra; CI logs chỉ được viện dẫn khi tồn tại. Không dùng AI tự tạo nguyên nhân.*","",
+evidenceMode==="ci-recovery"?"Trong quá trình phát triển BlogNaver, [PR #"+number+"]("+web+"/pull/"+number+") từng không vượt qua kiểm tra CI. Sau khi mã thay đổi, một lượt kiểm tra khác đã hoàn tất thành công và PR được merge.":"[PR #"+number+"]("+web+"/pull/"+number+") ghi nhận một lỗi được tác giả PR mô tả và một thay đổi mã nhằm xử lý lỗi. PR đã vượt qua Bug Checker và được merge. Không có bằng chứng CI đỏ rồi xanh trên hai revision cho trường hợp này.","",
 "## Bối cảnh và dấu hiệu lỗi","",
 "**PR:** "+clean(pr.title,180)+".",
 "",
-"**Nhóm lỗi nhận diện bằng quy tắc:** "+clean(symptom.title,130)+".",
+"**Chế độ bằng chứng:** "+(evidenceMode==="ci-recovery"?"CI recovery":"Engineering postmortem")+". **Nhóm lỗi:** "+clean(symptom.title,130)+".",
 "",
-"**Hướng kiểm tra từ Knowledge Base:** "+clean(symptom.advice,400)+".",
+"**Hướng kiểm tra:** "+clean(symptom.advice,400)+".",
 "",
-"Chi tiết được lấy từ [CI run thất bại #"+failed.id+"]("+web+"/actions/runs/"+failed.id+"). Rule matching là bằng chứng về dấu hiệu, **chưa phải kết luận root cause**.",
+evidenceMode==="ci-recovery"?"Chi tiết được lấy từ [CI run thất bại #"+failed.id+"]("+web+"/actions/runs/"+failed.id+"). Rule matching là bằng chứng về dấu hiệu, **chưa phải kết luận root cause**.":"Mô tả lỗi là tuyên bố trong PR: [xem nguồn gốc và cách sửa]("+web+"/pull/"+number+"). Không có log thất bại để xác minh độc lập nguyên nhân.",
 "",
 "## Những file có thay đổi trong PR","",
 ...files.map(x=>"- "+clean(x.filename,150)+" ("+x.status+", +"+x.additions+"/-"+x.deletions+")"),
@@ -129,11 +141,11 @@ const lines=[
 ...commits.slice(-8).map(c=>"- ["+c.sha.slice(0,10)+"]("+web+"/commit/"+c.sha+"): "+clean(c.commit?.message?.split("\n")[0],140)),
 "",
 "## Kết quả kiểm chứng","",
-"- CI từng lỗi: [run #"+failed.id+"]("+web+"/actions/runs/"+failed.id+").",
+...(evidenceMode==="ci-recovery"?["- CI từng lỗi: [run #"+failed.id+"]("+web+"/actions/runs/"+failed.id+")."]:["- Chưa xác minh được CI thất bại trước khi sửa."]),
 "- CI chạy thành công sau bản sửa: [run #"+success.id+"]("+web+"/actions/runs/"+success.id+").",
 "- Bản thay đổi đã merge: [PR #"+number+"]("+web+"/pull/"+number+").",
 "",
-"**Giới hạn:** Hai lượt CI ở hai SHA khác nhau cho thấy trạng thái kiểm thử đã đổi sau khi sửa source. Để nói chính xác lỗi được sửa bởi dòng nào, cần đối chiếu failed log với commit diff. CI xanh cũng không thay thế kiểm chứng production trên trình duyệt.",
+evidenceMode==="ci-recovery"?"**Giới hạn:** Hai lượt CI ở hai SHA khác nhau cho thấy trạng thái kiểm thử đã đổi sau khi sửa source. CI xanh không thay thế kiểm chứng production.":"**Giới hạn:** Root cause do PR mô tả, chưa chứng minh được bằng CI lỗi trước đó. Diff và CI xanh chứng minh có thay đổi mã và kiểm thử qua, không chứng minh lỗi đã tái hiện/khắc phục trên production.",
 "",
 "## Bài học có thể tái sử dụng","",
 "1. Lưu và kiểm tra log thất bại trước khi sửa.",
