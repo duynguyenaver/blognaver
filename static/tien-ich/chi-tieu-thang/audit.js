@@ -1,0 +1,35 @@
+(()=>{"use strict";
+const $=x=>document.getElementById(x),money=n=>Math.round(+n||0).toLocaleString("vi-VN")+" ₫";
+const root=document.querySelector(".shell");if(!root)return;document.body.classList.add("finance-audit");
+const panel=document.createElement("section");panel.innerHTML='<div class="audit-toolbar audit-card"><div class="audit-tabs"><button data-period="day">Ngày</button><button data-period="month" aria-pressed="true">Tháng</button><button data-period="year">Năm</button></div><label>Chọn ngày <input id="auditDate" type="date"></label><label>Chọn tháng <input id="auditMonth" type="month"></label><label>Chọn năm <input id="auditYear" type="number" min="2000" max="2100"></label></div><div class="audit-cards">'+["Tổng chi tiêu","Số dư ròng","Ngân sách còn lại","Tỷ lệ tiết kiệm"].map((name,i)=>'<div class="audit-card"><small>'+name+'</small><strong id="auditValue'+i+'">—</strong><span class="audit-trend" id="auditTrend'+i+'">—</span></div>').join("")+'</div><div class="audit-visuals"><div class="audit-card"><h2>Dòng tiền · Khoản chi</h2><div id="auditFlow" class="audit-chart"></div></div><div class="audit-card"><h2>Chi tiêu theo danh mục</h2><div id="auditCategories"></div></div></div><section class="audit-card"><h2>Sổ cái kiểm toán</h2><p>Trạng thái đối soát là độc lập với trạng thái đồng bộ GitHub.</p><div class="audit-ledger"><table><thead><tr><th>Ngày</th><th>Danh mục</th><th>Nơi giao dịch</th><th>Loại</th><th>Số tiền</th><th>Đối soát</th></tr></thead><tbody id="auditLedgerBody"></tbody></table></div></section>';
+root.querySelector(".hero")?.after(panel);
+const toast=document.createElement("div");toast.className="audit-toast";toast.hidden=true;toast.setAttribute("role","status");document.body.append(toast);
+const today=new Date(),two=x=>String(x).padStart(2,"0"),date=d=>d.getFullYear()+"-"+two(d.getMonth()+1)+"-"+two(d.getDate());
+$("auditDate").value=date(today);$("auditMonth").value=date(today).slice(0,7);$("auditYear").value=today.getFullYear();
+let period="month",timer;
+function showPicker(){["auditDate","auditMonth","auditYear"].forEach((id,i)=>{const label=$(id).closest("label");label.hidden=(["day","month","year"][i]!==period)})}showPicker();
+function first(key){return period==="day"?new Date(key+"T12:00:00"):period==="month"?new Date(key+"-01T12:00:00"):new Date(+key,0,1,12)}
+function shift(d,n){const x=new Date(d);if(period==="day")x.setDate(x.getDate()+n);else if(period==="month")x.setMonth(x.getMonth()+n);else x.setFullYear(x.getFullYear()+n);return x}
+function sum(rows,kind){return rows.filter(r=>r.type===kind).reduce((v,r)=>v+(Number(r.amount)||0),0)}
+function render(){
+const state=window.BNPersonalData?.read?.();if(!Array.isArray(state?.items))return;
+const key=period==="day"?$("auditDate").value:period==="month"?$("auditMonth").value:$("auditYear").value;if(!key)return;
+const lo=first(key),hi=shift(lo,1),prev=shift(lo,-1),range=(start,end)=>state.items.filter(r=>r.date>=date(start)&&r.date<date(end));
+const rows=range(lo,hi),old=range(prev,lo),spent=sum(rows,"expense"),income=sum(rows,"income"),previous=sum(old,"expense"),oldIncome=sum(old,"income");
+const budget=period==="month"?Number(state.budgets?.[key]||0):0;
+const values=[money(spent),money(income-spent),budget?money(budget-spent):"Chưa đặt ngân sách",income?(100*(income-spent)/income).toFixed(1)+"%":"Chưa có thu nhập"];
+const previousValues=[previous,oldIncome-previous,null,oldIncome?100*(oldIncome-previous)/oldIncome:null],currentValues=[spent,income-spent,null,income?100*(income-spent)/income:null];
+values.forEach((value,i)=>{ $("auditValue"+i).textContent=value;const target=$("auditTrend"+i),p=previousValues[i],c=currentValues[i];target.className="audit-trend";if(p===null||c===null||!p){target.textContent="Chưa đủ dữ liệu so sánh";return}const pct=(c-p)/Math.abs(p)*100;target.textContent=(pct>0?"+":"")+pct.toFixed(1)+"% so với kỳ trước";target.classList.add((i===0?pct<0:pct>0)?"good":"bad")});
+const categories=new Map(),groups=new Map();for(const r of rows.filter(r=>r.type==="expense")){categories.set(r.category,(categories.get(r.category)||0)+Number(r.amount));const k=period==="year"?r.date.slice(0,7):period==="month"?r.date.slice(8,10):r.date;groups.set(k,(groups.get(k)||0)+Number(r.amount))}
+const keys=period==="year"?Array.from({length:12},(_,i)=>key+"-"+two(i+1)):period==="month"?Array.from({length:new Date(lo.getFullYear(),lo.getMonth()+1,0).getDate()},(_,i)=>two(i+1)):[key],peak=Math.max(1,...groups.values()),flow=$("auditFlow");flow.replaceChildren();
+for(const [i,k] of keys.entries()){const b=document.createElement("div");b.className="audit-bar";b.style.height=Math.max(2,185*(groups.get(k)||0)/peak)+"px";b.title=k+" · "+money(groups.get(k)||0);if(period!=="month"||i%5===0){const label=document.createElement("span");label.textContent=k.slice(-2);b.append(label)}flow.append(b)}
+const cat=$("auditCategories");cat.replaceChildren();if(!categories.size)cat.textContent="Chưa có dữ liệu";for(const [name,v] of [...categories].sort((a,b)=>b[1]-a[1])){const row=document.createElement("div");row.className="audit-category-row";const label=document.createElement("span");label.textContent=name||"Khác";const amount=document.createElement("b");amount.textContent=money(v);const track=document.createElement("div");track.className="audit-category-track";const fill=document.createElement("span");fill.style.width=(spent?100*v/spent:0)+"%";track.append(fill);row.append(label,amount,track);cat.append(row)}
+const tbody=$("auditLedgerBody");tbody.replaceChildren();for(const r of [...rows].sort((a,b)=>b.date.localeCompare(a.date))){const tr=document.createElement("tr");[r.date,r.category||"—",r.merchant||"—",r.type==="income"?"Thu":"Chi",money(r.amount),"Chưa đối soát"].forEach((v,i)=>{const td=document.createElement("td");td.textContent=v;if(i===4)td.className="money";tr.append(td)});tbody.append(tr)}
+if(!rows.length){const row=document.createElement("tr"),td=document.createElement("td");td.colSpan=6;td.textContent="Không có giao dịch trong kỳ";row.append(td);tbody.append(row)}
+}
+panel.querySelectorAll("[data-period]").forEach(b=>b.onclick=()=>{period=b.dataset.period;panel.querySelectorAll("[data-period]").forEach(x=>x.setAttribute("aria-pressed",String(b===x)));showPicker();render()});
+["auditDate","auditMonth","auditYear"].forEach(id=>$(id).addEventListener("change",render));
+new MutationObserver(render).observe($("transactions"),{childList:true});
+const status=$("status");new MutationObserver(()=>{if(status.textContent.includes("Đã lưu giao dịch")){toast.textContent="Đã lưu giao dịch trên thiết bị 🌟";toast.hidden=false;clearTimeout(timer);timer=setTimeout(()=>toast.hidden=true,4000)}render()}).observe(status,{childList:true,subtree:true});
+window.addEventListener("bn:personal-cloud-change",render);render();
+})();
