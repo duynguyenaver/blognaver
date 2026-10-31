@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Đọc văn bản tiếng Việt và xuất bản ghi âm WAV ngay trên trình duyệt, không cần API key.">
+<title>Text to Speech Studio — BlogNaver</title>
+<link rel="stylesheet" href="../utilities.css"><link rel="stylesheet" href="../../access-gate.css"><script src="../../access-gate.js"></script>
+<style>
+:root{--tts-radius:16px}body{min-width:0}.studio{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(280px,1fr);gap:18px;align-items:start}.studio>.panel{margin:0;min-width:0;border-radius:var(--tts-radius)}.studio textarea{font:16px/1.75 system-ui,-apple-system,sans-serif;min-height:310px;height:43vh;max-height:650px;resize:vertical;border-radius:12px;background:rgba(4,14,30,.35)}.control{margin:18px 0}.control label{display:block;margin-bottom:7px;font-weight:700;font-size:13px}.control select,.control input{width:100%;background:#0b1c32;color:var(--text);border:1px solid #476487;border-radius:10px;padding:11px}.hint{font-size:12px;color:var(--muted)}.primary{background:#347ebd;border-color:#5daced}.controls{display:flex;flex-wrap:wrap;gap:10px}.controls button{padding:12px 15px}.controls button:disabled{opacity:.48;cursor:not-allowed}.panel h2{margin-top:0}.note{border-left:3px solid var(--blue);padding:12px 14px;border-radius:8px;background:#10243c;color:var(--muted);font-size:13px;margin-top:16px}.statusline{margin:14px 0;font-weight:650;min-height:24px}.statusline.error{color:#ffadba}.toolbar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}.toolbar small{color:var(--muted)}.download{display:none;margin-top:12px;word-break:break-all}.download.visible{display:inline-block}select:focus-visible{outline:3px solid #9ed7ff;outline-offset:3px}audio{width:100%;margin-top:15px}footer{padding:28px 0;color:var(--muted);font-size:12px}@media(max-width:760px){.studio{grid-template-columns:1fr}.studio textarea{height:260px;min-height:240px}.controls button{flex:1 1 130px}}
+@media(prefers-color-scheme:light){body.tts-light{background:#f4f7fb;color:#15243a}body.tts-light .panel{background:#fff;color:#15243a;border-color:#d6e2ed}body.tts-light .hint,body.tts-light .note,body.tts-light p{color:#54657b}body.tts-light textarea,body.tts-light select,body.tts-light input{background:#f8fbff;color:#15243a;border-color:#a9bfd3}body.tts-light .note{background:#edf5ff}}
+</style></head>
+<body><main class="shell">
+<nav><a href="../">← Tiện ích</a><span>EDITORIAL / AUDIO LAB</span></nav>
+<header><div class="eyebrow">BLOGNAVER · FREE BROWSER TOOL</div><h1>Text to Speech Studio</h1><p>Chuyển văn bản thành giọng đọc, nghe thử và ghi thành WAV để dựng video. Không cần đăng nhập hoặc gửi nội dung lên máy chủ BlogNaver.</p></header>
+<div class="studio">
+<section class="panel"><div class="toolbar"><h2>01 / Nội dung đọc</h2><small id="count">0 ký tự</small></div>
+<label class="subtle" for="script">Kịch bản lồng tiếng</label>
+<textarea id="script" spellcheck="true" maxlength="15000" placeholder="Dán kịch bản video YouTube của bạn vào đây..."></textarea>
+<div class="controls"><button id="listen" class="primary" type="button">▶ Phát âm thanh</button><button id="stop" type="button" class="secondary" disabled>■ Dừng</button><button id="record" type="button">↓ Ghi và tải WAV</button></div>
+<div id="status" class="statusline" role="status" aria-live="polite">Sẵn sàng.</div>
+<a id="download" class="btn download" download="blognaver-voice.wav">Tải lại bản WAV vừa ghi</a>
+<audio id="preview" controls class="hidden" aria-label="Nghe lại file WAV"></audio>
+</section>
+<aside class="panel"><h2>02 / Thiết lập giọng đọc</h2>
+<div class="control"><label for="voice">Giọng đọc hệ thống</label><select id="voice"><option value="">Đang tìm giọng đọc…</option></select><div class="hint">Ưu tiên các giọng vi-VN nếu thiết bị hỗ trợ.</div></div>
+<div class="control"><label for="rate">Tốc độ · <output id="rateValue">1.0×</output></label><input type="range" id="rate" min="0.6" max="1.6" step="0.1" value="1"></div>
+<div class="control"><label for="pitch">Cao độ · <output id="pitchValue">1.0</output></label><input type="range" id="pitch" min="0.7" max="1.3" step="0.1" value="1"></div>
+<div class="note"><strong>Điều kiện ghi WAV:</strong> Trình duyệt phải hỗ trợ chia sẻ âm thanh của tab. Khi được hỏi, hãy chọn <strong>tab hiện tại</strong> và bật <strong>Chia sẻ âm thanh tab / Share tab audio</strong>. Không chọn toàn màn hình. Nếu trình duyệt không cung cấp audio track, bạn vẫn dùng được chức năng nghe thử nhưng không thể xuất WAV bằng giọng hệ thống theo cách này.</div>
+<p class="hint">Tính năng WAV ghi âm thanh tab bằng quyền bạn cấp, không ghi micro và không tải âm thanh lên server. Nên dùng Chrome/Edge desktop. Phụ thuộc chính sách trình duyệt và loại giọng đọc.</p>
+</aside></div>
+<footer>© BlogNaver · Audio xử lý cục bộ trên thiết bị. Kiểm tra điều khoản sử dụng của từng giọng đọc trước khi dùng thương mại.</footer>
+</main>
+<script>
+(() => {
+"use strict";
+const $ = id => document.getElementById(id);
+const synth = window.speechSynthesis;
+const els = {script:$("script"),voice:$("voice"),rate:$("rate"),pitch:$("pitch"),listen:$("listen"),stop:$("stop"),record:$("record"),status:$("status"),download:$("download"),preview:$("preview")};
+let voices=[],speaking=false,recording=false,stream=null,context=null,source=null,processor=null,silence=null,chunks=[],sampleRate=44100,objectURL=null;
+const status=(msg,error=false)=>{els.status.textContent=msg;els.status.classList.toggle("error",error)};
+const setUI=()=>{els.listen.disabled=speaking||recording;els.record.disabled=speaking||recording;els.stop.disabled=!speaking&&!recording};
+if(!synth){status("Trình duyệt không hỗ trợ Web Speech API.",true);els.listen.disabled=true;els.record.disabled=true;return}
+function loadVoices(){
+ const current=els.voice.value;
+ voices=synth.getVoices();
+ els.voice.replaceChildren();
+ if(!voices.length){els.voice.add(new Option("Chưa tìm thấy giọng đọc",""));return}
+ voices.forEach((v,i)=>els.voice.add(new Option(`${v.name} · ${v.lang}${v.localService?" · local":""}`,String(i))));
+ const prefer=voices.findIndex(v=>v.lang.toLowerCase().startsWith("vi"));
+ const picked=voices.findIndex((v,i)=>String(i)===current);
+ els.voice.value=String(picked>=0?picked:prefer>=0?prefer:0);
+}
+loadVoices();
+synth.addEventListener?.("voiceschanged",loadVoices);
+els.script.addEventListener("input",()=>{$("count").textContent=els.script.value.length.toLocaleString("vi-VN")+" ký tự"});
+["rate","pitch"].forEach(k=>els[k].addEventListener("input",()=>{$(k+"Value").textContent=Number(els[k].value).toFixed(1)+(k==="rate"?"×":"")}));
+function cleanup(){
+ if(processor){try{processor.disconnect()}catch{} processor.onaudioprocess=null;processor=null}
+ if(source){try{source.disconnect()}catch{}source=null}
+ if(silence){try{silence.disconnect()}catch{}silence=null}
+ if(context){const old=context;context=null;old.close().catch(()=>{})}
+ if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}
+}
+function wavBuffer(pieces,sr){
+ const length=pieces.reduce((n,b)=>n+b.length,0);
+ if(!length)throw Error("Không ghi được mẫu âm thanh.");
+ if(length>sr*60*20)throw Error("Bản ghi quá dài (tối đa 20 phút).");
+ const ab=new ArrayBuffer(44+length*2),view=new DataView(ab);
+ const str=(offset,s)=>{for(let i=0;i<s.length;i++)view.setUint8(offset+i,s.charCodeAt(i))};
+ str(0,"RIFF");view.setUint32(4,36+length*2,true);str(8,"WAVE");str(12,"fmt ");view.setUint32(16,16,true);view.setUint16(20,1,true);view.setUint16(22,1,true);view.setUint32(24,sr,true);view.setUint32(28,sr*2,true);view.setUint16(32,2,true);view.setUint16(34,16,true);str(36,"data");view.setUint32(40,length*2,true);
+ let pos=44;for(const part of pieces){for(let i=0;i<part.length;i++){const x=Math.max(-1,Math.min(1,part[i]));view.setInt16(pos,x<0?x*32768:x*32767,true);pos+=2}}
+ return new Blob([ab],{type:"audio/wav"});
+}
+let finishRecording=null;
+function speak(onFinish){
+ const text=els.script.value.trim();if(!text){status("Hãy nhập nội dung trước.",true);return false}
+ synth.cancel();
+ const utterance=new SpeechSynthesisUtterance(text);
+ const v=voices[Number(els.voice.value)];if(v){utterance.voice=v;utterance.lang=v.lang}else utterance.lang="vi-VN";
+ utterance.rate=Number(els.rate.value);utterance.pitch=Number(els.pitch.value);
+ speaking=true;setUI();
+ let ended=false;
+ const done=err=>{if(ended)return;ended=true;speaking=false;setUI();onFinish?.(err);if(!onFinish)status(err?"Đọc bị dừng hoặc lỗi.":"Đã đọc xong.",!!err)};
+ utterance.onend=()=>done(false);
+ utterance.onerror=e=>done(e.error!=="canceled"&&e.error!=="interrupted");
+ synth.speak(utterance);return true;
+}
+els.listen.addEventListener("click",()=>{if(!recording){status("Đang đọc…");speak()}});
+async function finalize(showOutput){
+ const pieces=chunks;chunks=[];const sr=sampleRate;
+ cleanup();recording=false;speaking=false;setUI();
+ if(!showOutput){status("Đã dừng ghi.");return}
+ try{
+  const blob=wavBuffer(pieces,sr);
+  if(objectURL)URL.revokeObjectURL(objectURL);
+  objectURL=URL.createObjectURL(blob);
+  els.download.href=objectURL;els.download.classList.add("visible");
+  els.preview.src=objectURL;els.preview.classList.remove("hidden");
+  status("Đã tạo WAV · "+(blob.size/1048576).toFixed(2)+" MB. Bấm tải file xuống.");
+  els.download.click();
+ }catch(e){status("Không tạo được WAV: "+e.message,true)}
+}
+els.stop.addEventListener("click",()=>{synth.cancel();if(recording){const fn=finishRecording;finishRecording=null;fn?.(true)}else{speaking=false;setUI();status("Đã dừng phát.")}});
+els.record.addEventListener("click",async()=>{
+ if(recording||speaking)return;
+ if(!els.script.value.trim()){status("Hãy nhập nội dung trước.",true);return}
+ if(!navigator.mediaDevices?.getDisplayMedia){status("Trình duyệt không hỗ trợ ghi âm tab. Hãy thử Chrome/Edge desktop.",true);return}
+ els.download.classList.remove("visible");els.preview.classList.add("hidden");
+ try{
+  status("Chọn tab hiện tại và bật chia sẻ âm thanh tab.");
+  stream=await navigator.mediaDevices.getDisplayMedia({video:true,audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
+  if(!stream.getAudioTracks().length)throw Error("Không nhận được âm thanh tab. Vui lòng bật Share tab audio.");
+  context=new (window.AudioContext||window.webkitAudioContext)();
+  await context.resume();
+  sampleRate=context.sampleRate;
+  chunks=[];
+  source=context.createMediaStreamSource(stream);
+  processor=context.createScriptProcessor(4096,1,1);
+  silence=context.createGain();silence.gain.value=0;
+  processor.onaudioprocess=e=>{if(recording)chunks.push(new Float32Array(e.inputBuffer.getChannelData(0)))};
+  source.connect(processor);processor.connect(silence);silence.connect(context.destination);
+  recording=true;setUI();
+  finishRecording=async save=>{if(!recording)return;recording=false;synth.cancel();await new Promise(r=>setTimeout(r,120));await finalize(save)};
+  stream.getAudioTracks()[0].addEventListener("ended",()=>{if(recording){const fn=finishRecording;finishRecording=null;fn?.(false)}},{once:true});
+  status("Đang ghi âm tab và đọc kịch bản…");
+  // Small delay to let the capture graph become active.
+  await new Promise(r=>setTimeout(r,350));
+  if(recording)speak(err=>{const fn=finishRecording;finishRecording=null;fn?.(!err)});
+ }catch(e){cleanup();recording=false;speaking=false;setUI();status("Không thể ghi WAV: "+(e.message||"Bạn đã từ chối chia sẻ tab."),true)}
+});
+window.addEventListener("pagehide",()=>{synth.cancel();cleanup();if(objectURL)URL.revokeObjectURL(objectURL)});
+})();
+</script></body></html>
