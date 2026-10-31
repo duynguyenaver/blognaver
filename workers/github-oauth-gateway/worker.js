@@ -82,7 +82,7 @@ function requireOrigin(req,env){
   return source===origin(env);
 }
 function validContentPath(path){
-  return typeof path==="string"&&path.length<240&&/^data\/[a-zA-Z0-9_/-]+\.(?:json|csv|txt)$/.test(path)&&!path.includes("..")&&!path.includes("//");
+  return typeof path==="string"&&path.length<240&&/^data\/[a-zA-Z0-9_/-]+\.enc\.json$/.test(path)&&!path.includes("..")&&!path.includes("//");
 }
 async function authStart(req,env,url){
   const state=random(),verifier=random(40);
