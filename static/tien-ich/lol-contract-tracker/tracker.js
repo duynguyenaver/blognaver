@@ -23,7 +23,7 @@ function days(x,now=new Date()){const v=iso(x);if(!v)return null;return Math.cei
 function status(r,now=new Date()){const d=days(r.endDate,now);return d===null?{key:"unknown",label:"Chưa rõ hạn"}:d<0?{key:"expired",label:"Ngày GCD đã qua"}:d<=60?{key:"soon",label:"Sắp đến hạn"}:{key:"future",label:"Còn thời hạn"}}
 function safeRow(r){if(!r||typeof r!=="object")return null;const name=clean(r.handle||r.player||r.name).slice(0,120),team=clean(r.team).slice(0,150);
  if(!name||!team)return null;const league=clean(r.league).toUpperCase();
- return {id:clean(r.id)||[league,team,name].join("/"),handle:name,team,league:CODES.has(league)?league:"OTHER",legalName:clean(r.legalName).slice(0,140),position:clean(r.position||r.role).slice(0,80),endDate:iso(r.endDate),sourceUrl:source(r.sourceUrl),sourceType:r.sourceType==="manual"?"manual":"official"}
+ return {id:clean(r.id)||[league,team,name].join("/"),handle:name,team,league:CODES.has(league)?league:"OTHER",competition:clean(r.competition||r.league).slice(0,80),legalName:clean(r.legalName).slice(0,140),position:clean(r.position||r.role).slice(0,80),endDate:iso(r.endDate),sourceUrl:source(r.sourceUrl),sourceType:r.sourceType==="manual"?"manual":"official"}
 }
 function snapshot(payload){if(!payload||!Array.isArray(payload.rows)||payload.rows.length>20000)throw Error("Snapshot không hợp lệ");
  const rows=payload.rows.map(safeRow).filter(Boolean);if(payload.rows.length&&rows.length<payload.rows.length*.7)throw Error("Dòng GCD thiếu thông tin");
@@ -34,13 +34,20 @@ function teams(){const chosen=$("team").value,league=$("league").value,all=[...n
 }
 function summary(){const rows=state.rows,date=state.snapshot?.fetchedAt;
  $("statPlayers").textContent=num.format(rows.length);$("statExpiring").textContent=num.format(rows.filter(r=>status(r).key==="soon").length);
- $("statLeagues").textContent=num.format(new Set(rows.map(x=>x.league)).size);
+ $("statLeagues").textContent=num.format(new Set(rows.map(x=>x.competition||x.league)).size);
  $("statDate").textContent=state.manual?"CSV vừa nhập":date?showDate(date.slice(0,10)):"Chưa có";
  $("snapshotMeta").textContent=state.manual?"Dữ liệu tạm, không tải lên GitHub":date?"Lấy lúc "+new Date(date).toLocaleString("vi-VN")+"; "+(state.snapshot.regions||[]).length+" tab GCD":"Chờ đồng bộ Riot GCD";
+ const sources=$("sourceDates");sources.replaceChildren();
+ const seen=new Set();
+ for(const r of state.snapshot?.regions||[]){
+  const gid=String(r.gid||"");if(!gid||seen.has(gid))continue;seen.add(gid);
+  sources.append(dom("span","",String(r.league||"GCD")+" · cập nhật nguồn: "+String(r.sheetUpdatedAt||"không rõ ngày")));
+ }
+ if(state.manual)sources.prepend(dom("span","","CSV tự nhập chưa kiểm chứng với Riot"));
 }
 function filter(){
  const q=norm($("search").value),league=$("league").value,team=$("team").value,st=$("status").value,sort=$("sort").value;
- state.filtered=state.rows.filter(r=>(!q||norm([r.handle,r.legalName,r.team,r.league,r.position].join(" ")).includes(q))&&(!league||r.league===league)&&(!team||r.team===team)&&(!st||status(r).key===st));
+ state.filtered=state.rows.filter(r=>(!q||norm([r.handle,r.legalName,r.team,r.league,r.competition,r.position].join(" ")).includes(q))&&(!league||r.league===league)&&(!team||r.team===team)&&(!st||status(r).key===st));
  state.filtered.sort((a,b)=>{if(sort==="name")return a.handle.localeCompare(b.handle);
  if(sort==="team")return a.team.localeCompare(b.team)||a.handle.localeCompare(b.handle);
  const x=a.endDate?Date.parse(a.endDate):Infinity,y=b.endDate?Date.parse(b.endDate):Infinity;return (sort==="recent"?y-x:x-y)||a.handle.localeCompare(b.handle)});
@@ -51,7 +58,7 @@ function render(){const tbody=$("contractRows");tbody.replaceChildren();const li
  for(const r of list.slice(state.page*PAGE,(state.page+1)*PAGE)){const tr=dom("tr"),td=dom("td");td.append(dom("strong","",r.handle));if(r.legalName)td.append(dom("div","role",r.legalName));
  const s=status(r),badge=dom("td");badge.append(dom("span","tag "+s.key,s.label));
  const src=dom("td"),a=dom("a","",r.sourceType==="manual"?"Đối chiếu Riot ↗":"Riot GCD ↗");a.href=r.sourceUrl;a.target="_blank";a.rel="noopener noreferrer";src.append(a);
- tr.append(td,dom("td","",r.team),dom("td","",r.league),dom("td","",r.position||"—"),dom("td","",showDate(r.endDate)),badge,src);tbody.append(tr)}
+ tr.append(td,dom("td","",r.team),dom("td","",r.competition||r.league),dom("td","",r.position||"—"),dom("td","",showDate(r.endDate)),badge,src);tbody.append(tr)}
  $("resultCount").textContent=num.format(list.length)+" kết quả";$("pageInfo").textContent=list.length?(state.page+1)+"/"+Math.ceil(list.length/PAGE):"0/0";
  $("prevPage").disabled=state.page===0;$("nextPage").disabled=(state.page+1)*PAGE>=list.length;
 }
