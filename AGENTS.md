@@ -56,6 +56,13 @@ Applies to every existing and new BlogNaver utility, CMS tool and integration, e
 - If GitHub refuses the merge due to permissions, required approvals, branch rules, or a failed/pending check, report the precise blocker and fix permitted repository/workflow settings through a separate PR where possible. **Never silently fall back to manual approval as the intended workflow** or claim the deployment succeeded.
 - This owner policy supersedes older AGENTS.md passages requiring manual approval, manual merge, a particular reviewer, or prohibiting safe CI-gated auto-merge. Keep independent security and data-safety gates in force.
 
+## Unofficial historical LoL GCD archives (Leaguepedia, 2026-11-01)
+
+- Riot's live public GCD Google Sheet is the **official** source for league-recognized current registrations/expiry. The Leaguepedia/Fandom `Archive:Global_Contract_Database` is a **third-party/community historical archive**, even when its underlying snapshots were derived from Riot. Never upgrade wiki copies or historical records to "official" or automatically overwrite the official GCD table.
+- Historical timeline references must include source URL, archive date, region and clearly labeled uncertainty. Archived changes are possible hints for research, **not** proof of a player being released, renewed, eligible to negotiate or transferred.
+- Respect Leaguepedia/Fandom access policies, robots.txt, licensing and citation. Historical discovery may index dated page links only; no bulk mirroring or anti-bot workarounds. If inaccessible, preserve verified links and warn, do not fabricate dates.
+- Keep the existing private PIN/OTP, GitHub token and encrypted user-data protections intact. Both source refreshes use separate data files under the same PR-first CI-review policy. Every new update must be on a feature/data branch, never a direct main push.
+
 ## League of Legends contract and transfer intelligence (2026-11-01)
 
 - The public **Riot Games League-Recognized Global Contract Database (GCD)** is the source for team registrations and listed contract end dates. The sheet is a tabbed public spreadsheet, not a live contract-renewal API. Never claim a date is a completed transfer, renewal, release, retirement or free agency by itself.
