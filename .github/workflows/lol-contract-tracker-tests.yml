@@ -1,0 +1,44 @@
+name: LoL Contract Tracker · Tests
+on:
+  pull_request:
+    paths:
+      - 'static/tien-ich/lol-contract-tracker/**'
+      - 'static/tien-ich/index.html'
+      - 'scripts/update-lol-contracts.py'
+      - 'scripts/test_update_lol_contracts.py'
+      - 'scripts/test-lol-contract-tracker.mjs'
+      - '.github/workflows/lol-contract-tracker-tests.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  contract-tracker:
+    name: GCD parser and UI regression
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Check JS parse
+        run: node --check static/tien-ich/lol-contract-tracker/tracker.js
+      - name: Python GCD importer offline tests
+        run: python3 -m unittest scripts/test_update_lol_contracts.py -v
+      - name: Client data and contract labels tests
+        run: node --test scripts/test-lol-contract-tracker.mjs
+      - name: Check JSON schema and attribution
+        run: |
+          python3 - <<'PY'
+          import json
+          base="static/tien-ich/lol-contract-tracker/"
+          data=json.load(open(base+"gcd.json",encoding="utf-8"))
+          news=json.load(open(base+"transfers.json",encoding="utf-8"))
+          assert data["version"]==1 and isinstance(data["rows"],list)
+          assert "docs.google.com/spreadsheets/" in data["sourceUrl"]
+          for event in news["events"]:
+              assert event["status"] in ("confirmed","renewed","rumor")
+              assert event["sourceUrl"].startswith("https://")
+              assert event["date"] and event["player"]
+          print("PASS: Riot GCD sources, schema and attributed transfer events")
+          PY
