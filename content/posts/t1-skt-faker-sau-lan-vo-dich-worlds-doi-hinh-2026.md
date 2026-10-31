@@ -303,7 +303,7 @@ T1 bước vào giải với tư cách **đương kim vô địch**, là **hạt
 
 | Vòng Swiss | Đối thủ | Kết quả |
 |---|---|---|
-| Round 1 — 23/10 | LOS (LOUD / RED Canids / paiN liên kết thương hiệu theo mùa giải) | **Thắng 1–0** |
+| Round 1 — 23/10 | LOS (đại diện CBLOL) | **Thắng 1–0** |
 | Round 2 — 24/10 | Dplus KIA | **Thua 0–1** |
 | Round 3 — 26/10 | CTBC Flying Oyster | **Thắng 1–0** |
 | Round 4 — 28/10 | Movistar KOI | **Thắng 2–0** |
