@@ -1,0 +1,35 @@
+name: Test GitHub OAuth gateway
+
+on:
+  pull_request:
+    paths:
+      - 'workers/github-oauth-gateway/**'
+      - 'static/github-auth.js'
+      - 'static/access-gate.js'
+      - 'static/tien-ich/cloud-sync.js'
+      - 'scripts/test-github-oauth-gateway.mjs'
+      - '.github/workflows/github-oauth-gateway.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  oauth-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Check runtime
+        run: node --version
+      - name: Gateway regression tests
+        run: node --test scripts/test-github-oauth-gateway.mjs
+      - name: Check module syntax
+        run: |
+          node --check workers/github-oauth-gateway/worker.js
+          node --check static/github-auth.js
+          node --check static/access-gate.js
+          node --check static/tien-ich/cloud-sync.js
