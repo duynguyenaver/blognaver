@@ -1,39 +1,28 @@
-{{- $posts := where site.RegularPages "Section" "posts" -}}
-{{- $posts = where $posts "Draft" false -}}
-<section class="bn-random-posts" aria-labelledby="bn-random-title">
-  <div class="bn-random-head"><h2 id="bn-random-title">RANDOM SUGGEST POSTS</h2><span class="bn-random-head-note">10 bài viết dành cho bạn</span></div>
-  <ul id="bn-random-posts-list" class="bn-random-grid">
-  {{- range $posts }}
-    <li class="bn-random-item"><a href="{{ .RelPermalink }}"><span class="bn-random-number" aria-hidden="true"></span><span class="bn-random-name">{{ .Title }}</span><span class="bn-random-arrow" aria-hidden="true">↗</span></a></li>
-  {{- end }}
-  </ul>
-</section>
-<style>
-.bn-random-posts{max-width:1200px;margin:14px auto 22px;padding:20px 22px;border:1px solid #e2e8f0;border-radius:16px;background:#fff;color:#0f172a}
-.bn-random-head{display:flex;align-items:baseline;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:15px}
-.bn-random-posts h2{font-size:1rem;letter-spacing:.055em;font-weight:850;margin:0;color:#0f172a}
-.bn-random-head-note{font-size:.78rem;color:#64748b}
-.bn-random-posts ul.bn-random-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 12px;list-style:none!important;list-style-type:none!important;padding:0!important;margin:0!important}
-.bn-random-posts ul.bn-random-grid>li.bn-random-item{display:block;min-width:0;list-style:none!important;list-style-type:none!important;list-style-image:none!important;padding:0!important;margin:0!important;text-indent:0!important;background:none!important}
-.bn-random-posts ul.bn-random-grid>li.bn-random-item::before,.bn-random-posts ul.bn-random-grid>li.bn-random-item::after,.bn-random-posts ul.bn-random-grid>li.bn-random-item::marker{content:none!important;display:none!important}
-.bn-random-posts .bn-random-item>a{display:flex;align-items:center;gap:12px;min-height:66px;padding:13px 14px;border:1px solid #e2e8f0;border-radius:13px;background:#f8fafc;color:#263b57;text-decoration:none!important;box-shadow:0 2px 9px #0f172a05;transition:transform .18s ease,background-color .18s ease,border-color .18s ease,box-shadow .18s ease}
-.bn-random-posts .bn-random-item>a:hover,.bn-random-posts .bn-random-item>a:focus-visible{transform:translateY(-2px);background:#eff6ff;border-color:#b9d4f6;box-shadow:0 7px 18px #1e3a8a12}
-.bn-random-posts .bn-random-number{display:grid;place-items:center;flex:0 0 32px;width:32px;height:32px;border-radius:9px;background:#e9eef7;color:#456382;font-size:.73rem;font-weight:850;font-variant-numeric:tabular-nums}
-.bn-random-posts .bn-random-name{flex:1;min-width:0;font-size:.91rem;font-weight:650;line-height:1.48;overflow-wrap:anywhere}
-.bn-random-posts .bn-random-item>a:hover .bn-random-name{color:#1d4ed8}
-.bn-random-posts .bn-random-arrow{font-size:1.05rem;color:#64748b;flex:0 0 auto}
-.bn-random-posts .bn-random-item>a:hover .bn-random-arrow{color:#2563eb}
-.bn-random-posts li:nth-child(n+11){display:none!important}
-@media(max-width:680px){.bn-random-posts ul.bn-random-grid{grid-template-columns:1fr}.bn-random-posts{padding:16px}}
-@media(prefers-reduced-motion:reduce){.bn-random-posts .bn-random-item>a{transition:none}.bn-random-posts .bn-random-item>a:hover{transform:none}}
-</style>
-<script>
-(function(){
- const ul=document.getElementById("bn-random-posts-list");if(!ul)return;
- const entries=Array.from(ul.children);
- for(let i=entries.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[entries[i],entries[j]]=[entries[j],entries[i]]}
- const chosen=entries.slice(0,10);
- chosen.forEach((item,i)=>{const number=item.querySelector(".bn-random-number");if(number)number.textContent=String(i+1).padStart(2,"0")});
- ul.replaceChildren(...chosen);
-})();
-</script>
+{{- $posts := (where (where site.RegularPages "Section" "posts") "Draft" false).ByDate.Reverse -}}
+{{- $catalog := slice -}}
+{{- range $posts -}}
+  {{- $catalog = $catalog | append (dict "id" .RelPermalink "title" .Title "description" (.Description | default (.Summary | plainify | htmlUnescape) | truncate 160) "tags" (.Params.tags | default slice) "categories" (.Params.categories | default slice) "date" (.Date.Format "2006-01-02")) -}}
+{{- end -}}
+{{- $data := resources.FromString "data/smart-posts.json" ($catalog | jsonify) | fingerprint -}}
+<link rel="stylesheet" href="{{ "css/smart-posts.css" | relURL }}?v={{ readFile "static/css/smart-posts.css" | md5 }}">
+<details id="bn-smart-posts" class="bn-smart" data-catalog="{{ $data.RelPermalink }}">
+  <summary><span class="bn-smart-heading"><span class="bn-smart-kicker">RANDOM SUGGEST POSTS</span><span class="bn-smart-title">Đọc gì tiếp theo?</span></span><span class="bn-smart-badge">✨ AI Smart Suggest</span><span class="bn-smart-chevron" aria-hidden="true">⌄</span></summary>
+  <div class="bn-smart-content">
+    <div class="bn-smart-bar"><p id="bn-smart-status" role="status" aria-live="polite">Bài mới từ kho BlogNaver · chưa dùng AI.</p><button id="bn-smart-refresh" type="button">Làm mới gợi ý ↻</button></div>
+    <div id="bn-smart-grid" class="bn-smart-grid" role="list" aria-label="Bài viết được gợi ý">
+      {{- range $index, $post := first 6 $posts }}
+      <div class="bn-smart-card" role="listitem"><a href="{{ .RelPermalink }}"><span class="bn-smart-number" aria-hidden="true">{{ printf "%02d" (add $index 1) }}</span><span class="bn-smart-copy"><strong>{{ .Title }}</strong><span class="bn-smart-reason">Bài mới · {{ .Date.Format "02.01.2006" }}</span></span><span aria-hidden="true">↗</span></a></div>
+      {{- else }}<p>Chưa có bài viết để gợi ý.</p>{{- end }}
+    </div>
+    <details class="bn-smart-settings"><summary>Cá nhân hóa &amp; kết nối Gemini <span aria-hidden="true">⌄</span></summary>
+      <p>Gemini chỉ nhận tiêu đề, mô tả ngắn và chủ đề của bài viết công khai. Gợi ý dựa trên nội dung blog, không phải dữ liệu xu hướng trực tiếp.</p>
+      <label class="bn-smart-check"><input id="bn-smart-personalize" type="checkbox"> Cá nhân hóa: lưu tối đa 30 đường dẫn bài đã đọc trên máy và gửi tối đa 12 tiêu đề gần nhất tới Gemini khi tạo gợi ý.</label>
+      <label for="bn-smart-key">Gemini API key <span>(tự dùng khóa đã kết nối trên thiết bị nếu có)</span></label><input id="bn-smart-key" type="password" autocomplete="off" placeholder="Nhập khi chưa có kết nối Gemini">
+      <label class="bn-smart-check"><input id="bn-smart-remember" type="checkbox"> Ghi nhớ khóa trên thiết bị tin cậy, được mã hóa trong kho khóa chung.</label>
+      <p>Script cùng tên miền có thể dùng khóa đã ghi nhớ. Không ghi nhớ trên máy dùng chung.</p>
+      <div class="bn-smart-actions"><button id="bn-smart-connect" type="button">Dùng Gemini để gợi ý</button><button id="bn-smart-forget" type="button">Quên kết nối Gemini trên máy</button></div>
+    </details>
+    <noscript><p>Bật JavaScript để sử dụng Gemini. Các liên kết bài viết phía trên vẫn hoạt động.</p></noscript>
+  </div>
+</details>
+<script src="{{ "tien-ich/device-secrets.js" | relURL }}" defer></script>
