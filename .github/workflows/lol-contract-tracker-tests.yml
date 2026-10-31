@@ -37,10 +37,10 @@ jobs:
           mod=importlib.util.module_from_spec(spec);spec.loader.exec_module(mod)
           tabs=mod.discover_tabs(mod.get(mod.PUBLIC_URL))
           print("GCD_TABS",list(tabs.items())[:30])
-          for gid in ("940656680","594163931"):
+          for gid in ("940656680","594163931","148326031","905624073","1177719586"):
               try:
                   raw=mod.get(mod.BASE+"/pub?gid="+gid+"&single=true&output=csv")
-                  print("GCD_HEADER",gid,list(csv.reader(io.StringIO(raw)))[:8])
+                  print("GCD_HEADER",gid,list(csv.reader(io.StringIO(raw)))[:4])
               except Exception as e: print("GCD_FETCH_ERROR",gid,str(e)[:200])
           PY
       - name: Probe Riot public GCD source (read-only, non-blocking)
