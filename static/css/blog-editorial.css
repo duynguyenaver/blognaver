@@ -207,3 +207,23 @@ body:has(article.page.single) :is(#toc-auto,#toc-static) { display:none !importa
   body:has(article.page.single) :is(#toc-auto,#toc-static) { display:none !important; }
   main article.page.single { border:0;box-shadow:none;padding:0 !important; }
 }
+
+
+/* 2026-10-31: one shared border-box measure for home cards and full articles.
+   Both surfaces use the same outer width rather than comparing inner prose widths. */
+:root{--bn-article-card-width:900px}
+body:has(.home) main .home article.single.summary,
+body:has(.home) main .home article.summary,
+main article.summary{
+  width:100%;max-width:var(--bn-article-card-width);margin-inline:auto;
+}
+body:has(article.page.single) main.tw-mx-4,
+body:has(article.page.single) article.page.single,
+main article.page.single #content,
+main article.page.single .post-content{
+  width:100%!important;max-width:var(--bn-article-card-width)!important;
+  box-sizing:border-box;
+}
+@media(max-width:1024px){
+ body:has(article.page.single) main.tw-mx-4{width:100%!important;max-width:100%!important}
+}
