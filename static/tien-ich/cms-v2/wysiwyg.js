@@ -1,0 +1,16 @@
+(()=>{"use strict";
+function boot(){const source=document.getElementById("body"),oldToolbar=document.querySelector(".editor-main .toolbar");if(!source||!oldToolbar||!window.Quill||!window.TurndownService)return;
+const richToolbar=document.createElement("div");richToolbar.className="v2-rich-toolbar";richToolbar.innerHTML='<span class="ql-formats"><select class="ql-header" aria-label="Cấp tiêu đề"><option selected></option><option value="1"></option><option value="2"></option><option value="3"></option></select></span><span class="ql-formats"><button class="ql-bold" aria-label="In đậm"></button><button class="ql-italic" aria-label="In nghiêng"></button><button class="ql-underline" aria-label="Gạch chân"></button><button class="ql-strike" aria-label="Gạch ngang"></button></span><span class="ql-formats"><button class="ql-list" value="ordered" aria-label="Danh sách số"></button><button class="ql-list" value="bullet" aria-label="Danh sách chấm"></button><button class="ql-blockquote" aria-label="Trích dẫn"></button></span><span class="ql-formats"><button class="ql-link" aria-label="Chèn link"></button><button class="ql-image" aria-label="Chèn ảnh qua URL"></button><button class="ql-code-block" aria-label="Mã nguồn"></button><button class="ql-clean" aria-label="Xóa định dạng"></button></span>';
+const editor=document.createElement("div");editor.className="v2-rich-editor";editor.setAttribute("aria-label","Trình soạn thảo văn bản trực quan");
+oldToolbar.before(richToolbar);richToolbar.after(editor);oldToolbar.hidden=true;source.classList.add("v2-hidden-source");
+const quill=new Quill(editor,{theme:"snow",modules:{toolbar:richToolbar},placeholder:"Bắt đầu viết bài... Bạn có thể định dạng trực tiếp bằng thanh công cụ."});
+const turndown=new TurndownService({headingStyle:"atx",bulletListMarker:"-",codeBlockStyle:"fenced"});let initializing=true;
+if(source.value.trim()){try{const markup=window.marked?window.marked.parse(source.value):source.value.split("\n").map(x=>"<p>"+x.replaceAll("&","&amp;").replaceAll("<","&lt;")+"</p>").join("");const clean=window.DOMPurify?window.DOMPurify.sanitize(markup):markup;quill.clipboard.dangerouslyPasteHTML(clean,"silent")}catch(e){console.warn("CMS V2 editor migration:",e)}}
+initializing=false;
+const sync=()=>{if(initializing)return;const md=turndown.turndown(quill.root.innerHTML).trim();source.value=md;source.dispatchEvent(new Event("input",{bubbles:true}))};
+quill.on("text-change",sync);
+const templateButtons=document.querySelectorAll("#templateGrid button");templateButtons.forEach(button=>button.addEventListener("click",()=>{requestAnimationFrame(()=>{const markup=window.marked?window.marked.parse(source.value):source.value;quill.clipboard.dangerouslyPasteHTML(window.DOMPurify?window.DOMPurify.sanitize(markup):markup,"silent");quill.focus()})}));
+source.addEventListener("change",()=>{const markup=window.marked?window.marked.parse(source.value):source.value;quill.clipboard.dangerouslyPasteHTML(window.DOMPurify?window.DOMPurify.sanitize(markup):markup,"silent")});
+}
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot);else boot();
+})();
