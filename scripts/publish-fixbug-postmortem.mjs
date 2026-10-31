@@ -28,7 +28,7 @@ async function pages(path,limit=5){
  return all;
 }
 const labelSpecs={
-  "fixbug:evidence-confirmed":{color:"0969da",description:"PR had failed CI, a later passing revision and verified deterministic log evidence"},
+  "fixbug:evidence-confirmed":{color:"0969da",description:"Evidence-backed CI recovery or documented product defect with code diff and passing checks"},
   "fixbug:published":{color:"1a7f37",description:"A verified Fix Bug 2026 blog article exists on main"},
   "fixbug:github-only":{color:"9a6700",description:"No public Fix Bug article was generated; see workflow log for reason"}
 };
@@ -121,7 +121,7 @@ const lines=[
 "seriesOrder: "+number,
 'author: "BlogNaver CI Reporter"',
 "---","",
-"*Fix Bug 2026 · Bài tự động tổng hợp từ GitHub PR, CI logs và Knowledge Base, không dùng AI tự tạo nguyên nhân.*","",
+"*Fix Bug 2026 · Bài tự động tổng hợp từ GitHub PR, code diff và kết quả kiểm tra; CI logs chỉ được viện dẫn khi tồn tại. Không dùng AI tự tạo nguyên nhân.*","",
 evidenceMode==="ci-recovery"?"Trong quá trình phát triển BlogNaver, [PR #"+number+"]("+web+"/pull/"+number+") từng không vượt qua kiểm tra CI. Sau khi mã thay đổi, một lượt kiểm tra khác đã hoàn tất thành công và PR được merge.":"[PR #"+number+"]("+web+"/pull/"+number+") ghi nhận một lỗi được tác giả PR mô tả và một thay đổi mã nhằm xử lý lỗi. PR đã vượt qua Bug Checker và được merge. Không có bằng chứng CI đỏ rồi xanh trên hai revision cho trường hợp này.","",
 "## Bối cảnh và dấu hiệu lỗi","",
 "**PR:** "+clean(pr.title,180)+".",
