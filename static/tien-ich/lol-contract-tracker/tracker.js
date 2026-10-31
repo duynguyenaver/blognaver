@@ -9,7 +9,12 @@ function iso(x){
  const s=clean(x);let m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
  if(!m){m=s.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})$/);if(m)m=[m[0],m[3],m[2],m[1]]}
  if(!m)m=s.match(/^(\d{4})[\/.](\d{1,2})[\/.](\d{1,2})$/);
- if(!m)return "";const y=+m[1],mo=+m[2],d=+m[3],v=new Date(Date.UTC(y,mo-1,d));
+ if(!m){const named=s.match(/^(\d{1,2})[- ]([A-Za-z]{3,9})[- ,]+(\d{4})$/);
+   if(named){const months={jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12};
+     const month=months[named[2].slice(0,3).toLowerCase()];if(month)m=[s,named[3],String(month),named[1]]}}
+ if(!m)return "";let y=+m[1],mo=+m[2],d=+m[3];
+ if(mo>12&&d<=12){const old=mo;mo=d;d=old}
+ const v=new Date(Date.UTC(y,mo-1,d));
  if(y<2000||y>2100||v.getUTCFullYear()!==y||v.getUTCMonth()!==mo-1||v.getUTCDate()!==d)return "";
  return [String(y),String(mo).padStart(2,"0"),String(d).padStart(2,"0")].join("-");
 }
@@ -18,7 +23,7 @@ function days(x,now=new Date()){const v=iso(x);if(!v)return null;return Math.cei
 function status(r,now=new Date()){const d=days(r.endDate,now);return d===null?{key:"unknown",label:"Chưa rõ hạn"}:d<0?{key:"expired",label:"Ngày GCD đã qua"}:d<=60?{key:"soon",label:"Sắp đến hạn"}:{key:"future",label:"Còn thời hạn"}}
 function safeRow(r){if(!r||typeof r!=="object")return null;const name=clean(r.handle||r.player||r.name).slice(0,120),team=clean(r.team).slice(0,150);
  if(!name||!team)return null;const league=clean(r.league).toUpperCase();
- return {id:clean(r.id)||[league,team,name].join("/"),handle:name,team,league:CODES.has(league)?league:"OTHER",legalName:clean(r.legalName).slice(0,140),position:clean(r.position||r.role).slice(0,80),endDate:iso(r.endDate),sourceUrl:source(r.sourceUrl)}
+ return {id:clean(r.id)||[league,team,name].join("/"),handle:name,team,league:CODES.has(league)?league:"OTHER",legalName:clean(r.legalName).slice(0,140),position:clean(r.position||r.role).slice(0,80),endDate:iso(r.endDate),sourceUrl:source(r.sourceUrl),sourceType:r.sourceType==="manual"?"manual":"official"}
 }
 function snapshot(payload){if(!payload||!Array.isArray(payload.rows)||payload.rows.length>20000)throw Error("Snapshot không hợp lệ");
  const rows=payload.rows.map(safeRow).filter(Boolean);if(payload.rows.length&&rows.length<payload.rows.length*.7)throw Error("Dòng GCD thiếu thông tin");
@@ -45,7 +50,7 @@ function render(){const tbody=$("contractRows");tbody.replaceChildren();const li
  if(!list.length){const tr=dom("tr"),td=dom("td","empty",state.rows.length?"Không tìm thấy hồ sơ phù hợp.":"Chưa có snapshot đã kiểm chứng. Mở Riot GCD hoặc nhập CSV bên dưới.");td.colSpan=7;tr.append(td);tbody.append(tr)}
  for(const r of list.slice(state.page*PAGE,(state.page+1)*PAGE)){const tr=dom("tr"),td=dom("td");td.append(dom("strong","",r.handle));if(r.legalName)td.append(dom("div","role",r.legalName));
  const s=status(r),badge=dom("td");badge.append(dom("span","tag "+s.key,s.label));
- const src=dom("td"),a=dom("a","","Riot GCD ↗");a.href=r.sourceUrl;a.target="_blank";a.rel="noopener noreferrer";src.append(a);
+ const src=dom("td"),a=dom("a","",r.sourceType==="manual"?"Đối chiếu Riot ↗":"Riot GCD ↗");a.href=r.sourceUrl;a.target="_blank";a.rel="noopener noreferrer";src.append(a);
  tr.append(td,dom("td","",r.team),dom("td","",r.league),dom("td","",r.position||"—"),dom("td","",showDate(r.endDate)),badge,src);tbody.append(tr)}
  $("resultCount").textContent=num.format(list.length)+" kết quả";$("pageInfo").textContent=list.length?(state.page+1)+"/"+Math.ceil(list.length/PAGE):"0/0";
  $("prevPage").disabled=state.page===0;$("nextPage").disabled=(state.page+1)*PAGE>=list.length;
@@ -75,14 +80,14 @@ function columns(row){const names=row.map(s=>norm(s).replace(/[\s\W_]+/gu,""));c
 function parseContractsCSV(csv,league,src=BASE){const tables=parseCSV(csv),index=tables.findIndex(row=>{const c=columns(row);return c.player>=0&&c.team>=0&&c.end>=0});if(index<0)throw Error("Thiếu header Player/IGN, Team hoặc Contract End Date.");
  const c=columns(tables[index]),get=(row,i)=>i<0?"":clean(row[i]),found=[],unique=new Set();
  tables.slice(index+1).forEach(row=>{const name=get(row,c.player),team=get(row,c.team);if(!name||!team||/^(team|player|total|notes|last updated)$/i.test(name))return;
- const r=safeRow({handle:name,team,league,legalName:get(row,c.legal),position:get(row,c.position),endDate:get(row,c.end),sourceUrl:src});
+ const r=safeRow({handle:name,team,league,legalName:get(row,c.legal),position:get(row,c.position),endDate:get(row,c.end),sourceUrl:src,sourceType:"manual"});
  if(r&&!unique.has(r.id)){unique.add(r.id);found.push(r)}});
  if(!found.length)throw Error("Không đọc được hồ sơ hợp lệ.");return found;
 }
 async function importFile(){const f=$("importFile").files[0];if(!f){$("importMessage").textContent="Chọn file CSV trước.";return}if(f.size>12e6){$("importMessage").textContent="CSV quá 12 MB.";return}
  try{const league=$("importLeague").value,records=parseContractsCSV(await f.text(),league);
  state.rows=[...state.rows.filter(r=>r.league!==league),...records];state.manual=true;state.page=0;teams();filter();summary();
- $("importMessage").textContent="Đọc "+num.format(records.length)+" hồ sơ "+league+" trong trình duyệt. Không upload lên GitHub."}
+ $("importMessage").textContent="Đọc "+num.format(records.length)+" hồ sơ "+league+" trong trình duyệt. CSV người dùng chưa xác minh. Không upload lên GitHub."}
  catch(e){$("importMessage").textContent="Không đọc được CSV: "+e.message}}
 function exportCSV(){const esc=v=>'"'+String(v??"").replaceAll('"','""')+'"';const values=[["Player","Team","League","Role","GCD End Date","Status","Source URL"]];
  state.filtered.forEach(r=>values.push([r.handle,r.team,r.league,r.position,r.endDate,status(r).label,r.sourceUrl]));
