@@ -48,6 +48,13 @@ jobs:
         run: python3 scripts/update-lol-contracts.py --check
       - name: Generate initial public GCD snapshot for review (temporary)
         run: |
+          python3 - <<'PY'
+          import json
+          path="static/tien-ich/lol-contract-tracker/gcd.json"
+          data=json.load(open(path,encoding="utf-8"))
+          data["rows"]=[];data["changes"]=[];data["regions"]=[];data["fetchedAt"]=None
+          open(path,"w",encoding="utf-8").write(json.dumps(data))
+          PY
           python3 scripts/update-lol-contracts.py
           python3 - <<'PY'
           import json
