@@ -46,6 +46,6 @@ Never publish salaries, buyout amounts or private contractual terms from specula
 
 ## Initial deployment
 
-The committed seed gcd.json is intentionally empty, rather than containing invented contract dates. Real results appear after Riot CSV is fetched and the data snapshot PR is reviewed and merged. Meanwhile the tool links to Riot GCD and supports temporary local CSV import.
+The first verified GCD snapshot contains **883 public registrations** downloaded from Riot's published regional tabs on 2026-10-31 UTC: LCK 160, LPL 76, LEC 87, LCP 70, and 490 additional academy/ERL regional entries categorized separately as OTHER with original competition labels. The original sheet update dates are **LCK 2026-08-20, LPL 2026-08-05, EMEA 2026-09-09, APAC 2026-10-21**; these reflect when Riot last updated each tab, not live November 2026 transfers. No LCS/CBLOL tab was present among the accessible published tabs during this import. The browser still offers official GCD and temporary CSV import. The first snapshot was imported on a review branch, never directly to main.
 
 The utility uses static same-origin data and relative HTML asset URLs for GitHub Pages pathprefix /blognaver/. No cross-origin browser Sheets calls or paid API required.
