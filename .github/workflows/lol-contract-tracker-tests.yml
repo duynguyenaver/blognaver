@@ -37,6 +37,9 @@ jobs:
         run: python3 -m unittest scripts/test_update_lol_gcd_archive.py -v
       - name: Historical archive browser regression
         run: node --test scripts/test-lol-contract-archive.mjs
+      - name: Probe community archive access (read-only, non-blocking)
+        continue-on-error: true
+        run: python3 scripts/update-lol-gcd-archive.py --check
       - name: Check historical UI JavaScript parse
         run: node --check static/tien-ich/lol-contract-tracker/archive.js
       - name: Check JSON schema and attribution
