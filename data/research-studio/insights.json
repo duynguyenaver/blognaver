@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-30T14:49:37.246Z",
+  "updatedAt": "2026-10-31T01:39:58.068Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -1205,6 +1205,25 @@
         "outputTokens": 5284
       },
       "models": [
+        "Gemini · models/gemini-3.5-flash-lite"
+      ],
+      "live": true
+    },
+    {
+      "slug": "cold-fusion-he-sinh-thai-cong-nghe-tuong-lai-tai-trung-quoc-tu-truyen-du-lieu-anh-sang--2026-10-31",
+      "title": "Hệ sinh thái công nghệ tương lai tại Trung Quốc: Từ truyền dữ liệu ánh sáng đến kim loại lỏng tự hành",
+      "series": "cold-fusion",
+      "sha": "63042a59fcf9565f8af6227c9a8e6b9b11d5f242",
+      "commitAt": "2026-10-31T01:39:32.494Z",
+      "durationMs": 70586,
+      "quota": {
+        "requests": 10,
+        "tokens": 47558,
+        "inputTokens": 39838,
+        "outputTokens": 7720
+      },
+      "models": [
+        "Gemini · models/gemini-3.1-flash-lite",
         "Gemini · models/gemini-3.5-flash-lite"
       ]
     }
