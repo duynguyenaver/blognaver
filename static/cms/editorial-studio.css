@@ -28,3 +28,16 @@ body{background:#f5f7fa;color:#334155}
 .studio-toaster[hidden]{display:none}
 @media(max-width:1200px){.editor-grid{grid-template-columns:1fr!important}.studio-preview-card{position:static;max-height:none}}
 @media(max-width:680px){.shell{display:block}.studio-preview-card{padding:14px}.studio-preview-output{font-size:17px}}
+
+/* Hotfix: stable preview + visible contrast */
+.studio-preview-card{position:static!important;top:auto!important;max-height:none!important;transform:none!important;z-index:auto!important;grid-column:2;grid-row:1}
+.editor-grid>.main-col{grid-column:1;grid-row:1}
+.editor-grid>.settings{grid-column:1/-1;grid-row:2}
+body,.workspace{background:#f8fafc!important;color:#334155!important}
+.top,.side,.paper,.settings .paper,.studio-preview-card{background:#fff!important;color:#334155!important;border-color:#e2e8f0!important}
+.workspace h1,.workspace h2,.workspace h3,.workspace strong,.workspace label{color:#0f172a!important}
+.workspace p,.workspace small,.workspace .muted,.workspace .wordbar{color:#475569!important}
+.workspace input,.workspace textarea,.workspace select,.ql-editor{background:#fff!important;color:#0f172a!important;border-color:#cbd5e1!important}
+.ql-toolbar.ql-snow{background:#f8fafc!important}.ql-snow .ql-stroke{stroke:#334155!important}.ql-snow .ql-fill{fill:#334155!important}
+.workspace .primary{background:#bc002d!important;color:#fff!important}
+@media(max-width:1200px){.editor-grid>.main-col{grid-column:1;grid-row:1}.studio-preview-card{grid-column:1;grid-row:2}.editor-grid>.settings{grid-column:1;grid-row:3}}
