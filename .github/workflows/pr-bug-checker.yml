@@ -46,7 +46,9 @@ jobs:
         run: python3 scripts/test-conflict-resolver.py
       - name: Validate bug knowledge classifier fixtures
         run: python3 scripts/test-ci-knowledge.py
-      - name: Verify CMS V2 navigation and permalinks\n        run: node scripts/test-cms-v2-router.mjs\n      - name: Bug checks with bounded retries and AGENTS.md guidance
+      - name: Verify CMS V2 navigation and permalinks
+        run: node scripts/test-cms-v2-router.mjs
+      - name: Bug checks with bounded retries and AGENTS.md guidance
         shell: bash
         run: |
           chmod +x scripts/pr-bug-checker.sh
