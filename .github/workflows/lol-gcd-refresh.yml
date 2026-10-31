@@ -1,4 +1,4 @@
-name: LoL Contracts · Daily Riot GCD Snapshot PR
+name: LoL Contracts · Daily Riot + Leaguepedia Sources PR
 on:
   workflow_dispatch:
   schedule:
@@ -23,6 +23,10 @@ jobs:
         run: |
           python3 scripts/update-lol-contracts.py
           python3 -m unittest scripts/test_update_lol_contracts.py -q
+      - name: Check community Leaguepedia archive links (robots compliant)
+        run: |
+          python3 scripts/update-lol-gcd-archive.py
+          python3 -m unittest scripts/test_update_lol_gcd_archive.py -q
       - name: Create reviewed snapshot PR only if changed
         env:
           GH_TOKEN: ${{ secrets.BLOGNAVER_GCD_BOT_TOKEN || github.token }}
@@ -30,17 +34,17 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if git diff --quiet -- static/tien-ich/lol-contract-tracker/gcd.json; then
-            echo "No registered contract changes. Skipping PR."
+          if git diff --quiet -- static/tien-ich/lol-contract-tracker/gcd.json static/tien-ich/lol-contract-tracker/archive.json; then
+            echo "No Riot contract or community archive index changes. Skipping PR."
             exit 0
           fi
           BRANCH="data/riot-gcd-$(date -u +%Y%m%d-%H%M%S)-$GITHUB_RUN_ID"
           git config user.name "BlogNaver GCD Data Bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git switch -c "$BRANCH"
-          git add static/tien-ich/lol-contract-tracker/gcd.json
-          git commit -m "data(lol): refresh Riot GCD snapshot and candidate roster changes"
+          git add static/tien-ich/lol-contract-tracker/gcd.json static/tien-ich/lol-contract-tracker/archive.json
+          git commit -m "data(lol): refresh GCD source snapshots and Leaguepedia historical pointers"
           git -c http.extraheader="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)" push "https://github.com/$REPO.git" "HEAD:refs/heads/$BRANCH"
           gh pr create --repo "$REPO" --base main --head "$BRANCH" \
-            --title "data(lol): refresh official Riot GCD contract snapshot" \
-            --body "Read-only download from Riot public GCD. Changes in team labels or expiry dates are NOT proof of free agency, renewal or transfer. Review tab freshness and CI before merge. Never commit directly to main."
+            --title "data(lol): refresh Riot contracts and/or Leaguepedia archive index" \
+            --body "Two separate sources: Riot GCD (official registered contracts), Leaguepedia/Fandom (unofficial historical dated links only, CC BY-SA attribution). A wiki mirror MUST NOT overwrite Riot contracts. Changes in GCD dates or teams are NOT confirmed renewal, free agency or transfer. Review per-tab source age and CI; never commit directly to main."
