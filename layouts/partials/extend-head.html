@@ -36,17 +36,15 @@
   text-transform: uppercase !important;
   font-weight: 800 !important;
 }
-/* Remove all DoIt theme-selection widgets, including mobile variants. */
-#theme-switch, #theme-select, #theme-toggle,
-.theme-switch, .theme-select, .theme-toggle,
-.theme-switcher, [id^="theme-switch"], [id^="theme-select"] {
-  display: none !important;
-}
 </style>
+<link rel="stylesheet" href="{{ "css/global-tech.css" | relURL }}">
 <script>
-/* Force light before theme initialization and discard an older dark preference. */
-try {
-  localStorage.setItem("theme", "light");
-} catch (e) {}
-document.documentElement.setAttribute("data-theme","light");
+/* Respect an explicit theme; otherwise use OS preference without overriding user settings. */
+(() => {
+  const root = document.documentElement;
+  let saved = null;
+  try { saved = localStorage.getItem("theme"); } catch (_) {}
+  if (saved === "dark" || saved === "light") root.setAttribute("data-theme", saved);
+  else root.setAttribute("data-theme", matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+})();
 </script>
