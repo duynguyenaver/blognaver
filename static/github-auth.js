@@ -27,7 +27,7 @@
      ...options
    });
    const body=await res.json().catch(()=>({}));
-   if(!res.ok)throw Error(body.error||"GitHub gateway HTTP "+res.status);
+   if(!res.ok){const error=new Error(body.error||"GitHub gateway HTTP "+res.status);error.status=res.status;throw error}
    return body;
  }
  async function readData(path,branch="main"){
