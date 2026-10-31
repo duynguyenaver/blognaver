@@ -27,6 +27,9 @@ jobs:
         run: python3 -m unittest scripts/test_update_lol_contracts.py -v
       - name: Client data and contract labels tests
         run: node --test scripts/test-lol-contract-tracker.mjs
+      - name: Probe Riot public GCD source (read-only, non-blocking)
+        continue-on-error: true
+        run: python3 scripts/update-lol-contracts.py --check
       - name: Check JSON schema and attribution
         run: |
           python3 - <<'PY'
