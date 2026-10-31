@@ -9,11 +9,6 @@ name = "Series"
 url = "/series/"
 weight = 15
 [[main]]
-identifier = "about"
-name = "Giới thiệu"
-url = "/about/"
-weight = 20
-[[main]]
 identifier = "resume"
 name = "Resume"
 url = "/resume/"
