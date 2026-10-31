@@ -149,7 +149,7 @@ const progress={wrap:$("progressWrap"),fill:$("progressFill"),pct:$("progressPct
 function setProgress(value,label){const n=Math.max(0,Math.min(100,Math.round(value)));progress.wrap.classList.add("visible");progress.fill.style.width=n+"%";progress.pct.textContent=n+"%";progress.track.setAttribute("aria-valuenow",String(n));progress.label.textContent=label}
 const cloud={token:$("ghToken"),auto:$("autoSync"),button:$("syncWav"),status:$("cloudStatus")};
 const cloudMessage=s=>cloud.status.textContent=s;
-if(window.BNAuth?.isAuthenticatedOrigin()){
+if(window.BNGitHubOAuth?.isAuthenticatedOrigin()){
   cloud.token.hidden=true;
   cloud.token.disabled=true;
   const label=document.querySelector('label[for="ghToken"]');
@@ -158,12 +158,12 @@ if(window.BNAuth?.isAuthenticatedOrigin()){
 }
 
 async function publishAudio(blob){
- if(window.BNAuth?.isAuthenticatedOrigin()){
+ if(window.BNGitHubOAuth?.isAuthenticatedOrigin()){
    if(blob.size>8*1024*1024){cloudMessage("WAV lớn hơn 8 MB, hãy tải về máy.");return}
    cloud.button.disabled=true;
    cloudMessage("Đang đồng bộ WAV qua GitHub OAuth gateway…");
    try {
-     const result=await window.BNAuth.uploadWav(blob);
+     const result=await window.BNGitHubOAuth.uploadWav(blob);
      cloudMessage("Đồng bộ thành công lên "+result.path+" (nhánh "+result.branch+").");
    }catch(error){
      cloudMessage("Đồng bộ thất bại: "+error.message+". WAV vẫn tải về máy bình thường.");
