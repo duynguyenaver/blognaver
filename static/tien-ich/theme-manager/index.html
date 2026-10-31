@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="vi" data-theme="dark">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="BlogNaver Theme Registry — lưu Theme ID và chọn phiên bản tham chiếu trên thiết bị.">
+<title>Theme Manager & Rollback Registry — BlogNaver</title>
+<link rel="stylesheet" href="../../access-gate.css"><script src="../../access-gate.js"></script>
+<style>
+:root,[data-theme=dark]{color-scheme:dark;--bg:#090d16;--panel:#0f172a;--text:#f8fafc;--muted:#94a3b8;--accent:#818cf8;--line:rgba(255,255,255,.1);--field:#111e35;--shadow:0 16px 48px rgba(0,0,0,.16)}
+[data-theme=light]{color-scheme:light;--bg:#f8fafc;--panel:#fff;--text:#0f172a;--muted:#64748b;--accent:#6366f1;--line:#e2e8f0;--field:#f8fafc;--shadow:0 12px 32px rgba(15,23,42,.04)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.65 system-ui,-apple-system,"Segoe UI",sans-serif;transition:background .2s,color .2s}
+.shell{max-width:1150px;margin:auto;padding:0 20px 60px}.top{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:24px 0;border-bottom:1px solid var(--line)}a{color:var(--accent)}nav a{text-decoration:none;font-weight:700}header{padding:44px 0 28px}h1{font-size:clamp(30px,4vw,48px);line-height:1.15;margin:8px 0 14px;letter-spacing:-.045em}h2{font-size:20px;margin:0 0 12px}p{color:var(--muted);margin:6px 0}.eyebrow{color:var(--accent);font-size:11px;font-weight:800;letter-spacing:.18em;text-transform:uppercase}
+.grid{display:grid;grid-template-columns:minmax(270px,1fr) minmax(0,1.7fr);gap:18px;align-items:start}.card{border:1px solid var(--line);border-radius:16px;background:var(--panel);box-shadow:var(--shadow);padding:24px;min-width:0}.full{grid-column:1/-1}.pill{display:inline-flex;align-items:center;gap:6px;background:rgba(99,102,241,.12);color:var(--accent);padding:5px 12px;border-radius:50px;font-size:12px;font-weight:750}.muted{color:var(--muted);font-size:13px}.field{margin:16px 0}.field label{display:block;font-weight:700;font-size:13px;margin-bottom:8px}input,textarea{width:100%;background:var(--field);color:var(--text);border:1px solid var(--line);border-radius:11px;padding:12px;font:inherit;min-width:0}textarea{resize:vertical;min-height:105px}button{font:inherit;color:var(--text);background:transparent;border:1px solid var(--line);padding:10px 13px;border-radius:10px;cursor:pointer;transition:transform .2s,border-color .2s,background .2s}button:hover:not(:disabled){border-color:var(--accent);transform:translateY(-1px)}button:disabled{opacity:.45;cursor:not-allowed}.primary{background:#6366f1;color:white;border-color:transparent;font-weight:700}.primary:hover{background:#4f46e5}.actions{display:flex;flex-wrap:wrap;gap:8px}.scroll{overflow-x:auto;max-width:100%}table{width:100%;border-collapse:collapse;min-width:550px;text-align:left}th{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:750}th,td{padding:15px 10px;border-bottom:1px solid var(--line);vertical-align:middle}td{font-size:13px}td strong{font-size:14px}td .muted{overflow-wrap:anywhere}td button{white-space:nowrap}.current{border-left:3px solid var(--accent)}.notice{border-left:3px solid var(--accent);background:var(--field);border-radius:10px;padding:14px 16px;margin-top:15px}.status{min-height:22px;font-size:13px;font-weight:700;margin-top:12px}.danger{color:#fca5a5}.success{color:#34d399}.id{font-family:ui-monospace,Menlo,monospace;overflow-wrap:anywhere}#activeId{font-size:19px;font-weight:800}.empty{color:var(--muted);text-align:center;padding:24px}button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+@media(max-width:750px){.grid{grid-template-columns:1fr}header{padding:30px 0 20px}.card{padding:17px}.full{grid-column:auto}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important}}
+</style></head>
+<body><div class="shell">
+<div class="top"><nav><a href="../">← Tiện ích</a></nav><button id="mode" type="button" aria-label="Đổi giao diện sáng tối">☀ Light Mode</button></div>
+<header><div class="eyebrow">BLOGNAVER / APPEARANCE SYSTEM</div><h1>Theme Manager <span style="color:var(--accent)">&</span> Rollback Registry</h1><p>Ghi lại những phiên bản giao diện để quản lý và đánh dấu phiên bản đang chọn trên trình duyệt.</p></header>
+<section class="grid">
+<div class="card">
+<div class="eyebrow">01 / Local registry</div><h2>Đăng ký Theme ID</h2>
+<form id="themeForm">
+<div class="field"><label for="themeId">Theme ID</label><input id="themeId" name="themeId" placeholder="theme-v2.1-indigo" maxlength="64" pattern="[a-zA-Z0-9][a-zA-Z0-9._-]{1,63}" required><p class="muted">Chỉ gồm chữ cái, số, dấu chấm, gạch nối và gạch dưới.</p></div>
+<div class="field"><label for="description">Mô tả thay đổi</label><textarea id="description" maxlength="500" required placeholder="Ví dụ: Cập nhật Electric Indigo, border radius 16px..."></textarea></div>
+<button class="primary" type="submit">＋ Lưu snapshot ID</button></form>
+<div id="feedback" class="status" role="status" aria-live="polite"></div>
+</div>
+<div class="card">
+<div class="eyebrow">02 / Selected reference</div><h2>Theme ID đang chọn</h2>
+<div class="pill">● ACTIVE IN THIS BROWSER</div>
+<p id="activeId" class="id">Chưa chọn</p><p class="muted" id="activeDescription">Chưa có mô tả.</p>
+<div class="notice"><strong>Lưu ý:</strong> Đây là sổ đăng ký và lựa chọn Theme ID <strong>cục bộ</strong>. Nút “Rollback ngay” chỉ đổi ID được lưu trong trình duyệt, <strong>không khôi phục CSS hoặc tạo GitHub commit/PR</strong>. Các Theme ID mẫu không phải bản backup mã nguồn.</div>
+<div class="actions" style="margin-top:18px"><button type="button" id="export">↓ Xuất JSON</button><button type="button" id="reset">Khôi phục dữ liệu mẫu</button></div>
+</div>
+<div class="card full"><div class="eyebrow">03 / History</div><h2>Theme Registry</h2><p class="muted">Dữ liệu nằm trong localStorage của thiết bị hiện tại, không tự đồng bộ GitHub.</p>
+<div class="scroll"><table><thead><tr><th>Theme ID</th><th>Mô tả / Ngày lưu</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody id="registry"></tbody></table></div>
+</div>
+</section>
+</div>
+<script>
+(()=>{"use strict";
+const K="blognaver.theme.registry.v1",A="blognaver.active.theme.id",MODE="blognaver.theme.manager.display.v1",MAX=100;
+const $=id=>document.getElementById(id),valid=id=>/^[A-Za-z0-9][A-Za-z0-9._-]{1,63}$/.test(id);
+const seed=[{id:"theme-v1.0-base",description:"Dữ liệu mẫu: giao diện nền tảng (chưa liên kết commit thực tế).",createdAt:""},{id:"theme-v1.5-editorial",description:"Dữ liệu mẫu: phong cách editorial (chưa liên kết commit thực tế).",createdAt:""},{id:"theme-v2.0-fintech",description:"Dữ liệu mẫu: phong cách fintech (chưa liên kết commit thực tế).",createdAt:""}];
+let state=[],active="";
+function notice(message,isError=false){$("feedback").textContent=message;$("feedback").className="status "+(isError?"danger":"success")}
+function read(){
+ try{const raw=localStorage.getItem(K);if(raw===null)return seed.map(x=>({...x}));const rows=JSON.parse(raw);
+ if(!Array.isArray(rows))throw Error("invalid");
+ return rows.filter(x=>x&&valid(x.id)&&typeof x.description==="string").slice(0,MAX).map(x=>({id:x.id,description:x.description.slice(0,500),createdAt:typeof x.createdAt==="string"?x.createdAt:""}));
+ }catch{return seed.map(x=>({...x}))}
+}
+function save(){
+ try{localStorage.setItem(K,JSON.stringify(state));localStorage.setItem(A,active);return true}
+ catch(e){notice("Không lưu được localStorage: "+(e.name||"Lỗi trình duyệt"),true);return false}
+}
+function cell(tr,value,cls=""){const td=document.createElement("td");td.textContent=value;td.className=cls;tr.append(td);return td}
+function render(){
+ $("activeId").textContent=active||"Chưa chọn";
+ $("activeDescription").textContent=state.find(x=>x.id===active)?.description||"Chưa có mô tả.";
+ const tbody=$("registry");tbody.replaceChildren();
+ if(!state.length){const tr=document.createElement("tr"),td=cell(tr,"Chưa có Theme ID.");td.colSpan=4;td.className="empty";tbody.append(tr);return}
+ for(const item of state){
+ const tr=document.createElement("tr");if(item.id===active)tr.classList.add("current");
+ cell(tr,item.id,"id");cell(tr,item.description+(item.createdAt?" · "+new Date(item.createdAt).toLocaleString("vi-VN"):" · Ví dụ mẫu"));
+ cell(tr,item.id===active?"● Đang chọn":"—");
+ const td=document.createElement("td"),btn=document.createElement("button");btn.type="button";btn.textContent=item.id===active?"Đang chọn":"Rollback ngay";btn.disabled=item.id===active;btn.addEventListener("click",()=>{
+ if(!confirm('Chọn Theme ID "'+item.id+'"?\n\nChỉ cập nhật trạng thái trong trình duyệt; không thay CSS hoặc rollback GitHub.'))return;
+ const old=active;active=item.id;if(!save()){active=old;return}render();notice("Đã chọn "+item.id+" trên trình duyệt này. Website production không thay đổi.");
+ });td.append(btn);tr.append(td);tbody.append(tr)
+ }
+}
+state=read();try{active=localStorage.getItem(A)||""}catch{}
+if(!state.some(x=>x.id===active))active=state[0]?.id||"";
+render();
+$("themeForm").addEventListener("submit",e=>{
+ e.preventDefault();const id=$("themeId").value.trim(),description=$("description").value.trim();
+ if(!valid(id)){notice("Theme ID không hợp lệ.",true);return}
+ if(!description){notice("Hãy nhập mô tả.",true);return}
+ if(state.some(x=>x.id===id)){notice("Theme ID đã tồn tại.",true);return}
+ if(state.length>=MAX){notice("Đã đạt giới hạn 100 bản ghi. Hãy xuất JSON để sao lưu.",true);return}
+ state.unshift({id,description,createdAt:new Date().toISOString()});
+ if(!save()){state.shift();return}
+ e.target.reset();render();notice("Đã lưu Theme ID "+id+". Đây chỉ là bản ghi metadata, không phải snapshot CSS.")
+});
+$("reset").addEventListener("click",()=>{
+ if(!confirm("Xóa registry cục bộ và thay bằng 3 Theme ID mẫu?"))return;
+ const prev=state,prior=active;state=seed.map(x=>({...x}));active=state[0].id;
+ if(!save()){state=prev;active=prior;return}render();notice("Đã khôi phục registry mẫu.")
+});
+$("export").addEventListener("click",()=>{
+ const blob=new Blob([JSON.stringify({schema:1,active,registry:state},null,2)],{type:"application/json"});
+ const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="blognaver-theme-registry.json";a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)
+});
+const root=document.documentElement;
+try{root.dataset.theme=localStorage.getItem(MODE)==="light"?"light":"dark"}catch{}
+function modeLabel(){$("mode").textContent=root.dataset.theme==="dark"?"☀ Light Mode":"☾ Dark Mode"}
+modeLabel();
+$("mode").addEventListener("click",()=>{root.dataset.theme=root.dataset.theme==="dark"?"light":"dark";try{localStorage.setItem(MODE,root.dataset.theme)}catch{}modeLabel()});
+})();
+</script></body></html>
