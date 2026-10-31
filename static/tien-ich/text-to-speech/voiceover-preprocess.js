@@ -161,7 +161,7 @@
       .replace(/[ \t]{2,}/g," ").replace(/\s+([,.;!?])/g,"$1").trim());
   }
   // STEP 3: narrate the actual body with contextual paragraph transitions.
-  const transitions=/^(?:đầu tiên|trước hết|tiếp theo|bên cạnh đó|ngoài ra|mặt khác|cuối cùng|nhìn chung|tuy nhiên|vì vậy|do đó|đồng thời|tóm lại|nói về|dưới lăng kính|chuyển sang)/iu;
+  const transitions=/^(?:đầu tiên|trước hết|tiếp theo|bên cạnh đó|ngoài ra|mặt khác|cuối cùng|nhìn chung|tuy nhiên|vì vậy|do đó|đồng thời|tóm lại|nói về|dưới lăng kính|dưới góc độ|chuyển sang|theo đó)/iu;
   function makeTransition(heading,index){
     const h=(heading||"").toLocaleLowerCase("vi-VN");
     if(/^(?:kết luận|tổng kết|tóm lại|lời kết|nhìn chung)/iu.test(h))return "Tóm lại, ";
@@ -174,7 +174,7 @@
   function sentence(value) {
     const result=toSpoken(value).replace(/^(?:nhìn chung,\s*kết luận|tóm lại,\s*kết luận)[,.:]?\s*/iu,"Tóm lại, ")
       .replace(/[:：\s]+$/g,"").replace(/[ \t]{2,}/g," ").trim();
-    if(!result||stray.test(result))return "";
+    if(!result||stray.test(result)||/^(?:tóm lại|nhìn chung)[,.;\s]*$/iu.test(result))return "";
     return /[.!?…]["”']?$/u.test(result)?result:result+".";
   }
   function buildNarration(blocks){
@@ -185,7 +185,7 @@
     for(const b of blocks){
       if(b.type==="heading"){currentHeading=b.text;continue;}
       if(b.type!=="paragraph")continue;
-      let text=b.text.trim();
+      let text=b.text.trim().replace(/^và\s+/iu,"");
       if(!transitions.test(text))text=makeTransition(currentHeading,index)+text.charAt(0).toLocaleLowerCase("vi-VN")+text.slice(1);
       const spoken=sentence(text);if(spoken)parts.push(spoken);
       currentHeading="";index++;
