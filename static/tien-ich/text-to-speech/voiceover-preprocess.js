@@ -119,7 +119,11 @@
     ["Terabits","Tê-ra-bít",true],["Bluetooth","Bơ-lu-tút",true],
     ["Wi-Fi","Quay-Phay",true],["Fudan","Phúc Đán",true],
     ["Intel","In-tel",true],["Drone","Đơ-ron",true],["feet","phít",true],
-    ["3D","Ba Đê",true],["USD","đô-la Mỹ",false],
+    ["3D","Ba Đê",true],["2D","Hai Đê",true],["R&D","A-ren-Đê",false],
+    ["Silicon Valley","Si-li-con Va-li",true],["Semiconductor","Xe-mi-con-đắc-tơ",true],
+    ["ChatGPT","Chát-Gi-Pi-Ti",true],["Silicon","Si-li-con",true],
+    ["GPU","Gi-Pi-U",false],["CPU","Si-Pi-U",false],["IT","Ai-Ti",false],
+    ["USD","đô-la Mỹ",false],
     ["MIT","Em-Ai-Ti",false],["DJI","Đi-Ji-Ai",false],["IoT","Ai-Ô-Tê",false],
     ["GPS","Gi-Pi-Ép",false],["VLC","Vê-Ép-Cê",false],["QR","Kiu-A",false],
     ["LED","Lét",false],["AI","Ei-Ai",false]
@@ -183,26 +187,60 @@
     if (/^[A-ZĐ]{2,}(?=\s|[.,;:!?]|$)/u.test(text)) return text;
     return text.charAt(0).toLocaleLowerCase("vi-VN")+text.slice(1);
   }
+  const WELCOME = "Chào mừng các bạn quay trở lại với góc nhìn công nghệ hôm nay!";
+  const CTA_QUESTION = "Theo bạn, điều gì đáng suy nghĩ nhất trong câu chuyện này?";
+  const CTA_INVITE = "Hãy chia sẻ góc nhìn của bạn ở phần bình luận.";
+  const SIGNOFF = "Cảm ơn các bạn đã theo dõi và hẹn gặp lại trong những câu chuyện công nghệ tiếp theo cùng BlogNaver!";
+  const HOOKS = Object.freeze({
+    architecture:"Vì sao một trụ sở có thể nói lên nhiều điều về cách con người làm việc?",
+    semiconductor:"Điều gì thực sự quyết định tương lai của công nghệ bán dẫn?",
+    ai:"Trí tuệ nhân tạo đang đặt ra những câu hỏi gì cho tương lai của chúng ta?",
+    general:"Đằng sau câu chuyện công nghệ này, điều gì mới thực sự đáng chú ý?"
+  });
+  function hookFor(blocks) {
+    // Hook is a question, never an unsupported claim; use only topic labels present in input.
+    const subject=blocks.slice(0,4).map(b=>b.text).join(" ");
+    if (/trụ sở|tòa nhà|kiến trúc|giếng trời|thiết kế/iu.test(subject))return HOOKS.architecture;
+    if (/bán dẫn|semiconductor|chip|vi mạch/iu.test(subject))return HOOKS.semiconductor;
+    if (/(?:^|[^\p{L}])AI(?=[^\p{L}]|$)|trí tuệ nhân tạo|ChatGPT/iu.test(subject))return HOOKS.ai;
+    return HOOKS.general;
+  }
+  function alreadyGenerated(s) {
+    return Object.values(HOOKS).includes(s)
+      || s===WELCOME || s===CTA_QUESTION || s===CTA_INVITE
+      || s===SIGNOFF || s==="Cảm ơn các bạn đã theo dõi!";
+  }
+  function talkshowStyle(s) {
+    // Preserve the attribution and substance of analytical claims.
+    return s.replace(/^Lập luận thiết kế cho rằng\s+/iu,
+      "Tại sao lại chọn hướng thiết kế này? Theo lập luận thiết kế, ")
+      .replace(/^Dữ liệu cho thấy\s+/iu,
+      "Các con số nói lên điều gì? Dữ liệu cho thấy ")
+      .replace(/^Một câu hỏi được đặt ra là\s+/iu,"Vậy câu hỏi đặt ra là ");
+  }
   function buildNarration(blocks){
-    const paragraphs=blocks.filter(b=>b.type==="paragraph"),parts=[];
+    const paragraphs=blocks.filter(b=>b.type==="paragraph");
+    const parts=[];
     const title=blocks.find(b=>b.type==="title");
-    if(title)parts.push(sentence(title.text));
+    if(title&&!alreadyGenerated(title.text))parts.push(sentence(title.text));
     let currentHeading="",index=0;
     for(const b of blocks){
       if(b.type==="heading"){currentHeading=b.text;continue;}
       if(b.type!=="paragraph")continue;
-      let text=b.text.trim().replace(/^và\s+/iu,"");
-      if (/^(?:chào mừng các bạn quay trở lại với góc nhìn công nghệ hôm nay|cảm ơn các bạn đã theo dõi)[.!?\s]*$/iu.test(text))continue;
+      let content=b.text.trim();
+      if(alreadyGenerated(content))continue;
+      // Reprocessing a script must not insert duplicated hooks, welcomes or CTAs.
+      content=content.replace(/^và\s+/iu,"");
+      if(!content)continue;
+      let text=talkshowStyle(content);
       if(!transitions.test(text))text=makeTransition(currentHeading,index)+lowerFirstForSpeech(text);
-      const spoken=sentence(text);if(spoken){parts.push(spoken);index++;}
+      const spoken=sentence(text);
+      if(spoken){parts.push(spoken);index++;}
       currentHeading="";
     }
-    if(!paragraphs.length)return "";
+    if(!parts.length||!paragraphs.length)return "";
     const body=parts.filter(Boolean).join("\n\n");
-    const intro="Chào mừng các bạn quay trở lại với góc nhìn công nghệ hôm nay!";
-    const outro="Cảm ơn các bạn đã theo dõi!";
-    return [/^chào mừng các bạn quay trở lại/iu.test(body)?"":intro,body,
-      /cảm ơn các bạn đã theo dõi[.!?\s]*$/iu.test(body)?"":outro].filter(Boolean).join("\n\n");
+    return [hookFor(blocks),WELCOME,body,CTA_QUESTION,CTA_INVITE,SIGNOFF].join("\n\n");
   }
   function cleanScript(value) {
     const cleaned=stripNoise(value);
