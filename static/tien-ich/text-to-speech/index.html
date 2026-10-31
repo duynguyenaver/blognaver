@@ -69,7 +69,7 @@
  <div class="prep-head">
   <div><span class="prep-label">SECTION 02 / YOUTUBE VOICEOVER</span>
    <h2 id="voiceoverTitle">02 / Tiền xử lý kịch bản Voiceover YouTube</h2>
-   <p>Dán bài blog thô, lọc metadata và chuyển thành kịch bản dễ đọc. Xử lý ngay trên trình duyệt, không cần API hoặc gửi dữ liệu ra ngoài.</p>
+   <p>Ba bước xử lý: lọc sạch metadata và nguồn, viết số/tên riêng theo âm đọc tiếng Việt, sau đó chuyển đoạn thành kịch bản nói có mở đầu và kết thúc. Hoạt động ngay trên trình duyệt, không dùng API.</p>
   </div>
   <span class="tag">100% Client-side</span>
  </div>
@@ -82,15 +82,16 @@
   <div class="prep-col">
    <label for="voiceoverOutput">Kịch bản đã tiền xử lý (có thể chỉnh sửa)</label>
    <textarea id="voiceoverOutput" spellcheck="true" placeholder="Kịch bản đã làm sạch sẽ xuất hiện tại đây. Bạn có thể chỉnh sửa trước khi chuyển sang TTS."></textarea>
-   <p class="hint">Bộ lọc dùng quy tắc Regex, không thể hiểu mọi ngữ cảnh. Hãy xem lại tên riêng, dữ kiện và từ nối.</p>
+   <p class="hint">Đã chuẩn hóa số, đơn vị đo, ký âm tên riêng và tạo lời dẫn. Hãy kiểm tra lại cách đọc và dữ kiện trước khi xuất WAV.</p>
   </div>
  </div>
  <div class="prep-actions">
   <button type="button" class="primary" id="voiceoverProcess">✨ Tiền xử lý kịch bản</button>
   <button type="button" id="voiceoverCopy" class="secondary" disabled>Sao chép</button>
-  <button type="button" id="voiceoverToTts" disabled>↑ Gửi sang khung đọc TTS</button>
+  <button type="button" id="voiceoverToTts" disabled>↑ Đẩy sang TTS Section 1</button>
  </div>
  <div id="voiceoverStatus" class="prep-status" role="status" aria-live="polite">Sẵn sàng tiền xử lý.</div>
+ <details class="guide" style="margin-top:14px"><summary style="cursor:pointer;font-weight:750">Bảng quy tắc ký âm tiếng Việt (xem ví dụ)</summary><p class="hint">Nvidia → En-vi-đi-a · Santa Clara → San-ta Cờ-la-ra · California → Ca-li-phót-ni-a · Voyager → Voi-ơ-jơ · Endeavor → En-đê-vơ · MIT → Em-Ai-Ti · DJI → Đi-Ji-Ai · Intel → In-tel · Fudan → Phúc Đán.</p><p class="hint">3D → Ba Đê · USD → đô-la Mỹ · feet → phít · Terabits → Tê-ra-bít · Wi-Fi → Quay-Phay · IoT → Ai-Ô-Tê · QR → Kiu-A · GPS → Gi-Pi-Ép · Drone → Đơ-ron · LED → Lét · VLC → Vê-Ép-Cê.</p><p class="hint">Đây là ký âm gần đúng cho giọng Hoài My, không phải phiên âm ngôn ngữ học. Luôn nghe thử và chỉnh sửa bản kết quả nếu cần.</p></details>
 </section>
 
 <section id="voiceFixer" class="panel" aria-labelledby="voiceFixerTitle">
