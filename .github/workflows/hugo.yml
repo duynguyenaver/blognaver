@@ -54,13 +54,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: node scripts/generate-workflow-snapshot.mjs
-      # Opt-in only after the private Worker is deployed, tested and owner-approved.
-      # Do not publish the protected tool HTML directly on GitHub Pages after cutover.
-      - name: Redirect private tools and Resume CMS to OAuth Worker
-        if: ${{ vars.BN_PRIVATE_GATEWAY_LIVE == 'true' }}
-        env:
-          BN_PRIVATE_GATEWAY_URL: ${{ vars.BN_PRIVATE_GATEWAY_URL }}
-        run: node scripts/private-pages-cutover.mjs "$BN_PRIVATE_GATEWAY_URL"
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa
         with:
