@@ -4,7 +4,7 @@ import fs from "node:fs";
 import assert from "node:assert/strict";
 import vm from "node:vm";
 const code=fs.readFileSync("static/tien-ich/cms-v2/v2.js","utf8");
-const begin=code.indexOf("const validPages="),end=code.indexOf('$$("[data-page]").forEach',begin);
+const begin=code.indexOf("const validPages="),end=code.indexOf('\n$("[data-page]").forEach(b=>b.onclick',begin);
 assert.ok(begin>=0&&end>begin,"Route implementation exists");
 const route=code.slice(begin,end);
 const names=["dashboard","posts","editor","media","templates","collections","transcripts","history","publishing","bilingual","integrations"];
