@@ -361,7 +361,7 @@
      if(voiceURL||bgmURL)await ensureAudioGraph();
      if(voiceURL){await voice.play()}
      if(bgmURL){await bgm.play()}
-     playing=true;ui.play.disabled=true;ui.pause.disabled=false;
+     playing=true;ui.play.disabled=true;ui.pause.disabled=exporting;
      playBase=position;origin=performance.now();
      if(activeVideo?.type==="video")activeVideo.media.play().catch(()=>{});
      frame=requestAnimationFrame(tick);
@@ -447,7 +447,9 @@
        const track=audioDest.stream.getAudioTracks()[0];
        if(track)capture.addTrack(track);
      }
-     recorder=new MediaRecorder(capture,{mimeType:mime,videoBitsPerSecond:ui.quality.value==="1080"?(fps===60?14000000:9500000):5000000,audioBitsPerSecond:192000});
+     const recordingOptions={mimeType:mime,videoBitsPerSecond:ui.quality.value==="1080"?(fps===60?14000000:9500000):5000000};
+     if(audioDest&&(voiceURL||bgmURL))recordingOptions.audioBitsPerSecond=192000;
+     recorder=new MediaRecorder(capture,recordingOptions);
      recorder.ondataavailable=e=>{if(e.data?.size)recordedChunks.push(e.data)};
      recorder.onerror=e=>{exportAbort=true;report("Lỗi bộ ghi video: "+(e.error?.message||"unknown"),true)};
      recorder.onstop=()=>finalizeExport(exportAbort);
