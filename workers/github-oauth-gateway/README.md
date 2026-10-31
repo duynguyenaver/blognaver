@@ -21,7 +21,7 @@ Routes:
 
 The browser facade static/github-auth.js provides session/readData/writeData/uploadWav/logout.
 The existing TTS WAV uploader uses OAuth when running within the protected Worker.
-Other tools must be migrated individually; there is no magic automatic sync of legacy browser state.
+The encrypted personal cloud adapter (monthly expenses, vocabulary and both language journals) is now wired to use the OAuth gateway when hosted on the Worker. TTS WAV archiving is also wired to the gateway. Other tools (including attendance, CMS and Resume CMS data operations) still need migration; there is no magic automatic sync of legacy browser state.
 
 ## Setup steps for owner (explicit actions required)
 
@@ -46,7 +46,7 @@ Other tools must be migrated individually; there is no magic automatic sync of l
    BN_PRIVATE_GATEWAY_LIVE=true
    BN_PRIVATE_GATEWAY_URL=PUBLIC_ORIGIN
    The protected Pages cutover script then replaces publicly hosted utility and Resume CMS files with login-redirect placeholders. Until then they remain publicly reachable on GitHub Pages.
-9. Port each legacy utility's token-based GitHub calls to BNGitHubOAuth.readData/BNGitHubOAuth.writeData and AES-GCM encrypted .enc.json data with conflict management. Then remove each PAT input. The login infrastructure alone cannot make every existing tool auto-sync.
+9. Test monthly expenses, vocabulary and the two diaries with a previously saved local AES-GCM passphrase. They should use BNGitHubOAuth over the Worker and continue syncing on data edits. A previously encrypted cloud backup remains compatible. Port attendance, CMS, series, Resume CMS and the remaining utilities individually; only then remove their PAT fields. Existing local passphrases used for AES-GCM decryption are NOT equivalent to login OTP and cannot be silently deleted without losing access to encrypted backups. The login infrastructure alone cannot make every existing tool auto-sync.
 
 ## Security limits
 
