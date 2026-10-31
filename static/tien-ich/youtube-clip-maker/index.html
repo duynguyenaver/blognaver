@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#090d16"><meta name="description" content="Dựng YouTube Video và Shorts từ ảnh, giọng đọc WAV/MP3 và nhạc nền, hoàn toàn trên trình duyệt.">
+<title>YouTube Clip Maker Lab — BlogNaver</title>
+<link rel="stylesheet" href="studio.css"><link rel="stylesheet" href="../../access-gate.css"><script src="../../access-gate.js"></script>
+<script src="editor.js" defer></script>
+</head><body>
+<header class="topbar"><div class="brand"><a href="../" class="back">← Tiện ích</a><span class="mark">▶</span><div><strong>YouTube Clip Maker Lab</strong><small>CAPCUT PRO × YOUTUBE STUDIO EDITION</small></div></div><div class="top-actions"><span class="privacy">● Local-first · Không upload</span><a href="../text-to-speech/">TTS ↗</a><a href="../youtube-thumbnail-cover-generator/">Thumbnail ↗</a></div></header>
+<main class="editor">
+<section class="intro"><div><div class="eyebrow">BLOGNAVER / CREATOR WORKSPACE</div><h1>Dựng video <em>từ hình & giọng đọc.</em></h1><p>Ghép Cover, WAV/MP3 và nhạc nền. Chỉnh hình, nhịp, phụ đề và xuất video trên máy bạn mà không cần server.</p></div><div class="intro-actions"><label class="control compact">Khung hình <select id="aspect"><option value="landscape">YouTube · 16:9</option><option value="portrait">Shorts · 9:16</option></select></label><label class="control compact">FPS <select id="fps"><option value="30">30 fps</option><option value="60">60 fps</option></select></label></div></section>
+<div class="workspace">
+<aside class="panel asset-panel" aria-labelledby="assetTitle"><div class="panel-head"><h2 id="assetTitle">01 / Media Library</h2><span class="chip">ASSETS</span></div>
+<label for="imageFiles" class="dropzone" id="imageDrop"><span class="drop-icon">▧</span><strong>Kéo thả ảnh / video</strong><small>PNG · JPG · WebP · MP4/WebM (video nền)</small><span class="btn-like">+ Chọn ảnh / video</span></label><input id="imageFiles" type="file" accept="image/png,image/jpeg,image/webp,video/mp4,video/webm" multiple hidden>
+<div class="asset-actions"><button id="importCover" type="button" class="ghost">▣ Nhập nhanh Cover từ Thumbnail Generator</button><a class="small-link" href="../youtube-thumbnail-cover-generator/gallery/">Mở Gallery ↗</a></div>
+<div id="assets" class="asset-grid" aria-label="Danh sách ảnh và video đã tải"></div>
+<div class="rule"></div>
+<div class="file-row"><label for="voiceFile"><strong>🎙 Voiceover</strong><small>WAV / MP3 / M4A</small></label><input id="voiceFile" type="file" accept="audio/wav,audio/x-wav,audio/mpeg,audio/mp3,audio/mp4,audio/x-m4a"></div>
+<div id="voiceInfo" class="file-info">Chưa nhập giọng đọc.</div>
+<div class="file-row"><label for="bgmFile"><strong>♫ Nhạc nền (BGM)</strong><small>WAV / MP3 / M4A · tùy chọn</small></label><input id="bgmFile" type="file" accept="audio/wav,audio/x-wav,audio/mpeg,audio/mp3,audio/mp4,audio/x-m4a"></div>
+<div id="bgmInfo" class="file-info">Chưa có nhạc nền.</div>
+<audio id="voiceElement" preload="metadata"></audio><audio id="bgmElement" preload="metadata" loop></audio>
+<div class="mini-note">File ở trên máy bạn. Ảnh từ Thumbnail Generator được đọc từ Gallery IndexedDB cùng trình duyệt; không cần GitHub token.</div>
+</aside>
+<section class="panel preview-panel" aria-labelledby="previewTitle"><div class="panel-head"><h2 id="previewTitle">02 / Canvas Preview</h2><span id="resolutionLabel" class="chip">1920 × 1080</span></div>
+<div class="canvas-stage"><canvas id="canvas" width="1920" height="1080" aria-label="Xem trước khung video"></canvas><div id="emptyCanvas" class="empty-overlay"><span>▶</span><strong>Hãy nhập ảnh hoặc video nền</strong><small>Khung dựng video sẽ xuất hiện tại đây</small></div></div>
+<div class="transport"><button id="play" type="button" class="icon-btn primary" aria-label="Phát">▶</button><button id="pause" type="button" class="icon-btn" aria-label="Tạm dừng" disabled>Ⅱ</button><button id="restart" type="button" class="icon-btn" aria-label="Về đầu video">↺</button><span id="clock" class="clock">00:00 / 00:10</span><button id="fullscreen" type="button" class="icon-btn right" aria-label="Phóng to màn hình">⛶</button></div>
+<label class="scrub-wrap"><span class="sr-only">Vị trí phát</span><input id="scrubber" type="range" min="0" max="10" step="0.01" value="0"></label>
+<div class="render-box"><div class="render-head"><div><strong>Xuất Video Pro</strong><small id="formatNote">Định dạng phụ thuộc trình duyệt · ưu tiên MP4 khi hỗ trợ, nếu không dùng WebM.</small></div><label class="control compact">Chất lượng <select id="quality"><option value="1080">1080p Full HD</option><option value="720">720p HD</option></select></label></div>
+<div class="render-actions"><button type="button" class="primary export-btn" id="export">⬇ Xuất Video Pro</button><button type="button" class="ghost" id="cancelExport" disabled>Dừng xuất</button><a id="download" class="download hidden" download>Tải video đã dựng ↓</a></div>
+<div class="progressline"><div id="progressFill"></div></div><div class="render-meta"><span id="exportStatus" role="status" aria-live="polite">Sẵn sàng dựng · Chưa xuất.</span><strong id="progressPct">0%</strong></div>
+<p class="mini-note">Render theo thời gian thực, không nhanh hơn độ dài audio. Trong lúc xuất hãy giữ tab đang mở; video có thể rất lớn. Độ phân giải 1080p/60fps tùy khả năng máy.</p>
+</div>
+</section>
+<aside class="panel inspector" aria-labelledby="inspectorTitle"><div class="panel-head"><h2 id="inspectorTitle">03 / Inspector</h2><span class="chip">PROPERTIES</span></div>
+<div class="section-label">Hình ảnh / Camera</div>
+<label class="control">Zoom <output id="zoomValue">1.00×</output><input type="range" id="zoom" min="1" max="2" step=".05" value="1"></label>
+<label class="control">Crop / Fit <select id="fit"><option value="cover">Fill (cắt vừa khung)</option><option value="contain">Fit (giữ nguyên ảnh)</option></select></label>
+<label class="control">Ken Burns <select id="kenBurns"><option value="in">Pan & Zoom In</option><option value="out">Zoom Out</option><option value="off">Tắt hiệu ứng</option></select></label>
+<label class="control">Chuyển cảnh <select id="transition"><option value="fade">Crossfade</option><option value="cut">Cut trực tiếp</option></select></label>
+<label class="control">Bộ lọc <select id="filter"><option value="none">Tự nhiên</option><option value="cinema">Cinematic</option><option value="warm">Warm</option><option value="mono">Mono</option></select></label>
+<div class="rule"></div><div class="section-label">Âm thanh</div>
+<label class="control">Âm lượng giọng <output id="voiceVolValue">100%</output><input id="voiceVol" type="range" min="0" max="1.5" step=".05" value="1"></label>
+<label class="control">Âm lượng BGM <output id="bgmVolValue">24%</output><input id="bgmVol" type="range" min="0" max=".8" step=".02" value=".24"></label>
+<label class="toggle"><input type="checkbox" id="ducking" checked><span><strong>Audio Ducking</strong><small>Giảm nhạc nền khi giọng đang nói</small></span></label>
+<label class="toggle"><input type="checkbox" id="waveform" checked><span><strong>Voice Waveform Overlay</strong><small>Sóng âm chạy theo cường độ voiceover</small></span></label>
+<div class="rule"></div><div class="section-label">Subtitles / Text</div>
+<textarea id="script" rows="7" placeholder="Dán kịch bản từ Voice Fixer / TTS để tạo phụ đề..."></textarea>
+<div class="subtitle-tools"><button id="generateSubs" type="button" class="secondary">✦ Tạo phụ đề theo kịch bản</button><label class="toggle small"><input type="checkbox" id="showSubs" checked><span>Hiện phụ đề</span></label></div>
+<label class="control">Kích thước chữ <output id="fontSizeValue">52</output><input id="fontSize" type="range" min="28" max="90" step="2" value="52"></label>
+<div class="mini-note">Phụ đề được chia và phân bổ thời gian <strong>ước lượng theo số từ</strong>, không phải speech-to-text nhận diện thời điểm thực. Có thể chỉnh văn bản rồi tạo lại trước khi xuất.</div>
+</aside>
+</div>
+<section class="timeline panel" aria-labelledby="timelineTitle"><div class="panel-head"><div><h2 id="timelineTitle">04 / Multi-track Timeline</h2><p>Kéo ảnh trong thư viện để thay thứ tự. Nhấp ảnh rồi dùng nút ↑ ↓ hoặc Xóa. Voiceover quyết định thời lượng video khi đã tải.</p></div><span id="durationLabel" class="chip">00:10</span></div>
+<div class="track"><div class="track-label"><strong>▧ VISUAL</strong><small>Ảnh / Video</small></div><div class="track-content" id="visualTrack"><span class="placeholder">Thêm ảnh để tạo Visual Track.</span></div></div>
+<div class="track"><div class="track-label"><strong>♫ AUDIO</strong><small>Voice & BGM</small></div><div class="track-content audio-track"><div id="voiceTrack" class="audio-clip voice-clip">🎙 Voiceover · Chưa có WAV/MP3</div><div id="bgmTrack" class="audio-clip bgm-clip">♫ BGM · Chưa có nhạc nền</div></div></div>
+<div class="track"><div class="track-label"><strong>≡ SUBTITLE</strong><small>Kịch bản / Text</small></div><div class="track-content" id="subtitleTrack"><span class="placeholder">Dán kịch bản và bấm tạo phụ đề.</span></div></div>
+<div class="timeline-bottom"><label class="control compact">Thời lượng khi chỉ có ảnh (giây) <input id="stillDuration" type="number" min="3" max="300" value="10" step="1"></label><span id="timelineHint">Mỗi ảnh được phân bổ đều theo thời lượng giọng đọc.</span></div></section>
+<footer>BlogNaver · Clip Maker Lab · Tất cả dữ liệu video xử lý trực tiếp trên trình duyệt. Không sử dụng tài nguyên có bản quyền nếu bạn chưa có quyền.</footer>
+</main>
+</body></html>
