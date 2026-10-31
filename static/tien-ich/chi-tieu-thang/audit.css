@@ -19,3 +19,68 @@ body.finance-audit{background:#f6f7f9;color:#334155;font-family:Inter,system-ui,
 .audit-toast{position:fixed;bottom:20px;right:20px;z-index:99999;max-width:min(440px,90vw);padding:13px 18px;background:#0f172a;color:white;border-radius:13px;box-shadow:0 12px 32px #0002}.audit-toast[hidden]{display:none}
 @media(max-width:1000px){.audit-cards{grid-template-columns:repeat(2,minmax(0,1fr))}.audit-visuals{grid-template-columns:1fr}}
 @media(max-width:600px){.audit-cards{grid-template-columns:1fr}.audit-toolbar{align-items:stretch}.audit-tabs{width:100%}.audit-tabs button{flex:1}.audit-card{padding:15px}}
+
+/* 2026-10-31: Deep Slate / Frosted Glass finance design system. */
+body.finance-audit{
+ --fin-bg:#090d16;--fin-surface:rgba(30,41,59,.72);--fin-border:rgba(255,255,255,.09);
+ --fin-text:#f8fafc;--fin-muted:#94a3b8;--fin-cyan:#38bdf8;--fin-green:#34d399;--fin-rose:#f43f5e;
+ color-scheme:dark;background:radial-gradient(ellipse at 12% 5%,rgba(56,189,248,.10),transparent 38%),radial-gradient(ellipse at 95% 28%,rgba(99,102,241,.09),transparent 44%),var(--fin-bg)!important;
+ color:var(--fin-text)!important;
+}
+.finance-audit .top{background:rgba(15,23,42,.85)!important;border-bottom:1px solid var(--fin-border);color:var(--fin-text)}
+.finance-audit .top :is(a,strong){color:var(--fin-text)}
+.finance-audit .hero,.finance-audit .panel,.finance-audit .stat,.finance-audit .audit-card{
+ background:var(--fin-surface)!important;border:1px solid var(--fin-border)!important;
+ border-radius:16px!important;color:var(--fin-text)!important;
+ box-shadow:0 12px 38px rgba(0,0,0,.17);
+ backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+}
+.finance-audit .audit-cards .audit-card:nth-child(1){box-shadow:0 9px 36px rgba(244,63,94,.08)}
+.finance-audit .audit-cards .audit-card:nth-child(2){box-shadow:0 9px 36px rgba(52,211,153,.11)}
+.finance-audit .hero h1,.finance-audit h2,.finance-audit h3,.finance-audit .stat strong,
+.finance-audit .audit-card strong,.finance-audit .panel strong{color:var(--fin-text)!important}
+.finance-audit :is(.eyebrow,.help,.muted,.stat small,.audit-card small,.audit-card p,.audit-card label,.panel p,.panel label,.bar span){color:var(--fin-muted)!important}
+.finance-audit :is(input,select,textarea){
+ background:#0f172a!important;border:1px solid rgba(148,163,184,.26)!important;
+ color:var(--fin-text)!important;border-radius:10px!important;
+}
+.finance-audit :is(input,textarea)::placeholder{color:#94a3b8!important;opacity:.85}
+.finance-audit :is(input,select,textarea):focus-visible,.finance-audit button:focus-visible{
+ outline:2px solid var(--fin-cyan)!important;outline-offset:2px
+}
+.finance-audit .primary,.finance-audit .audit-tabs button[aria-pressed=true]{
+ background:linear-gradient(135deg,#4f46e5,#2563eb)!important;color:#fff!important;
+ border:1px solid rgba(129,140,248,.35)!important
+}
+.finance-audit .ghost,.finance-audit .audit-tabs button{
+ background:#172337!important;color:var(--fin-text)!important;border:1px solid var(--fin-border)!important;
+}
+.finance-audit :is(.primary,.ghost,.audit-tabs button,.item,.audit-ledger tbody tr){
+ transition:background-color .2s ease,transform .2s ease,border-color .2s ease,box-shadow .2s ease
+}
+.finance-audit :is(.primary,.ghost,.audit-tabs button):hover{border-color:rgba(56,189,248,.5)!important;box-shadow:0 0 18px rgba(56,189,248,.13)}
+.finance-audit .audit-tabs{background:#101b2c!important;border:1px solid var(--fin-border)}
+.finance-audit .audit-trend{background:rgba(148,163,184,.13);color:#cbd5e1}
+.finance-audit .audit-trend.good{background:rgba(52,211,153,.14);color:#6ee7b7}
+.finance-audit .audit-trend.bad{background:rgba(244,63,94,.14);color:#fda4af}
+.finance-audit .audit-chart,.finance-audit .audit-ledger :is(td,th){
+ border-color:rgba(148,163,184,.12)!important
+}
+.finance-audit .audit-bar{background:linear-gradient(180deg,#38bdf8,#6366f1)!important}
+.finance-audit .audit-category-track,.finance-audit .bar-track{background:#101a2b!important}
+.finance-audit .audit-category-track span,.finance-audit .bar-fill{background:linear-gradient(90deg,#38bdf8,#818cf8)!important}
+.finance-audit .audit-ledger th{background:rgba(15,23,42,.7)!important;color:#94a3b8!important}
+.finance-audit .audit-ledger td{color:var(--fin-text)}
+.finance-audit .audit-ledger td:last-child{color:#fbbf24!important}
+.finance-audit .audit-ledger tbody tr:hover{background:rgba(56,189,248,.06)}
+.finance-audit .audit-ledger .money{color:var(--fin-green)!important;font-variant-numeric:tabular-nums}
+.finance-audit .item,.finance-audit .notice,.finance-audit .insights-advice article{
+ background:rgba(15,23,42,.55)!important;color:var(--fin-text)!important;border:1px solid var(--fin-border)!important;
+ border-radius:12px
+}
+.finance-audit .item :is(h3,p){color:var(--fin-text)!important}
+.finance-audit .save-progress{background:#101a2b!important;border-color:var(--fin-border)!important}
+.finance-audit .save-progress-head,.finance-audit .status{color:var(--fin-text)!important}
+.finance-audit .audit-toast{background:#1e293b!important;color:#f8fafc!important;border:1px solid var(--fin-border)}
+.finance-audit .layout{align-items:start}
+@media(prefers-reduced-motion:reduce){.finance-audit *{transition:none!important;scroll-behavior:auto!important}}
