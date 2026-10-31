@@ -12,8 +12,8 @@ async function refresh(){
   finally{clearTimeout(timeout)}
   const data=await response.json();
   if(!response.ok)throw Error(data.error||"Bridge không trả dữ liệu quota");
-  window.BNQuotaStore.save(data);
-  state.textContent="Đã kết nối";status.textContent="Quota đã cập nhật trực tiếp từ Codex trên Mac.";help.open=false;
+  const stored=window.BNQuotaStore.save(data);
+  state.textContent="Đã kết nối";status.textContent=stored?"Quota đã cập nhật trực tiếp từ Codex trên Mac.":"Quota đã cập nhật; bộ nhớ trình duyệt đầy nên lịch sử mới chỉ lưu tạm trong phiên này.";help.open=false;
  }catch(error){
   state.textContent="Chưa kết nối";
   status.textContent="Không thể đọc quota: "+(error instanceof TypeError?"Kiểm tra cầu nối và quyền localhost trong trình duyệt.":error.message);
