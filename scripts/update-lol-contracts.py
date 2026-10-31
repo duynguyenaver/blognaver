@@ -142,15 +142,19 @@ def rows_from_csv(text: str, region: str, source: str):
         if normal(handle) in ("player", "name", "total", "notes", "lastupdated"): continue
         # The actual Riot tabs share a League column. Use it instead of guessing
         # from a potentially missing tab label (LCK/LEC/LCS/CBLOL/LPL/LCP).
-        recorded_region = league_from_label(cell("league"))
-        actual_region = recorded_region if recorded_region != "OTHER" else region
-        if actual_region == "OTHER":
+        raw_league = cell("league")
+        recorded_region = league_from_label(raw_league)
+        # Unknown named leagues in EMEA/APAC tabs are ERLs/academy circuits,
+        # NOT the LEC or LCP. Keep their true competition name under OTHER.
+        actual_region = (recorded_region if recorded_region != "OTHER"
+                         else "OTHER" if raw_league else region)
+        if actual_region == "OTHER" and not raw_league:
             continue
         first, family = cell("legalFirst"), cell("legalFamily")
         legal_name = cell("legalName") or " ".join(x for x in (first, family) if x)
         key = "|".join((actual_region, handle.casefold(), team.casefold()))
         found[key] = {"id": key, "league": actual_region, "team": team,
-                      "handle": handle, "legalName": legal_name,
+                      "handle": handle, "legalName": legal_name, "competition": raw_league,
                       "position": cell("position"), "endDate": parse_date(cell("endDate")),
                       "sourceUrl": source}
     return list(found.values())
@@ -171,7 +175,9 @@ def fetch_tab(gid: str, region: str):
                 raise ValueError("HTML returned instead of CSV")
             parsed = rows_from_csv(text, region, source)
             if len(parsed) < 5: raise ValueError("Too few valid records: " + str(len(parsed)))
-            return parsed
+            first = next(csv.reader(io.StringIO(text)), [])
+            updated_at = first[1].strip() if first and first[0].strip().casefold().startswith("this sheet was last updated") and len(first)>1 else ""
+            return parsed, updated_at
         except (OSError, ValueError, csv.Error) as exc:
             failures.append(type(exc).__name__ + ": " + str(exc)[:140])
     raise RuntimeError("All Riot CSV endpoints failed for gid=" + gid + ": " + "; ".join(failures))
@@ -251,12 +257,13 @@ def main():
         if region not in REGIONS:
             continue
         try:
-            records = fetch_tab(gid, region)
+            records, sheet_updated_at = fetch_tab(gid, region)
             all_rows.extend(records)
             for recorded_region in sorted({r["league"] for r in records}):
                 count = sum(r["league"] == recorded_region for r in records)
                 found_regions.add(recorded_region)
                 metadata.append({"league": recorded_region, "gid": gid, "count": count,
+                                 "sheetUpdatedAt": sheet_updated_at,
                                  "url": PUBLIC_URL+"#gid="+gid})
                 print("OK", recorded_region, gid, count)
         except RuntimeError as exc:
