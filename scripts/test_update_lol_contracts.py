@@ -61,6 +61,33 @@ class TestGCD(unittest.TestCase):
         with self.assertRaises(ValueError):
             importer.build_snapshot({"rows":old},old[:1],[{"league":"LCK"}],"2026-11-01")
 
+    def test_real_published_lck_sheet_layout(self):
+        csv_text = (
+            "THIS SHEET WAS LAST UPDATED ON:,Aug 20 2026\n"
+            "League,Team,Official Summoner Name,,Legal First Name,Legal Family Name,"
+            "End Date (Month Day Year),,Team Contact Information\n"
+            "LCK,T1,Faker,,Sanghyeok,Lee,\"November 19, 2029\",,\n"
+        )
+        rows=importer.rows_from_csv(csv_text,"OTHER",importer.PUBLIC_URL+"#gid=905624073")
+        self.assertEqual(len(rows),1)
+        self.assertEqual(rows[0]["league"],"LCK")
+        self.assertEqual(rows[0]["endDate"],"2029-11-19")
+        self.assertEqual(rows[0]["legalName"],"Sanghyeok Lee")
+        self.assertEqual(rows[0]["position"],"")
+
+    def test_real_lec_and_lcp_sheet_layouts(self):
+        lec=("League,Team,Official Summoner Name,Main Role,Legal First Name,"
+             "Legal Family Name,\"Contract End (Month, Day, Year) at 23:59 UTC\"\n"
+             "LEC,GIANTX,Jackies,MID,Adam,Jerabek,\"November 16, 2026\"\n")
+        lcp=("League,Team,Official Summoner Name,Position,Legal First Name,"
+             "Legal Family Name,Residency,\"End Date (Month, Day, Year)\"\n"
+             "LCP,GAM Esports,Kiaya,Top,Duy Sang,Tran,Native Resident,\"November 16, 2026\"\n")
+        for raw,league in ((lec,"LEC"),(lcp,"LCP")):
+            rows=importer.rows_from_csv(raw,"OTHER",importer.PUBLIC_URL)
+            self.assertEqual(len(rows),1)
+            self.assertEqual(rows[0]["league"],league)
+            self.assertEqual(rows[0]["endDate"],"2026-11-16")
+
     def test_region_labels_and_discovery(self):
         html='<ul><li><a href="#gid=940656680">Korea (LCK)</a></li><li><a href="#gid=594163931">China (LPL)</a></li><li><a href="#gid=123456789">EMEA</a></li></ul>'
         tabs=importer.discover_tabs(html)
