@@ -20,6 +20,7 @@ ALLOWED_ORIGINS = {
     "http://127.0.0.1:1313",
 }
 MAX_SECONDS = 18
+MAX_RESPONSE_BYTES = 4096
 
 def query_codex():
     codex = shutil.which("codex")
@@ -74,7 +75,18 @@ def query_codex():
                     def safe_window(w):
                         if not isinstance(w, dict):
                             return None
-                        return {k: w[k] for k in ("usedPercent", "windowDurationMins", "resetsAt") if k in w}
+                        # Compact, validated scalar fields only. No raw JSONL, sessions or history.
+                        clean = {}
+                        used = w.get("usedPercent")
+                        if isinstance(used, (int, float)) and not isinstance(used, bool) and 0 <= used <= 100:
+                            clean["usedPercent"] = round(float(used), 2)
+                        duration = w.get("windowDurationMins")
+                        if isinstance(duration, (int, float)) and not isinstance(duration, bool) and duration in (300, 10080):
+                            clean["windowDurationMins"] = int(duration)
+                        reset = w.get("resetsAt")
+                        if isinstance(reset, (int, float)) and not isinstance(reset, bool) and 0 < reset < 4102444800:
+                            clean["resetsAt"] = int(reset)
+                        return clean if "usedPercent" in clean and "windowDurationMins" in clean else None
                     mapped = {"primary": safe_window(limit.get("primary")),
                               "secondary": safe_window(limit.get("secondary"))}
                     if not any(mapped.values()):
@@ -105,7 +117,9 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Vary", "Origin")
 
     def send_json(self, code, payload):
-        raw = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+        raw = json.dumps(payload, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+        if len(raw) > MAX_RESPONSE_BYTES:
+            raise ValueError("Bridge payload exceeds the safety size limit")
         self.send_response(code)
         self.headers_cors()
         self.send_header("Content-Type", "application/json; charset=utf-8")
