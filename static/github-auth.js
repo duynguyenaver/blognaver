@@ -48,7 +48,7 @@
      method:"POST",headers:{"Content-Type":"audio/wav"},body:wav
    });
  }
- window.BNAuth=Object.freeze({isAuthenticatedOrigin:runningOnGateway,session,logout,readData,writeData,uploadWav});
+ window.BNGitHubOAuth=Object.freeze({isAuthenticatedOrigin:runningOnGateway,session,logout,readData,writeData,uploadWav});
  if(runningOnGateway()){
    document.addEventListener("DOMContentLoaded",async()=>{
      const data=await session().catch(()=>({authenticated:false}));
