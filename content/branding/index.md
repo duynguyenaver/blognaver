@@ -119,3 +119,7 @@ Thông báo nổi xác nhận việc lưu **trên thiết bị** sau khi thao t�
 Biểu mẫu CV dùng thẻ bo góc 16px, label gắn với trường nhập và ô mô tả kinh nghiệm nhiều dòng. Nháp văn bản tự lưu trên máy, không chứa token hoặc ảnh upload; trạng thái này độc lập với xuất bản GitHub.
 
 Bản xem trước và CV đã xuất bản dùng chung cấu hình A4 dọc, lề trên/dưới 10mm và trái/phải 12mm. Mô tả công việc chạy toàn chiều ngang, chữ nội dung 11pt / 1.5; bảng dùng 10pt. Tiêu đề hồ sơ vẫn hiện khi in, các nút điều hướng được ẩn.
+
+## CMS V2 · Chiều cao vùng làm việc
+
+CMS V2 trên desktop sử dụng chiều cao màn hình hiện tại. Nội dung soạn thảo và metadata có vùng cuộn riêng; thanh lưu/preview/xuất bản nằm trong vùng làm việc. Màn hình nhỏ và bàn phím điện thoại sử dụng cuộn trang tự nhiên. Ô Markdown ẩn không được tạo khoảng trống phía dưới editor.

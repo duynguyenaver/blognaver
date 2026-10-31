@@ -13,16 +13,17 @@ const names=["dashboard","posts","editor","media","templates","collections","tra
 const views=names.map(name=>({dataset:{view:name},hidden:name!=="dashboard"}));
 const buttons=names.map(name=>({dataset:{page:name},classList:{toggle(cls,on){this.active=on}},setAttribute(k,v){this[k]=v}}));
 const tools={open:false};
-let hash="",loaded=[];
+let hash="",loaded=[],workspaceScrolls=0;
 const context={
  $$:selector=>selector==="[data-view]"?views:selector==="[data-page]"?buttons:[],
- document:{getElementById:id=>id==="v2ToolsMenu"?tools:null},
+ document:{querySelector:selector=>selector===".main"?{scrollTo(){workspaceScrolls++}}:null,getElementById:id=>id==="v2ToolsMenu"?tools:null},
  location:{get hash(){return hash}},
  history:{pushState(_s,_t,url){hash=url}},
  window:{scrollTo(){}},loadPosts(){loaded.push("posts")},loadMedia(){loaded.push("media")}
 };
 vm.createContext(context);vm.runInContext(route+";globalThis.activate=page;",context);
 for(const name of names){context.activate(name);assert.equal(hash,"#"+name,"deep link "+name);assert.equal(views.filter(x=>!x.hidden).length,1,"exactly one visible view");assert.equal(views.find(x=>!x.hidden).dataset.view,name,"active view "+name);assert.equal(buttons.find(x=>x.dataset.page===name).classList.active,true,"active navigation "+name)}
+assert.equal(workspaceScrolls,names.length,"workspace scroll resets for every route");
 assert.equal(tools.open,true,"TOOLS opened for its child route");
 context.activate("not-a-page");assert.equal(views.find(x=>!x.hidden).dataset.view,"dashboard","invalid route falls back");
 assert.ok(loaded.includes("media")&&loaded.includes("posts"),"page initializers fire");
