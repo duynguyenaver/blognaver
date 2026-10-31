@@ -16,6 +16,22 @@ print("### Diagnosis after attempt "+str(a.attempt))
 for case in matches:
     print("- **"+case.get("title","Unknown")+"** ("+case.get("kind","unknown")+"): "+case.get("advice","Inspect log"))
 if not matches:print("- Unknown failure: review the first relevant error, not only the final summary.")
+# Cross-reference historical Fix Bug 2026 lessons without changing classification,
+# retry budgets, source files or root-cause confidence.
+if matches:
+    try:
+        kb=json.loads(pathlib.Path("data/ci/bug-knowledge.json").read_text(encoding="utf-8"))
+        linked={m.get("id") for m in matches}
+        lessons=[item for item in kb.get("series_casebook",{}).get("lessons",[])
+                 if linked.intersection(item.get("classifier_case_ids",[]))]
+        if lessons:
+            print("\n### Related Fix Bug 2026 examples (advisory, NOT root-cause proof)")
+            for item in lessons[:3]:
+                print("- **"+item["id"]+"** ["+item["evidence_mode"]+"]: "+item["reusable_action"])
+                print("  Evidence caveat: "+item["evidence_limit"]+" Source: "+item["pr_url"])
+            print("- Check the current first failure and latest SHA; do not infer a cause from a matched rule.")
+    except (OSError,ValueError,KeyError,TypeError) as error:
+        print("- Casebook unavailable; continue with the original classifier and inspect logs.")
 if a.attempt>=3:
     text=pathlib.Path("AGENTS.md").read_text(encoding="utf-8",errors="replace")
     headings=list(re.finditer(r"(?m)^#{2,4} (.+)$",text))
