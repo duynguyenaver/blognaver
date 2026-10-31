@@ -88,6 +88,17 @@ class TestGCD(unittest.TestCase):
             self.assertEqual(rows[0]["league"],league)
             self.assertEqual(rows[0]["endDate"],"2026-11-16")
 
+    def test_emea_regional_league_not_falsely_marked_lec(self):
+        raw=("League,Team,Official Summoner Name,Main Role,\"Contract End (Month, Day, Year)\"\n"
+             "LFL,Team Baguette,Paris,Top,\"November 16, 2026\"\n"
+             "LEC,GIANTX,Jackies,Mid,\"November 16, 2026\"\n")
+        rows=importer.rows_from_csv(raw,"LEC",importer.PUBLIC_URL)
+        self.assertEqual(len(rows),2)
+        self.assertEqual(rows[0]["league"],"OTHER")
+        self.assertEqual(rows[0]["competition"],"LFL")
+        self.assertEqual(rows[1]["league"],"LEC")
+        self.assertEqual(rows[1]["competition"],"LEC")
+
     def test_region_labels_and_discovery(self):
         html='<ul><li><a href="#gid=940656680">Korea (LCK)</a></li><li><a href="#gid=594163931">China (LPL)</a></li><li><a href="#gid=123456789">EMEA</a></li></ul>'
         tabs=importer.discover_tabs(html)
