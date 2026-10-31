@@ -22,21 +22,31 @@
   const calendarPatterns = [
     /(?<![\p{L}\p{N}])(?:trong\s+ngày|vào\s+ngày|ngày|hôm|vào)\s+\d{1,2}\s*[\/.-]\s*\d{1,2}\s*[\/.-]\s*\d{2,4}(?![\p{L}\p{N}])/giu,
     /(?<![\p{L}\p{N}])\d{1,2}\s*[\/.-]\s*\d{1,2}\s*[\/.-]\s*\d{2,4}(?![\p{L}\p{N}])/gu,
-    /(?<![\p{L}\p{N}])\d{4}-\d{1,2}-\d{1,2}(?![\p{L}\p{N}])/gu,
+    /(?<![\p{L}\p{N}])\d{4}\s*[\/.-]\s*\d{1,2}\s*[\/.-]\s*\d{1,2}(?![\p{L}\p{N}])/gu,
     /(?<![\p{L}\p{N}])(?:trong\s+)?(?:ngày\s+)?\d{1,2}\s+tháng\s+\d{1,2}\s+năm\s+\d{4}(?![\p{L}\p{N}])/giu,
     /(?<![\p{L}\p{N}])(?:trong\s+)?tháng\s+\d{1,2}\s*(?:năm\s*)?\d{4}(?![\p{L}\p{N}])/giu,
-    /(?<![\p{L}\p{N}])(?:tháng\s+)?\d{1,2}\s*[\/.-]\s*\d{4}(?![\p{L}\p{N}])/giu,
+    /(?<![\p{L}\p{N}])(?:(?:trong|vào|ngày)\s+)?(?:tháng\s+)?\d{1,2}\s*[\/.-]\s*\d{4}(?![\p{L}\p{N}])/giu,
     /(?<![\p{L}\p{N}])(?:vào\s+)?năm\s+(?:19|20)\d{2}(?![\p{L}\p{N}])/giu
   ];
   const uiOnly = /^(?:[➜→↗✓✕×•·]\s*)*(?:trong|và|từ|phút|sê[\s-]?ri|series|thể loại|tác giả|danh mục|chuyên mục|tags?|mục lục|đọc tiếp|xem thêm|đọc thêm|chia sẻ|chia sẻ bài viết|copy link|sao chép|sao chép liên kết|quay lại|trang chủ|bài viết liên quan|bài trước|bài sau|xem tất cả|tải xuống|bình luận|đăng ký|subscribe|source|nguồn)\s*[.:;!?…\-–—]*$/iu;
-  const statsOnly = /^(?:(?:số từ|thời gian đọc|reading time)\s*[:：-]\s*)?\d[\d.,]*\s*(?:từ|chữ|words?|phút(?:\s*đọc)?|mins?|minutes?)$/iu;
+  const statsOnly = /^(?:(?:số từ|thời gian đọc|reading time)\s*[:：-]\s*)?(?:(?:đọc\s+)?trong\s+)?\d[\d.,]*\s*(?:từ|chữ|words?|phút(?:\s*đọc)?|mins?|minutes?)$/iu;
   const headerMeta = /^(?:tác giả|author|đăng bởi|đăng ngày|ngày đăng|ngày xuất bản|xuất bản|published|updated|cập nhật|số từ|word count|thời gian đọc|reading time|thể loại|chuyên mục|danh mục|tags?|series|sê[\s-]?ri)\s*[:：—–-]\s*.*$/iu;
   const bylineOrStat = /^(?:duy\s+nguyen|nguyễn\s+duy\s+khang|\d[\d.,]*\s*(?:từ|chữ|words?|phút(?:\s*đọc)?))$/iu;
   const isolatedDate = /^\d{1,2}\s*[\/.-]\s*\d{1,2}\s*[\/.-]\s*\d{2,4}$/u;
   const sourceMarker = /^(?:#{1,6}\s*)?(?:nguồn và phương pháp|nguồn tham khảo|video\s*\/\s*nguồn tiếng anh gốc|tài liệu tham khảo|references?|disclaimer|bản quyền|copyright)(?:\s|[:：.…—–-]|$)/iu;
   function purgeDates(s) {
     let result=String(s||"");
-    for(const pattern of calendarPatterns) result=result.replace(pattern," ");
+    let foundDate=false;
+    for(const pattern of calendarPatterns){
+      const next=result.replace(pattern," ");
+      if(next!==result)foundDate=true;
+      result=next;
+    }
+    if(foundDate){
+      // Remove prepositions left behind by dates deleted from short publication headers.
+      result=result.replace(/(^|[.!?]\s+)(?:vào|trong ngày|ngày)\s*(?=[,.;:!?]|$)/giu,"$1");
+      result=result.replace(/(^|[.!?]\s+)(?:cập nhật|đăng ngày|xuất bản)\s*(?=[,.;:!?]|$)/giu,"$1");
+    }
     return result.replace(/\s+([,;:.!?])(?=\s|$)/gu,"$1")
       .replace(/^\s*[,;:.!?–—-]+\s*/u,"")
       .replace(/\s+[,;:](?=\s|$)/gu,"")
