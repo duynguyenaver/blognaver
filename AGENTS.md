@@ -1,5 +1,16 @@
 # BlogNaver Agent Guidelines
 
+## YouTube Voiceover Storytelling & Hoai My pronunciation (owner policy, 2026-10-31)
+
+For all future BlogNaver YouTube voiceover script generators and related editorial projects, use a source-grounded **hook → conversational narrative → insight → audience question/CTA → warm sign-off** structure.
+
+- In the first ~5 seconds, open with an engaging *topic-specific* rhetorical question, curiosity, dilemma or paradox; **do not begin by reading a dry article title, number or source metadata**. Do not assert invented claims or sensational details as facts. In deterministic clients without research/semantic understanding, use a safe question selected from detected topic cues rather than fabricated specifics.
+- Convert stiff journalistic analysis into approachable talkshow storytelling while preserving attributions, dates, figures, caveats and uncertainty. Use natural context-specific paragraph transitions, not the same filler phrase on every paragraph.
+- Remove bylines, dates/read-times in frontmatter, generic website UI and source/disclaimer blocks from the spoken script, while retaining genuine dates and facts in its body. Convert numeric/measurement expressions to Vietnamese spoken words as applicable and guard URLs, technical IDs and ambiguous numeric formats.
+- Optimize specifically for **Microsoft Hoai My Online (Natural) vi-VN**. Write **3D → Ba Đê**, **2D → Hai Đê**, **R&D → A-ren-Đê** (never *Ba Dê*), **AI → Ei-Ai**, **IT → Ai-Ti**, **MIT → Em-Ai-Ti**, **GPU → Gi-Pi-U**, **CPU → Si-Pi-U**, **ChatGPT → Chát-Gi-Pi-Ti**, **Silicon Valley → Si-li-con Va-li**, **Semiconductor → Xe-mi-con-đắc-tơ**, **Silicon → Si-li-con**. Keep hyphens between syllables in English-name phonetics (e.g. En-vi-đi-a, San-ta Cờ-la-ra, Voi-ơ-jơ, En-đê-vơ, Ca-li-phót-ni-a). Do not replace Vietnamese words that merely contain a technology acronym as a substring.
+- Finish with a broader reflection or audience-facing question, an invitation to comment, and a natural warm channel sign-off; avoid reading a literal heading “Kết luận.” Do not invent a channel name unless it is established; BlogNaver can use its own name.
+- Always provide editable output, listen-through before production and regression tests for dates, numbers, names, pronunciation, duplicate hook/sign-off and preservation of real technical content. A rule-based converter is an approximation; do not claim human-equivalent intonation.
+
 ## PERMANENT OWNER POLICY: No About / Giới thiệu page (2026-10-31)
 
 - **The owner does not want any Giới thiệu / About page or section. Never create or restore `/about/`, an equivalent About/Profile landing page, its menu entry, or a self-introduction section.**

@@ -44,3 +44,21 @@ test("removes orphan words, does not add repeated intro/outro", () => {
   assert.ok(once.includes("Đầu tiên, công ty phát triển"));
   assert.equal(cleanScript(once).text,once);
 });
+
+
+test("hook, conversational voiceover ending and Hoai My pronunciation", () => {
+ const input="# Kiến trúc trụ sở Nvidia\n\nLập luận thiết kế cho rằng Santa Clara là trung tâm kết nối.\n\n## Kết luận\nHai tòa nhà giúp nhân viên làm việc cùng nhau.";
+ const result=cleanScript(input).text;
+ includesAll(result,["Vì sao một trụ sở","Chào mừng","Tại sao lại chọn hướng thiết kế này?","Theo lập luận thiết kế","Tóm lại,","Theo bạn,","Hãy chia sẻ góc nhìn","Cảm ơn các bạn"]);
+});
+
+test("Hoai My D phonetics and additional technical acronyms", () => {
+ const text=cleanScript("3D, 2D, R&D, AI, IT, MIT, CPU, GPU, ChatGPT, Silicon Valley, Semiconductor, Silicon.").text;
+ includesAll(text,["Ba Đê","Hai Đê","A-ren-Đê","Ei-Ai","Ai-Ti","Em-Ai-Ti","Si-Pi-U","Gi-Pi-U","Chát-Gi-Pi-Ti","Si-li-con Va-li","Xe-mi-con-đắc-tơ","Si-li-con"]);
+ assert.ok(!text.includes("Ba Dê"));
+});
+
+test("storytelling reprocessing is stable", () => {
+ const first=cleanScript("# Tòa nhà\n\nLập luận thiết kế cho rằng công trình tạo kết nối.").text;
+ assert.equal(cleanScript(first).text,first);
+});
