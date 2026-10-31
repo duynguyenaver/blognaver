@@ -57,7 +57,7 @@ function render(){const tbody=$("contractRows");tbody.replaceChildren();const li
  if(!list.length){const tr=dom("tr"),td=dom("td","empty",state.rows.length?"Không tìm thấy hồ sơ phù hợp.":"Chưa có snapshot đã kiểm chứng. Mở Riot GCD hoặc nhập CSV bên dưới.");td.colSpan=7;tr.append(td);tbody.append(tr)}
  for(const r of list.slice(state.page*PAGE,(state.page+1)*PAGE)){const tr=dom("tr"),td=dom("td");td.append(dom("strong","",r.handle));if(r.legalName)td.append(dom("div","role",r.legalName));
  const s=status(r),badge=dom("td");badge.append(dom("span","tag "+s.key,s.label));
- const src=dom("td"),a=dom("a","",r.sourceType==="manual"?"Đối chiếu Riot ↗":"Riot GCD ↗");a.href=r.sourceUrl;a.target="_blank";a.rel="noopener noreferrer";src.append(a);
+ const src=dom("td"),a=dom("a","",r.sourceType==="manual"?"Đối chiếu Riot ↗":"Riot GCD ↗");a.href=r.sourceUrl;a.target="_blank";a.rel="noopener noreferrer";src.append(a);const historical={LCK:"KR",LPL:"CN",LEC:"EMEA",LCS:"AME",CBLOL:"AME",LCP:"APAC"}[r.league];if(historical){const link=dom("a","archive-row-link","Lịch sử ↗");link.href="https://lol.fandom.com/wiki/Archive:Global_Contract_Database/"+historical;link.target="_blank";link.rel="noopener noreferrer";link.title="Leaguepedia: nguồn lưu trữ cộng đồng, không phải Riot";src.append(link)}
  tr.append(td,dom("td","",r.team),dom("td","",r.competition||r.league),dom("td","",r.position||"—"),dom("td","",showDate(r.endDate)),badge,src);tbody.append(tr)}
  $("resultCount").textContent=num.format(list.length)+" kết quả";$("pageInfo").textContent=list.length?(state.page+1)+"/"+Math.ceil(list.length/PAGE):"0/0";
  $("prevPage").disabled=state.page===0;$("nextPage").disabled=(state.page+1)*PAGE>=list.length;
