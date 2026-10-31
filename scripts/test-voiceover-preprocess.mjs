@@ -33,9 +33,11 @@ test("context-aware transitions and conclusion", () => {
   includesAll(value,["Chào mừng các bạn quay trở lại","Đầu tiên, trải qua","Nói về kiến trúc,","Dưới lăng kính phân tích tổ chức,","Tuy nhiên,","Tóm lại,","Cảm ơn các bạn đã theo dõi!"]);
 });
 
-test("preserves dated facts and does not corrupt acronym case", () => {
+test("purges calendar dates within body but preserves technical quantities", () => {
   const value=cleanScript("MIT nghiên cứu AI tại California. Ngày 31/10/2026, công ty triển khai kế hoạch 30 năm.").text;
-  includesAll(value,["Em-Ai-Ti","Ei-Ai","Ca-li-phót-ni-a","ngày ba mươi mốt tháng mười năm","ba mươi năm"]);
+  includesAll(value,["Em-Ai-Ti","Ei-Ai","Ca-li-phót-ni-a","ba mươi năm"]);
+  assert.ok(!value.includes("31/10/2026"));
+  assert.ok(!value.includes("ngày ba mươi mốt"));
 });
 
 test("removes orphan words, does not add repeated intro/outro", () => {
@@ -61,4 +63,40 @@ test("Hoai My D phonetics and additional technical acronyms", () => {
 test("storytelling reprocessing is stable", () => {
  const first=cleanScript("# Tòa nhà\n\nLập luận thiết kế cho rằng công trình tạo kết nối.").text;
  assert.equal(cleanScript(first).text,first);
+});
+
+
+test("hotfix: eliminates dates in inline and mixed publication metadata",()=>{
+ const input="# Báo cáo công nghệ\nDuy Nguyen · 30/10/2026 · 1378 từ · 7 phút\n31/10/2026\nsê-ri.\ntrong.\nvà.\ntừ\nphút\n\n## Hạ tầng\nNvidia ngày 31/10/2026 có GPU và 3D. Trong 30 năm, đội ngũ phát triển.\n\n## Nguồn và phương pháp\nColdFusion Research\nResearch Studio\nẢnh nhận diện nguồn video";
+ const output=cleanScript(input).text;
+ includesAll(output,["En-vi-đi-a","Gi-Pi-U","Ba Đê","ba mươi năm"]);
+ for(const fragment of ["Duy Nguyen","30/10/2026","31/10/2026","1378 từ","7 phút","sê-ri.","trong.","và.","ColdFusion Research","Research Studio","Ảnh nhận diện nguồn video"]){
+   assert.ok(!output.includes(fragment),"Unexpected metadata: "+fragment);
+ }
+});
+test("hotfix: handles DD.MM.YY, ISO YYYY-MM-DD, month/year and natural date phrases",()=>{
+ const input="Nvidia giới thiệu GPU ngày 31.10.26. Vào 10/2026, Intel tiếp tục dự án. Ngày 30 tháng 10 năm 2026, hãng dùng 2D. 2026-10-31 ghi lại một lần nữa.";
+ const output=cleanScript(input).text;
+ includesAll(output,["En-vi-đi-a","Gi-Pi-U","In-tel","Hai Đê"]);
+ for(const token of ["31.10.26","10/2026","30 tháng 10","2026-10-31","năm hai nghìn không trăm hai mươi sáu","Vào,"]){
+   assert.ok(!output.includes(token),"Unexpected date fragment: "+token);
+ }
+});
+test("hotfix: metadata labels and reading statistics vanish even when standalone",()=>{
+ const value=cleanScript("Ngày xuất bản\n30/10/2026\nThời lượng đọc\n1881 từ / 9 phút\n\nNvidia sản xuất GPU.").text;
+ includesAll(value,["En-vi-đi-a","Gi-Pi-U"]);
+ for(const token of ["Ngày xuất bản","Thời lượng đọc","1881","9 phút","30/10"]){
+   assert.ok(!value.includes(token));
+ }
+});
+test("hotfix: does not delete meaningful Vietnamese words and spoken durations",()=>{
+ const result=cleanScript("Trong 7 phút thuyết trình, Nvidia giới thiệu GPU cùng 30 năm kinh nghiệm.").text;
+ includesAll(result,["trong bảy phút thuyết trình","En-vi-đi-a","Gi-Pi-U","ba mươi năm"]);
+});
+test("hotfix: completed script also removes calendar dates on reprocess",()=>{
+ const first=cleanScript("Nvidia có GPU.").text;
+ const withDate=first.replace("Gi-Pi-U.","Gi-Pi-U ngày 31/10/2026.");
+ const output=cleanScript(withDate).text;
+ assert.ok(!output.includes("31/10/2026"));
+ assert.equal((output.match(/Chào mừng các bạn/g)||[]).length,1);
 });

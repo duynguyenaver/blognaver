@@ -84,7 +84,7 @@
   <div class="prep-col">
    <label for="voiceoverOutput">Kịch bản đã tiền xử lý (có thể chỉnh sửa)</label>
    <textarea id="voiceoverOutput" spellcheck="true" placeholder="Kịch bản đã làm sạch sẽ xuất hiện tại đây. Bạn có thể chỉnh sửa trước khi chuyển sang TTS."></textarea>
-   <p class="hint">Đã chuẩn hóa số, đơn vị đo, ký âm tên riêng và tạo lời dẫn. Hãy kiểm tra lại cách đọc và dữ kiện trước khi xuất WAV.</p>
+   <p class="hint">Ngày tháng theo lịch và thống kê xuất bản được loại khỏi bản đọc, kể cả ngày nằm trong thân bài. Số liệu kỹ thuật và từ điển ký âm vẫn được giữ. Hãy rà soát nội dung trước khi xuất WAV.</p>
   </div>
  </div>
  <div class="prep-actions">
@@ -370,4 +370,4 @@ document.getElementById("sendToClip").addEventListener("click", () => {
   catch(e){window.alert("Trình duyệt không lưu được kịch bản. Hãy sao chép và dán thủ công vào Clip Maker.");return}
   window.location.href="../youtube-clip-maker/";
 });
-</script><script src="voiceover-preprocess.js" defer></script><script src="voice-fixer.js" defer></script></body></html>
+</script><script src="voiceover-preprocess.js?v=20261031-purge-dates-hotfix" defer></script><script src="voice-fixer.js" defer></script></body></html>

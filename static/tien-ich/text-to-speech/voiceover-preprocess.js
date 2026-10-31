@@ -9,10 +9,85 @@
   const send = $("voiceoverToTts");
   const feedback = $("voiceoverStatus");
   const tts = $("script");
-  if (!raw || !output || !run || !copy || !send || !feedback || !tts) return;
+
+
+
+  // Step 0 — remove website controls before HTML-to-text or Markdown parsing.
+  function dropHtmlControls(s) {
+    return s.replace(/<(button|nav|footer|aside|form|script|style)\b[^>]*>[\s\S]*?<\/\1\s*>/giu,"")
+      .replace(/<a\b[^>]*(?:role\s*=\s*["']?button|class\s*=\s*["'][^"']*\b(?:btn|button)\b)[^>]*>[\s\S]*?<\/a\s*>/giu,"");
+  }
+  // Calendar timestamps are deliberately excluded from the spoken script, even in body prose.
+  // Scope to calendar syntax; preserve quantitative facts like "30 năm" or "7 phút làm việc".
+  const calendarPatterns = [
+    /(?<![\p{L}\p{N}])(?:trong\s+ngày|vào\s+ngày|ngày|hôm|vào)\s+\d{1,2}\s*[\/.-]\s*\d{1,2}\s*[\/.-]\s*\d{2,4}(?![\p{L}\p{N}])/giu,
+    /(?<![\p{L}\p{N}])\d{1,2}\s*[\/.-]\s*\d{1,2}\s*[\/.-]\s*\d{2,4}(?![\p{L}\p{N}])/gu,
+    /(?<![\p{L}\p{N}])\d{4}\s*[\/.-]\s*\d{1,2}\s*[\/.-]\s*\d{1,2}(?![\p{L}\p{N}])/gu,
+    /(?<![\p{L}\p{N}])(?:trong\s+)?(?:ngày\s+)?\d{1,2}\s+tháng\s+\d{1,2}\s+năm\s+\d{4}(?![\p{L}\p{N}])/giu,
+    /(?<![\p{L}\p{N}])(?:trong\s+)?tháng\s+\d{1,2}\s*(?:năm\s*)?\d{4}(?![\p{L}\p{N}])/giu,
+    /(?<![\p{L}\p{N}])(?:(?:trong|vào|ngày)\s+)?(?:tháng\s+)?\d{1,2}\s*[\/.-]\s*\d{4}(?![\p{L}\p{N}])/giu,
+    /(?<![\p{L}\p{N}])(?:vào\s+)?năm\s+(?:19|20)\d{2}(?![\p{L}\p{N}])/giu
+  ];
+  const uiOnly = /^(?:[➜→↗✓✕×•·]\s*)*(?:trong|và|từ|phút|sê[\s-]?ri|series|thể loại|tác giả|ngày đăng|đăng ngày|ngày xuất bản|thời gian đọc|thời lượng đọc|số từ|danh mục|chuyên mục|tags?|mục lục|đọc tiếp|xem thêm|đọc thêm|chia sẻ|chia sẻ bài viết|copy link|sao chép|sao chép liên kết|quay lại|trang chủ|bài viết liên quan|bài trước|bài sau|xem tất cả|tải xuống|bình luận|đăng ký|subscribe|source|nguồn)\s*[.:;!?…\-–—]*$/iu;
+  const statsOnly = /^(?:(?:số từ|thời gian đọc|thời lượng đọc|reading time)\s*[:：-]\s*)?(?:(?:đọc\s+)?trong\s+)?\d[\d.,]*\s*(?:từ|chữ|words?|phút(?:\s*đọc)?|mins?|minutes?)(?:\s*[,/·|•]\s*\d[\d.,]*\s*(?:phút(?:\s*đọc)?|mins?|minutes?))?$/iu;
+  const headerMeta = /^(?:tác giả|author|đăng bởi|đăng ngày|ngày đăng|ngày xuất bản|xuất bản|published|updated|cập nhật|số từ|word count|thời gian đọc|reading time|thể loại|chuyên mục|danh mục|tags?|series|sê[\s-]?ri)\s*[:：—–-]\s*.*$/iu;
+  const bylineOrStat = /^(?:duy\s+nguyen|nguyễn\s+duy\s+khang|\d[\d.,]*\s*(?:từ|chữ|words?|phút(?:\s*đọc)?))$/iu;
+  const isolatedDate = /^\d{1,2}\s*[\/.-]\s*\d{1,2}\s*[\/.-]\s*\d{2,4}$/u;
+  const sourceMarker = /^(?:#{1,6}\s*)?(?:nguồn và phương pháp|nguồn tham khảo|video\s*\/\s*nguồn tiếng anh gốc|tài liệu tham khảo|references?|disclaimer|bản quyền|copyright)(?:\s|[:：.…—–-]|$)/iu;
+  function purgeDates(s) {
+    let result=String(s||"");
+    let foundDate=false;
+    for(const pattern of calendarPatterns){
+      const next=result.replace(pattern," ");
+      if(next!==result)foundDate=true;
+      result=next;
+    }
+    if(foundDate){
+      // Remove prepositions left behind by dates deleted from short publication headers.
+      result=result.replace(/(^|[.!?]\s+)(?:vào|trong ngày|ngày)\s*(?=[,.;:!?]|$)/giu,"$1");
+      result=result.replace(/(^|[.!?]\s+)(?:cập nhật|đăng ngày|xuất bản)\s*(?=[,.;:!?]|$)/giu,"$1");
+    }
+    return result.replace(/\s+([,;:.!?])(?=\s|$)/gu,"$1")
+      .replace(/^\s*[,;:.!?–—-]+\s*/u,"")
+      .replace(/\s+[,;:](?=\s|$)/gu,"")
+      .replace(/[.!?]\s*[,;:]+/gu,". ")
+      .replace(/[,;:]\s*[.!?]/gu,".")
+      .replace(/([.!?]\s+)([a-zà-ỹđ])/giu,(_,space,letter)=>space+letter.toLocaleUpperCase("vi-VN"))
+      .replace(/[ \t]{2,}/gu," ").trim();
+  }
+  function isMetaPiece(s) {
+    const v=s.trim();
+    return uiOnly.test(v)||statsOnly.test(v)||bylineOrStat.test(v)||isolatedDate.test(v)||headerMeta.test(v);
+  }
+  function stripInlineMetadata(s) {
+    let v=s.trim();
+    if(!v||headerMeta.test(v)||uiOnly.test(v)||statsOnly.test(v))return "";
+    const parts=v.split(/\s*[·|•]\s*/);
+    if(parts.length>1) {
+      const kept=parts.filter(x=>!isMetaPiece(x));
+      if(!kept.length)return "";
+      v=kept.join(" ");
+    }
+    // A standalone byline or publication statistic is never spoken.
+    if(bylineOrStat.test(v))return "";
+    v=purgeDates(v);
+    if(!v||uiOnly.test(v)||statsOnly.test(v)||bylineOrStat.test(v))return "";
+    if(/^(?:đăng ngày|ngày xuất bản|ngày đăng|cập nhật ngày|published|updated)\s*[:：.——–-]*$/iu.test(v))return "";
+    return v;
+  }
+  function purgeArticleNoise(text) {
+    return String(text||"").split("\n").map(line=>{
+      const s=line.trim();
+      if(!s)return "";
+      // Keep markers so the footer state machine can discard following references too.
+      if(sourceMarker.test(s))return s;
+      if(/^(?:coldfusion research|research studio|ảnh nhận diện nguồn video|bài viết phân tích dựa trên phụ đề)/iu.test(s))return "";
+      return stripInlineMetadata(s);
+    }).join("\n");
+  }
 
   function normalizeInput(text) {
-    let result = String(text || "").normalize("NFC")
+    let result = dropHtmlControls(String(text || "").normalize("NFC"))
       .replace(/\r\n?/g, "\n")
       .replace(/[\u200B-\u200D\uFEFF]/g, "")
       .replace(/\u00A0/g, " ");
@@ -64,7 +139,7 @@
     return null;
   }
   function stripNoise(input) {
-    const lines=normalizeInput(input).split("\n");
+    const lines=purgeArticleNoise(normalizeInput(input)).split("\n");
     const blocks=[];let pending=[],removedLines=0,front=true,inSources=false;
     const flush=()=>{
       const p=pending.join(" ").replace(/\s+/g," ").trim();pending=[];
@@ -74,7 +149,7 @@
       const s=raw.trim(),prev=i===0||!lines[i-1].trim(),next=i===lines.length-1||!lines[i+1].trim();
       const heading=headingOf(s,prev,next);
       const label=(heading?heading.text:s).replace(/[.:：\s]+$/g,"");
-      if(sourceHeading.test(label)){flush();inSources=true;removedLines++;return;}
+      if(sourceHeading.test(label)||(!front&&sourceLine.test(s))){flush();inSources=true;removedLines++;return;}
       if(inSources&&heading&&heading.level<=2)inSources=false;
       if(inSources){removedLines++;return;}
       if(!s){flush();return;}
@@ -244,9 +319,9 @@
   }
   function cleanScript(value) {
     const original=normalizeInput(value).trim();
-    // A completed script is left unchanged on repeat processing (avoid doubled hook/CTA).
+    // Completed scripts remain stable, but purge any pasted calendar dates on rerun too.
     if(Object.values(HOOKS).some(h=>original.startsWith(h+"\n\n"+WELCOME)) && original.endsWith(SIGNOFF))
-      return {text:original,removedLines:0,sections:0};
+      return {text:purgeArticleNoise(original).replace(/\n{3,}/g,"\n\n"),removedLines:0,sections:0};
     const cleaned=stripNoise(value);
     return {text:buildNarration(cleaned.blocks),removedLines:cleaned.removedLines,
       sections:cleaned.blocks.filter(x=>x.type==="heading").length};
@@ -255,6 +330,7 @@
     feedback.textContent = value;
     feedback.classList.toggle("bad", isError);
   }
+  if (raw && output && run && copy && send && feedback && tts) {
   run.addEventListener("click", () => {
     const text = raw.value.trim();
     if (!text) { message("Hãy dán nội dung bài viết trước.", true); raw.focus(); return; }
@@ -302,6 +378,7 @@
     tts.focus({ preventScroll: true });
     message("Đã gửi kịch bản sang khung TTS. Chọn giọng và bấm Phát âm thanh.");
   });
-  // Expose a pure function for independent unit testing; no network or storage.
-  window.BNVoiceoverPreprocessor = Object.freeze({ cleanScript });
+  }
+  // Pure helpers are available to Node.js regression tests without a real DOM.
+  window.BNVoiceoverPreprocessor = Object.freeze({ cleanScript, purgeArticleNoise, purgeDates, stripNoise });
 })();
