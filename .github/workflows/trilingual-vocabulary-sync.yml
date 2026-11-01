@@ -4,6 +4,7 @@ on:
     paths:
       - 'scripts/sync-trilingual-vocabulary.py'
       - 'scripts/test-sync-trilingual-vocabulary.py'
+      - 'scripts/test-vocab-library-pager.mjs'
       - 'static/tien-ich/hoc-tieng-viet-han-anh/**'
       - '.github/workflows/trilingual-vocabulary-sync.yml'
   workflow_dispatch:
@@ -32,10 +33,13 @@ jobs:
           persist-credentials: false
       - name: Test parsing, stable IDs, Vietnamese/Korean/English mapping
         run: python3 scripts/test-sync-trilingual-vocabulary.py -v
+      - name: Test newest-first vocabulary ordering and 3-item live pagination
+        run: node scripts/test-vocab-library-pager.mjs
       - name: Syntax check
         run: |
           python3 -m py_compile scripts/sync-trilingual-vocabulary.py
           node --check static/tien-ich/hoc-tieng-viet-han-anh/study.js
+          node --check static/tien-ich/hoc-tieng-viet-han-anh/vocab-order.js
           node --check static/tien-ich/hoc-tieng-viet-han-anh/live-sheet.js
           bash -n scripts/merge-verified-vocabulary-pr.sh
           node -e "new Function(require('fs').readFileSync('docs/google-apps-script/LanguageLab.gs', 'utf8'))"

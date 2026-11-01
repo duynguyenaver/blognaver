@@ -1,6 +1,7 @@
 (()=>{
 "use strict";
-const $=id=>document.getElementById(id),limit=28;
+const $=id=>document.getElementById(id),limit=3;
+const ordering=window.BNVocabOrdering;
 let all=[],snapshot=[],display=[],meta={},page=0,card=0,shown=false,reviewed=new Set(),liveLoading=false;
 const normal=s=>String(s??"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim();
 const element=(tag,text,cls)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=String(text);if(cls)e.className=cls;return e};
@@ -9,10 +10,17 @@ const languageNames={vi:"TIẾNG VIỆT",ko:"한국어",en:"ENGLISH"};
 const safeLink=s=>typeof s==="string"&&/^https:\/\/docs\.google\.com\/spreadsheets\/d\/[a-zA-Z0-9_-]+/.test(s);
 function setState(kind,title,detail){$("dot").className="dot "+kind;$("stateTitle").textContent=title;$("stateText").textContent=detail}
 function prettyDate(s){const d=new Date(s);return s&&!Number.isNaN(d.getTime())?new Intl.DateTimeFormat("vi-VN",{dateStyle:"medium",timeStyle:"short",timeZone:"Asia/Ho_Chi_Minh"}).format(d):"chưa xác định"}
-function select(){
+function select(resetPage=true){
  const q=normal($("query").value),filter=$("filter").value;
- display=all.filter(x=>(filter==="all"||(filter==="ready"?complete(x):!complete(x)))&&normal([x.vi,x.ko,x.en,x.content,x.context,x.grammar,x.examples?.vi,x.examples?.ko,x.examples?.en,x.sheetTitle,x.tabTitle].join(" ")).includes(q));
- page=0;card=0;shown=false;render();
+ const selectedId=display[card]?.id;
+ display=ordering.newestFirst(all.filter(x=>(filter==="all"||(filter==="ready"?complete(x):!complete(x)))&&normal([x.vi,x.ko,x.en,x.content,x.context,x.grammar,x.examples?.vi,x.examples?.ko,x.examples?.en,x.sheetTitle,x.tabTitle].join(" ")).includes(q)));
+ if(resetPage){page=0;card=0;shown=false}
+ else{
+  page=Math.min(page,Math.max(0,Math.ceil(display.length/limit)-1));
+  const at=display.findIndex(x=>x.id===selectedId);
+  card=at>=0?at:Math.min(card,Math.max(0,display.length-1));
+ }
+ render();
 }
 function render(){
  $("total").textContent=all.length.toLocaleString("vi-VN");
@@ -92,14 +100,19 @@ async function refreshLive(){
  liveLoading=true;
  try{
   const rows=await window.BNLiveVocabulary.query();
-  all=window.BNLiveVocabulary.merge(rows,snapshot);
+  const updated=window.BNLiveVocabulary.merge(rows,snapshot);
+  const newer=ordering.containsNewRows(updated,all);
+  const changed=ordering.contentChanged(updated,all);
+  all=updated;
   const sheetId=window.BNLiveVocabulary.sheetId;
   const source=meta.sources?.find(s=>s.id===sheetId);
   if(source)source.count=rows.length;
   setState("good","Google Sheets · Đã đọc dữ liệu trực tiếp",
     "Đã xác nhận "+rows.length+" hàng trên Sheet1 lúc "+new Date().toLocaleTimeString("vi-VN")+
     ". Ngữ cảnh/AI được cập nhật sau khi GitHub Actions hoàn thành. Không có sync_id cho mỗi lần lưu.");
-  select();
+  // Keep the reader on their selected page if nothing new was inserted;
+  // jump back to the three most recent words only on a genuine new row.
+  if(changed)select(newer);
  }catch(e){
   if(snapshot.length||meta.updatedAt)setState("","Đang dùng bản GitHub gần nhất",
     "Không xác nhận được dữ liệu live từ Google Sheets ("+e.message+"). Kiểm tra quyền chia sẻ hoặc thử Tải lại.");
