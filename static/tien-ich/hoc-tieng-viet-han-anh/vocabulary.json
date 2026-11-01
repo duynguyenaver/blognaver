@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "folderId": "1coylrqzqPOLZP_lhUdWlb3nI47Qr-af7",
-  "updatedAt": "2026-11-01T16:54:54+00:00",
+  "updatedAt": "2026-11-01T16:57:07+00:00",
   "sources": [
     {
       "id": "19nL6wtouHV-0OumsQR2jF-5xWA1cpbpivRUIsm7hDgk",
@@ -1022,7 +1022,6 @@
       "tabTitle": "Sheet1",
       "row": 42,
       "inputHash": "41016060159c50fd6a886799",
-      "aiStatus": "ready",
       "context": "Dùng để chỉ cơ quan tiêu hoá nằm ở phần trên của bụng, thường xuất hiện trong các câu nói về sức khỏe, cảm giác đói, hoặc các bệnh lý liên quan.",
       "grammar": "Danh từ chung, không có dạng số nhiều/đơn. Khi dùng trong câu tiếng Hàn, thường đi kèm với trợ từ ‘은/는’ (chủ đề) hoặc ‘이/가’ (chủ ngữ).",
       "examples": {
@@ -1031,9 +1030,11 @@
         "en": "['My stomach hurts because I ate too quickly.', 'The doctor advised me to eat lightly to protect my stomach.', 'Nausea can originate from the stomach.']"
       },
       "references": [],
+      "aiStatus": "ready",
       "aiModel": "openai/gpt-oss-120b",
       "grounded": false,
-      "aiProvider": "groq"
+      "aiProvider": "groq",
+      "reviewRecommended": null
     },
     {
       "vi": "hoàn lưu của một cơn bão",
@@ -1046,7 +1047,6 @@
       "tabTitle": "Sheet1",
       "row": 43,
       "inputHash": "35a5698b8e910fdbf105c870",
-      "aiStatus": "ready",
       "context": "Thường dùng trong bối cảnh khí tượng học, mô tả quá trình hình thành, phát triển và suy giảm của một cơn bão.",
       "grammar": "Cụm danh từ; trong tiếng Hàn, ‘폭풍의 순환’ là danh từ kết hợp với trợ từ sở hữu ‘의’. Khi làm chủ ngữ, dùng ‘이/가’; khi làm tân ngữ, dùng ‘을/를’.",
       "examples": {
@@ -1055,9 +1055,11 @@
         "en": "['Meteorologists are studying the storm cycle to improve forecasts.', 'A storm cycle usually lasts several days.', 'Understanding the storm cycle helps reduce damage.']"
       },
       "references": [],
+      "aiStatus": "ready",
       "aiModel": "openai/gpt-oss-120b",
       "grounded": false,
-      "aiProvider": "groq"
+      "aiProvider": "groq",
+      "reviewRecommended": null
     },
     {
       "vi": "bão nhiệt đới",
@@ -1070,7 +1072,6 @@
       "tabTitle": "Sheet1",
       "row": 44,
       "inputHash": "61414d55da9895f77ec6501e",
-      "aiStatus": "ready",
       "context": "Thuật ngữ khí tượng dùng để chỉ hệ thống bão có nguồn gốc ở vùng nhiệt đới, thường mang theo mưa lớn và gió mạnh.",
       "grammar": "Danh từ; trong tiếng Hàn, ‘열대성 폭풍’ là danh từ ghép, không thay đổi hình thức. Khi dùng làm chủ ngữ, dùng ‘이/가’; làm tân ngữ, dùng ‘을/를’.",
       "examples": {
@@ -1079,9 +1080,11 @@
         "en": "['The tropical storm is approaching the coastline.', 'A tropical storm warning has been issued for the next 24 hours.', 'After the tropical storm, many areas were flooded.']"
       },
       "references": [],
+      "aiStatus": "ready",
       "aiModel": "openai/gpt-oss-120b",
       "grounded": false,
-      "aiProvider": "groq"
+      "aiProvider": "groq",
+      "reviewRecommended": null
     },
     {
       "vi": "chi phí cố định",
@@ -1094,7 +1097,6 @@
       "tabTitle": "Sheet1",
       "row": 45,
       "inputHash": "ad8d32f7ae7183b45ec4e6eb",
-      "aiStatus": "ready",
       "context": "Dùng để chỉ các khoản chi không thay đổi theo mức sản lượng hay doanh thu, ví dụ trong kế toán và quản trị tài chính.",
       "grammar": "Cụm danh từ; trong tiếng Hàn là 명사구 (고정 비용) không có hậu tố biến đổi. Khi dùng trong câu, thường đứng làm chủ ngữ hoặc tân ngữ, có thể đi kèm với các trợ từ như 은/는, 을/를.",
       "examples": {
@@ -1103,9 +1105,11 @@
         "en": "The company's fixed costs include rent and managerial salaries."
       },
       "references": [],
+      "aiStatus": "ready",
       "aiModel": "openai/gpt-oss-120b",
       "grounded": false,
-      "aiProvider": "groq"
+      "aiProvider": "groq",
+      "reviewRecommended": null
     },
     {
       "vi": "định phí",
@@ -1118,7 +1122,6 @@
       "tabTitle": "Sheet1",
       "row": 46,
       "inputHash": "94c93d25a40add2acf680fdd",
-      "aiStatus": "ready",
       "context": "Thường dùng để chỉ khoản phí mà một bên phải trả cho dịch vụ hoặc giao dịch, như phí ngân hàng, phí môi giới.",
       "grammar": "Danh từ; trong tiếng Hàn là 명사 (수수료). Khi dùng làm tân ngữ, thường đi kèm với 동사 받다, 부과하다, 내다. Khi làm chủ ngữ, có thể đi với 동사 있다, 발생하다.",
       "examples": {
@@ -1127,9 +1130,11 @@
         "en": "The bank charges a 2% fee on each money transfer."
       },
       "references": [],
+      "aiStatus": "ready",
       "aiModel": "openai/gpt-oss-120b",
       "grounded": false,
-      "aiProvider": "groq"
+      "aiProvider": "groq",
+      "reviewRecommended": null
     },
     {
       "vi": "quỹ tư nhân",
@@ -1142,7 +1147,6 @@
       "tabTitle": "Sheet1",
       "row": 47,
       "inputHash": "ee07a5598bb1927556476e0b",
-      "aiStatus": "ready",
       "context": "Thuật ngữ tài chính chỉ các quỹ đầu tư vốn được huy động từ các nhà đầu tư cá nhân hoặc tổ chức, không công khai trên thị trường chứng khoán.",
       "grammar": "Cụm danh từ; trong tiếng Hàn là 명사 (사모펀드). Khi dùng làm chủ ngữ hoặc tân ngữ, không thay đổi hình thức. Thường đi kèm với 동사 설립하다, 투자하다, 관리하다.",
       "examples": {
@@ -1151,9 +1155,11 @@
         "en": "This private equity fund is looking for technology companies to invest in."
       },
       "references": [],
+      "aiStatus": "ready",
       "aiModel": "openai/gpt-oss-120b",
       "grounded": false,
-      "aiProvider": "groq"
+      "aiProvider": "groq",
+      "reviewRecommended": null
     },
     {
       "vi": "private equity",
@@ -1166,7 +1172,6 @@
       "tabTitle": "Sheet1",
       "row": 48,
       "inputHash": "53b94640a39536ef49f0152b",
-      "aiStatus": "ready",
       "context": "Thuật ngữ này dùng trong lĩnh vực tài chính, đầu tư để chỉ các quỹ đầu tư vốn tư nhân, thường mua lại công ty hoặc cổ phần lớn để tái cấu trúc và tăng giá trị.",
       "grammar": "Danh từ chung, có thể đứng độc lập hoặc đi kèm với các từ chỉ vị trí (ví dụ: \"quỹ private equity\", \"công ty private equity\"). Trong tiếng Hàn, 사모펀드 là danh từ không chia, thường đi kèm với các trợ từ như 은/는, 이/가.",
       "examples": {
@@ -1175,9 +1180,11 @@
         "en": "['Our company is looking for a private equity fund to expand its operations.', \"Many foreign investors are interested in Vietnam's private equity market.\", 'The private equity fund acquired the tech company last year.']"
       },
       "references": [],
+      "aiStatus": "ready",
       "aiModel": "openai/gpt-oss-120b",
       "grounded": false,
-      "aiProvider": "groq"
+      "aiProvider": "groq",
+      "reviewRecommended": null
     }
   ]
 }
