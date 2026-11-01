@@ -7,6 +7,11 @@
 :root{--tts-radius:16px}body{min-width:0}.studio{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(280px,1fr);gap:18px;align-items:start}.studio>.panel{margin:0;min-width:0;border-radius:var(--tts-radius)}.studio textarea{font:16px/1.75 system-ui,-apple-system,sans-serif;min-height:310px;height:43vh;max-height:650px;resize:vertical;border-radius:12px;background:rgba(4,14,30,.35)}.control{margin:18px 0}.control label{display:block;margin-bottom:7px;font-weight:700;font-size:13px}.control select,.control input{width:100%;background:#0b1c32;color:var(--text);border:1px solid #476487;border-radius:10px;padding:11px}.hint{font-size:12px;color:var(--muted)}.primary{background:#347ebd;border-color:#5daced}.controls{display:flex;flex-wrap:wrap;gap:10px}.controls button{padding:12px 15px}.controls button:disabled{opacity:.48;cursor:not-allowed}.panel h2{margin-top:0}.note{border-left:3px solid var(--blue);padding:12px 14px;border-radius:8px;background:#10243c;color:var(--muted);font-size:13px;margin-top:16px}.statusline{margin:14px 0;font-weight:650;min-height:24px}.statusline.error{color:#ffadba}.toolbar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}.toolbar small{color:var(--muted)}.download{display:none;margin-top:12px;word-break:break-all}.download.visible{display:inline-block}select:focus-visible{outline:3px solid #9ed7ff;outline-offset:3px}audio{width:100%;margin-top:15px}footer{padding:28px 0;color:var(--muted);font-size:12px}@media(max-width:760px){.studio{grid-template-columns:1fr}.studio textarea{height:260px;min-height:240px}.controls button{flex:1 1 130px}}
 @media(prefers-color-scheme:light){body.tts-light{background:#f4f7fb;color:#15243a}body.tts-light .panel{background:#fff;color:#15243a;border-color:#d6e2ed}body.tts-light .hint,body.tts-light .note,body.tts-light p{color:#54657b}body.tts-light textarea,body.tts-light select,body.tts-light input{background:#f8fbff;color:#15243a;border-color:#a9bfd3}body.tts-light .note{background:#edf5ff}}
 .progress-wrap{margin:15px 0;display:none}.progress-wrap.visible{display:block}.progress-track{height:12px;background:#1b3354;border-radius:50px;overflow:hidden;border:1px solid #385a7b}.progress-fill{height:100%;width:0;background:#38bdf8;transition:width .25s}.progress-row{display:flex;justify-content:space-between;color:var(--muted);font-size:13px;margin:5px 0}.cloud{border:1px solid var(--line);border-radius:16px;padding:17px;margin-top:18px}.cloud details summary{cursor:pointer;font-weight:750}.cloud label{display:block;margin:9px 0}.cloud input[type=password]{width:100%;font:inherit}.cloud input[type=checkbox]{width:auto}.cloud .hint{line-height:1.6}.cloudstatus{font-size:13px;margin-top:8px;overflow-wrap:anywhere}
+#ghCredentialStatus{margin:0 0 12px;font-weight:700;line-height:1.65}
+#ghCredentialStatus.bad{color:#ffb1bb}
+#ghRememberDevice{width:auto}
+#ghConnectRemember,#ghForgetDevice{min-height:44px}
+@media(max-width:760px){#ghConnectRemember,#ghForgetDevice{flex:1 1 150px}}
 /* Import public BlogNaver articles as a source for all three TTS sections. */
 #blogArticleImporter{margin:0 0 22px;border-radius:16px;padding:clamp(17px,3vw,26px)}
 #blogArticleImporter h2{margin:0 0 8px}
@@ -109,7 +114,25 @@
 <div class="controls"><button id="listen" class="primary" type="button">▶ Phát âm thanh</button><button id="stop" type="button" class="secondary" disabled>■ Dừng</button><button id="record" type="button">↓ Ghi giọng đọc thành WAV</button></div>
 <p class="hint">Có thể đọc trọn kịch bản đến 50.000 ký tự; khi phát, hệ thống chia nội dung thành câu/đoạn ngắn mà không cắt nội dung. Ghi WAV qua chia sẻ âm thanh tab vẫn giới hạn 20 phút/file; kịch bản dài hơn cần ghi thành nhiều phần để xuất WAV. Chrome/Edge yêu cầu chọn tab và bật chia sẻ âm thanh.</p><div class="progress-wrap" id="progressWrap" aria-live="polite"><div class="progress-row"><span id="progressLabel">Chờ bắt đầu</span><strong id="progressPct">0%</strong></div><div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progressTrack"><div class="progress-fill" id="progressFill"></div></div><p class="hint">Phần trăm ước lượng theo vị trí văn bản đang đọc; chỉ đạt 100% sau khi file WAV được tạo thành công.</p></div><div id="status" class="statusline" role="status" aria-live="polite">Sẵn sàng.</div>
 <a id="download" class="btn download" download="blognaver-voice.wav">Tải lại bản WAV vừa ghi</a>
-<audio id="preview" controls class="hidden" aria-label="Nghe lại file WAV"></audio><section class="cloud"><details><summary>Đồng bộ WAV lên GitHub (tùy chọn)</summary><label for="ghToken">GitHub token có quyền Contents: Read and write của repository</label><input id="ghToken" type="password" autocomplete="off" spellcheck="false" placeholder="Dán GitHub token (không lưu localStorage)"><label><input id="autoSync" type="checkbox"> Tự đồng bộ mỗi file WAV đã ghi lên GitHub</label><p class="hint">Tệp sẽ được lưu trên nhánh <code>tts-audio-archive</code>, dưới thư mục <code>data/tts-audio/</code>. Repository công khai có thể khiến tệp âm thanh được người khác truy cập. Không bật nếu kịch bản riêng tư. Giới hạn file đồng bộ 8 MB. Token chỉ ở bộ nhớ tab và không đưa vào URL.</p><button id="syncWav" type="button" class="secondary" disabled>Đồng bộ file WAV hiện tại</button><p id="cloudStatus" class="cloudstatus" role="status" aria-live="polite">Chưa có file WAV.</p></details></section>
+<audio id="preview" controls class="hidden" aria-label="Nghe lại file WAV"></audio>
+<section class="cloud" aria-label="Kết nối GitHub cho WAV và từ điển cách đọc">
+  <p id="ghCredentialStatus" class="cloudstatus" role="status" aria-live="polite">Đang kiểm tra token GitHub đã lưu trên thiết bị…</p>
+  <details id="githubConnectionSettings">
+    <summary>GitHub · Kết nối &amp; đồng bộ WAV (tùy chọn)</summary>
+    <label for="ghToken">GitHub token (dùng chung cho WAV và Section 04)</label>
+    <input id="ghToken" type="password" autocomplete="off" spellcheck="false" placeholder="Dán token một lần trên thiết bị này">
+    <label for="ghRememberDevice"><input id="ghRememberDevice" type="checkbox" checked> Ghi nhớ token trên thiết bị này (Web Crypto + IndexedDB)</label>
+    <div class="controls">
+      <button id="ghConnectRemember" type="button" class="secondary">Kết nối &amp; ghi nhớ GitHub</button>
+      <button id="ghForgetDevice" type="button" class="secondary">Quên token trên thiết bị</button>
+    </div>
+    <p class="hint">Token được mã hóa trong IndexedDB trên cùng thiết bị và hồ sơ trình duyệt, tự khôi phục sau F5 hoặc khởi động lại. Không đẩy token lên GitHub hay lưu trong localStorage. Nếu xóa dữ liệu website, dùng chế độ ẩn danh, đổi trình duyệt hoặc thu hồi token, có thể cần nhập lại. Script chạy trên chính website vẫn có thể truy cập token sau giải mã — chỉ sử dụng trên thiết bị tin cậy.</p>
+    <label><input id="autoSync" type="checkbox"> Tự đồng bộ mỗi file WAV đã ghi lên GitHub</label>
+    <p class="hint">Tệp lưu ở nhánh <code>tts-audio-archive</code> trong <code>data/tts-audio/</code>. Repository công khai có thể khiến bản WAV được người khác truy cập. Không bật cho nội dung riêng tư. Giới hạn 8 MB. Section 04 cần quyền Contents và Pull requests: Read &amp; write.</p>
+    <button id="syncWav" type="button" class="secondary" disabled>Đồng bộ file WAV hiện tại</button>
+    <p id="cloudStatus" class="cloudstatus" role="status" aria-live="polite">Chưa có file WAV.</p>
+  </details>
+</section>
 </section>
 <aside class="panel"><h2>Thiết lập giọng đọc</h2>
 <div class="control"><label for="voice">Giọng đọc hệ thống</label><select id="voice"><option value="">Đang tìm giọng đọc…</option></select><div class="hint">Mặc định ưu tiên Microsoft Hoai My Online (Natural) – Vietnamese khi có sẵn; nếu không, chọn giọng tiếng Việt khác.</div></div>
@@ -230,6 +253,7 @@
 
 <footer>© BlogNaver · Audio xử lý cục bộ trên thiết bị. Kiểm tra điều khoản sử dụng của từng giọng đọc trước khi dùng thương mại. <a href="../youtube-thumbnail-cover-generator/">Thumbnail Generator ↗</a> · <a href="../youtube-clip-maker/">YouTube Clip Maker ↗</a></footer>
 </main>
+<script src="github-credential-vault.js?v=20261101-device"></script>
 <script src="dynamic-voice.js"></script>
 <script>
 (() => {
@@ -245,6 +269,7 @@ function setProgress(value,label){const n=Math.max(0,Math.min(100,Math.round(val
 const cloud={token:$("ghToken"),auto:$("autoSync"),button:$("syncWav"),status:$("cloudStatus")};
 const cloudMessage=s=>cloud.status.textContent=s;
 async function publishAudio(blob){
+ await window.BNGithubTokenVault?.ready;
  const token=cloud.token.value.trim();
  if(!token){cloudMessage("Chưa có GitHub token: WAV vẫn tải được về máy.");return}
  if(blob.size>8*1024*1024){cloudMessage("WAV lớn hơn 8 MB. Hãy tải xuống máy; không tự đồng bộ.");return}
@@ -267,6 +292,7 @@ async function publishAudio(blob){
   const filepath="data/tts-audio/"+filename;
   const resp=await fetch(api+"/contents/"+filepath,{method:"PUT",headers,body:JSON.stringify({message:"archive(tts): "+filename,content:b64,branch:"tts-audio-archive"})});
   if(!resp.ok){const err=await resp.json().catch(()=>({}));throw Error("GitHub HTTP "+resp.status+": "+(err.message||"Không thể upload"))}
+  await window.BNGithubTokenVault?.rememberAfterSuccess?.();
   cloudMessage("Đồng bộ thành công: "+filepath+" (nhánh tts-audio-archive)");
  }catch(e){cloudMessage("Đồng bộ thất bại: "+e.message+" — file vẫn có thể tải xuống máy.")}
  finally{cloud.button.disabled=!recordedBlob}
