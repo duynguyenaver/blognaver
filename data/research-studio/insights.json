@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-01T12:23:41.732Z",
+  "updatedAt": "2026-11-01T12:24:26.231Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -1533,7 +1533,8 @@
         "Groq · openai/gpt-oss-20b",
         "Groq · openai/gpt-oss-120b",
         "Gemini · models/gemini-3.5-flash-lite"
-      ]
+      ],
+      "live": true
     },
     {
       "slug": "cold-fusion-cuoc-dua-chien-luoc-giua-hong-kong-va-singapore-inh-hinh-lai-tuong-lai-trun-2026-11-01",
@@ -1547,6 +1548,23 @@
         "tokens": 16763,
         "inputTokens": 11438,
         "outputTokens": 5325
+      },
+      "models": [
+        "Gemini · models/gemini-3.5-flash-lite"
+      ]
+    },
+    {
+      "slug": "cold-fusion-hanh-trinh-gioi-han-giai-ma-ranh-gioi-giua-ao-thuat-the-chat-va-tin-nguong--2026-11-01",
+      "title": "Hành trình giới hạn: Giải mã ranh giới giữa ảo thuật, thể chất và tín ngưỡng cùng David Blaine",
+      "series": "cold-fusion",
+      "sha": "b324df5ceeb979b6f9c75172d17700b6cd0d61ab",
+      "commitAt": "2026-11-01T12:23:44.155Z",
+      "durationMs": 58081,
+      "quota": {
+        "requests": 11,
+        "tokens": 63151,
+        "inputTokens": 54720,
+        "outputTokens": 8431
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
