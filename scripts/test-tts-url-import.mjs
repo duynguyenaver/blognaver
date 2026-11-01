@@ -30,7 +30,7 @@ function fixtureDocument(paragraph="Lịch sử Gen.G từ Samsung Galaxy đến
 function makeNodes(){
   const ids=[
     "blogArticleImportForm","blogArticleUrl","blogArticleImportButton",
-    "blogArticleImportStatus","blogArticleSourceLink",
+    "blogArticleImportStatus","blogArticleSourceLink","externalReaderConsent",
     "voiceoverRaw","voiceoverOutput","voiceFixerInput","voiceFixerOutput","script",
     "voiceoverCopy","voiceoverToTts","voiceFixerToTts","voiceFixerListen",
     "voiceFixerPacing","voiceFixerEnglish","voiceoverStatus","voiceFixerStatus","stop"
@@ -80,18 +80,34 @@ test("URL source form and ordered script loading exist",()=>{
   assert.match(page,/voiceover-preprocess\.js[^"]*" defer><\/script><script src="voice-fixer\.js[^"]*" defer><\/script><script src="article-url-import\.js[^"]*" defer>/);
 });
 
-test("accepts only on-site article URL and strips tracking query/anchor",()=>{
+test("accepts same-origin and external public articles but blocks unsafe URLs",()=>{
   const {api}=load();
-  assert.equal(api.normalizeArticleUrl(ARTICLE+"?utm_source=mail#story"),ARTICLE);
-  assert.equal(api.normalizeArticleUrl("/blognaver/bai-viet/gen-g/"),"https://duynguyenaver.github.io/blognaver/bai-viet/gen-g/");
+  assert.equal(api.normalizeArticleUrl(ARTICLE+"?utm_source=mail#story"),
+    ARTICLE+"?utm_source=mail");
+  assert.equal(api.normalizeArticleUrl("/blognaver/bai-viet/gen-g/"),
+    "https://duynguyenaver.github.io/blognaver/bai-viet/gen-g/");
+  assert.equal(api.normalizeArticleUrl("https://news.example.com/articles/review.html"),
+    "https://news.example.com/articles/review.html");
   for(const invalid of [
-    "https://evil.example/blognaver/bai-viet/suspicious/",
-    "https://duynguyenaver.github.io.evil.example/blognaver/bai-viet/fake/",
     "https://duynguyenaver.github.io/blognaver/tien-ich/text-to-speech/",
-    "javascript:alert(1)",
     "https://duynguyenaver.github.io/blognaver/",
-    "https://user:pass@duynguyenaver.github.io/blognaver/bai-viet/gen-g/"
-  ]) assert.throws(()=>api.normalizeArticleUrl(invalid),/URL|BlogNaver|trang chủ|tiện ích|mật khẩu|HTTPS/i,invalid);
+    "https://user:pass@duynguyenaver.github.io/blognaver/bai-viet/gen-g/",
+    "http://example.com/article",
+    "https://127.0.0.1/private",
+    "https://192.168.1.1/private",
+    "https://localhost/something",
+    "https://example.internal/article",
+    "https://news.example.com/"
+  ]) assert.throws(()=>api.normalizeArticleUrl(invalid),/URL|BlogNaver|trang chủ|tiện ích|mật khẩu|HTTPS|nội bộ|IP|cục bộ/i,invalid);
+});
+
+test("Reader extracts article markdown, removing metadata/links but keeping text",()=>{
+  const {api}=load();
+  const text="Title: Báo mẫu\nURL Source: https://news.example.com/example\nMarkdown Content:\n\n# Bài báo tiếng Việt\n\nMột bài báo có nội dung chính và rất nhiều dữ kiện thú vị, chi tiết sự kiện và tổng quan lịch sử. [Xem thêm](https://news.example.com/info)\n\n## Bối cảnh\n\nGiải thích nguồn gốc của sự kiện một cách đầy đủ.";
+  const item=api.readerArticle(text,"Bài báo tiếng Việt");
+  assert.match(item.raw,/Bài báo tiếng Việt/);
+  assert.doesNotMatch(item.raw,/URL Source:|https:\/\/news\.example\.com\/info/);
+  assert.match(item.raw,/Xem thêm/);
 });
 
 test("extracts title and main blog body, not chrome",()=>{
