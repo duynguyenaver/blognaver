@@ -8,7 +8,7 @@ on:
       - '.github/workflows/trilingual-vocabulary-sync.yml'
   workflow_dispatch:
   schedule:
-    - cron: '7,37 * * * *'
+    - cron: '3/5 * * * *' # GitHub Actions minimum is 5 minutes; avoid top-of-hour congestion
 
 permissions:
   contents: write
@@ -89,6 +89,7 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           VOCAB_WRITEBACK_SHEETS: "1"
           VOCAB_MAX_GEMINI_ITEMS: '30'
+          VOCAB_MAX_GEMINI_MODEL_ATTEMPTS: '12'
         run: python3 scripts/sync-trilingual-vocabulary.py
       - name: Create data branch and Pull Request (never commit to main)
         if: steps.existing.outputs.skip == 'false'

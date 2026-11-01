@@ -4,6 +4,7 @@ import importlib.util
 import pathlib
 import tempfile
 import unittest
+from unittest.mock import patch
 
 ROOT = pathlib.Path(__file__).resolve().parent
 spec = importlib.util.spec_from_file_location("vocab_sync", ROOT / "sync-trilingual-vocabulary.py")
@@ -84,6 +85,59 @@ class TrilingualSyncTests(unittest.TestCase):
         self.assertEqual(result[0]["context"], "Công ty chuyên phát triển hệ thống ERP")
         self.assertEqual(result[0]["grammar"], "ERP(시스템) + 개발사")
         self.assertEqual(result[0]["aiStatus"] if "aiStatus" in result[0] else "source", "source")
+
+    def test_gemini_discovery_includes_pro_lite_and_excludes_tts_image_audio(self):
+        options = [
+            {"name": "models/gemini-3.8-flash-tts", "supportedGenerationMethods": ["generateContent"]},
+            {"name": "models/gemini-3.8-flash-image", "supportedGenerationMethods": ["generateContent"]},
+            {"name": "models/gemini-3.8-flash", "supportedGenerationMethods": ["generateContent"], "outputTokenLimit": 8192},
+            {"name": "models/gemini-3.8-flash-lite", "supportedGenerationMethods": ["generateContent"]},
+            {"name": "models/gemini-3.8-pro", "supportedGenerationMethods": ["generateContent"]},
+            {"name": "models/gemini-3.8-embedding", "supportedGenerationMethods": ["embedContent"]},
+        ]
+        names = mod.discover_text_models(options)
+        self.assertEqual(["gemini-3.8-flash", "gemini-3.8-flash-lite", "gemini-3.8-pro"], names)
+        self.assertEqual("gemini-3.8-pro", mod.discover_text_models(options, "models/gemini-3.8-pro")[0])
+
+    def test_gemini_model_429_rotates_to_other_available_text_model(self):
+        item = {"id": "t2", "vi": "công ty", "ko": "회사", "en": "company", "content": ""}
+        reply = {"candidates": [{"content": {"parts": [{"text": '{"items":[{"id":"t2","vi":"công ty","ko":"회사","en":"company","context":"Dùng để chỉ doanh nghiệp","grammar":"Danh từ","examples":{"vi":"Đó là công ty.","ko":"그곳은 회사입니다.","en":"That is a company."}}]}' }]},
+                "groundingMetadata": {"groundingChunks": [{"web": {"uri": "https://example.edu/dictionary"}}]}}]}
+        def mocked_request(url, body):
+            if "gemini-3.8-flash:" in url:
+                raise mod.SyncError("API returned HTTP 429: RESOURCE_EXHAUSTED")
+            return reply
+        state = {"blocked": set()}
+        with patch.object(mod, "get_json_post", side_effect=mocked_request) as request:
+            ready = mod.ai_enrich_batch([item], ["gemini-3.8-flash", "gemini-3.8-pro"], state)
+        self.assertEqual(2, request.call_count)
+        self.assertEqual({"gemini-3.8-flash"}, state["blocked"])
+        self.assertEqual("ready", ready["t2"]["aiStatus"])
+        self.assertEqual("gemini-3.8-pro", ready["t2"]["aiModel"])
+        self.assertTrue(ready["t2"]["grounded"])
+
+    def test_gemini_plain_text_fallback_never_invents_web_citations(self):
+        item = {"id": "t3", "vi": "công ty", "ko": "회사", "en": "company", "content": ""}
+        reply = {"candidates": [{"content": {"parts": [{"text": '{"items":[{"id":"t3","vi":"công ty","ko":"회사","en":"company","context":"Doanh nghiệp","grammar":"Danh từ","examples":{"vi":"Một công ty.","ko":"한 회사.","en":"A company."}}]}' }]}}]}
+        def mocked_request(url, body):
+            if '"googleSearch"' in body.decode("utf-8"):
+                raise mod.SyncError("API returned HTTP 400: tool not supported")
+            return reply
+        with patch.object(mod, "get_json_post", side_effect=mocked_request) as request:
+            ready = mod.ai_enrich_batch([item], ["gemini-3.8-flash"], {"blocked": set()})
+        self.assertEqual(2, request.call_count)
+        self.assertEqual([], ready["t3"]["references"])
+        self.assertFalse(ready["t3"]["grounded"])
+        self.assertEqual("ready", ready["t3"]["aiStatus"])
+
+    def test_gemini_all_429_does_not_repeat_failed_models_each_batch(self):
+        item = {"id": "t4", "vi": "công ty", "ko": "회사", "en": "company", "content": ""}
+        state = {"blocked": set()}
+        with patch.object(mod, "get_json_post", side_effect=mod.SyncError("API returned HTTP 429")) as request:
+            self.assertEqual({}, mod.ai_enrich_batch([item], ["gemini-a", "gemini-b"], state))
+            self.assertEqual({}, mod.ai_enrich_batch([item], ["gemini-a", "gemini-b"], state))
+        self.assertEqual(2, request.call_count)
+        self.assertEqual({"gemini-a", "gemini-b"}, state["blocked"])
 
     def test_safe_unicode(self):
         rows = [["Tiếng Việt", "한국어", "English"], ["Công nghệ", "기술", "Technology"]]

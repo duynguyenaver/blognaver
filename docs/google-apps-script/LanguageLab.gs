@@ -9,6 +9,7 @@ const BN_SHEET_ID = "19nL6wtouHV-0OumsQR2jF-5xWA1cpbpivRUIsm7hDgk";
 const BN_TAB = "Sheet1";
 const BN_SNAPSHOT = "https://duynguyenaver.github.io/blognaver/tien-ich/hoc-tieng-viet-han-anh/vocabulary.json";
 const BN_DISPATCH = "https://api.github.com/repos/duynguyenaver/blognaver/actions/workflows/trilingual-vocabulary-sync.yml/dispatches";
+const BN_WRITEBACK_INTERVAL_MS = 2 * 60 * 1000; // effective ~2-minute polling
 
 function onOpen() {
   SpreadsheetApp.getUi().createMenu("Language Lab")
@@ -21,13 +22,14 @@ function installLanguageLabTriggers() {
   const book = SpreadsheetApp.getActiveSpreadsheet();
   if (!book || book.getId() !== BN_SHEET_ID) throw new Error("Mở Apps Script từ đúng Google Sheets viethananh.");
   for (const t of ScriptApp.getProjectTriggers()) {
-    if (["languageLabOnEdit", "languageLabWriteBack"].includes(t.getHandlerFunction())) {
+    if (["languageLabOnEdit", "languageLabWriteBack", "languageLabWriteBackTick"].includes(t.getHandlerFunction())) {
       ScriptApp.deleteTrigger(t);
     }
   }
   ScriptApp.newTrigger("languageLabOnEdit").forSpreadsheet(book).onEdit().create();
-  ScriptApp.newTrigger("languageLabWriteBack").timeBased().everyMinutes(5).create();
-  SpreadsheetApp.getUi().alert("Đã cài trigger: sửa cột A–C sẽ yêu cầu GitHub đồng bộ (nếu đã thiết lập token); mỗi 5 phút ghi kết quả Gemini có sẵn vào D–E. Token phải lưu trong Script properties.");
+  // everyMinutes(2) is invalid in Apps Script; run a 1-minute clock with an elapsed-time gate.
+  ScriptApp.newTrigger("languageLabWriteBackTick").timeBased().everyMinutes(1).create();
+  SpreadsheetApp.getUi().alert("Đã cài trigger: sửa cột A–C sẽ yêu cầu GitHub đồng bộ (nếu đã thiết lập token); khoảng mỗi 2 phút ghi kết quả Gemini có sẵn vào D–E. Token phải lưu trong Script properties.");
 }
 
 function languageLabOnEdit(event) {
@@ -65,6 +67,25 @@ function languageLabOnEdit(event) {
   } finally {
     lock.releaseLock();
   }
+}
+
+/** Installed timer runs every minute; effective writeback at most once per 2 minutes.
+ * The Sheets menu keeps calling languageLabWriteBack() directly to allow manual checks.
+ * Script timers are best-effort; they do not guarantee second-precise delivery.
+ */
+function languageLabWriteBackTick() {
+  const lock = LockService.getScriptLock();
+  if (!lock.tryLock(2000)) return;
+  try {
+    const props = PropertiesService.getScriptProperties();
+    const now = Date.now();
+    const last = Number(props.getProperty("last_language_writeback_poll") || "0");
+    if (now - last < BN_WRITEBACK_INTERVAL_MS) return;
+    props.setProperty("last_language_writeback_poll", String(now));
+  } finally {
+    lock.releaseLock();
+  }
+  languageLabWriteBack();
 }
 
 function languageLabWriteBack() {

@@ -32,11 +32,11 @@ Source: \`docs/google-apps-script/LanguageLab.gs\`
 
 1. Set the Google Sheet general access to **Viewer** (or Restricted, with different live-display architecture).
 2. In the owner Sheet choose **Extensions → Apps Script** and paste the complete contents of \`LanguageLab.gs\`.
-3. Save; run **installLanguageLabTriggers** once from the Apps Script editor and approve the Google permissions. This creates an **installable onEdit trigger** and a **5-minute writeback trigger** running as the installer.
+3. Save; run **installLanguageLabTriggers** once from the Apps Script editor and approve the Google permissions. This creates an **installable onEdit trigger** and a **effective 2-minute writeback trigger** running as the installer.
 4. To request immediate Gemini enrichment when A–C changes, create a **fine-grained GitHub token restricted to this repo with Actions: Read and write**, and store it under **Apps Script → Project Settings → Script properties**, key \`GITHUB_DISPATCH_TOKEN\`. Never paste token into source files, sheet cells, public repos, browser pages, or comments.
 5. After a successful Gemini/GitHub Actions data PR and Hugo deploy, the time trigger reads the published vocabulary JSON, verifies exact A–C values at the same row, then writes **only blank D–E cells**. From the Sheet menu, **Language Lab → Ghi ngữ cảnh Gemini vào cột D–E** runs a manual check. Already-filled cells are never replaced.
 
-Without \`GITHUB_DISPATCH_TOKEN\`, the browser can still read newly entered A–C directly and the scheduled Actions job can enrich every 30 minutes. The 5-minute Apps Script trigger can backfill **after** a validated AI snapshot has deployed.
+Without \`GITHUB_DISPATCH_TOKEN\`, the browser can still read newly entered A–C directly and the scheduled Actions job can enrich every 30 minutes. The approximately 2-minute Apps Script check can backfill **after** a validated AI snapshot has deployed.
 
 **Security:** Access to a bound Apps Script project must be limited to trusted collaborators. Protect the script properties and review script editors. The owner may wish to keep a standalone (not bound) script to isolate GitHub dispatch credentials from collaborators.
 
@@ -52,7 +52,8 @@ When both integrations are configured they both act idempotently on blank cells,
 ## AI quality and safeguards
 
 - \`GEMINI_API_KEY\` is provided as an Actions secret; the browser never receives it.
-- Gemini model names are retrieved dynamically; no retired hardcoded model.
+- Gemini models are discovered dynamically from ListModels and filtered to `generateContent` text-only candidates (not TTS/image/audio/embeddings). The importer tries up to 12 eligible Flash, Flash-Lite, Pro or other text-capable models in priority order, rotating on HTTP 429/404/400. Failed models are not retried repeatedly inside the same sync run. This may help with *per-model* quotas but cannot bypass project-level quota exhaustion.
+- Prefer Google Search-grounded linguistic references. If a model rejects Google Search or produces invalid grounded output, optionally try one plain-language generation; such results contain no invented citations and are explicitly labelled ungrounded internally. Never mislabel ungrounded output as web-verified.
 - Google Search grounding is requested and evidence URLs kept. AI-generated examples are not presented as literal quotes.
 - Missing/uncertain AI content leaves the word marked as pending and does not fabricate translated content.
 - Cached AI result for an unchanged source row is reused; edits to A–C invalidate it.
@@ -65,3 +66,9 @@ When both integrations are configured they both act idempotently on blank cells,
 Run: \`python3 scripts/test-sync-trilingual-vocabulary.py -v\`, \`python3 -m py_compile scripts/sync-trilingual-vocabulary.py\`, \`node --check static/tien-ich/hoc-tieng-viet-han-anh/live-sheet.js\`, and \`node --check static/tien-ich/hoc-tieng-viet-han-anh/study.js\`.
 
 The existing separate \`tu-vung-han-anh-viet\` personal encrypted vocabulary utility has not been changed.
+
+## November 2026 sync cadence change
+
+- The owner-bound Apps Script project is **not automatically updated** by a GitHub commit. After any GitHub `LanguageLab.gs` changes, paste the revised source into the actual Google Apps Script editor, Save, then run `installLanguageLabTriggers` again. It deletes the old 5-minute trigger and registers `languageLabWriteBackTick` (one-minute clock with two-minute throttle). Do **not** click Deploy or publish an Apps Script web app.
+- The GitHub Actions `schedule` is 5 minutes (the GitHub minimum; sometimes delayed). When `GITHUB_DISPATCH_TOKEN` is configured in Apps Script properties, direct edits to A–C can request the workflow immediately. Without that token, only the scheduled polling runs.
+- Source A–C data loads in browser independently. AI generation requires project quota and a successful workflow/data PR/Pages deployment; D–E writeback follows later, approximately every 2 minutes once enriched JSON is published. It is not guaranteed 2 minutes end-to-end.
