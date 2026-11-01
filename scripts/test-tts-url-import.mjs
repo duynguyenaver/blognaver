@@ -77,7 +77,7 @@ function load({paragraph, prepared, fixed, responseOk=true,confirm=true}={}){
 test("URL source form and ordered script loading exist",()=>{
   for(const id of ["blogArticleImportForm","blogArticleUrl","blogArticleImportStatus","blogArticleSourceLink"])
     assert.ok(page.includes('id="'+id+'"'));
-  assert.match(page,/voiceover-preprocess\.js[^"]*" defer><\/script><script src="voice-fixer\.js" defer><\/script><script src="article-url-import\.js[^"]*" defer>/);
+  assert.match(page,/voiceover-preprocess\.js[^"]*" defer><\/script><script src="voice-fixer\.js[^"]*" defer><\/script><script src="article-url-import\.js[^"]*" defer>/);
 });
 
 test("accepts only on-site article URL and strips tracking query/anchor",()=>{
