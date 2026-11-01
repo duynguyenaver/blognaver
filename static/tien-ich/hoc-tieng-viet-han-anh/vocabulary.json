@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "folderId": "1coylrqzqPOLZP_lhUdWlb3nI47Qr-af7",
-  "updatedAt": "2026-11-01T15:26:40+00:00",
+  "updatedAt": "2026-11-01T15:28:25+00:00",
   "sources": [
     {
       "id": "19nL6wtouHV-0OumsQR2jF-5xWA1cpbpivRUIsm7hDgk",
@@ -772,7 +772,6 @@
       "tabTitle": "Sheet1",
       "row": 32,
       "inputHash": "71ec1567e80012fcdac50c39",
-      "aiStatus": "ready",
       "context": "Dùng để mô tả một tình huống, vấn đề hoặc công việc gây ra nhiều trở ngại, yêu cầu nỗ lực lớn để giải quyết.",
       "grammar": "Danh từ \"khó khăn\" (VN) – tính từ \"딱딱한\" (KO) – tính từ \"stiff\" (EN). Khi dùng trong câu, thường đi kèm với danh từ hoặc động từ để chỉ mức độ khó của việc làm: \"có khó khăn\", \"gặp khó khăn\", \"đối mặt với khó khăn\".",
       "examples": {
@@ -781,9 +780,11 @@
         "en": "['We faced stiff challenges in completing the project on time.', 'Learning Korean has many stiff aspects for beginners.', 'Despite the difficulties, he kept moving forward.']"
       },
       "references": [],
+      "aiStatus": "ready",
       "aiModel": "openai/gpt-oss-120b",
       "grounded": false,
-      "aiProvider": "groq"
+      "aiProvider": "groq",
+      "reviewRecommended": null
     },
     {
       "vi": "vất vả",
@@ -796,7 +797,6 @@
       "tabTitle": "Sheet1",
       "row": 33,
       "inputHash": "4ce866cbca070ee0869062c0",
-      "aiStatus": "ready",
       "context": "Diễn tả trạng thái làm việc hoặc di chuyển một cách nặng nề, mệt mỏi, đòi hỏi sức lực lớn.",
       "grammar": "Danh từ \"vất vả\" (VN) – tính từ \"딱딱한\" (KO) – tính từ \"stiff\" (EN). Thường đi kèm với động từ chỉ hành động: \"công việc vất vả\", \"đi bộ vất vả\", \"cảm thấy vất vả\".",
       "examples": {
@@ -805,9 +805,11 @@
         "en": "['This task is stiff; I need a break.', 'After a stiff day of work, he feels exhausted.', 'Climbing the mountain is stiff but rewarding.']"
       },
       "references": [],
+      "aiStatus": "ready",
       "aiModel": "openai/gpt-oss-120b",
       "grounded": false,
-      "aiProvider": "groq"
+      "aiProvider": "groq",
+      "reviewRecommended": null
     }
   ]
 }
