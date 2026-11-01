@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-01T11:02:12.632Z",
+  "updatedAt": "2026-11-01T11:03:00.557Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -1333,7 +1333,8 @@
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
-      ]
+      ],
+      "live": true
     },
     {
       "slug": "cold-fusion-phan-tich-hien-tuong-thien-van-mat-trang-che-khuat-sao-moc-ngay-06-10-2026-2026-11-01",
@@ -1350,7 +1351,8 @@
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
-      ]
+      ],
+      "live": true
     },
     {
       "slug": "cold-fusion-su-menh-juno-va-goc-nhin-tu-junocam-khi-cong-cu-truyen-thong-cong-dong-tao--2026-11-01",
@@ -1364,6 +1366,23 @@
         "tokens": 15492,
         "inputTokens": 9762,
         "outputTokens": 5730
+      },
+      "models": [
+        "Gemini · models/gemini-3.5-flash-lite"
+      ]
+    },
+    {
+      "slug": "cold-fusion-su-tro-lai-cua-blue-planet-ii-goc-nhin-moi-ve-ai-duong-sau-25-nam-2026-11-01",
+      "title": "Sự Trở Lại Của Blue Planet II: Góc Nhìn Mới Về Đại Dương Sau 25 Năm",
+      "series": "cold-fusion",
+      "sha": "818ffa3d77764bf975aa7c917e7370c8fcb496a3",
+      "commitAt": "2026-11-01T11:02:21.257Z",
+      "durationMs": 44654,
+      "quota": {
+        "requests": 8,
+        "tokens": 11148,
+        "inputTokens": 6789,
+        "outputTokens": 4359
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
