@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
   "folderId": "1coylrqzqPOLZP_lhUdWlb3nI47Qr-af7",
-  "updatedAt": "2026-11-01T16:53:07+00:00",
+  "updatedAt": "2026-11-01T16:54:54+00:00",
   "sources": [
     {
       "id": "19nL6wtouHV-0OumsQR2jF-5xWA1cpbpivRUIsm7hDgk",
       "title": "Google Sheets 19nL6wto",
       "url": "https://docs.google.com/spreadsheets/d/19nL6wtouHV-0OumsQR2jF-5xWA1cpbpivRUIsm7hDgk/edit",
-      "count": 45
+      "count": 47
     }
   ],
   "items": [
@@ -847,7 +847,6 @@
       "tabTitle": "Sheet1",
       "row": 35,
       "inputHash": "3decc10b996c5b5c389b8155",
-      "aiStatus": "ready",
       "context": "Dùng để chỉ thời gian trong năm từ tháng 6 đến tháng 8 ở miền Bắc, hoặc tháng 7 đến tháng 9 ở miền Nam, khi thời tiết nóng và có nhiều hoạt động ngoài trời.",
       "grammar": "Danh từ chỉ thời gian, không chia động từ. Khi dùng làm trạng từ, thường kết hợp với các động từ như \"đi\", \"đến\", \"bắt đầu\". Trong tiếng Hàn, 여름 là danh từ chung, có thể đứng một mình hoặc kết hợp với các từ chỉ thời gian khác (예: 여름에, 여름 동안).",
       "examples": {
@@ -856,9 +855,11 @@
         "en": "I will go on a beach trip this summer."
       },
       "references": [],
+      "aiStatus": "ready",
       "aiModel": "openai/gpt-oss-120b",
       "grounded": false,
-      "aiProvider": "groq"
+      "aiProvider": "groq",
+      "reviewRecommended": null
     },
     {
       "vi": "mùa hè",
@@ -871,7 +872,6 @@
       "tabTitle": "Sheet1",
       "row": 36,
       "inputHash": "a67350cb64c30fb90368f2a9",
-      "aiStatus": "ready",
       "context": "Cũng chỉ thời gian nóng trong năm, thường dùng trong ngữ cảnh trang trọng hơn hoặc khi muốn nhấn mạnh mùa trong năm (đối lập với mùa xuân, thu, đông).",
       "grammar": "Danh từ chỉ mùa, có thể dùng làm danh từ độc lập hoặc kết hợp với các từ chỉ thời gian (예: 여름에, 여름 동안). Khi dịch sang tiếng Việt, “mùa hè” và “mùa hạ” có nghĩa gần giống, nhưng “mùa hạ” thường dùng trong văn thơ, “mùa hè” dùng phổ thông.",
       "examples": {
@@ -880,9 +880,11 @@
         "en": "Summer in the north is very hot."
       },
       "references": [],
+      "aiStatus": "ready",
       "aiModel": "openai/gpt-oss-120b",
       "grounded": false,
-      "aiProvider": "groq"
+      "aiProvider": "groq",
+      "reviewRecommended": null
     },
     {
       "vi": "thuốc trị mụn",
@@ -895,7 +897,6 @@
       "tabTitle": "Sheet1",
       "row": 37,
       "inputHash": "9bb68ea60c4307d463718532",
-      "aiStatus": "ready",
       "context": "Dùng để chỉ các loại thuốc, kem, gel hoặc sản phẩm chăm sóc da có công dụng giảm mụn, thường được nhắc đến trong bối cảnh chăm sóc da, thảo luận về vấn đề mụn trên da mặt.",
       "grammar": "Cụm danh từ, trong tiếng Hàn 여드름 치료제 là danh từ ghép (여드름 ‘mụn’ + 치료제 ‘thuốc điều trị’). Khi dùng trong câu, có thể làm chủ ngữ, tân ngữ hoặc bổ ngữ. Trong tiếng Anh “acne treatment” cũng là danh từ ghép, thường đi kèm với động từ như use, apply, recommend.",
       "examples": {
@@ -904,9 +905,11 @@
         "en": "The doctor prescribed a new acne treatment for me."
       },
       "references": [],
+      "aiStatus": "ready",
       "aiModel": "openai/gpt-oss-120b",
       "grounded": false,
-      "aiProvider": "groq"
+      "aiProvider": "groq",
+      "reviewRecommended": null
     },
     {
       "vi": "mụn bọc",
@@ -919,7 +922,6 @@
       "tabTitle": "Sheet1",
       "row": 38,
       "inputHash": "91bee16081cb4dd5f139df52",
-      "aiStatus": "ready",
       "context": "Dùng để chỉ loại mụn sâu, chứa dịch, thường xuất hiện ở mặt, lưng hoặc ngực, gây sưng tấy và để lại sẹo.",
       "grammar": "Danh từ chung, không chia số. Khi dùng trong câu, có thể đứng độc lập hoặc đi kèm với các từ chỉ vị trí, mức độ (nặng, nhẹ).",
       "examples": {
@@ -928,9 +930,11 @@
         "en": "['She is treating the cystic acne on her face with antibiotics.', 'Cystic acne often appears after puberty and can persist for years.', 'The doctor advised not to touch cystic acne to reduce the risk of inflammation.']"
       },
       "references": [],
+      "aiStatus": "ready",
       "aiModel": "openai/gpt-oss-120b",
       "grounded": false,
-      "aiProvider": "groq"
+      "aiProvider": "groq",
+      "reviewRecommended": null
     },
     {
       "vi": "ghép gan",
@@ -943,7 +947,6 @@
       "tabTitle": "Sheet1",
       "row": 39,
       "inputHash": "bdfea5d371e4c93e51310d0b",
-      "aiStatus": "ready",
       "context": "Thủ thuật thay thế gan bệnh bằng gan khỏe từ người hiến tặng, thường áp dụng cho bệnh nhân suy gan nặng.",
       "grammar": "Danh từ kết hợp, có thể dùng như danh từ riêng (간 이식) hoặc kết hợp với động từ (실시하다, 받다).",
       "examples": {
@@ -952,9 +955,11 @@
         "en": "['The patient received a liver transplant after waiting six months.', 'The liver transplant surgery was performed by a top specialist team.', 'After a liver transplant, the patient must follow a strict diet regimen.']"
       },
       "references": [],
+      "aiStatus": "ready",
       "aiModel": "openai/gpt-oss-120b",
       "grounded": false,
-      "aiProvider": "groq"
+      "aiProvider": "groq",
+      "reviewRecommended": null
     },
     {
       "vi": "ghép thận",
@@ -967,7 +972,6 @@
       "tabTitle": "Sheet1",
       "row": 40,
       "inputHash": "0f11953007cc08f85bd08d74",
-      "aiStatus": "ready",
       "context": "Phẫu thuật thay thế thận bị hỏng bằng thận khỏe từ người hiến tặng, thường dành cho bệnh nhân suy thận giai đoạn cuối.",
       "grammar": "Danh từ ghép, có thể đi kèm với các động từ như 받다 (nhận), 시행하다 (thực hiện).",
       "examples": {
@@ -976,9 +980,11 @@
         "en": "['He successfully received a kidney transplant and is now recovering.', 'The kidney transplant procedure requires a high degree of compatibility between donor and recipient.', 'After a kidney transplant, the patient must take immunosuppressive medication.']"
       },
       "references": [],
+      "aiStatus": "ready",
       "aiModel": "openai/gpt-oss-120b",
       "grounded": false,
-      "aiProvider": "groq"
+      "aiProvider": "groq",
+      "reviewRecommended": null
     },
     {
       "vi": "trào ngược dạ dày",
@@ -991,7 +997,6 @@
       "tabTitle": "Sheet1",
       "row": 41,
       "inputHash": "1092cbf715118874c13f9da4",
-      "aiStatus": "ready",
       "context": "Dùng để mô tả tình trạng dịch dạ dày chảy ngược lên thực quản, thường xuất hiện trong y học, sức khỏe và khi mô tả các triệu chứng bệnh.",
       "grammar": "Cụm danh từ. \"trào ngược dạ dày\" là danh từ ghép, không thay đổi dạng. Trong tiếng Hàn, \"위식도 역류\" cũng là danh từ ghép, không có hậu tố chia. Tiếng Anh \"gastroesophageal reflux\" là danh từ ghép, thường đi kèm với các động từ như \"cause\", \"suffer from\".",
       "examples": {
@@ -1000,74 +1005,179 @@
         "en": "['He suffers from gastroesophageal reflux, which makes his throat feel burning.', 'The doctor advised avoiding spicy foods to reduce gastroesophageal reflux.', 'After overeating, she experienced gastroesophageal reflux.']"
       },
       "references": [],
+      "aiStatus": "ready",
       "aiModel": "openai/gpt-oss-120b",
       "grounded": false,
-      "aiProvider": "groq"
+      "aiProvider": "groq",
+      "reviewRecommended": null
     },
     {
-      "vi": "",
-      "ko": "#VALUE!",
-      "en": "#VALUE!",
+      "vi": "dạ dày",
+      "ko": "위",
+      "en": "stomach",
       "content": "",
       "id": "15b9d5b295de522a8219f509",
       "sheetId": "19nL6wtouHV-0OumsQR2jF-5xWA1cpbpivRUIsm7hDgk",
       "sheetTitle": "Google Sheets 19nL6wto",
       "tabTitle": "Sheet1",
       "row": 42,
-      "inputHash": "512dd01e51d938e38650d527",
-      "aiStatus": "pending"
+      "inputHash": "41016060159c50fd6a886799",
+      "aiStatus": "ready",
+      "context": "Dùng để chỉ cơ quan tiêu hoá nằm ở phần trên của bụng, thường xuất hiện trong các câu nói về sức khỏe, cảm giác đói, hoặc các bệnh lý liên quan.",
+      "grammar": "Danh từ chung, không có dạng số nhiều/đơn. Khi dùng trong câu tiếng Hàn, thường đi kèm với trợ từ ‘은/는’ (chủ đề) hoặc ‘이/가’ (chủ ngữ).",
+      "examples": {
+        "vi": "['Tôi bị đau dạ dày vì ăn quá nhanh.', 'Bác sĩ khuyên nên ăn nhẹ để bảo vệ dạ dày.', 'Cơn buồn nôn có thể xuất phát từ dạ dày.']",
+        "ko": "['위가 아파서 병원에 갔어요.', '위에 부담을 주지 않도록 천천히 드세요.', '위염은 위 점막에 염증이 생기는 질환입니다.']",
+        "en": "['My stomach hurts because I ate too quickly.', 'The doctor advised me to eat lightly to protect my stomach.', 'Nausea can originate from the stomach.']"
+      },
+      "references": [],
+      "aiModel": "openai/gpt-oss-120b",
+      "grounded": false,
+      "aiProvider": "groq"
     },
     {
-      "vi": "",
-      "ko": "#VALUE!",
-      "en": "#VALUE!",
+      "vi": "hoàn lưu của một cơn bão",
+      "ko": "폭풍의 순환",
+      "en": "Storm cycle",
       "content": "",
       "id": "8110664ad37cfc2efe0189be",
       "sheetId": "19nL6wtouHV-0OumsQR2jF-5xWA1cpbpivRUIsm7hDgk",
       "sheetTitle": "Google Sheets 19nL6wto",
       "tabTitle": "Sheet1",
       "row": 43,
-      "inputHash": "512dd01e51d938e38650d527",
-      "aiStatus": "pending"
+      "inputHash": "35a5698b8e910fdbf105c870",
+      "aiStatus": "ready",
+      "context": "Thường dùng trong bối cảnh khí tượng học, mô tả quá trình hình thành, phát triển và suy giảm của một cơn bão.",
+      "grammar": "Cụm danh từ; trong tiếng Hàn, ‘폭풍의 순환’ là danh từ kết hợp với trợ từ sở hữu ‘의’. Khi làm chủ ngữ, dùng ‘이/가’; khi làm tân ngữ, dùng ‘을/를’.",
+      "examples": {
+        "vi": "['Nhà khí tượng học đang nghiên cứu hoàn lưu của một cơn bão để dự báo thời tiết.', 'Hoàn lưu của một cơn bão thường kéo dài vài ngày.', 'Hiểu rõ hoàn lưu của một cơn bão giúp giảm thiểu thiệt hại.']",
+        "ko": "['기상학자들은 폭풍의 순환을 연구하고 있습니다.', '폭풍의 순환은 보통 며칠 동안 지속됩니다.', '폭풍의 순환을 이해하면 피해를 줄일 수 있습니다.']",
+        "en": "['Meteorologists are studying the storm cycle to improve forecasts.', 'A storm cycle usually lasts several days.', 'Understanding the storm cycle helps reduce damage.']"
+      },
+      "references": [],
+      "aiModel": "openai/gpt-oss-120b",
+      "grounded": false,
+      "aiProvider": "groq"
     },
     {
-      "vi": "",
-      "ko": "#VALUE!",
-      "en": "#VALUE!",
+      "vi": "bão nhiệt đới",
+      "ko": "열대성 폭풍",
+      "en": "tropical storm",
       "content": "",
       "id": "f3fe43cecfae2bb7214bee66",
       "sheetId": "19nL6wtouHV-0OumsQR2jF-5xWA1cpbpivRUIsm7hDgk",
       "sheetTitle": "Google Sheets 19nL6wto",
       "tabTitle": "Sheet1",
       "row": 44,
-      "inputHash": "512dd01e51d938e38650d527",
-      "aiStatus": "pending"
+      "inputHash": "61414d55da9895f77ec6501e",
+      "aiStatus": "ready",
+      "context": "Thuật ngữ khí tượng dùng để chỉ hệ thống bão có nguồn gốc ở vùng nhiệt đới, thường mang theo mưa lớn và gió mạnh.",
+      "grammar": "Danh từ; trong tiếng Hàn, ‘열대성 폭풍’ là danh từ ghép, không thay đổi hình thức. Khi dùng làm chủ ngữ, dùng ‘이/가’; làm tân ngữ, dùng ‘을/를’.",
+      "examples": {
+        "vi": "['Bão nhiệt đới đang tiến gần đến bờ biển.', 'Cảnh báo bão nhiệt đới đã được ban hành trong 24 giờ tới.', 'Sau bão nhiệt đới, nhiều khu vực bị ngập lụt.']",
+        "ko": "['열대성 폭풍이 해안에 접근하고 있습니다.', '열대성 폭풍 경보가 다음 24시간 동안 발령되었습니다.', '열대성 폭풍 이후 많은 지역이 침수되었습니다.']",
+        "en": "['The tropical storm is approaching the coastline.', 'A tropical storm warning has been issued for the next 24 hours.', 'After the tropical storm, many areas were flooded.']"
+      },
+      "references": [],
+      "aiModel": "openai/gpt-oss-120b",
+      "grounded": false,
+      "aiProvider": "groq"
     },
     {
-      "vi": "",
-      "ko": "#VALUE!",
-      "en": "#VALUE!",
+      "vi": "chi phí cố định",
+      "ko": "고정 비용",
+      "en": "Fixed costs",
       "content": "",
       "id": "1d3ec6a004b7cd35aa3a7c3b",
       "sheetId": "19nL6wtouHV-0OumsQR2jF-5xWA1cpbpivRUIsm7hDgk",
       "sheetTitle": "Google Sheets 19nL6wto",
       "tabTitle": "Sheet1",
       "row": 45,
-      "inputHash": "512dd01e51d938e38650d527",
-      "aiStatus": "pending"
+      "inputHash": "ad8d32f7ae7183b45ec4e6eb",
+      "aiStatus": "ready",
+      "context": "Dùng để chỉ các khoản chi không thay đổi theo mức sản lượng hay doanh thu, ví dụ trong kế toán và quản trị tài chính.",
+      "grammar": "Cụm danh từ; trong tiếng Hàn là 명사구 (고정 비용) không có hậu tố biến đổi. Khi dùng trong câu, thường đứng làm chủ ngữ hoặc tân ngữ, có thể đi kèm với các trợ từ như 은/는, 을/를.",
+      "examples": {
+        "vi": "Chi phí cố định của công ty bao gồm tiền thuê nhà và lương nhân viên quản lý.",
+        "ko": "회사의 고정 비용에는 임대료와 관리 직원 급여가 포함됩니다.",
+        "en": "The company's fixed costs include rent and managerial salaries."
+      },
+      "references": [],
+      "aiModel": "openai/gpt-oss-120b",
+      "grounded": false,
+      "aiProvider": "groq"
     },
     {
-      "vi": "",
-      "ko": "#VALUE!",
-      "en": "#VALUE!",
+      "vi": "định phí",
+      "ko": "수수료",
+      "en": "charge",
       "content": "",
       "id": "a6a13d488a31d4007cd92a5d",
       "sheetId": "19nL6wtouHV-0OumsQR2jF-5xWA1cpbpivRUIsm7hDgk",
       "sheetTitle": "Google Sheets 19nL6wto",
       "tabTitle": "Sheet1",
       "row": 46,
-      "inputHash": "512dd01e51d938e38650d527",
-      "aiStatus": "pending"
+      "inputHash": "94c93d25a40add2acf680fdd",
+      "aiStatus": "ready",
+      "context": "Thường dùng để chỉ khoản phí mà một bên phải trả cho dịch vụ hoặc giao dịch, như phí ngân hàng, phí môi giới.",
+      "grammar": "Danh từ; trong tiếng Hàn là 명사 (수수료). Khi dùng làm tân ngữ, thường đi kèm với 동사 받다, 부과하다, 내다. Khi làm chủ ngữ, có thể đi với 동사 있다, 발생하다.",
+      "examples": {
+        "vi": "Ngân hàng thu định phí 2% trên mỗi giao dịch chuyển tiền.",
+        "ko": "은행은 송금 거래마다 2%의 수수료를 부과합니다.",
+        "en": "The bank charges a 2% fee on each money transfer."
+      },
+      "references": [],
+      "aiModel": "openai/gpt-oss-120b",
+      "grounded": false,
+      "aiProvider": "groq"
+    },
+    {
+      "vi": "quỹ tư nhân",
+      "ko": "사모펀드",
+      "en": "private equity fund",
+      "content": "",
+      "id": "6c7439063b3f2942be240d10",
+      "sheetId": "19nL6wtouHV-0OumsQR2jF-5xWA1cpbpivRUIsm7hDgk",
+      "sheetTitle": "Google Sheets 19nL6wto",
+      "tabTitle": "Sheet1",
+      "row": 47,
+      "inputHash": "ee07a5598bb1927556476e0b",
+      "aiStatus": "ready",
+      "context": "Thuật ngữ tài chính chỉ các quỹ đầu tư vốn được huy động từ các nhà đầu tư cá nhân hoặc tổ chức, không công khai trên thị trường chứng khoán.",
+      "grammar": "Cụm danh từ; trong tiếng Hàn là 명사 (사모펀드). Khi dùng làm chủ ngữ hoặc tân ngữ, không thay đổi hình thức. Thường đi kèm với 동사 설립하다, 투자하다, 관리하다.",
+      "examples": {
+        "vi": "Quỹ tư nhân này đang tìm kiếm các công ty công nghệ để đầu tư.",
+        "ko": "이 사모펀드는 투자할 기술 회사를 찾고 있습니다.",
+        "en": "This private equity fund is looking for technology companies to invest in."
+      },
+      "references": [],
+      "aiModel": "openai/gpt-oss-120b",
+      "grounded": false,
+      "aiProvider": "groq"
+    },
+    {
+      "vi": "private equity",
+      "ko": "사모펀드",
+      "en": "private equity fund",
+      "content": "",
+      "id": "60bc25cfa3d7d01c12efe275",
+      "sheetId": "19nL6wtouHV-0OumsQR2jF-5xWA1cpbpivRUIsm7hDgk",
+      "sheetTitle": "Google Sheets 19nL6wto",
+      "tabTitle": "Sheet1",
+      "row": 48,
+      "inputHash": "53b94640a39536ef49f0152b",
+      "aiStatus": "ready",
+      "context": "Thuật ngữ này dùng trong lĩnh vực tài chính, đầu tư để chỉ các quỹ đầu tư vốn tư nhân, thường mua lại công ty hoặc cổ phần lớn để tái cấu trúc và tăng giá trị.",
+      "grammar": "Danh từ chung, có thể đứng độc lập hoặc đi kèm với các từ chỉ vị trí (ví dụ: \"quỹ private equity\", \"công ty private equity\"). Trong tiếng Hàn, 사모펀드 là danh từ không chia, thường đi kèm với các trợ từ như 은/는, 이/가.",
+      "examples": {
+        "vi": "['Công ty chúng tôi đang tìm kiếm một quỹ private equity để mở rộng hoạt động.', 'Nhiều nhà đầu tư quốc tế quan tâm đến thị trường private equity ở Việt Nam.', 'Quỹ private equity đã mua lại công ty công nghệ này vào năm ngoái.']",
+        "ko": "['우리 회사는 사업 확장을 위해 사모펀드를 찾고 있습니다.', '많은 해외 투자자들이 베트남의 사모펀드 시장에 관심을 가지고 있습니다.', '그 사모펀드가 지난해 이 기술 회사를 인수했습니다.']",
+        "en": "['Our company is looking for a private equity fund to expand its operations.', \"Many foreign investors are interested in Vietnam's private equity market.\", 'The private equity fund acquired the tech company last year.']"
+      },
+      "references": [],
+      "aiModel": "openai/gpt-oss-120b",
+      "grounded": false,
+      "aiProvider": "groq"
     }
   ]
 }
