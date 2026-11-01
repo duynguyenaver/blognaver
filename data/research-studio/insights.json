@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-01T10:56:41.404Z",
+  "updatedAt": "2026-11-01T10:58:47.326Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -1293,6 +1293,23 @@
         "tokens": 34099,
         "inputTokens": 27338,
         "outputTokens": 6761
+      },
+      "models": [
+        "Gemini · models/gemini-3.5-flash-lite"
+      ]
+    },
+    {
+      "slug": "cold-fusion-hanh-trinh-che-tao-va-phong-kinh-vien-vong-james-webb-2026-11-01",
+      "title": "Hành trình chế tạo và phóng Kính viễn vọng James Webb",
+      "series": "cold-fusion",
+      "sha": "62a1751d8bd59a580b7e2dca5094880a8723499b",
+      "commitAt": "2026-11-01T10:58:15.182Z",
+      "durationMs": 52179,
+      "quota": {
+        "requests": 13,
+        "tokens": 102559,
+        "inputTokens": 92949,
+        "outputTokens": 9610
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
