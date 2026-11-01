@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-01T11:07:04.943Z",
+  "updatedAt": "2026-11-01T11:08:17.045Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -1369,7 +1369,8 @@
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
-      ]
+      ],
+      "live": true
     },
     {
       "slug": "cold-fusion-su-tro-lai-cua-blue-planet-ii-goc-nhin-moi-ve-ai-duong-sau-25-nam-2026-11-01",
@@ -1386,7 +1387,8 @@
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
-      ]
+      ],
+      "live": true
     },
     {
       "slug": "cold-fusion-giai-ma-the-spheres-khi-amazon-dua-thien-nhien-vao-khong-gian-lam-viec-do-t-2026-11-01",
@@ -1417,6 +1419,23 @@
         "tokens": 15892,
         "inputTokens": 10263,
         "outputTokens": 5629
+      },
+      "models": [
+        "Gemini · models/gemini-3.5-flash-lite"
+      ]
+    },
+    {
+      "slug": "cold-fusion-nghich-ly-fermi-va-hanh-trinh-tim-kiem-su-song-ngoai-trai-at-2026-11-01",
+      "title": "Nghịch lý Fermi và Hành trình Tìm kiếm Sự sống Ngoài Trái Đất",
+      "series": "cold-fusion",
+      "sha": "b154b619fb4c8d1818f0c95ffe1758379547817d",
+      "commitAt": "2026-11-01T11:07:45.007Z",
+      "durationMs": 34244,
+      "quota": {
+        "requests": 9,
+        "tokens": 45358,
+        "inputTokens": 38508,
+        "outputTokens": 6850
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
