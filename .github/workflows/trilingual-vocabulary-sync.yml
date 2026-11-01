@@ -1,0 +1,103 @@
+name: Language Lab · Google Drive to Gemini to PR
+on:
+  pull_request:
+    paths:
+      - 'scripts/sync-trilingual-vocabulary.py'
+      - 'scripts/test-sync-trilingual-vocabulary.py'
+      - 'static/tien-ich/hoc-tieng-viet-han-anh/**'
+      - '.github/workflows/trilingual-vocabulary-sync.yml'
+  workflow_dispatch:
+  schedule:
+    - cron: '7,37 * * * *'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: blognaver-vocabulary-sync-${{ github.event_name }}
+  cancel-in-progress: false
+
+jobs:
+  test:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Test parsing, stable IDs, Vietnamese/Korean/English mapping
+        run: python3 -m unittest discover -s scripts -p 'test-sync-trilingual-vocabulary.py' -v
+      - name: Syntax check
+        run: |
+          python3 -m py_compile scripts/sync-trilingual-vocabulary.py
+          node --check static/tien-ich/hoc-tieng-viet-han-anh/study.js
+          python3 -m json.tool static/tien-ich/hoc-tieng-viet-han-anh/vocabulary.json >/dev/null
+
+  sync:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: main
+          persist-credentials: false
+      - name: Install Google Drive authentication library
+        run: python3 -m pip install --disable-pip-version-check --quiet 'google-auth>=2.0,<3.0' 'requests>=2,<3'
+      - name: Verify vocabulary importer
+        run: python3 -m unittest discover -s scripts -p 'test-sync-trilingual-vocabulary.py' -q
+      - name: Skip duplicate pending vocabulary sync PR
+        id: existing
+        env:
+          GH_TOKEN: ${{ secrets.BLOGNAVER_VOCAB_BOT_TOKEN || github.token }}
+          REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          n="$(gh pr list --repo "$REPO" --state open --json title --jq '[.[]|select(.title=="data(vocab): sync Google Drive Sheets")]|length')"
+          if [ "$n" != "0" ]; then
+            echo 'skip=true' >> "$GITHUB_OUTPUT"
+            echo "Already have a pending data PR, waiting for its checks/merge."
+          else
+            echo 'skip=false' >> "$GITHUB_OUTPUT"
+          fi
+      - name: Read all Sheets and enrich only new/modified words
+        if: steps.existing.outputs.skip == 'false'
+        env:
+          VOCAB_DRIVE_FOLDER_ID: '1coylrqzqPOLZP_lhUdWlb3nI47Qr-af7'
+          VOCAB_PUBLIC_SHEET_IDS: '19nL6wtouHV-0OumsQR2jF-5xWA1cpbpivRUIsm7hDgk'
+          VOCAB_GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.VOCAB_GOOGLE_SERVICE_ACCOUNT_JSON }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          VOCAB_MAX_GEMINI_ITEMS: '30'
+        run: python3 scripts/sync-trilingual-vocabulary.py
+      - name: Create data branch and Pull Request (never commit to main)
+        if: steps.existing.outputs.skip == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.BLOGNAVER_VOCAB_BOT_TOKEN || github.token }}
+          REPO: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          DATA='static/tien-ich/hoc-tieng-viet-han-anh/vocabulary.json'
+          if git diff --quiet -- "$DATA"; then
+            echo "No changes: Google Sheets and cached Gemini results are unchanged."
+            exit 0
+          fi
+          BRANCH="data/vocab-drive-sync-$RUN_ID"
+          git config user.name "BlogNaver Vocabulary Bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$BRANCH"
+          git add -- "$DATA"
+          git commit -m "data(vocab): sync trilingual Google Sheets and Gemini explanations"
+          AUTH="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
+          git -c http.extraheader="AUTHORIZATION: basic $AUTH" push "https://github.com/$REPO.git" "HEAD:refs/heads/$BRANCH"
+          gh pr create --repo "$REPO" --base main --head "$BRANCH" \
+            --title 'data(vocab): sync Google Drive Sheets' \
+            --body 'Automated refresh from the owner-approved Drive folder; exact row provenance, Gemini Google Search-grounded educational examples, and fail-closed errors. No keys committed.'
+          gh pr merge "$BRANCH" --repo "$REPO" --auto --squash || \
+            echo 'Auto-merge could not be enabled; PR remains open for existing CI automation.'
