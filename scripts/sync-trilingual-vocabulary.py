@@ -727,7 +727,7 @@ def collect(old: dict) -> dict:
             if ai:
                 # Never override owner-authored A:C translations.
                 for key in ("vi", "ko", "en"):
-                    if not x.get(key):
+                    if not x.get(key) and ai.get(key):
                         x[key] = ai[key]
                 for key in ("context", "grammar", "examples", "references",
                             "aiStatus", "aiModel", "grounded", "aiProvider",
