@@ -25,13 +25,13 @@ Không có quyền Viewer cho Service Account, không xuất bản Google Sheets
    - **Secrets → New repository secret**: \`MONTHLY_EXPENSES_ENCRYPTION_PASSPHRASE\` = mật khẩu riêng **ít nhất 16 ký tự**. Giá trị này dùng **chỉ trong runner khi mã hóa** và **trong dashboard khi bạn nhập để giải mã**. Không đặt trùng token bridge.
    - GitHub token bot \`BLOGNAVER_VOCAB_BOT_TOKEN\` của hệ thống PR đã có sẵn phải có quyền tạo nhánh, PR và yêu cầu auto-merge.
 5. GitHub → Actions → **Monthly expenses · Private Google Sheets encrypted sync** → **Run workflow** trên \`main\` để tạo bản mã đầu tiên. Sau khi PR dữ liệu green CI, merge và Pages deploy xong, vào dashboard \`/tien-ich/chi-phi-thang/\`, nhập \`MONTHLY_EXPENSES_ENCRYPTION_PASSPHRASE\`. Dữ liệu hiện chưa có giao dịch nếu bạn chưa nhập hàng nào.
-6. (Tùy chọn) Trong Apps Script chọn hàm \`installMonthlyExpensesTriggers\` → **Run** → cấp quyền. Triggers được tạo với quyền của bạn; khi sửa tab \`chiphithang\` / \`ngansach\`, nếu có \`GITHUB_DISPATCH_TOKEN\` thì gửi lệnh kích hoạt GitHub workflow, có chống lặp tối thiểu 60 giây. Có menu **Chi phí tháng → Đồng bộ ngay**. Không bắt buộc; lịch chạy GitHub vẫn hoạt động.
+6. **Bật đồng bộ khi sửa ô:** Trong Google Sheets → **Extensions → Apps Script**, cập nhật mã bằng bản `docs/google-apps-script/MonthlyExpenses.gs` mới nhất, Save, rồi **Deploy → Manage deployments → Edit → New version → Deploy** để Web App dùng mã mới. Chạy `installMonthlyExpensesTriggers` → **Run** → cấp quyền. Script cài trigger `onEdit` và `onChange` cho `chiphithang` / `ngansach`: sửa ô ở dòng cũ, đổi Phương thức, thêm/xóa dòng đều gửi workflow nếu có `GITHUB_DISPATCH_TOKEN`. Các chỉnh sửa trong 60 giây được gộp bằng một lượt gửi chậm (không bị bỏ qua). Menu **Chi phí tháng → Đồng bộ ngay** kích hoạt thủ công; GitHub Actions vẫn tự kiểm tra mỗi 15 phút nếu không có token.
 
 **LƯU Ý:** Apps Script project có thể xem và sửa bởi người có quyền chỉnh sửa Apps Script. Chỉ cấp quyền biên tập Sheet/script cho tài khoản đáng tin. Deployment endpoint truy cập Internet nhưng nội dung được bảo vệ bằng token ngẫu nhiên 32+ ký tự; ai có được token có thể yêu cầu xem dữ liệu. Không ghi token vào URL, ô Sheet hoặc public repo; nếu bị lộ, thay ngay tại 2 chỗ và deploy lại nếu cần.
 
 ### Cấu trúc bảng
 
-Tab \`chiphithang\` (A:H): Ngày | Loại | Danh mục | Nội dung | Số tiền (VND) | Phương thức | Ghi chú | Mã giao dịch.
+Tab \`chiphithang\` (A:H): Ngày | Loại | Danh mục | Nội dung | Số tiền (VND) | Phương thức | Ghi chú | Mã giao dịch. **Giá trị thay đổi tại bất kỳ cột A:H nào, kể cả ở giao dịch cũ, sẽ làm thay đổi sourceHash và được xuất bản lại.**
 - Ngày: YYYY-MM-DD (cột Google Sheets đã có format \`yyyy-mm-dd\`); Loại là \`Thu\` hoặc \`Chi\`; số tiền VND nguyên dương.
 - ID giao dịch là tùy chọn, phải khác nhau nếu nhập.
 Tab \`ngansach\` (A:C): Tháng (YYYY-MM) | Ngân sách (VND) | Ghi chú. Mỗi tháng một dòng, dạng văn bản \`2026-11\`.
@@ -43,12 +43,13 @@ Tab \`ngansach\` (A:C): Tháng (YYYY-MM) | Ngân sách (VND) | Ghi chú. Mỗi t
 - HTTP GET vào Web app chỉ trả lời tình trạng service; POST sai token trả lỗi chung, không chứa dữ liệu. Không dùng JSONP hoặc public Sheet export.
 - Giao diện GitHub Pages chỉ giải mã trong trình duyệt bằng WebCrypto, tùy chọn nhớ mật khẩu bằng vault \`BNDeviceSecrets\`. Same-origin script bị xâm nhập vẫn có thể truy cập dữ liệu đang mở.
 - Bảng sai schema hoặc truy cập lỗi: pipeline thất bại an toàn, giữ bản ciphertext cuối cùng. Tệp plaintext không được lưu vào git.
-- Snapshot cần PR → CI → merge → Pages deploy; lịch GitHub mỗi 15 phút không phải cập nhật tức thời. Nút Refresh trên trang chỉ đọc bản mã đã triển khai.
+- Snapshot cần PR → CI → merge → Pages deploy, vì vậy không cập nhật ngay khi sửa Google Sheets. Dashboard tự kiểm tra bản mã mới mỗi 60 giây khi đang mở và kiểm tra ngay khi quay lại tab. Nút Refresh chỉ đọc bản mã đã triển khai. **Chỉ cập nhật `.gs` trong GitHub không tự cập nhật Apps Script đã deploy**; cần xuất bản Web App mới và cài lại triggers như bước 6.
 
 ### Kiểm tra
 
 \`python3 scripts/test-sync-monthly-expenses.py -v\`
 \`node --check static/tien-ich/chi-phi-thang/app.js\`
+`node scripts/test-monthly-expenses-apps-script.mjs`
 \`node -e "new Function(require('fs').readFileSync('docs/google-apps-script/MonthlyExpenses.gs','utf8'))"\`
 
 Không thay đổi tiện ích nhập liệu thủ công \`/chi-tieu-thang/\`.
