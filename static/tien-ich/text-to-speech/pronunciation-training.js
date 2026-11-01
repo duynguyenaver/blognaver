@@ -84,13 +84,21 @@
     const alternatives=rules.map(r=>"(?<p"+r.i+">"+escapeRegExp(r.term)+")").join("|");
     const pattern=new RegExp("(?<![\\p{L}\\p{N}_])(?:"+alternatives+")(?![\\p{L}\\p{N}_])","giu");
     const groups=new Map(rules.map(x=>["p"+x.i,x]));
-    return text.replace(pattern,(match,...rest)=>{
+    const replaceText=segment=>segment.replace(pattern,(match,...rest)=>{
       const capture=rest.at(-1);
       const hit=Object.keys(capture||{}).find(name=>capture[name]!==undefined);
       const r=groups.get(hit);
       if(!r||r.caseSensitive&&match!==r.term)return match;
       return r.reading;
     });
+    // Never rewrite URLs, email addresses or inline/fenced code, even in direct preview.
+    const protectedPattern=/\x60{3}[\s\S]*?\x60{3}|\x60[^\x60\n]+\x60|(?:https?:\/\/|www\.)[^\s<>"']+|[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}/g;
+    let result="",last=0;
+    for(const token of text.matchAll(protectedPattern)){
+      result+=replaceText(text.slice(last,token.index))+token[0];
+      last=token.index+token[0].length;
+    }
+    return result+replaceText(text.slice(last));
   }
 
   function status(message,error=false){
