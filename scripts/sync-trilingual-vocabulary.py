@@ -769,21 +769,29 @@ def write_run_summary(result: dict, old: dict) -> None:
     ready = [x for x in rows if x.get("aiStatus") == "ready"]
     pending = [x for x in rows if x.get("aiStatus") == "pending"]
     groq = sum(x.get("aiProvider") == "groq" for x in ready)
+    offline = sum(x.get("aiProvider") == "offline" for x in ready)
+    gemini = len(ready) - groq - offline
+    offline_only = os.environ.get("VOCAB_OFFLINE_ONLY", "0") == "1"
     lines = [
-        "## Language Lab · provider diagnostics", "",
+        "## Language Lab · real output diagnostics", "",
         f"- Imported vocabulary records: **{len(rows)}** (previous version: {len(old.get('items', []))})",
-        f"- AI-generated entries: **{len(ready)}** (Groq {groq}, Gemini {len(ready)-groq})",
-        f"- Pending AI: **{len(pending)}**",
-        f"- Gemini API key configured: **{'YES' if GEMINI_KEY else 'NO'}**",
-        f"- Groq API key configured: **{'YES' if GROQ_KEY else 'NO'}**",
+        f"- Completed notes: **{len(ready)}** (offline {offline}, Groq {groq}, Gemini {gemini})",
+        f"- Pending notes: **{len(pending)}**",
+        f"- Keyless offline mode: **{'ON (no Gemini/Groq requests)' if offline_only else 'OFF'}**",
     ]
+    if not offline_only:
+        lines += [
+            f"- Gemini API key configured: **{'YES' if GEMINI_KEY else 'NO'}**",
+            f"- Groq API key configured: **{'YES' if GROQ_KEY else 'NO'}**",
+        ]
     if result.get("aiRetryAfter"):
         lines.append("- Gemini cooldown: " + result["aiRetryAfter"] + " (Groq still eligible)")
-    if pending and not GROQ_KEY:
+    if pending and not GROQ_KEY and not offline_only:
         lines.append("- ACTION: Add GROQ_API_KEY in Settings > Secrets and variables > Actions.")
-    if pending and (GEMINI_KEY or GROQ_KEY):
+    if pending and (GEMINI_KEY or GROQ_KEY) and not offline_only:
         lines.append("- ATTENTION: At least one API is configured, but no guarantee of content. Inspect job logs for HTTP 429/401/400 and JSON validation errors.")
-    lines.append("- Note: A successful sync job is NOT proof that AI enrichment succeeded.")
+    lines.append("- Offline curated records are original learning notes; unknown terms use visibly marked templates requiring human review.")
+    lines.append("- A successful workflow does not imply linguistic accuracy; review the examples.")
     try:
         with open(target, "a", encoding="utf-8") as file:
             file.write("\n".join(lines) + "\n")
