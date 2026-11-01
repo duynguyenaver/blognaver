@@ -28,7 +28,7 @@ function render(){
   const korean=element("h3",x.ko||x.vi||x.en||x.content);korean.lang=x.ko?"ko":"vi";
   const trans=element("p",undefined,"trans");for(const [k,v] of [["vi",x.vi],["en",x.en]]){if(v){const span=element("span",v);span.lang=k;trans.append(span)}}title.append(korean,trans);
   const from=element("span",[x.sheetTitle,x.tabTitle].filter(Boolean).join(" / "),"origin");head.append(title,from);article.append(head);
-  article.append(element("span",complete(x)?(x.aiStatus==="sheet"?"✓ ĐÃ CÓ NỘI DUNG TRONG SHEETS":"✦ GEMINI AI · ĐÃ BỔ SUNG"):"◷ ĐANG CHỜ GEMINI AI","ai-status"+(complete(x)?"":" pending")));
+  article.append(element("span",complete(x)?(x.aiStatus==="sheet"?"✓ ĐÃ CÓ NỘI DUNG TRONG SHEETS":x.aiProvider==="groq"?"✦ GROQ AI · ĐÃ BỔ SUNG":"✦ GEMINI AI · ĐÃ BỔ SUNG"):"◷ ĐANG CHỜ AI (GEMINI / GROQ)","ai-status"+(complete(x)?"":" pending")));
   const detail=element("details"),summary=element("summary","Xem ngữ cảnh và ví dụ ngữ pháp ▾");
   detail.append(summary);
   if(complete(x)){
@@ -42,7 +42,7 @@ function render(){
     for(const u of x.references.slice(0,4)){if(!/^https:\/\//.test(u))continue;try{const a=element("a",new URL(u).hostname+" ↗");a.href=u;a.target="_blank";a.rel="noopener noreferrer";refs.append(a,document.createTextNode(" · "))}catch{}}
     detail.append(refs);
    }
-  }else detail.append(element("p","Gemini chưa bổ sung thông tin. Từ vựng gốc đã được lưu; hệ thống sẽ thử lại ở lượt đồng bộ tiếp theo."));
+  }else detail.append(element("p","AI chưa bổ sung thông tin. Hệ thống sẽ thử Gemini hoặc Groq ở lượt đồng bộ tiếp theo. Từ vựng gốc vẫn được giữ."));
   article.append(detail);root.append(article);
  }
  const totalPages=Math.max(1,Math.ceil(display.length/limit));

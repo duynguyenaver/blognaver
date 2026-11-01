@@ -37,6 +37,7 @@ HEADERS = {
 }
 SERVICE_JSON = os.environ.get("VOCAB_GOOGLE_SERVICE_ACCOUNT_JSON", "").strip()
 GEMINI_KEY = os.environ.get("GEMINI_API_KEY", "").strip()
+GROQ_KEY = os.environ.get("GROQ_API_KEY", "").strip()
 
 
 class SyncError(RuntimeError):
@@ -424,6 +425,163 @@ def get_json_post(url: str, body: bytes) -> dict:
     return json.loads(request(url, headers={"Content-Type": "application/json"}, body=body, retries=0))
 
 
+
+# Groq's REST interface is OpenAI-compatible. Never call it from browser JS:
+# only the server-side GitHub Actions process may read GROQ_API_KEY.
+GROQ_API = "https://api.groq.com/openai/v1"
+GROQ_NON_TEXT = (
+    "whisper", "speech", "audio", "tts", "orpheus", "image", "vision",
+    "embedding", "guard", "safeguard", "moderation", "compound",
+)
+
+
+def groq_text_models(data: list[dict], preferred: str = "") -> list[str]:
+    """Choose models from the LIVE account list; no unsupported hardcoded fallback."""
+    available = set()
+    for x in data:
+        name = str(x.get("id", "")).strip()
+        low = name.lower()
+        if not name or x.get("active") is False or any(k in low for k in GROQ_NON_TEXT):
+            continue
+        # Avoid discontinued 2026 free/developer Llama 3.1/3.3 models even if
+        # a stale account listing happens to include them.
+        if low.startswith(("llama-3.1-", "llama-3.3-")):
+            continue
+        if not (name.startswith(("openai/", "qwen/", "meta-llama/", "mistral-", "gemma-"))
+                or "llama" in low or "mixtral" in low):
+            continue
+        available.add(name)
+    preferred_order = ["openai/gpt-oss-120b", "qwen/qwen3.8-27b", "openai/gpt-oss-20b"]
+    ordered = [x for x in preferred_order if x in available]
+    ordered += sorted(available - set(ordered))
+    if preferred in available:
+        ordered.remove(preferred)
+        ordered.insert(0, preferred)
+    return ordered[:max(1, min(8, int(os.environ.get("VOCAB_MAX_GROQ_MODEL_ATTEMPTS", "5"))))]
+
+
+def groq_models() -> list[str]:
+    if not GROQ_KEY:
+        return []
+    try:
+        listed = get_json(GROQ_API + "/models",
+                          {"Authorization": "Bearer " + GROQ_KEY})
+        candidates = groq_text_models(listed.get("data", []),
+                                      os.environ.get("VOCAB_GROQ_MODEL", "").strip())
+        print("INFO: Groq text models available: " + (", ".join(candidates) or "none"),
+              file=sys.stderr)
+        return candidates
+    except (SyncError, ValueError, KeyError, TypeError) as exc:
+        print("WARNING: Groq model discovery unavailable: " + str(exc)[:140], file=sys.stderr)
+        return []
+
+
+def groq_post(model: str, prompt: str, json_mode: bool) -> dict:
+    data = {"model": model,
+            "messages": [
+                {"role": "system", "content": "Bạn là chuyên gia ngữ pháp Việt–Hàn–Anh. "
+                 "Chỉ trả JSON hợp lệ, ví dụ tự viết, không bịa trích dẫn hay nguồn."},
+                {"role": "user", "content": prompt},
+            ],
+            "temperature": 0.2,
+            "max_completion_tokens": 2500,
+            "stream": False}
+    if json_mode:
+        data["response_format"] = {"type": "json_object"}
+    raw = request(GROQ_API + "/chat/completions", headers={
+        "Authorization": "Bearer " + GROQ_KEY, "Content-Type": "application/json"
+    }, body=json.dumps(data, ensure_ascii=False).encode("utf-8"), retries=0)
+    return json.loads(raw)
+
+
+def ai_enrich_groq_batch(batch: list[dict], model_names: list[str],
+                         state: dict | None = None) -> dict[str, dict]:
+    """Fallback after Gemini failure/cooldown. Persist no fake web citations."""
+    if not batch or not model_names or not GROQ_KEY:
+        return {}
+    state = state if state is not None else {"blocked": set()}
+    blocked = state.setdefault("blocked", set())
+    valid_ids = {x["id"] for x in batch}
+    payload = [{k: x.get(k, "") for k in ("id", "vi", "ko", "en", "content")} for x in batch]
+    prompt = (
+        "Hãy viết Ngữ cảnh sử dụng và Ghi chú ngữ pháp cho từng mục từ Việt–Hàn–Anh. "
+        "Giữ NGUYÊN những bản dịch đầu vào. Giải thích nghĩa và tình huống sử dụng "
+        "của cách nói tiếng Hàn, phân biệt từ loại/cấu trúc/sắc thái, tạo ba câu "
+        "ví dụ tự nhiên thể hiện cùng ý. Không tuyên bố đã tra cứu trên web. "
+        "Không bịa dữ kiện. Trả DUY NHẤT object JSON gồm trường items, mỗi phần tử "
+        "có {id, vi, ko, en, context, grammar, examples:{vi,ko,en}}. "
+        "Mỗi context/grammar viết bằng tiếng Việt, mỗi examples đúng ngôn ngữ; "
+        "nếu chưa chắc nghĩa thì để trống thay vì đoán. Dữ liệu:\n"
+        + json.dumps(payload, ensure_ascii=False)
+    )
+    ordered = list(model_names)
+    preferred = state.get("last_success_model")
+    if preferred in ordered:
+        ordered.remove(preferred)
+        ordered.insert(0, preferred)
+    for name in ordered:
+        if name in blocked:
+            continue
+        for json_mode in (True, False):
+            try:
+                answer = groq_post(name, prompt, json_mode)
+                text = answer["choices"][0]["message"].get("content") or ""
+                parsed = extract_json(text)
+                rows = parsed.get("items", [])
+                if not isinstance(rows, list):
+                    raise ValueError("Groq response missing items array")
+                ready = {}
+                for row in rows:
+                    if not isinstance(row, dict) or row.get("id") not in valid_ids:
+                        continue
+                    examples = row.get("examples")
+                    if not isinstance(examples, dict):
+                        continue
+                    record = {k: clean(row.get(k, ""), 750)
+                              for k in ("vi", "ko", "en", "context", "grammar")}
+                    record["examples"] = {k: clean(examples.get(k, ""), 600)
+                                          for k in ("vi", "ko", "en")}
+                    if not record["context"] or not record["grammar"] or not all(record["examples"].values()):
+                        continue
+                    record.update({
+                        "references": [], "grounded": False,
+                        "aiStatus": "ready", "aiModel": name, "aiProvider": "groq"
+                    })
+                    ready[row["id"]] = record
+                if not ready:
+                    raise ValueError("Groq generated no complete educational examples")
+                state["last_success_model"] = name
+                print(f"INFO: Groq fallback succeeded with {name}; "
+                      f"enriched {len(ready)}/{len(batch)} rows (ungrounded)",
+                      file=sys.stderr)
+                return ready
+            except SyncError as exc:
+                msg = str(exc)
+                if "HTTP 400" in msg and json_mode:
+                    print(f"INFO: {name} does not accept JSON mode; retrying standard chat",
+                          file=sys.stderr)
+                    continue
+                blocked.add(name)
+                if "HTTP 429" in msg:
+                    print(f"WARNING: Groq {name} quota 429; rotating once to next model",
+                          file=sys.stderr)
+                else:
+                    print(f"WARNING: Groq {name}: {msg[:150]}", file=sys.stderr)
+                # A bad key affects every model, so stop instead of retrying.
+                if "HTTP 401" in msg or "HTTP 403" in msg:
+                    blocked.update(ordered)
+                break
+            except (ValueError, KeyError, TypeError, IndexError) as exc:
+                if json_mode:
+                    # Some accounts/models support only regular chat completions.
+                    continue
+                blocked.add(name)
+                print(f"WARNING: Groq {name} invalid response: {str(exc)[:150]}",
+                      file=sys.stderr)
+                break
+    return {}
+
+
 def write_back_ready(rows: list[dict], headers: dict) -> None:
     """Best-effort Sheets D/E writeback. Only exact A:C + header matches; never overwrite edits."""
     if not headers or os.environ.get("VOCAB_WRITEBACK_SHEETS", "0") != "1":
@@ -511,7 +669,7 @@ def collect(old: dict) -> dict:
     for x in items:
         last = cache.get(x["id"], {})
         if last.get("inputHash") == x["inputHash"] and last.get("aiStatus") == "ready":
-            for key in ("context", "grammar", "examples", "references", "aiStatus", "aiModel", "grounded"):
+            for key in ("context", "grammar", "examples", "references", "aiStatus", "aiModel", "grounded", "aiProvider"):
                 if not x.get(key):
                     x[key] = last.get(key)
             for lang in ("vi", "ko", "en"):
@@ -534,32 +692,40 @@ def collect(old: dict) -> dict:
     if cool_down and pending:
         print(f"INFO: Gemini quota cooldown active until {previous_retry}. "
               "Source rows still sync; skipping repeated rate-limit API calls.", file=sys.stderr)
+    # Gemini cooldown does NOT block Groq. The two providers have separate
+    # credentials/quotas; a Gemini 429 should not stop useful Groq enrichment.
     names = models() if pending and not cool_down else []
-    if pending and not names and not cool_down:
-        print(f"INFO: {len(pending)} words pending Gemini; no eligible models with access. "
-              "Check GEMINI_API_KEY, model availability and project quotas.", file=sys.stderr)
-    # Keep 429 failures blocked across all groups for this workflow execution.
-    quota_state = {"blocked": set(), "rate_limited": set()}
-    todo = pending[:max(0, MAX_ENRICH)] if not cool_down else []
+    groq_names = groq_models() if pending else []
+    if pending and not names and not groq_names:
+        print(f"INFO: {len(pending)} words pending AI. Configure GROQ_API_KEY "
+              "or wait for Gemini quota/model access.", file=sys.stderr)
+    gemini_state = {"blocked": set(), "rate_limited": set()}
+    groq_state = {"blocked": set()}
+    todo = pending[:max(0, MAX_ENRICH)]
     for start in range(0, len(todo), 3):
         group = todo[start:start+3]
-        enriched = ai_enrich_batch(group, names, quota_state) if names else {}
+        enriched = ai_enrich_batch(group, names, gemini_state) if names else {}
+        remaining = [x for x in group if x["id"] not in enriched]
+        # Always try Groq for missing results, including during Gemini cooldown.
+        if remaining and groq_names:
+            enriched.update(ai_enrich_groq_batch(remaining, groq_names, groq_state))
         for x in group:
             ai = enriched.get(x["id"])
             if ai:
-                # Don't override user-provided translations.
+                # Never override owner-authored A:C translations.
                 for key in ("vi", "ko", "en"):
                     if not x.get(key):
                         x[key] = ai[key]
-                for key in ("context", "grammar", "examples", "references", "aiStatus", "aiModel", "grounded"):
-                    x[key] = ai[key]
+                for key in ("context", "grammar", "examples", "references",
+                            "aiStatus", "aiModel", "grounded", "aiProvider"):
+                    x[key] = ai.get(key, "gemini" if key == "aiProvider" else None)
     write_back_ready(items, headers)
     result = {"schemaVersion": 1, "folderId": FOLDER, "updatedAt": None,
               "sources": sources, "items": items}
     if cool_down:
         result["aiRetryAfter"] = previous_retry
-    elif (quota_state["rate_limited"] and names
-          and len(quota_state["blocked"]) >= len(names)
+    elif (gemini_state["rate_limited"] and names
+          and len(gemini_state["blocked"]) >= len(names)
           and not any(x.get("aiStatus") == "ready" for x in todo)):
         # Daily/project-wide 429 cannot be solved by rotating models repeatedly.
         # Retry after a bounded 15-minute pause; the Sheet's A:C still imports.
