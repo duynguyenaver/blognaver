@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Đơn xin việc đồng bộ Google Sheets qua Service Account: bản CV bốn trang A4 theo bố cục mẫu Samsung, có mã hóa và in PDF.">
+<title>Đơn xin việc · Samsung-style Resume — BlogNaver</title>
+<link rel="stylesheet" href="app.css">
+<link rel="stylesheet" href="../../access-gate.css">
+<script src="../../access-gate.js"></script>
+<script src="../device-secrets.js" defer></script>
+<script src="app.js" defer></script>
+</head>
+<body>
+<div class="workspace no-print">
+  <nav class="nav"><a href="../">← Tiện ích</a><a href="../../" class="brand"><i></i>DUY NGUYEN</a><span>CAREER / GOOGLE SHEETS</span></nav>
+  <header class="hero">
+    <span class="kicker">BLOGNAVER · CAREER DOCUMENT STUDIO</span>
+    <h1>Đơn xin việc <em>/ 입사지원서</em></h1>
+    <p>Nhập hồ sơ một lần trong Google Sheets. Bản Đơn xin việc A4 tái hiện cách chia trang, bảng biểu xanh cyan và nền xám của mẫu ứng tuyển Samsung đính kèm. Dữ liệu đồng bộ thông qua Google Service Account và chỉ mở sau khi giải mã trên thiết bị.</p>
+    <div class="hero-tags"><span>Google Sheets là nguồn dữ liệu</span><span>Service Account · Không Apps Script</span><span>AES-256-GCM</span><span>4 trang A4</span></div>
+  </header>
+  <section class="sync" aria-live="polite"><span class="status-dot" id="statusDot"></span><div class="status-copy"><strong id="syncTitle">Đang kiểm tra bản đồng bộ</strong><p id="syncDetail">Dữ liệu cá nhân chỉ hiển thị sau khi mở khóa.</p></div><button id="refresh" class="btn outline" type="button">↻ Kiểm tra cập nhật</button></section>
+  <section class="actions">
+    <a class="btn outline" href="https://docs.google.com/spreadsheets/d/17PL7m0_NTkZdWzptHkVewuqPcnTHul5KFIeT0MCHd0A/edit?usp=drivesdk" target="_blank" rel="noopener noreferrer">▦ Mở Google Sheets</a>
+    <button class="btn outline" id="blankPreview" type="button">▤ Xem mẫu trắng</button>
+    <button class="btn primary" id="print" type="button" disabled>↓ In / Lưu PDF A4</button>
+    <button class="btn outline" id="lock" type="button" hidden>🔒 Khóa & quên mật khẩu</button>
+  </section>
+  <section class="unlock" id="unlockPanel">
+    <div><span class="kicker">PRIVATE RESUME · QUYỀN RIÊNG TƯ</span><h2>Mở khóa Đơn xin việc</h2><p>Bản mã hóa được tải từ GitHub Pages. Mật khẩu được kiểm tra trong trình duyệt, không gửi về GitHub hay Google.</p></div>
+    <form id="unlockForm"><label for="passphrase">Mật khẩu giải mã</label><div class="unlock-row"><input type="password" id="passphrase" autocomplete="off" placeholder="Mật khẩu đã đặt trong GitHub Secret" required><button class="btn primary" type="submit">Mở hồ sơ</button></div><label class="remember"><input type="checkbox" id="remember"> Ghi nhớ trên thiết bị này (chỉ dùng trên máy cá nhân)</label><p id="unlockError" role="alert"></p></form>
+  </section>
+  <div class="preview-bar"><div><strong>PREVIEW · SAMSUNG-STYLE APPLICATION</strong><p id="previewInfo">Xem trước mẫu trống; các ô được điền từ Google Sheets sau khi mở khóa.</p></div><span id="pageCount">04 A4 PAGES</span></div>
+</div>
+<main id="cvDocument" class="cv-document" hidden aria-label="Đơn xin việc bốn trang A4">
+  <section class="paper" aria-label="Trang 1: lý lịch, học vấn và chứng chỉ">
+    <div class="application-header"><div class="application-title">ĐƠN XIN VIỆC <span>입사지원서</span></div><p>Vui lòng điền đầy đủ thông tin. | 정확한 정보를 기입해 주시기 바랍니다.</p></div>
+    <div class="section-box with-label">
+      <span class="side-label">인적사항</span>
+      <table class="profile-table"><tbody id="profileRows"></tbody></table>
+    </div>
+    <div class="section-box with-label">
+      <span class="side-label">학력사항</span>
+      <div class="table-wrap"><table class="sheet-table education"><thead><tr><th>구분<br>Học vấn</th><th>입학년월<br>Nhập học</th><th>졸업년월<br>Tốt nghiệp</th><th>학교명<br>Trường</th><th>전공<br>Chuyên ngành</th><th>졸업구분<br>Trạng thái</th><th>소재지<br>Địa điểm</th></tr></thead><tbody id="educationRows"></tbody></table><div id="theses" class="theses"></div></div>
+    </div>
+    <div class="section-box with-label">
+      <span class="side-label">경력사항</span>
+      <div class="table-wrap"><table class="sheet-table"><thead><tr><th>근무기간 · Thời gian</th><th>근무처 · Công ty</th><th>직위 · Chức vụ</th><th>직무 · Nhiệm vụ</th></tr></thead><tbody id="careerRows"></tbody></table></div>
+    </div>
+    <div class="three-columns">
+      <div class="section-box with-label mini"><span class="side-label">자격사항</span><table class="sheet-table"><thead><tr><th>특수자격및면허</th><th>등급</th></tr></thead><tbody id="certRows"></tbody></table></div>
+      <div class="section-box with-label mini"><span class="side-label">어학사항</span><table class="sheet-table"><thead><tr><th>언어 · Ngôn ngữ</th><th>점(응시명) · Điểm</th></tr></thead><tbody id="languageRows"></tbody></table></div>
+      <div class="section-box with-label mini"><span class="side-label">특기사항</span><table class="sheet-table"><tbody id="militaryRows"></tbody></table></div>
+    </div>
+    <div class="page-footer">ĐƠN XIN VIỆC · SAMSUNG-STYLE FORM <span>1 / 4</span></div>
+  </section>
+  <section class="paper" aria-label="Trang 2: nghiên cứu và thành tựu">
+    <h2 class="page-heading">석, 박사과정 중 연구경력</h2><p class="page-subheading">(이공계만 작성) · Kinh nghiệm nghiên cứu</p>
+    <h3 class="category-title">[연구경력] · RESEARCH EXPERIENCE</h3>
+    <div id="researchCards" class="research-cards"></div>
+    <h3 class="category-title">[논문/특허/수상내역 목록] · CÔNG TRÌNH / BẰNG SÁNG CHẾ / GIẢI THƯỞNG</h3>
+    <div id="achievements" class="award-list"></div>
+    <div class="page-footer">ĐƠN XIN VIỆC · SAMSUNG-STYLE FORM <span>2 / 4</span></div>
+  </section>
+  <section class="paper" aria-label="Trang 3: trình bày kinh nghiệm làm việc">
+    <h2 class="page-heading">경력 사항 기술</h2><p class="page-subheading">Chi tiết quá trình công tác và những công việc chính</p>
+    <div id="experienceCards" class="experience-cards"></div>
+    <div class="page-footer">ĐƠN XIN VIỆC · SAMSUNG-STYLE FORM <span>3 / 4</span></div>
+  </section>
+  <section class="paper" aria-label="Trang 4: nội dung bổ sung">
+    <h2 class="page-heading">추가 기재 사항</h2>
+    <p class="category-title">※ 추가적으로 기술하고 싶은 사항이 있다면, 본 페이지에 자유롭게 작성해주시기 바랍니다.</p>
+    <div id="additional" class="additional-content"></div>
+    <div class="page-footer">ĐƠN XIN VIỆC · SAMSUNG-STYLE FORM <span>4 / 4</span></div>
+  </section>
+</main>
+<footer class="website-footer no-print">BLOGNAVER · SPREADSHEET FIRST · ENCRYPTED BY DESIGN · Mẫu tham khảo, không phải biểu mẫu chính thức của Samsung.</footer>
+</body></html>
