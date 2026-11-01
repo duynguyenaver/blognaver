@@ -1,10 +1,10 @@
 (()=>{
 "use strict";
 const $=id=>document.getElementById(id),limit=28;
-let all=[],display=[],meta={},page=0,card=0,shown=false,reviewed=new Set();
+let all=[],snapshot=[],display=[],meta={},page=0,card=0,shown=false,reviewed=new Set(),liveLoading=false;
 const normal=s=>String(s??"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim();
 const element=(tag,text,cls)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=String(text);if(cls)e.className=cls;return e};
-const complete=x=>x.aiStatus==="ready"&&x.context&&x.grammar&&x.examples&&(x.examples.ko||x.examples.en||x.examples.vi);
+const complete=x=>!!(x.context&&x.grammar&&(x.aiStatus==="ready"||x.aiStatus==="sheet"));
 const languageNames={vi:"TIẾNG VIỆT",ko:"한국어",en:"ENGLISH"};
 const safeLink=s=>typeof s==="string"&&/^https:\/\/docs\.google\.com\/spreadsheets\/d\/[a-zA-Z0-9_-]+/.test(s);
 function setState(kind,title,detail){$("dot").className="dot "+kind;$("stateTitle").textContent=title;$("stateText").textContent=detail}
@@ -28,14 +28,14 @@ function render(){
   const korean=element("h3",x.ko||x.vi||x.en||x.content);korean.lang=x.ko?"ko":"vi";
   const trans=element("p",undefined,"trans");for(const [k,v] of [["vi",x.vi],["en",x.en]]){if(v){const span=element("span",v);span.lang=k;trans.append(span)}}title.append(korean,trans);
   const from=element("span",[x.sheetTitle,x.tabTitle].filter(Boolean).join(" / "),"origin");head.append(title,from);article.append(head);
-  article.append(element("span",complete(x)?"✦ GEMINI AI · ĐÃ BỔ SUNG":"◷ ĐANG CHỜ GEMINI AI","ai-status"+(complete(x)?"":" pending")));
+  article.append(element("span",complete(x)?(x.aiStatus==="sheet"?"✓ ĐÃ CÓ NỘI DUNG TRONG SHEETS":"✦ GEMINI AI · ĐÃ BỔ SUNG"):"◷ ĐANG CHỜ GEMINI AI","ai-status"+(complete(x)?"":" pending")));
   const detail=element("details"),summary=element("summary","Xem ngữ cảnh và ví dụ ngữ pháp ▾");
   detail.append(summary);
   if(complete(x)){
    detail.append(element("p","Ngữ cảnh sử dụng: "+x.context));
    detail.append(element("p","Ngữ pháp & lưu ý: "+x.grammar));
    const examples=element("div",undefined,"examples");
-   for(const [k,label] of [["vi","VI"],["ko","KR"],["en","EN"]]){if(x.examples[k]){const line=element("div"),b=element("b",label),span=element("span",x.examples[k]);span.lang=k;line.append(b,span);examples.append(line)}}
+   for(const [k,label] of [["vi","VI"],["ko","KR"],["en","EN"]]){if(x.examples?.[k]){const line=element("div"),b=element("b",label),span=element("span",x.examples[k]);span.lang=k;line.append(b,span);examples.append(line)}}
    detail.append(examples);
    if(Array.isArray(x.references)&&x.references.length){
     const refs=element("p","Nguồn tham khảo: ");
@@ -72,7 +72,7 @@ async function load(){
   if(!res.ok)throw new Error("HTTP "+res.status);
   const payload=await res.json();
   if(!Array.isArray(payload.items)||!Array.isArray(payload.sources))throw new Error("Định dạng dữ liệu không hợp lệ");
-  all=payload.items.filter(x=>x&&typeof x==="object"&&(x.vi||x.ko||x.en||x.content));
+  all=payload.items.filter(x=>x&&typeof x==="object"&&(x.vi||x.ko||x.en||x.content));snapshot=all.slice();
   meta=payload;reviewed.clear();
   const list=$("sources");list.replaceChildren();
   for(const s of payload.sources){const row=element("div",undefined,"source"),a=element("a",s.title||"Google Sheet");
@@ -83,8 +83,29 @@ async function load(){
   else if(!payload.updatedAt)setState("","Chờ đồng bộ lần đầu","Google Sheets mẫu đã kết nối; dữ liệu sẽ xuất hiện sau khi nguồn có hàng hợp lệ và tác vụ chạy thành công.");
   else setState("good","Đã đồng bộ Google Sheets","Cập nhật: "+prettyDate(payload.updatedAt)+". "+all.length+" mục từ "+payload.sources.length+" bảng tính.");
   select();
+  await refreshLive();
  }catch(e){setState("bad","Không thể tải dữ liệu",e.message+". Kiểm tra việc triển khai dữ liệu GitHub Pages.");$("list").replaceChildren(element("div","Không thể tải bản dữ liệu. Vui lòng thử lại sau.","empty"))}
  finally{$("reload").disabled=false}
+}
+async function refreshLive(){
+ if(liveLoading||document.hidden||!window.BNLiveVocabulary)return;
+ liveLoading=true;
+ try{
+  const rows=await window.BNLiveVocabulary.query();
+  all=window.BNLiveVocabulary.merge(rows,snapshot);
+  const sheetId=window.BNLiveVocabulary.sheetId;
+  const source=meta.sources?.find(s=>s.id===sheetId);
+  if(source)source.count=rows.length;
+  setState("good","Google Sheets · Đã đọc dữ liệu trực tiếp",
+    "Đã xác nhận "+rows.length+" hàng trên Sheet1 lúc "+new Date().toLocaleTimeString("vi-VN")+
+    ". Ngữ cảnh/AI được cập nhật sau khi GitHub Actions hoàn thành. Không có sync_id cho mỗi lần lưu.");
+  select();
+ }catch(e){
+  if(snapshot.length||meta.updatedAt)setState("","Đang dùng bản GitHub gần nhất",
+    "Không xác nhận được dữ liệu live từ Google Sheets ("+e.message+"). Kiểm tra quyền chia sẻ hoặc thử Tải lại.");
+  else setState("bad","Chưa đọc được Google Sheets",
+    e.message+". Dữ liệu có thể cần vài phút để được đồng bộ qua GitHub Actions.");
+ }finally{liveLoading=false}
 }
 $("reload").addEventListener("click",load);
 $("query").addEventListener("input",select);$("filter").addEventListener("change",select);
@@ -96,5 +117,7 @@ $("previousCard").addEventListener("click",()=>cardMove(-1));$("nextCard").addEv
 $("mark").addEventListener("click",()=>{if(display[card])reviewed.add(display[card].id);$("reviewed").textContent=reviewed.size;cardMove(1)});
 $("speak").addEventListener("click",()=>{if(!window.speechSynthesis||!display[card])return;window.speechSynthesis.cancel();const lang=$("language").value,u=new SpeechSynthesisUtterance(display[card][lang]||display[card].content||"");u.lang={vi:"vi-VN",ko:"ko-KR",en:"en-US"}[lang];u.rate=.86;window.speechSynthesis.speak(u)});
 window.addEventListener("pageshow",e=>{if(e.persisted)load()});
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)refreshLive()});
+setInterval(()=>{if(!document.hidden)refreshLive()},30000);
 load();
 })();

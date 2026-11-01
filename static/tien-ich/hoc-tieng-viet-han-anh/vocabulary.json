@@ -1,14 +1,28 @@
 {
   "schemaVersion": 1,
   "folderId": "1coylrqzqPOLZP_lhUdWlb3nI47Qr-af7",
-  "updatedAt": null,
+  "updatedAt": "2026-11-01T12:52:34Z",
   "sources": [
     {
       "id": "19nL6wtouHV-0OumsQR2jF-5xWA1cpbpivRUIsm7hDgk",
       "title": "viethananh",
       "url": "https://docs.google.com/spreadsheets/d/19nL6wtouHV-0OumsQR2jF-5xWA1cpbpivRUIsm7hDgk/edit",
-      "count": 0
+      "count": 1
     }
   ],
-  "items": []
+  "items": [
+    {
+      "vi": "Công ty phát triển ERP",
+      "ko": "ERP 개발사",
+      "en": "ERP Development Company",
+      "content": "",
+      "id": "b997d09080753a7cac8e6f4e",
+      "sheetId": "19nL6wtouHV-0OumsQR2jF-5xWA1cpbpivRUIsm7hDgk",
+      "sheetTitle": "viethananh",
+      "tabTitle": "Sheet1",
+      "row": 2,
+      "inputHash": "8f8c1762ca25bfc7b979c731",
+      "aiStatus": "pending"
+    }
+  ]
 }
