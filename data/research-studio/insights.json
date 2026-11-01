@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-01T11:10:11.926Z",
+  "updatedAt": "2026-11-01T11:47:41.290Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -1488,6 +1488,23 @@
         "tokens": 15477,
         "inputTokens": 9822,
         "outputTokens": 5655
+      },
+      "models": [
+        "Gemini · models/gemini-3.5-flash-lite"
+      ]
+    },
+    {
+      "slug": "cold-fusion-giai-ma-bien-nien-su-dune-tu-cuoc-chien-chong-may-moc-den-con-duong-vang-cu-2026-11-01",
+      "title": "Giải mã biên niên sử Dune: Từ cuộc chiến chống máy móc đến Con đường vàng của Leto II",
+      "series": "cold-fusion",
+      "sha": "ead6eb94ff79bcfb37fc9e8bab6b528d4c49cc8d",
+      "commitAt": "2026-11-01T11:47:05.015Z",
+      "durationMs": 40460,
+      "quota": {
+        "requests": 9,
+        "tokens": 45710,
+        "inputTokens": 37342,
+        "outputTokens": 8368
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
