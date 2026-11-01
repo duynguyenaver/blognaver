@@ -674,7 +674,7 @@ def collect(old: dict) -> dict:
     for x in items:
         last = cache.get(x["id"], {})
         if last.get("inputHash") == x["inputHash"] and last.get("aiStatus") == "ready":
-            for key in ("context", "grammar", "examples", "references", "aiStatus", "aiModel", "grounded", "aiProvider"):
+            for key in ("context", "grammar", "examples", "references", "aiStatus", "aiModel", "grounded", "aiProvider", "reviewRecommended"):
                 if not x.get(key):
                     x[key] = last.get(key)
             for lang in ("vi", "ko", "en"):
@@ -697,10 +697,13 @@ def collect(old: dict) -> dict:
     if cool_down and pending:
         print(f"INFO: Gemini quota cooldown active until {previous_retry}. "
               "Source rows still sync; skipping repeated rate-limit API calls.", file=sys.stderr)
-    # Gemini cooldown does NOT block Groq. The two providers have separate
-    # credentials/quotas; a Gemini 429 should not stop useful Groq enrichment.
-    names = models() if pending and not cool_down else []
-    groq_names = groq_models() if pending else []
+    # KEYLESS MODE: no Gemini/Groq requests are attempted. Offline reference
+    # generation works entirely from the Google Sheets A:C strings plus
+    # curated/linguistic data stored in this repository.
+    offline_only = os.environ.get("VOCAB_OFFLINE_ONLY", "0") == "1"
+    # Normal mode is retained for optional future AI provider use.
+    names = models() if pending and not cool_down and not offline_only else []
+    groq_names = groq_models() if pending and not offline_only else []
     if pending and not names and not groq_names:
         print(f"INFO: {len(pending)} words pending AI. Configure GROQ_API_KEY "
               "or wait for Gemini quota/model access.", file=sys.stderr)
@@ -714,22 +717,32 @@ def collect(old: dict) -> dict:
         # Always try Groq for missing results, including during Gemini cooldown.
         if remaining and groq_names:
             enriched.update(ai_enrich_groq_batch(remaining, groq_names, groq_state))
+        if remaining and (offline_only or os.environ.get("VOCAB_OFFLINE_FALLBACK", "0") == "1"):
+            from offline_trilingual_vocabulary import offline_enrich
+            for source in remaining:
+                if source["id"] not in enriched:
+                    enriched[source["id"]] = offline_enrich(source)
         for x in group:
             ai = enriched.get(x["id"])
             if ai:
                 # Never override owner-authored A:C translations.
                 for key in ("vi", "ko", "en"):
-                    if not x.get(key):
+                    if not x.get(key) and ai.get(key):
                         x[key] = ai[key]
                 for key in ("context", "grammar", "examples", "references",
-                            "aiStatus", "aiModel", "grounded", "aiProvider"):
-                    x[key] = ai.get(key, "gemini" if key == "aiProvider" else None)
+                            "aiStatus", "aiModel", "grounded", "aiProvider",
+                            "reviewRecommended"):
+                    if key in ai:
+                        if key in ("context", "grammar") and x.get(key):
+                            continue  # the spreadsheet owner's partial note wins
+                        x[key] = ai[key]
+                x.setdefault("aiProvider", "gemini")
     write_back_ready(items, headers)
     result = {"schemaVersion": 1, "folderId": FOLDER, "updatedAt": None,
               "sources": sources, "items": items}
-    if cool_down:
+    if cool_down and not offline_only and pending:
         result["aiRetryAfter"] = previous_retry
-    elif (gemini_state["rate_limited"] and names
+    elif (not offline_only and gemini_state["rate_limited"] and names
           and len(gemini_state["blocked"]) >= len(names)
           and not any(x.get("aiStatus") == "ready" for x in todo)):
         # Daily/project-wide 429 cannot be solved by rotating models repeatedly.
@@ -758,21 +771,29 @@ def write_run_summary(result: dict, old: dict) -> None:
     ready = [x for x in rows if x.get("aiStatus") == "ready"]
     pending = [x for x in rows if x.get("aiStatus") == "pending"]
     groq = sum(x.get("aiProvider") == "groq" for x in ready)
+    offline = sum(x.get("aiProvider") == "offline" for x in ready)
+    gemini = len(ready) - groq - offline
+    offline_only = os.environ.get("VOCAB_OFFLINE_ONLY", "0") == "1"
     lines = [
-        "## Language Lab · provider diagnostics", "",
+        "## Language Lab · real output diagnostics", "",
         f"- Imported vocabulary records: **{len(rows)}** (previous version: {len(old.get('items', []))})",
-        f"- AI-generated entries: **{len(ready)}** (Groq {groq}, Gemini {len(ready)-groq})",
-        f"- Pending AI: **{len(pending)}**",
-        f"- Gemini API key configured: **{'YES' if GEMINI_KEY else 'NO'}**",
-        f"- Groq API key configured: **{'YES' if GROQ_KEY else 'NO'}**",
+        f"- Completed notes: **{len(ready)}** (offline {offline}, Groq {groq}, Gemini {gemini})",
+        f"- Pending notes: **{len(pending)}**",
+        f"- Keyless offline mode: **{'ON (no Gemini/Groq requests)' if offline_only else 'OFF'}**",
     ]
+    if not offline_only:
+        lines += [
+            f"- Gemini API key configured: **{'YES' if GEMINI_KEY else 'NO'}**",
+            f"- Groq API key configured: **{'YES' if GROQ_KEY else 'NO'}**",
+        ]
     if result.get("aiRetryAfter"):
         lines.append("- Gemini cooldown: " + result["aiRetryAfter"] + " (Groq still eligible)")
-    if pending and not GROQ_KEY:
+    if pending and not GROQ_KEY and not offline_only:
         lines.append("- ACTION: Add GROQ_API_KEY in Settings > Secrets and variables > Actions.")
-    if pending and (GEMINI_KEY or GROQ_KEY):
+    if pending and (GEMINI_KEY or GROQ_KEY) and not offline_only:
         lines.append("- ATTENTION: At least one API is configured, but no guarantee of content. Inspect job logs for HTTP 429/401/400 and JSON validation errors.")
-    lines.append("- Note: A successful sync job is NOT proof that AI enrichment succeeded.")
+    lines.append("- Offline curated records are original learning notes; unknown terms use visibly marked templates requiring human review.")
+    lines.append("- A successful workflow does not imply linguistic accuracy; review the examples.")
     try:
         with open(target, "a", encoding="utf-8") as file:
             file.write("\n".join(lines) + "\n")
