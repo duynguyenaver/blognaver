@@ -7,6 +7,7 @@
   const fetchPrevious = $("voiceFixerFromSection2"), process = $("voiceFixerProcess");
   const transfer = $("voiceFixerToTts"), listen = $("voiceFixerListen");
   const info = $("voiceFixerStatus"), tts = $("script");
+  const maxTtsChars = Number(tts?.dataset?.maxChars) || 50000;
   if (![input, output, pace, english, fetchPrevious, process, transfer, listen, info, tts].every(Boolean)) return;
 
   // Spaces are often read more smoothly than syllable-joining dashes.
@@ -80,9 +81,9 @@
   function sendToTTS({ask = true, scroll = true} = {}) {
     const value = output.value.trim();
     if (!value) {message("Chưa có kịch bản đã tối ưu.", true);return false;}
-    if (value.length > tts.maxLength) {
+    if (value.length > maxTtsChars) {
       message("Kịch bản " + value.length.toLocaleString("vi-VN") +
-        " ký tự vượt giới hạn TTS " + tts.maxLength.toLocaleString("vi-VN") +
+        " ký tự vượt giới hạn TTS " + maxTtsChars.toLocaleString("vi-VN") +
         ". Hãy rút gọn trước; hệ thống không tự cắt nội dung.", true);
       return false;
     }
