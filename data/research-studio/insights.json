@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-01T11:08:53.999Z",
+  "updatedAt": "2026-11-01T11:09:31.199Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -1454,6 +1454,23 @@
         "tokens": 23815,
         "inputTokens": 18316,
         "outputTokens": 5499
+      },
+      "models": [
+        "Gemini · models/gemini-3.5-flash-lite"
+      ]
+    },
+    {
+      "slug": "cold-fusion-su-tro-lai-cua-toc-do-sieu-thanh-phan-tich-chien-luoc-tu-nguyen-mau-mark-2--2026-11-01",
+      "title": "Sự trở lại của tốc độ siêu thanh: Phân tích chiến lược từ nguyên mẫu Mark 2.1 của Hermes",
+      "series": "cold-fusion",
+      "sha": "d332c9cde377a03b8ea16065e925408e59bc43a4",
+      "commitAt": "2026-11-01T11:08:57.809Z",
+      "durationMs": 31776,
+      "quota": {
+        "requests": 8,
+        "tokens": 24099,
+        "inputTokens": 17855,
+        "outputTokens": 6244
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
