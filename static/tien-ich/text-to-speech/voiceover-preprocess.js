@@ -189,6 +189,9 @@
     return pieces.join(" ");
   }
   const terms=[
+    // English esports names: Gen.G -> den di; uppercase isolated G -> di, never "dê".
+    ["Gen.G","den di",true],["Gen G","den di",true],
+    ["Gen-G","den di",true],["GenG","den di",true],["G","di",false],
     ["Apricot Forest","A-pri-cot Pho-rét",true],["Internet of Things","In-tơ-nét off Thing-sơ",true],
     ["Santa Clara","San-ta Cờ-la-ra",true],["feet vuông","phít vuông",true],
     ["California","Ca-li-phót-ni-a",true],["Endeavor","En-đê-vơ",true],
@@ -261,6 +264,7 @@
   }
   function lowerFirstForSpeech(text){
     // Lowercase ordinary sentence starts, never proper names or initialisms.
+    if (/^Gen(?:[.\s-]?G)(?=\s|[.,;:!?]|$)/iu.test(text)) return text;
     if (/^(?:Nvidia|Santa Clara|California|Voyager|Endeavor|Intel|Fudan|Apricot Forest|Drone|Wi-Fi|Bluetooth|Terabits|Gigabits|Gigabytes|MIT|DJI|IoT|GPS|VLC|QR|LED|AI)(?=\s|[.,;:!?]|$)/u.test(text)) return text;
     if (/^[A-ZĐ]{2,}(?=\s|[.,;:!?]|$)/u.test(text)) return text;
     return text.charAt(0).toLocaleLowerCase("vi-VN")+text.slice(1);
