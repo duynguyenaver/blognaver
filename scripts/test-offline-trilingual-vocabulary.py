@@ -82,6 +82,21 @@ class OfflineLanguageTests(unittest.TestCase):
         self.assertEqual("template-offline-v1", result["items"][2]["aiModel"])
         self.assertNotIn("aiRetryAfter", result)
 
+    def test_partially_filled_owner_context_is_not_replaced(self):
+        values = [
+            ["Việt", "Hàn", "Anh", "Context or Expression", "Ngữ pháp ví dụ"],
+            ["xịt khoáng", "페이셜 미스트", "Facial mist", "Ghi chú của tôi", ""],
+        ]
+        with patch.dict(os.environ, {"VOCAB_OFFLINE_ONLY": "1"}), \
+             patch.object(sync, "service_headers", return_value={}), \
+             patch.object(sync, "public_csv", return_value=values), \
+             patch.object(sync, "write_back_ready"):
+            result = sync.collect({"items": [], "sources": [], "updatedAt": None})
+        word = result["items"][0]
+        self.assertEqual("ready", word["aiStatus"])
+        self.assertEqual("Ghi chú của tôi", word["context"])
+        self.assertTrue(word["grammar"])
+
     def test_existing_manual_sheet_notes_not_overwritten(self):
         values = [
             ["Việt", "Hàn", "Anh", "Context or Expression", "Ngữ pháp ví dụ"],
