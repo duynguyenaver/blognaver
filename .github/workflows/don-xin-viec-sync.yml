@@ -1,0 +1,87 @@
+name: Đơn xin việc · Service Account encrypted Sheets sync
+
+on:
+  pull_request:
+    paths:
+      - 'static/tien-ich/don-xin-viec/**'
+      - 'static/tien-ich/donxinviec/**'
+      - 'static/tien-ich/index.html'
+      - 'scripts/sync-don-xin-viec.py'
+      - 'scripts/test-sync-don-xin-viec.py'
+      - '.github/workflows/don-xin-viec-sync.yml'
+  workflow_dispatch:
+  schedule:
+    - cron: '*/5 * * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.event_name == 'pull_request' && format('don-xin-viec-check-{0}', github.event.pull_request.number) || 'don-xin-viec-sheet-sync' }}
+  cancel-in-progress: false
+
+jobs:
+  test:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Install tests and crypto dependencies
+        run: python3 -m pip install --quiet 'cryptography>=42,<48' 'google-auth>=2.27,<3' 'requests>=2,<3'
+      - name: Check sanitizer, schema and browser logic
+        run: |
+          python3 -m unittest discover -s scripts -p 'test-sync-don-xin-viec.py' -v
+          python3 -m py_compile scripts/sync-don-xin-viec.py
+          node --check static/tien-ich/don-xin-viec/app.js
+          test ! -e static/tien-ich/don-xin-viec/data.json
+
+  sync:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout main using owner's GitHub token
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ secrets.BLOGNAVER_VOCAB_BOT_TOKEN }}
+      - name: Install Google auth and AES encryption
+        run: python3 -m pip install --quiet 'google-auth>=2.27,<3' 'cryptography>=42,<48' 'requests>=2,<3'
+      - name: Read sheet with Service Account and encrypt in runner memory
+        env:
+          DONXINVIEC_SERVICE_ACCOUNT_JSON: ${{ secrets.DONXINVIEC_SERVICE_ACCOUNT_JSON }}
+          DONXINVIEC_ENCRYPTION_PASSPHRASE: ${{ secrets.DONXINVIEC_ENCRYPTION_PASSPHRASE }}
+          DONXINVIEC_SHEET_ID: 17PL7m0_NTkZdWzptHkVewuqPcnTHul5KFIeT0MCHd0A
+        run: python3 scripts/sync-don-xin-viec.py
+      - name: Create encrypted-data Pull Request (never push main)
+        env:
+          GH_TOKEN: ${{ secrets.BLOGNAVER_VOCAB_BOT_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          data_file=static/tien-ich/don-xin-viec/data.enc.json
+          if git diff --quiet -- "$data_file" && [[ -z "$(git ls-files --others --exclude-standard -- "$data_file")" ]]; then
+            echo "No Google Sheets data changes. No PR needed."
+            exit 0
+          fi
+          if [[ -z "${GH_TOKEN:-}" ]]; then
+            echo "::error::Missing BLOGNAVER_VOCAB_BOT_TOKEN for PR publishing."
+            exit 1
+          fi
+          git config user.name "BlogNaver Automation"
+          git config user.email "actions@users.noreply.github.com"
+          branch="automation/don-xin-viec-sync-${RUN_ID}"
+          git switch -c "$branch"
+          git add -- "$data_file"
+          git commit -m "data(cv): refresh encrypted Google Sheets snapshot"
+          git push origin "HEAD:refs/heads/$branch"
+          url="$(gh pr create --repo "$GH_REPO" --base main --head "$branch" --title "data(cv): encrypted service-account sync #${RUN_ID}" --body "Automated AES-256-GCM snapshot from owner Google Sheets. No plaintext CV data, private key, or passphrase committed. Source hash changes whenever any mapped cell changes.")"
+          echo "Created encrypted-data PR: $url"
+          if ! gh pr merge "$url" --repo "$GH_REPO" --auto --squash --delete-branch; then
+            echo "::warning::PR created but auto-merge requires repository branch rules / permissions; please inspect $url"
+          fi
