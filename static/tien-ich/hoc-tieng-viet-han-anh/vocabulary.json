@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
   "folderId": "1coylrqzqPOLZP_lhUdWlb3nI47Qr-af7",
-  "updatedAt": "2026-11-01T12:52:34Z",
+  "updatedAt": "2026-11-01T13:21:08+00:00",
   "sources": [
     {
       "id": "19nL6wtouHV-0OumsQR2jF-5xWA1cpbpivRUIsm7hDgk",
-      "title": "viethananh",
+      "title": "Google Sheets 19nL6wto",
       "url": "https://docs.google.com/spreadsheets/d/19nL6wtouHV-0OumsQR2jF-5xWA1cpbpivRUIsm7hDgk/edit",
-      "count": 1
+      "count": 2
     }
   ],
   "items": [
@@ -18,10 +18,23 @@
       "content": "",
       "id": "b997d09080753a7cac8e6f4e",
       "sheetId": "19nL6wtouHV-0OumsQR2jF-5xWA1cpbpivRUIsm7hDgk",
-      "sheetTitle": "viethananh",
+      "sheetTitle": "Google Sheets 19nL6wto",
       "tabTitle": "Sheet1",
       "row": 2,
       "inputHash": "8f8c1762ca25bfc7b979c731",
+      "aiStatus": "pending"
+    },
+    {
+      "vi": "viết blog tự động",
+      "ko": "자동 블로그 작성",
+      "en": "Automatic blog writing",
+      "content": "",
+      "id": "574499fd3b005082651d388a",
+      "sheetId": "19nL6wtouHV-0OumsQR2jF-5xWA1cpbpivRUIsm7hDgk",
+      "sheetTitle": "Google Sheets 19nL6wto",
+      "tabTitle": "Sheet1",
+      "row": 3,
+      "inputHash": "20759e00ae33f030e95d573e",
       "aiStatus": "pending"
     }
   ]
