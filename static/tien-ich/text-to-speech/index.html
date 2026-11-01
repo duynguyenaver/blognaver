@@ -35,6 +35,31 @@
 #voiceoverPreprocessor .prep-label{color:var(--blue);font-weight:800;font-size:11px;letter-spacing:.1em;text-transform:uppercase}
 @media(max-width:760px){#voiceoverPreprocessor .prep-grid{grid-template-columns:1fr}#voiceoverPreprocessor textarea{height:245px;min-height:200px}#voiceoverPreprocessor .prep-actions button{flex:1 1 145px}}
 
+/* Section 04: owner-trained pronunciation (collapsed optional settings) */
+#pronunciationTraining{margin:20px 0 8px;border-radius:16px;padding:clamp(17px,3vw,26px)}
+#pronunciationTraining>summary{cursor:pointer;list-style:none;display:flex;gap:12px;align-items:center;justify-content:space-between}
+#pronunciationTraining>summary::-webkit-details-marker{display:none}
+#pronunciationTraining>summary::after{content:"⌄";font-size:23px;color:var(--blue);transform-origin:center;transition:transform .2s}
+#pronunciationTraining[open]>summary::after{transform:rotate(180deg)}
+#pronunciationTraining h2{margin:4px 0 0}
+#pronunciationTraining .pron-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:16px 0}
+#pronunciationTraining label{font-weight:700;font-size:13px;display:block;margin-bottom:5px}
+#pronunciationTraining input:not([type=checkbox]),#pronunciationTraining select{width:100%;min-width:0;max-width:100%;padding:12px;border:1px solid #476487;border-radius:9px;background:#0b1c32;color:var(--text);font:inherit}
+#pronunciationTraining input:focus-visible,#pronunciationTraining button:focus-visible{outline:3px solid #9ed7ff;outline-offset:2px}
+#pronunciationTraining .pron-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+#pronunciationTraining .pron-actions button{min-height:44px}
+#pronunciationTraining .pron-check{display:flex;align-items:flex-start;gap:9px;font-weight:400}
+#pronunciationTraining .pron-check input{width:18px;height:18px;flex:none;margin-top:3px}
+#pronunciationTraining .pron-rule-list{padding:0;margin:11px 0 18px;list-style:none;display:grid;gap:7px;max-height:350px;overflow:auto}
+#pronunciationTraining .pron-rule-list>li{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:11px;border:1px solid var(--line);border-radius:9px}
+#pronunciationTraining .pron-rule-label{overflow-wrap:anywhere;min-width:0}
+#pronunciationTraining .pron-rule-label small{color:var(--muted)}
+#pronunciationTraining .pron-rule-actions{display:flex;gap:6px}
+#pronunciationTraining .pron-rule-actions button{font-size:12px;padding:7px 12px;min-height:37px}
+#pronunciationTrainingStatus{margin:10px 0 24px;font-size:13px;line-height:1.6;min-height:20px}
+#pronunciationTrainingStatus.bad{color:#ffb1bb}
+#pronunciationPullRequest[hidden]{display:none}
+@media(max-width:740px){#pronunciationTraining .pron-form-grid{grid-template-columns:1fr}#pronunciationTraining .pron-actions button{flex:1 1 130px}}
 /* Section 3: Voice Fixer / Natural Rhythm */
 #voiceFixer{margin:22px 0 26px;border-radius:16px;padding:clamp(18px,3vw,28px)}
 #voiceFixer .fixer-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:15px;flex-wrap:wrap}
@@ -162,6 +187,46 @@
   <div id="voiceFixerStatus" class="fixer-status" role="status" aria-live="polite">Sẵn sàng. Hai bộ lọc đều bật theo mặc định.</div>
   <div class="fixer-notice">Bộ từ điển sử dụng âm đọc xấp xỉ và dấu câu, không thay đổi engine giọng đọc. Kết quả được tự gửi lên Section 1 sau khi xử lý thành công; nếu TTS đang đọc/ghi hoặc có kịch bản cần bảo vệ, bạn sẽ được thông báo trước khi thay thế. Hãy nghe thử, kiểm tra tên riêng và số liệu trước khi xuất WAV.</div>
 </section>
+
+<details id="pronunciationTraining" class="panel" aria-labelledby="pronunciationTrainingTitle">
+  <summary>
+    <span><span class="eyebrow">SECTION 04 / TRAIN PRONUNCIATION</span>
+    <h2 id="pronunciationTrainingTitle">04 / Train cách đọc tiếng Anh / Việt chuẩn</h2></span>
+  </summary>
+  <p class="hint">Bạn thấy một từ đọc sai? Nhập từ gốc và âm đọc muốn nghe. Quy tắc được áp dụng tại Section 02, Section 03 và khi phát âm thanh Section 01. Không cần sửa mã nguồn hoặc thay giọng Hoài My.</p>
+  <form id="pronunciationEntryForm">
+    <div class="pron-form-grid">
+      <div><label for="pronunciationTerm">Từ/cụm từ đọc sai</label>
+      <input id="pronunciationTerm" type="text" maxlength="100" required placeholder="Ví dụ: Gen.G" autocomplete="off" spellcheck="false"></div>
+      <div><label for="pronunciationReading">Đọc đúng theo ý bạn</label>
+      <input id="pronunciationReading" type="text" maxlength="180" required placeholder="Ví dụ: den di" autocomplete="off"></div>
+      <div><label for="pronunciationLanguage">Ngôn ngữ</label>
+      <select id="pronunciationLanguage"><option value="en">Tiếng Anh / tên thương hiệu</option><option value="vi">Tiếng Việt</option></select></div>
+      <div><label class="pron-check" for="pronunciationCaseSensitive">
+        <input id="pronunciationCaseSensitive" type="checkbox" checked>
+        <span>Phân biệt chữ hoa/thường<small class="hint" style="display:block;font-weight:400">Tránh sửa nhầm từ tiếng Việt có cùng cách viết.</small></span>
+      </label></div>
+    </div>
+    <div class="pron-actions"><button type="submit" class="primary">+ Thêm / Cập nhật cách đọc</button></div>
+  </form>
+  <div class="control"><label for="pronunciationPreview">Nghe thử qua kịch bản · Kiểm tra văn bản sau thay thế</label>
+    <input id="pronunciationPreview" type="text" placeholder="Ví dụ: Hôm nay Gen.G thi đấu!" value="Hôm nay Gen.G thi đấu!">
+    <p id="pronunciationPreviewResult" class="hint" aria-live="polite"></p></div>
+  <div class="toolbar"><strong>Bộ từ điển đã học</strong><small id="pronunciationRuleCount">Đang tải…</small></div>
+  <ul id="pronunciationRuleList" class="pron-rule-list" aria-label="Các cách đọc đã học"></ul>
+  <p class="hint">Quy tắc mới dùng ngay trong tab. Để dùng lại trên thiết bị khác, bấm <strong>Lưu GitHub</strong>: hệ thống tạo nhánh dữ liệu và Pull Request, chờ CI xanh rồi auto-merge. Không ghi thẳng vào main.</p>
+  <label class="pron-check" for="pronunciationPublishConsent">
+    <input id="pronunciationPublishConsent" type="checkbox">
+    <span>Tôi đồng ý công khai <strong>chỉ các từ và cách đọc</strong> trong repository BlogNaver. Không gửi kịch bản, token hoặc dữ liệu riêng tư.</span>
+  </label>
+  <div class="pron-actions">
+    <button type="button" id="pronunciationSaveGithub" class="primary">Lưu cách đọc lên GitHub (tạo PR)</button>
+    <button type="button" id="pronunciationRefresh" class="secondary">↻ Tải lại từ GitHub</button>
+    <a id="pronunciationPullRequest" href="#" target="_blank" rel="noopener noreferrer" hidden></a>
+  </div>
+  <p class="hint">Dùng chung GitHub token tại mục <strong>Đồng bộ WAV</strong> của Section 01. Token cần quyền Contents: Read &amp; write và Pull requests: Read &amp; write. Token chỉ được dùng để gọi GitHub API; không đưa vào PR hoặc tệp công khai.</p>
+</details>
+<p id="pronunciationTrainingStatus" role="status" aria-live="polite">Chọn mở Section 04 để luyện phiên âm tiếng Anh/Việt.</p>
 
 <footer>© BlogNaver · Audio xử lý cục bộ trên thiết bị. Kiểm tra điều khoản sử dụng của từng giọng đọc trước khi dùng thương mại. <a href="../youtube-thumbnail-cover-generator/">Thumbnail Generator ↗</a> · <a href="../youtube-clip-maker/">YouTube Clip Maker ↗</a></footer>
 </main>
@@ -413,4 +478,4 @@ document.getElementById("sendToClip").addEventListener("click", () => {
   catch(e){window.alert("Trình duyệt không lưu được kịch bản. Hãy sao chép và dán thủ công vào Clip Maker.");return}
   window.location.href="../youtube-clip-maker/";
 });
-</script><script src="voiceover-preprocess.js?v=20261031-purge-dates-hotfix" defer></script><script src="voice-fixer.js?v=20261101-g-pronunciation" defer></script><script src="article-url-import.js?v=20261101" defer></script></body></html>
+</script><script src="pronunciation-training.js?v=20261101" defer></script><script src="voiceover-preprocess.js?v=20261101-dictionary" defer></script><script src="voice-fixer.js?v=20261101-training" defer></script><script src="article-url-import.js?v=20261101" defer></script></body></html>
