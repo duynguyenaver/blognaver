@@ -27,7 +27,7 @@ function envelope(c,t) {
  return clamp(Math.min(fi,fo),0,1);
 }
 function schedule(ctx,assets,clips,tracks,settings,from,seconds,playbackRate=1){
- const time0=ctx.currentTime+.04;
+ const time0=typeof ctx.startRendering==="function"?0:ctx.currentTime+.04;
  const master=ctx.createGain();master.gain.value=clamp(Number(settings.master??1),0,1.5);
  master.connect(ctx.destination);
  const solos=trackKeys.some(k=>tracks[k]?.solo);
