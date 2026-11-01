@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-01T00:10:48.230Z",
+  "updatedAt": "2026-11-01T10:42:34.552Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -1240,6 +1240,24 @@
         "tokens": 20858,
         "inputTokens": 15840,
         "outputTokens": 5018
+      },
+      "models": [
+        "Gemini · models/gemini-3.5-flash-lite"
+      ],
+      "live": true
+    },
+    {
+      "slug": "cold-fusion-cuoc-chien-sinh-tu-tai-swiss-stage-cktg-2026-khi-blg-doan-tuyet-lich-su-cua-2026-11-01",
+      "title": "Cuộc chiến sinh tử tại Swiss Stage CKTG 2026: Khi BLG đoạn tuyệt lịch sử của nhà vua MSI",
+      "series": "cold-fusion",
+      "sha": "edb5c741eb923183177a08d549fa0b04b5c6e58d",
+      "commitAt": "2026-11-01T10:41:57.493Z",
+      "durationMs": 50598,
+      "quota": {
+        "requests": 14,
+        "tokens": 97445,
+        "inputTokens": 88535,
+        "outputTokens": 8910
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
