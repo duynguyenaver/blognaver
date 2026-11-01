@@ -102,13 +102,14 @@ async function saveProject(manual=true){
  });
  await state.saveChain;
 }
-async function audioContext(){
+async function audioContext(resume=true){
  if(!state.ctx){const Constructor=window.AudioContext||window.webkitAudioContext;if(!Constructor)throw Error("Trình duyệt chưa hỗ trợ Web Audio.");state.ctx=new Constructor();}
- if(state.ctx.state==="suspended")await state.ctx.resume();
+ // Safari/Chrome may suspend playback until a gesture: decoding project media must not await resume.
+ if(resume&&state.ctx.state==="suspended")await state.ctx.resume();
  return state.ctx;
 }
 async function decode(blob){
- const context=await audioContext();
+ const context=await audioContext(false);
  const buffer=await context.decodeAudioData(await blob.arrayBuffer());
  if(!buffer?.duration||!Number.isFinite(buffer.duration))throw Error("Audio hỏng hoặc codec không hỗ trợ.");
  return buffer;
