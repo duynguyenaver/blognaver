@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-01T11:47:41.290Z",
+  "updatedAt": "2026-11-01T12:21:01.147Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -1405,7 +1405,8 @@
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
-      ]
+      ],
+      "live": true
     },
     {
       "slug": "cold-fusion-nghien-cuu-t2k-va-bat-doi-xung-neutrino-giai-ma-bi-an-vat-chat-vu-tru-2026-11-01",
@@ -1440,7 +1441,8 @@
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
-      ]
+      ],
+      "live": true
     },
     {
       "slug": "cold-fusion-tu-dong-hoa-nha-may-dien-tu-phan-tich-mo-hinh-san-xuat-linh-hoat-cua-circui-2026-11-01",
@@ -1457,7 +1459,8 @@
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
-      ]
+      ],
+      "live": true
     },
     {
       "slug": "cold-fusion-su-tro-lai-cua-toc-do-sieu-thanh-phan-tich-chien-luoc-tu-nguyen-mau-mark-2--2026-11-01",
@@ -1474,7 +1477,8 @@
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
-      ]
+      ],
+      "live": true
     },
     {
       "slug": "cold-fusion-kien-truc-luong-tu-quang-hoc-giai-phap-phan-bo-qubit-theo-thoi-gian-2026-11-01",
@@ -1491,7 +1495,8 @@
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
-      ]
+      ],
+      "live": true
     },
     {
       "slug": "cold-fusion-giai-ma-bien-nien-su-dune-tu-cuoc-chien-chong-may-moc-den-con-duong-vang-cu-2026-11-01",
@@ -1507,6 +1512,26 @@
         "outputTokens": 8368
       },
       "models": [
+        "Gemini · models/gemini-3.5-flash-lite"
+      ],
+      "live": true
+    },
+    {
+      "slug": "cold-fusion-ban-chat-khung-hoang-no-chau-au-va-bai-hoc-quan-tri-tien-te-tu-goc-nhin-col-2026-11-01",
+      "title": "Bản chất khủng hoảng nợ châu Âu và bài học quản trị tiền tệ từ góc nhìn Colddestruction",
+      "series": "cold-fusion",
+      "sha": "694d2413570770be80e12c3a4734d335dbe46208",
+      "commitAt": "2026-11-01T12:20:12.038Z",
+      "durationMs": 35621,
+      "quota": {
+        "requests": 7,
+        "tokens": 67793,
+        "inputTokens": 61663,
+        "outputTokens": 6130
+      },
+      "models": [
+        "Groq · openai/gpt-oss-20b",
+        "Groq · openai/gpt-oss-120b",
         "Gemini · models/gemini-3.5-flash-lite"
       ]
     }
