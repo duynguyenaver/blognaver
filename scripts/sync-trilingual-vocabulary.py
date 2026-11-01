@@ -484,8 +484,13 @@ def groq_post(model: str, prompt: str, json_mode: bool) -> dict:
                 {"role": "user", "content": prompt},
             ],
             "temperature": 0.2,
-            "max_completion_tokens": 2500,
+            "max_completion_tokens": 4800,
             "stream": False}
+    # Budget enough for JSON instead of consuming it all on reasoning.
+    if model.startswith("openai/gpt-oss-"):
+        data["reasoning_effort"] = "low"
+    elif model.startswith("qwen/"):
+        data["reasoning_effort"] = "none"
     if json_mode:
         data["response_format"] = {"type": "json_object"}
     raw = request(GROQ_API + "/chat/completions", headers={
@@ -743,12 +748,46 @@ def collect(old: dict) -> dict:
     return result
 
 
+
+def write_run_summary(result: dict, old: dict) -> None:
+    """Show whether AI actually generated data, without printing credential values."""
+    target = os.environ.get("GITHUB_STEP_SUMMARY", "")
+    if not target:
+        return
+    rows = result.get("items", [])
+    ready = [x for x in rows if x.get("aiStatus") == "ready"]
+    pending = [x for x in rows if x.get("aiStatus") == "pending"]
+    groq = sum(x.get("aiProvider") == "groq" for x in ready)
+    lines = [
+        "## Language Lab · provider diagnostics", "",
+        f"- Imported vocabulary records: **{len(rows)}** (previous version: {len(old.get('items', []))})",
+        f"- AI-generated entries: **{len(ready)}** (Groq {groq}, Gemini {len(ready)-groq})",
+        f"- Pending AI: **{len(pending)}**",
+        f"- Gemini API key configured: **{'YES' if GEMINI_KEY else 'NO'}**",
+        f"- Groq API key configured: **{'YES' if GROQ_KEY else 'NO'}**",
+    ]
+    if result.get("aiRetryAfter"):
+        lines.append("- Gemini cooldown: " + result["aiRetryAfter"] + " (Groq still eligible)")
+    if pending and not GROQ_KEY:
+        lines.append("- ACTION: Add GROQ_API_KEY in Settings > Secrets and variables > Actions.")
+    if pending and (GEMINI_KEY or GROQ_KEY):
+        lines.append("- ATTENTION: At least one API is configured, but no guarantee of content. Inspect job logs for HTTP 429/401/400 and JSON validation errors.")
+    lines.append("- Note: A successful sync job is NOT proof that AI enrichment succeeded.")
+    try:
+        with open(target, "a", encoding="utf-8") as file:
+            file.write("\n".join(lines) + "\n")
+    except OSError as exc:
+        print("WARNING: Could not write GitHub job summary: " + str(exc)[:120], file=sys.stderr)
+
+
+
 def main():
     old = read_old()
     if os.environ.get("VOCAB_TEST_MODE"):
         print("Test mode: import functions only")
         return
     result = collect(old)
+    write_run_summary(result, old)
     if result == old:
         print("No vocabulary changes.")
         return
