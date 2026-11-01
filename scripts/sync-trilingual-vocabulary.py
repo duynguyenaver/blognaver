@@ -622,10 +622,10 @@ def write_back_ready(rows: list[dict], headers: dict) -> None:
                     if examples.get(key):
                         phrases.append(f"{lang}: {examples[key]}")
                 grammar = "\n".join(phrases)
-                if not clean(raw[3]):
+                if not clean(raw[3]) or (x.get("aiProvider") in ("gemini", "groq") and is_offline_template(raw[3], raw[4])):
                     edits.append({"range": f"'{title.replace(chr(39), chr(39)*2)}'!D{x['row']}",
                                   "values": [[x["context"]]]})
-                if not clean(raw[4]):
+                if not clean(raw[4]) or (x.get("aiProvider") in ("gemini", "groq") and is_offline_template(raw[3], raw[4])):
                     edits.append({"range": f"'{title.replace(chr(39), chr(39)*2)}'!E{x['row']}",
                                   "values": [[grammar]]})
             if not edits:
@@ -636,6 +636,12 @@ def write_back_ready(rows: list[dict], headers: dict) -> None:
             print(f"INFO: Sheets writeback {sid}: {response.get('totalUpdatedCells', 0)} cells")
         except (SyncError, ValueError, KeyError, HTTPError) as exc:
             print(f"WARNING: Could not write Gemini D/E to {sid}: {str(exc)[:250]}", file=sys.stderr)
+
+
+def is_offline_template(context: str, grammar: str) -> bool:
+    """Recognize the retired auto-generated templates, never owner-written notes."""
+    return (str(context or "").startswith("Tham khảo offline:")
+            and str(grammar or "").startswith("Gợi ý kiểm tra:"))
 
 
 def collect(old: dict) -> dict:
@@ -673,18 +679,29 @@ def collect(old: dict) -> dict:
     pending = []
     for x in items:
         last = cache.get(x["id"], {})
-        if last.get("inputHash") == x["inputHash"] and last.get("aiStatus") == "ready":
-            for key in ("context", "grammar", "examples", "references", "aiStatus", "aiModel", "grounded", "aiProvider", "reviewRecommended"):
+        # Retired generic offline placeholders must not be labelled as a
+        # completed Gemini/Groq result, even when saved back to D/E.
+        stale_offline = is_offline_template(x.get("context"), x.get("grammar"))
+        if stale_offline:
+            x.pop("context", None)
+            x.pop("grammar", None)
+        same_input = last.get("inputHash") == x["inputHash"]
+        valid_cached_ai = (same_input and last.get("aiStatus") == "ready"
+                           and last.get("aiProvider") in ("gemini", "groq")
+                           and bool(last.get("context") and last.get("grammar")))
+        if valid_cached_ai:
+            for key in ("context", "grammar", "examples", "references", "aiStatus",
+                        "aiModel", "grounded", "aiProvider", "reviewRecommended"):
                 if not x.get(key):
                     x[key] = last.get(key)
-            for lang in ("vi", "ko", "en"):
-                if not x.get(lang):
-                    x[lang] = last.get(lang, "")
         elif x.get("context") and x.get("grammar"):
             x["aiStatus"] = "sheet"
         else:
             x["aiStatus"] = "pending"
         if x["aiStatus"] == "pending":
+            if stale_offline or (same_input and last.get("aiProvider") == "offline"):
+                print(f"INFO: Re-queue old offline template row {x['row']} for Gemini/Groq",
+                      file=sys.stderr)
             pending.append(x)
     now = datetime.now(timezone.utc)
     previous_retry = old.get("aiRetryAfter")
