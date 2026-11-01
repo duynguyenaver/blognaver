@@ -73,7 +73,16 @@ jobs:
           set -euo pipefail
           FILE=static/tien-ich/chi-phi-thang/data.enc.json
           if git diff --quiet -- "$FILE" && [ -z "$(git ls-files --others --exclude-standard -- "$FILE")" ]; then
-            echo "No changed finance data; skip PR."
+            echo "::notice::No changes in financial data; no new PR or deploy required."
+            # Close only same-repo owner finance PRs whose sourceHash already
+            # matches main. Never close PRs with newer or different data.
+            if [ -n "${GH_TOKEN:-}" ]; then
+              if ! python3 scripts/finance-conflict-resolver.py close-duplicates; then
+                echo "::warning::No-change sync succeeded, but duplicate PR cleanup needs attention."
+              fi
+            else
+              echo "::warning::No-change sync succeeded; missing bot token, so duplicate PR cleanup was skipped."
+            fi
             exit 0
           fi
           if [ -z "${GH_TOKEN:-}" ]; then
