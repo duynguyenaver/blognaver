@@ -8,11 +8,8 @@ on:
       - 'static/tien-ich/hoc-tieng-viet-han-anh/**'
       - '.github/workflows/trilingual-vocabulary-sync.yml'
   workflow_dispatch:
-  # Run AI enrichment immediately after each successful Pages deployment,
-  # including bot merges; the scheduled poll alone can be delayed.
-  workflow_run:
-    workflows: ["Build and deploy Hugo"]
-    types: [completed]
+  # Hugo dispatches this workflow explicitly after Pages deployment.
+  # workflow_dispatch and schedule run the same importer.
   schedule:
     - cron: '3/5 * * * *' # GitHub Actions minimum is 5 minutes; avoid top-of-hour congestion
 
@@ -51,7 +48,7 @@ jobs:
           python3 -m json.tool static/tien-ich/hoc-tieng-viet-han-anh/vocabulary.json >/dev/null
 
   sync:
-    if: github.event_name != 'pull_request' && (github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main'))
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
