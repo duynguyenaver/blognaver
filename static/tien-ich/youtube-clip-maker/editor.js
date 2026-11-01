@@ -9,7 +9,7 @@
   "voiceInfo","bgmInfo","voiceElement","bgmElement","aspect","fps","quality","resolutionLabel","play","pause",
   "restart","fullscreen","scrubber","clock","export","cancelExport","download","progressFill","progressPct",
   "exportStatus","zoom","zoomValue","fit","kenBurns","transition","filter","voiceVol","voiceVolValue",
-  "bgmVol","bgmVolValue","ducking","waveform","script","showSubs","generateSubs","fontSize","fontSizeValue",
+  "bgmVol","bgmVolValue","brightness","brightnessValue","contrast","contrastValue","saturation","saturationValue","ducking","waveform","script","showSubs","generateSubs","fontSize","fontSizeValue",
   "stillDuration","timelineHint","durationLabel","visualTrack","voiceTrack","bgmTrack","subtitleTrack"]) {
    ui[id] = $(id);
  }
@@ -227,7 +227,9 @@
    const scale=ratio*zoom*dynamic;
    const dw=width*scale,dh=height*scale;
    const offset=ken==="off"?0:(local-.5)*Math.min(w,h)*.025;
-   ctx.save();ctx.globalAlpha=opacity;ctx.filter=filterMap[ui.filter.value]||"none";
+   ctx.save();ctx.globalAlpha=opacity;
+   ctx.filter=(filterMap[ui.filter.value]==="none"?"":(filterMap[ui.filter.value]||"")+" ") +
+     "brightness("+Number(ui.brightness.value)+"%) contrast("+Number(ui.contrast.value)+"%) saturate("+Number(ui.saturation.value)+"%)";
    ctx.drawImage(media,(w-dw)/2+offset,(h-dh)/2-offset*.55,dw,dh);
    ctx.restore();
  }
@@ -306,6 +308,7 @@
    ui.voiceVolValue.textContent=Math.round(Number(ui.voiceVol.value)*100)+"%";
    ui.bgmVolValue.textContent=Math.round(Number(ui.bgmVol.value)*100)+"%";
    ui.fontSizeValue.textContent=ui.fontSize.value;
+   for(const id of ["brightness","contrast","saturation"])ui[id+"Value"].textContent=ui[id].value+"%";
  }
  function ensureAudioGraph(){
    if(audioCtx)return audioCtx.resume();
@@ -393,7 +396,7 @@
  ui.scrubber.addEventListener("input",()=>{if(!exporting)seek(ui.scrubber.value)});
  ui.fullscreen.addEventListener("click",()=>{const el=canvas.parentElement;if(!document.fullscreenElement)el.requestFullscreen?.();else document.exitFullscreen?.()});
  for(const id of ["aspect","quality"]){ui[id].addEventListener("change",()=>{if(exporting)return;sizeCanvas();draw(position)})}
- for(const id of ["zoom","fit","kenBurns","transition","filter","waveform","showSubs","fontSize"]){
+ for(const id of ["zoom","fit","kenBurns","transition","filter","brightness","contrast","saturation","waveform","showSubs","fontSize"]){
    ui[id].addEventListener("input",()=>{labelSettings();if(!playing)draw(position)});
  }
  for(const id of ["voiceVol","bgmVol","ducking"]){ui[id].addEventListener("input",()=>{labelSettings();setMixer()})}
