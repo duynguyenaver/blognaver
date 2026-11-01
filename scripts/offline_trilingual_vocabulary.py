@@ -56,7 +56,7 @@ def offline_enrich(entry: dict) -> dict:
     ko = str(entry.get("ko", "")).strip()
     en = str(entry.get("en", "")).strip()
     record = load_notes().get(normal(vi))
-    if record and vi and ko and en:
+    if record and vi and ko and en and normal(record.get("sourceKo")) == normal(ko) and normal(record.get("sourceEn")) == normal(en):
         context = str(record.get("context") or "").strip()
         grammar = str(record.get("grammar") or "").strip()
         examples = record.get("examples", {})
