@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-01T10:55:54.115Z",
+  "updatedAt": "2026-11-01T10:56:41.404Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -1276,6 +1276,23 @@
         "tokens": 32299,
         "inputTokens": 25950,
         "outputTokens": 6349
+      },
+      "models": [
+        "Gemini · models/gemini-3.5-flash-lite"
+      ]
+    },
+    {
+      "slug": "cold-fusion-tai-dinh-hinh-chuong-trinh-artemis-phan-tich-chien-luoc-cai-to-va-ky-thuat--2026-11-01",
+      "title": "Tái định hình chương trình Artemis: Phân tích chiến lược cải tổ và kỹ thuật không gian",
+      "series": "cold-fusion",
+      "sha": "acfa9a748da35ac64ead40350b2c31ead995f661",
+      "commitAt": "2026-11-01T10:56:05.500Z",
+      "durationMs": 37559,
+      "quota": {
+        "requests": 10,
+        "tokens": 34099,
+        "inputTokens": 27338,
+        "outputTokens": 6761
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
