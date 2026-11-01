@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "folderId": "1coylrqzqPOLZP_lhUdWlb3nI47Qr-af7",
-  "updatedAt": "2026-11-01T17:07:06+00:00",
+  "updatedAt": "2026-11-01T17:09:02+00:00",
   "sources": [
     {
       "id": "19nL6wtouHV-0OumsQR2jF-5xWA1cpbpivRUIsm7hDgk",
@@ -1198,7 +1198,7 @@
       "row": 49,
       "inputHash": "20bc1f4acf5eb0f213ceaccd",
       "context": "Dùng để chỉ bệnh truyền nhiễm do ký sinh trùng Plasmodium gây ra, thường gặp ở các vùng nhiệt đới và cận nhiệt đới.",
-      "grammar": "Danh từ danh nghĩa; trong câu tiếng Hàn thường đi kèm với từ chỉ bệnh (병) hoặc dùng làm chủ ngữ/đối tượng. Không có dạng chia.",
+      "grammar": "Danh từ danh nghĩa; trong câu tiếng Hàn thường đi kèm với từ chỉ bệnh (병) hoặc dùng làm chủ ngữ/đối tượng. Không có dạng chia. VI: ['Anh ấy vừa được chẩn đoán mắc sốt rét sau chuyến đi tới châu Phi.', 'Sốt rét có thể gây sốt cao và ớn lạnh kéo dài.', 'Để phòng ngừa sốt rét, nên dùng thuốc phòng ngừa khi vào khu vực có nguy cơ.'] KR: ['그는 아프리카 여행 후 말라리아에 걸렸다고 진단받았다.', '말라리아는 고열과 오한을 오래 지속시킬 수 있다.', '말라리아를 예방하려면 위험 지역에 갈 때 예방약을 복용해야 한다.'] EN: ['He was diagnosed with malaria after his trip to Africa.', 'Malaria can cause prolonged high fever and chills.', 'To prevent malaria, you should take prophylactic medication when traveling to high-risk areas.']",
       "examples": {
         "vi": "['Anh ấy vừa được chẩn đoán mắc sốt rét sau chuyến đi tới châu Phi.', 'Sốt rét có thể gây sốt cao và ớn lạnh kéo dài.', 'Để phòng ngừa sốt rét, nên dùng thuốc phòng ngừa khi vào khu vực có nguy cơ.']",
         "ko": "['그는 아프리카 여행 후 말라리아에 걸렸다고 진단받았다.', '말라리아는 고열과 오한을 오래 지속시킬 수 있다.', '말라리아를 예방하려면 위험 지역에 갈 때 예방약을 복용해야 한다.']",
@@ -1223,7 +1223,7 @@
       "row": 50,
       "inputHash": "6e2119ef71ff23562d2d25b3",
       "context": "Dùng để chỉ bệnh do virus Dengue truyền qua muỗi Aedes, phổ biến ở các khu vực nhiệt đới và cận nhiệt đới.",
-      "grammar": "Danh từ danh nghĩa; trong tiếng Hàn thường xuất hiện cùng với từ bệnh (병) hoặc dùng làm danh từ chỉ bệnh. Không có dạng chia.",
+      "grammar": "Danh từ danh nghĩa; trong tiếng Hàn thường xuất hiện cùng với từ bệnh (병) hoặc dùng làm danh từ chỉ bệnh. Không có dạng chia. VI: ['Mùa mưa năm nay, sốt xuất huyết đã bùng phát ở nhiều tỉnh.', 'Bệnh nhân sốt xuất huyết thường có biểu hiện đau đầu và phát ban.', 'Để giảm nguy cơ mắc sốt xuất huyết, cần tiêu diệt nơi ươm muỗi.'] KR: ['올해 장마철에 뎅기열이 여러 도에서 급증했다.', '뎅기열 환자는 보통 두통과 발진을 겪는다.', '뎅기열 위험을 줄이려면 모기 번식지를 제거해야 한다.'] EN: ['During this rainy season, dengue fever has surged in many provinces.', 'Patients with dengue fever often experience headaches and rashes.', 'To reduce the risk of dengue fever, mosquito breeding sites must be eliminated.']",
       "examples": {
         "vi": "['Mùa mưa năm nay, sốt xuất huyết đã bùng phát ở nhiều tỉnh.', 'Bệnh nhân sốt xuất huyết thường có biểu hiện đau đầu và phát ban.', 'Để giảm nguy cơ mắc sốt xuất huyết, cần tiêu diệt nơi ươm muỗi.']",
         "ko": "['올해 장마철에 뎅기열이 여러 도에서 급증했다.', '뎅기열 환자는 보통 두통과 발진을 겪는다.', '뎅기열 위험을 줄이려면 모기 번식지를 제거해야 한다.']",
@@ -1248,7 +1248,7 @@
       "row": 51,
       "inputHash": "967542adf197585153e0aab6",
       "context": "Dùng để chỉ chất lỏng đỏ trong cơ thể người hoặc động vật, hoặc ẩn dụ cho mối quan hệ gia đình, huyết thống.",
-      "grammar": "Danh từ chung, không chia số. Khi dùng trong câu, thường đi kèm với các vị từ như 'của', 'trong', 'với'.",
+      "grammar": "Danh từ chung, không chia số. Khi dùng trong câu, thường đi kèm với các vị từ như 'của', 'trong', 'với'. VI: ['Trong vũ khí, máu huyết thường được dùng để biểu thị sức mạnh.', 'Cô ấy rơi vào vết thương và máu huyết chảy ra.', 'Họ nói rằng máu huyết không thể thay đổi được.'] KR: ['그는 피가 많이 흘렸다.', '피는 몸 안에서 중요한 역할을 한다.', '그들의 피는 같은 혈통이다.'] EN: ['He was bleeding heavily.', 'Blood plays a vital role in the body.', 'Their blood ties them together.']",
       "examples": {
         "vi": "['Trong vũ khí, máu huyết thường được dùng để biểu thị sức mạnh.', 'Cô ấy rơi vào vết thương và máu huyết chảy ra.', 'Họ nói rằng máu huyết không thể thay đổi được.']",
         "ko": "['그는 피가 많이 흘렸다.', '피는 몸 안에서 중요한 역할을 한다.', '그들의 피는 같은 혈통이다.']",
@@ -1273,7 +1273,7 @@
       "row": 52,
       "inputHash": "260cf1b0b756ec963c7e2cd2",
       "context": "Chỉ mối quan hệ huyết thống, nguồn gốc gia đình, thường dùng trong ngữ cảnh nói về xuất xứ, danh tộc hoặc di truyền.",
-      "grammar": "Danh từ không đếm được, thường đi kèm với các từ chỉ sở hữu như 'của', 'từ', hoặc các động từ như 'có', 'được'.",
+      "grammar": "Danh từ không đếm được, thường đi kèm với các từ chỉ sở hữu như 'của', 'từ', hoặc các động từ như 'có', 'được'. VI: ['Anh ấy tự hào về huyết thống của mình.', 'Huyết thống hoàng gia được ghi chép cẩn thận.', 'Trong truyền thống này, huyết thống quyết định vị trí xã hội.'] KR: ['그는 자신의 혈통을 자랑한다.', '왕가의 혈통은 오래전부터 이어져 왔다.', '이 전통에서는 혈통이 사회적 지위를 결정한다.'] EN: ['He is proud of his lineage.', 'The royal lineage has been recorded for centuries.', 'In this tradition, lineage determines social status.']",
       "examples": {
         "vi": "['Anh ấy tự hào về huyết thống của mình.', 'Huyết thống hoàng gia được ghi chép cẩn thận.', 'Trong truyền thống này, huyết thống quyết định vị trí xã hội.']",
         "ko": "['그는 자신의 혈통을 자랑한다.', '왕가의 혈통은 오래전부터 이어져 왔다.', '이 전통에서는 혈통이 사회적 지위를 결정한다.']",
