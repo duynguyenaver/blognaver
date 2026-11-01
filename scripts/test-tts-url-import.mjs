@@ -91,7 +91,7 @@ test("accepts only on-site article URL and strips tracking query/anchor",()=>{
     "javascript:alert(1)",
     "https://duynguyenaver.github.io/blognaver/",
     "https://user:pass@duynguyenaver.github.io/blognaver/bai-viet/gen-g/"
-  ]) assert.throws(()=>api.normalizeArticleUrl(invalid),Error,invalid);
+  ]) assert.throws(()=>api.normalizeArticleUrl(invalid),/URL|BlogNaver|trang chủ|tiện ích|mật khẩu|HTTPS/i,invalid);
 });
 
 test("extracts title and main blog body, not chrome",()=>{
