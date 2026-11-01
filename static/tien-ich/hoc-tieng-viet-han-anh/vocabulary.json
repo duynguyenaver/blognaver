@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "folderId": "1coylrqzqPOLZP_lhUdWlb3nI47Qr-af7",
-  "updatedAt": "2026-11-01T15:52:27+00:00",
+  "updatedAt": "2026-11-01T15:54:13+00:00",
   "sources": [
     {
       "id": "19nL6wtouHV-0OumsQR2jF-5xWA1cpbpivRUIsm7hDgk",
@@ -822,7 +822,6 @@
       "tabTitle": "Sheet1",
       "row": 34,
       "inputHash": "1971f8b47297fa4e898e232e",
-      "aiStatus": "ready",
       "context": "Dùng để chỉ thời gian trong năm khi nhiệt độ thấp, thời tiết lạnh, thường đi kèm với các hoạt động như trượt tuyết, lễ hội ánh sáng, hoặc mô tả cảm giác lạnh lẽo.",
       "grammar": "‘겨울’ là danh từ chung, không chia dạng. Khi dùng làm trạng từ, thường kết hợp với hậu tố ‘에’ (vào mùa đông) hoặc ‘동안’ (trong suốt mùa đông). Cấu trúc thường gặp: 겨울에 + động từ, 겨울 동안 + danh từ, 겨울이 되다 (trở thành mùa đông).",
       "examples": {
@@ -831,9 +830,11 @@
         "en": "['This winter is very cold, so I have to wear a thick coat.', 'We will go skiing next winter.', 'During the winter, I read a lot of books.']"
       },
       "references": [],
+      "aiStatus": "ready",
       "aiModel": "openai/gpt-oss-120b",
       "grounded": false,
-      "aiProvider": "groq"
+      "aiProvider": "groq",
+      "reviewRecommended": null
     }
   ]
 }
