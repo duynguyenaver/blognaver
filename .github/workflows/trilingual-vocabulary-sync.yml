@@ -4,6 +4,7 @@ on:
     paths:
       - 'scripts/sync-trilingual-vocabulary.py'
       - 'scripts/test-sync-trilingual-vocabulary.py'
+      - 'scripts/test-language-lab-provider-rollback.py'
       - 'scripts/offline_trilingual_vocabulary.py'
       - 'scripts/trilingual-offline-notes.json'
       - 'scripts/test-vocab-library-pager.mjs'
@@ -38,6 +39,7 @@ jobs:
       - name: Test parsing, stable IDs, Vietnamese/Korean/English mapping
         run: |
           python3 scripts/test-sync-trilingual-vocabulary.py -v
+          python3 scripts/test-language-lab-provider-rollback.py -v
           python3 scripts/test-offline-trilingual-vocabulary.py -v
       - name: Test newest-first vocabulary ordering and 3-item live pagination
         run: node scripts/test-vocab-library-pager.mjs
@@ -66,6 +68,7 @@ jobs:
       - name: Verify vocabulary importer
         run: |
           python3 scripts/test-sync-trilingual-vocabulary.py -q
+          python3 scripts/test-language-lab-provider-rollback.py -q
           python3 scripts/test-offline-trilingual-vocabulary.py -q
       - name: Skip duplicate pending vocabulary sync PR
         id: existing
