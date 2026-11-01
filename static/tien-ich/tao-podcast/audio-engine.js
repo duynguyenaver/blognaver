@@ -83,18 +83,16 @@ function wavHeader(bytes,sampleRate,channels=2){
  label(36,"data");view.setUint32(40,bytes,true);
  return array;
 }
-function packPCM(audio,volume){
+function packPCM(audio,volume,start=0,frames=audio.length-start){
  const channels=Math.min(2,audio.numberOfChannels);
  const left=audio.getChannelData(0),right=channels>1?audio.getChannelData(1):left;
- const samples=new ArrayBuffer(left.length*4),view=new DataView(samples);
- let peak=0;
- for(let i=0;i<left.length;i++){
-  const l=clamp(left[i]*volume,-1,1),r=clamp(right[i]*volume,-1,1);
+ const samples=new ArrayBuffer(frames*4),view=new DataView(samples);
+ for(let i=0;i<frames;i++){
+  const l=clamp(left[start+i]*volume,-1,1),r=clamp(right[start+i]*volume,-1,1);
   view.setInt16(i*4,l<0?Math.round(l*32768):Math.round(l*32767),true);
   view.setInt16(i*4+2,r<0?Math.round(r*32768):Math.round(r*32767),true);
-  peak=Math.max(peak,Math.abs(left[i]),Math.abs(right[i]));
  }
- return {pcm:samples,peak};
+ return samples;
 }
 async function renderWAV({assets,clips,tracks,settings,sampleRate=48000,onProgress=()=>{},cancelled=()=>false}){
  const total=durationOf(clips);
@@ -113,18 +111,20 @@ async function renderWAV({assets,clips,tracks,settings,sampleRate=48000,onProgre
      if(cancelled())throw Error("Đã hủy xuất WAV.");
      const startFrame=i*chunkSeconds*sampleRate;
      const frameCount=Math.min(chunkSeconds*sampleRate,wholeFrames-startFrame);
-     const from=startFrame/sampleRate,seconds=frameCount/sampleRate;
-     const context=new OfflineAudioContext(2,frameCount,sampleRate);
+     // 350ms DSP warm-up avoids audible compressor resets at the 20-second chunk boundary.
+     const warmFrames=startFrame?Math.min(startFrame,Math.round(.35*sampleRate)):0;
+     const from=(startFrame-warmFrames)/sampleRate,seconds=(frameCount+warmFrames)/sampleRate;
+     const context=new OfflineAudioContext(2,frameCount+warmFrames,sampleRate);
      schedule(context,assets,clips,tracks,{...settings,master:settings.master??1},from,seconds);
      const rendered=await context.startRendering();
      if(pass===0&&normalize){
        for(let ch=0;ch<2;ch++){
          const values=rendered.getChannelData(ch);
-         for(let p=0;p<values.length;p++)maxPeak=Math.max(maxPeak,Math.abs(values[p]));
+         for(let p=warmFrames;p<warmFrames+frameCount;p++)maxPeak=Math.max(maxPeak,Math.abs(values[p]));
        }
      }else{
        const gain=normalize&&maxPeak>0?Math.min(4,Math.pow(10,-1/20)/maxPeak):1;
-       pcmParts.push(new Blob([packPCM(rendered,gain).pcm]));
+       pcmParts.push(new Blob([packPCM(rendered,gain,warmFrames,frameCount)]));
      }
      onProgress(Math.round(((pass*chunks+i+1)/(rounds*chunks))*100));
      await new Promise(r=>setTimeout(r,0));
