@@ -58,5 +58,5 @@ test("Section 02 preprocessor uses identical Gen.G pronunciation as Voice Fixer"
 test("Direct Section 01 playback applies the pronunciation without rewriting editor text",()=>{
   assert.match(page,/window\.BNVoiceFixer\?\.pronounceEnglish\?\.\(part\.text\)/);
   assert.match(page,/new SpeechSynthesisUtterance\(spoken\)/);
-  assert.match(page,/voice-fixer\.js\?v=20261101-g-pronunciation/);
+  assert.match(page,/voice-fixer\.js\?v=20261101-(?:g-pronunciation|training)/);
 });

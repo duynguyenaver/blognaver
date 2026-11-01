@@ -39,7 +39,8 @@
     regex:new RegExp("(?<![\\p{L}\\p{N}_])" + escapeRegExp(t.term) + "(?![\\p{L}\\p{N}_])", t.ci ? "giu" : "gu")
   }));
   function applyTerms(segment) {
-    let result = segment;
+    // Learned owner corrections have priority over built-in English pronunciations.
+    let result = window.BNPronunciationTraining?.apply?.(segment) ?? segment;
     for (const entry of dict) result = result.replace(entry.regex, () => entry.reading);
     return result;
   }

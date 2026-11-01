@@ -242,7 +242,7 @@
     return result+fn(s.slice(last));
   }
   function toSpoken(text){
-    return outsideProtected(text,s=>numbers(applyPhonetics(symbols(s)))
+    return outsideProtected(text,s=>numbers(applyPhonetics(symbols(window.BNPronunciationTraining?.apply?.(s) ?? s)))
       .replace(/[ \t]{2,}/g," ").replace(/\s+([,.;!?])/g,"$1").trim());
   }
   // STEP 3: narrate the actual body with contextual paragraph transitions.
