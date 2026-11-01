@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-01T12:21:01.147Z",
+  "updatedAt": "2026-11-01T12:23:41.732Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -1532,6 +1532,23 @@
       "models": [
         "Groq · openai/gpt-oss-20b",
         "Groq · openai/gpt-oss-120b",
+        "Gemini · models/gemini-3.5-flash-lite"
+      ]
+    },
+    {
+      "slug": "cold-fusion-cuoc-dua-chien-luoc-giua-hong-kong-va-singapore-inh-hinh-lai-tuong-lai-trun-2026-11-01",
+      "title": "Cuộc đua chiến lược giữa Hồng Kông và Singapore: Định hình lại tương lai trung tâm tài chính châu Á",
+      "series": "cold-fusion",
+      "sha": "3c85dbfa9bd6008bb3df27adc37c83f7b796ce97",
+      "commitAt": "2026-11-01T12:22:37.948Z",
+      "durationMs": 56371,
+      "quota": {
+        "requests": 8,
+        "tokens": 16763,
+        "inputTokens": 11438,
+        "outputTokens": 5325
+      },
+      "models": [
         "Gemini · models/gemini-3.5-flash-lite"
       ]
     }
