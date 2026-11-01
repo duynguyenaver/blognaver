@@ -2,32 +2,54 @@
 <html lang="vi">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#080d18">
+<meta name="theme-color" content="#090d12">
+<meta name="color-scheme" content="dark">
 <meta name="description" content="Tra cứu hợp đồng và chuyển nhượng tuyển thủ Liên Minh Huyền Thoại qua Riot Global Contract Database: LCK, LPL, LEC, LCS, LCP, CBLOL.">
 <title>LoL Contract & Transfer Tracker — BlogNaver</title>
 <link rel="stylesheet" href="../../access-gate.css"><script src="../../access-gate.js"></script>
-<link rel="stylesheet" href="tracker.css"><script src="tracker.js" defer></script><script src="archive.js" defer></script>
+<link rel="stylesheet" href="tracker.css"><link rel="stylesheet" href="riot-theme.css"><script src="tracker.js" defer></script><script src="archive.js" defer></script>
 </head>
 <body>
 <div class="shell">
-<nav class="topnav"><a href="../" class="back">← Tiện ích</a><a class="brand" href="/blognaver/"><span class="dot"></span> DUY NGUYEN <em>LAB</em></a><span class="navdesc">ESPORTS INTELLIGENCE</span></nav>
+<nav class="topnav" aria-label="Điều hướng BlogNaver">
+  <a href="../" class="back">‹ <span>TIỆN ÍCH</span></a>
+  <a class="brand" href="/blognaver/"><span class="dot" aria-hidden="true"></span> DUY NGUYEN <em>LAB</em></a>
+  <span class="navdesc"><span class="nav-pulse" aria-hidden="true"></span> LOL ESPORTS / CONTRACT INTELLIGENCE</span>
+</nav>
+<div class="eyeline" aria-hidden="true"><span>THE RIFT</span><span>CONTRACT INTELLIGENCE · RESEARCH DESK</span><span>RIOT GCD / COMMUNITY HISTORY</span></div>
 <header class="hero">
- <div class="hero-copy"><div class="eyebrow">BLOGNAVER / LEAGUE OF LEGENDS / CONTRACT INTELLIGENCE</div>
- <h1>LoL <span>Contract & Transfer</span> Tracker</h1>
- <p>Tra cứu hạn hợp đồng, đội đăng ký và biến động tuyển thủ từ cơ sở dữ liệu Riot Games. Theo dõi tin chuyển nhượng với <strong>trạng thái chứng cứ rõ ràng</strong> — không đánh đồng tin đồn với hợp đồng chính thức.</p>
- <div class="hero-actions"><a href="https://docs.google.com/spreadsheets/d/1Y7k5kQ2AegbuyiGwEPsa62e883FYVtHqr6UVut9RC4o/pubhtml" target="_blank" rel="noopener noreferrer" class="button">↗ Riot GCD chính thức</a><button id="downloadCsv" type="button" class="secondary">↓ Xuất kết quả CSV</button></div>
- </div><div class="hero-graphic" aria-hidden="true"><div class="league-ring">LCK <i>·</i> LPL <i>·</i> LEC</div><strong>GCD</strong><span>OFFICIAL CONTRACT REGISTER</span><div class="hero-line">TRANSFER MARKET / 2026–2027</div></div>
+ <div class="hero-copy">
+  <div class="eyebrow"><span class="eyebrow-line" aria-hidden="true"></span> ESPORTS INTELLIGENCE / LEAGUE OF LEGENDS</div>
+  <p class="hero-overline">THE CONTRACT ARCHIVE</p>
+  <h1>CONTRACT <span>&amp; TRANSFER</span><br>TRACKER</h1>
+  <p class="hero-lead">Theo dõi hợp đồng, đội hình và thị trường chuyển nhượng Liên Minh Huyền Thoại. <strong>Riot GCD chính thức</strong> cho hồ sơ hiện hành — <strong>Leaguepedia</strong> để đối chiếu lịch sử, không trộn lẫn nguồn.</p>
+  <div class="hero-actions"><a href="#contracts" class="button">KHÁM PHÁ HỢP ĐỒNG <span aria-hidden="true">↘</span></a><a href="https://docs.google.com/spreadsheets/d/1Y7k5kQ2AegbuyiGwEPsa62e883FYVtHqr6UVut9RC4o/pubhtml" target="_blank" rel="noopener noreferrer" class="secondary official-link">RIOT GCD ↗</a><button id="downloadCsv" type="button" class="secondary">↓ XUẤT CSV</button></div>
+  <div class="hero-foot"><span class="foot-ornament" aria-hidden="true">◆</span> DATA IS EVIDENCE. RUMOURS ARE NOT CONTRACTS.</div>
+ </div>
+ <div class="hero-graphic" aria-hidden="true">
+  <div class="arena-halo"></div><div class="arena-sigil"><span class="sigil-outer"></span><span class="sigil-core">GCD</span></div>
+  <div class="league-ring">LCK <i>•</i> LPL <i>•</i> LEC <i>•</i> LCP</div>
+  <span class="graphic-caption">GLOBAL CONTRACT DATABASE</span>
+  <div class="hero-line"><span>VERIFIED SOURCES</span><span>SCOUTING DESK // 01</span></div>
+ </div>
 </header>
-<section class="notice" aria-label="Giới hạn dữ liệu"><strong>Phân biệt dữ kiện:</strong> <em>Ngày hết hạn trên GCD</em> không đồng nghĩa “đã rời đội” hay “đã tự do”. Chỉ gắn nhãn <em>Gia hạn xác nhận / Chuyển nhượng xác nhận</em> khi có thông báo hoặc nguồn chứng thực. Lịch sử Leaguepedia chỉ dùng để đối chiếu. Dữ liệu mỗi khu vực có thể cập nhật vào ngày khác nhau. Không cần GitHub token để tra cứu.</section>
+<nav class="jumpnav" aria-label="Các mục của tiện ích">
+  <a href="#contracts"><span>01</span> HỢP ĐỒNG</a>
+  <a href="#changes"><span>02</span> BIẾN ĐỘNG</a>
+  <a href="#transfers"><span>03</span> CHUYỂN NHƯỢNG</a>
+  <a href="#historical"><span>04</span> LƯU TRỮ</a>
+  <a href="#manualImport"><span>+</span> NHẬP CSV</a>
+</nav>
+<section class="notice" aria-label="Giới hạn dữ liệu"><span class="notice-icon" aria-hidden="true">!</span> <strong>THÔNG TIN QUAN TRỌNG:</strong> <em>Ngày hết hạn trên GCD</em> không đồng nghĩa “đã rời đội” hay “đã tự do”. Chỉ gắn nhãn <em>Gia hạn xác nhận / Chuyển nhượng xác nhận</em> khi có thông báo hoặc nguồn chứng thực. Lịch sử Leaguepedia chỉ dùng để đối chiếu. Dữ liệu mỗi khu vực có thể cập nhật vào ngày khác nhau. Không cần GitHub token để tra cứu.</section>
 <section class="stats" aria-label="Tổng quan số liệu">
- <div class="stat"><span>Đăng ký GCD</span><strong id="statPlayers">—</strong><small>người trong snapshot</small></div>
- <div class="stat"><span>Trong 60 ngày</span><strong id="statExpiring">—</strong><small>ngày hết hạn sắp đến</small></div>
- <div class="stat"><span>Giải đấu</span><strong id="statLeagues">—</strong><small>có dữ liệu</small></div>
- <div class="stat"><span>Snapshot</span><strong id="statDate">Chưa có</strong><small id="snapshotMeta">Chờ dữ liệu từ Riot GCD</small></div>
+ <div class="stat"><span>RIOT GCD · REGISTRATIONS</span><strong id="statPlayers">—</strong><small>người trong snapshot</small></div>
+ <div class="stat"><span>EXPIRING · 60 DAYS</span><strong id="statExpiring">—</strong><small>ngày hết hạn sắp đến</small></div>
+ <div class="stat"><span>COMPETITIONS</span><strong id="statLeagues">—</strong><small>có dữ liệu</small></div>
+ <div class="stat"><span>LAST SNAPSHOT</span><strong id="statDate">Chưa có</strong><small id="snapshotMeta">Chờ dữ liệu từ Riot GCD</small></div>
 </section>
 <div id="sourceDates" class="source-dates" aria-label="Thời điểm cập nhật từng tab Riot GCD"></div>
 <main>
-<section class="workspace" id="contracts"><div class="section-head"><div><div class="eyebrow">01 / CONTRACT DATABASE</div><h2>Hợp đồng tuyển thủ & HLV</h2><p id="datasetStatus" role="status" aria-live="polite">Đang tải snapshot đã kiểm tra…</p></div><div class="source-tag">● RIOT GCD <span>Snapshot, không phải API realtime</span></div></div>
+<section class="workspace" id="contracts"><div class="section-head"><div><div class="eyebrow">01 / OFFICIAL CONTRACT REGISTRY</div><h2>Hợp đồng tuyển thủ &amp; HLV</h2><p id="datasetStatus" role="status" aria-live="polite">Đang tải snapshot đã kiểm tra…</p></div><div class="source-tag"><span class="source-symbol" aria-hidden="true">◆</span> RIOT GCD <span>OFFICIAL · SOURCE SNAPSHOT</span></div></div>
  <div class="filters">
   <label class="filter grow">Tìm tuyển thủ hoặc đội<input id="search" type="search" placeholder="Faker, T1, Gumayusi, Chovy, BLG…" autocomplete="off"></label>
   <label class="filter">Giải đấu<select id="league"><option value="">Tất cả khu vực</option><option>LCK</option><option>LPL</option><option>LEC</option><option>LCS</option><option>CBLOL</option><option>LCP</option><option>OTHER</option></select></label>
@@ -40,11 +62,11 @@
  <div class="pager"><button id="prevPage" class="secondary" type="button">← Trước</button><span id="pageInfo">—</span><button id="nextPage" class="secondary" type="button">Tiếp →</button></div>
 </section>
 <section class="dual">
- <div class="workspace" id="changes"><div class="section-head"><div><div class="eyebrow">02 / DATABASE DELTA</div><h2>Biến động ghi nhận</h2></div></div><p class="section-sub">So sánh hai lần tải GCD. <strong>Thay đổi ngày hết hạn chỉ là dấu hiệu cần kiểm chứng</strong>, không tự động kết luận gia hạn.</p><div id="changesList" class="event-list" aria-live="polite"><p class="muted">Chưa có lần đối chiếu nào.</p></div></div>
- <div class="workspace" id="transfers"><div class="section-head"><div><div class="eyebrow">03 / VERIFIED TRANSFERS</div><h2>Tin chuyển nhượng</h2></div></div><p class="section-sub">Tin có nguồn tham khảo và thời điểm; không hiển thị tin đồn vô căn cứ. Các sự kiện cũ được gắn ngày để tránh nhầm với chuyển nhượng mới.</p><div class="tabs" role="group" aria-label="Bộ lọc tin chuyển nhượng"><button type="button" class="tab active" data-event="all">Tất cả</button><button type="button" class="tab" data-event="confirmed">Xác nhận</button><button type="button" class="tab" data-event="renewed">Gia hạn</button><button type="button" class="tab" data-event="rumor">Tin đồn</button></div><div id="transfersList" class="event-list" aria-live="polite"><p class="muted">Đang tải tin đã xác minh…</p></div></div>
+ <div class="workspace" id="changes"><div class="section-head"><div><div class="eyebrow">02 / CONTRACT MONITOR</div><h2>Biến động ghi nhận</h2></div></div><p class="section-sub">So sánh hai lần tải GCD. <strong>Thay đổi ngày hết hạn chỉ là dấu hiệu cần kiểm chứng</strong>, không tự động kết luận gia hạn.</p><div id="changesList" class="event-list" aria-live="polite"><p class="muted">Chưa có lần đối chiếu nào.</p></div></div>
+ <div class="workspace" id="transfers"><div class="section-head"><div><div class="eyebrow">03 / TRANSFER WATCH</div><h2>Tin chuyển nhượng</h2></div></div><p class="section-sub">Tin có nguồn tham khảo và thời điểm; không hiển thị tin đồn vô căn cứ. Các sự kiện cũ được gắn ngày để tránh nhầm với chuyển nhượng mới.</p><div class="tabs" role="group" aria-label="Bộ lọc tin chuyển nhượng"><button type="button" class="tab active" data-event="all">Tất cả</button><button type="button" class="tab" data-event="confirmed">Xác nhận</button><button type="button" class="tab" data-event="renewed">Gia hạn</button><button type="button" class="tab" data-event="rumor">Tin đồn</button></div><div id="transfersList" class="event-list" aria-live="polite"><p class="muted">Đang tải tin đã xác minh…</p></div></div>
 </section>
 <section class="workspace archive-workspace" id="historical">
-<div class="section-head"><div><div class="eyebrow">04 / HISTORICAL CONTRACT ARCHIVE</div><h2>Kho lịch sử hợp đồng · Leaguepedia</h2><p>Đối chiếu bản lưu từ tháng 2/2018. <strong>Wiki cộng đồng — không phải Riot chính thức.</strong></p></div><div class="source-tag secondary-source">◌ LEAGUEPEDIA <span>Historical · Community archive</span></div></div>
+<div class="section-head"><div><div class="eyebrow">04 / HALL OF RECORDS</div><h2>Kho lịch sử hợp đồng · Leaguepedia</h2><p>Đối chiếu bản lưu từ tháng 2/2018. <strong>Wiki cộng đồng — không phải Riot chính thức.</strong></p></div><div class="source-tag secondary-source"><span class="source-symbol" aria-hidden="true">◇</span> LEAGUEPEDIA <span>COMMUNITY · HISTORICAL</span></div></div>
 <div class="archive-intro"><strong>Hai nguồn, hai nhiệm vụ:</strong> Riot GCD là nguồn hiện hành chính thức; Leaguepedia là kho bản lưu giúp tìm thời điểm đội hình và ngày hợp đồng từng thay đổi. Bản lưu lịch sử không tự xác nhận chuyển nhượng hoặc gia hạn mới.</div>
 <div class="filters archive-filters">
 <label class="filter">Vùng lịch sử<select id="archiveRegion"><option value="KR">Hàn Quốc · KR</option><option value="CN">Trung Quốc · CN</option><option value="EMEA">Châu Âu · EMEA</option><option value="AME">Châu Mỹ · AME</option><option value="APAC">Châu Á–TBD · APAC</option><option value="VN">Việt Nam · VN</option></select></label>
@@ -70,6 +92,6 @@
  </ul><p>Nguồn: <a href="https://competitiveops.riotgames.com/vi-VN/league-of-legends" target="_blank" rel="noopener noreferrer">Riot Competitive Operations</a> · <a href="https://www.sheepesports.com/en/articles/gcd-the-lol-esports-global-contract-database/en" target="_blank" rel="noopener noreferrer">Giải thích quy định GCD</a>. Trang này không đại diện Riot Games và không sử dụng Riot API key.</p>
 </div></details>
 </main>
-<footer><span>BlogNaver · LoL Contracts & Transfers · Data with evidence, not speculation</span><a href="/blognaver/">← Trang chủ</a></footer>
+<footer><span>BLOGNAVER / LOL CONTRACT INTELLIGENCE · INDEPENDENT FAN UTILITY · NOT AFFILIATED WITH RIOT GAMES</span><a href="/blognaver/">← Trang chủ</a></footer>
 </div>
 </body></html>
