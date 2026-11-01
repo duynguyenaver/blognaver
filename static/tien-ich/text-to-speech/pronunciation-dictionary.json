@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "note": "Public, owner-approved pronunciation rules for BlogNaver Text to Speech Studio. Updates require GitHub Pull Requests.",
+  "entries": [
+    {
+      "term": "Gen.G",
+      "reading": "den di",
+      "language": "en",
+      "caseSensitive": false
+    }
+  ]
+}
