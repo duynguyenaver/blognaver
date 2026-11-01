@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
   "folderId": "1coylrqzqPOLZP_lhUdWlb3nI47Qr-af7",
-  "updatedAt": "2026-11-01T14:44:41+00:00",
+  "updatedAt": "2026-11-01T14:52:46+00:00",
   "sources": [
     {
       "id": "19nL6wtouHV-0OumsQR2jF-5xWA1cpbpivRUIsm7hDgk",
       "title": "Google Sheets 19nL6wto",
       "url": "https://docs.google.com/spreadsheets/d/19nL6wtouHV-0OumsQR2jF-5xWA1cpbpivRUIsm7hDgk/edit",
-      "count": 23
+      "count": 29
     }
   ],
   "items": [
@@ -585,6 +585,156 @@
       "grounded": false,
       "aiProvider": "groq",
       "reviewRecommended": null
+    },
+    {
+      "vi": "mệt mỏi",
+      "ko": "피곤한",
+      "en": "tired",
+      "content": "",
+      "id": "16d3d436174136c9cf1e7e03",
+      "sheetId": "19nL6wtouHV-0OumsQR2jF-5xWA1cpbpivRUIsm7hDgk",
+      "sheetTitle": "Google Sheets 19nL6wto",
+      "tabTitle": "Sheet1",
+      "row": 25,
+      "inputHash": "b763164d1c3770b3d3d2f23c",
+      "aiStatus": "ready",
+      "context": "Tham khảo offline: “mệt mỏi” được ghi trong bảng với tiếng Hàn “피곤한” và tiếng Anh “tired”. Hãy đối chiếu văn cảnh để xác định sắc thái và chọn cách dịch tự nhiên. Đây là lời dẫn nhập thuật ngữ, không phải xác minh nghĩa từ điển.",
+      "grammar": "Gợi ý kiểm tra: “피곤한” có thể là dạng định ngữ bổ nghĩa danh từ; cần kiểm tra danh từ theo sau. Để dùng trong câu, cần chọn trợ từ, đuôi câu và mức độ kính ngữ theo mục đích giao tiếp. Chưa có phân tích ngữ pháp riêng đã được thẩm định cho mục từ này.",
+      "examples": {
+        "vi": "Trong bài học này, chúng tôi tìm hiểu cách dùng “mệt mỏi”.",
+        "ko": "이번 수업에서는 '피곤한'라는 표현을 배웁니다.",
+        "en": "In this lesson, we learn the expression “tired”."
+      },
+      "references": [],
+      "aiModel": "template-offline-v1",
+      "grounded": false,
+      "aiProvider": "offline",
+      "reviewRecommended": true
+    },
+    {
+      "vi": "nhợt nhạt",
+      "ko": "창백한",
+      "en": "pale",
+      "content": "",
+      "id": "32449efcd610a6678a684bfe",
+      "sheetId": "19nL6wtouHV-0OumsQR2jF-5xWA1cpbpivRUIsm7hDgk",
+      "sheetTitle": "Google Sheets 19nL6wto",
+      "tabTitle": "Sheet1",
+      "row": 26,
+      "inputHash": "32ebac6d3aa5b30367f043a9",
+      "aiStatus": "ready",
+      "context": "Tham khảo offline: “nhợt nhạt” được ghi trong bảng với tiếng Hàn “창백한” và tiếng Anh “pale”. Hãy đối chiếu văn cảnh để xác định sắc thái và chọn cách dịch tự nhiên. Đây là lời dẫn nhập thuật ngữ, không phải xác minh nghĩa từ điển.",
+      "grammar": "Gợi ý kiểm tra: “창백한” có thể là dạng định ngữ bổ nghĩa danh từ; cần kiểm tra danh từ theo sau. Để dùng trong câu, cần chọn trợ từ, đuôi câu và mức độ kính ngữ theo mục đích giao tiếp. Chưa có phân tích ngữ pháp riêng đã được thẩm định cho mục từ này.",
+      "examples": {
+        "vi": "Trong bài học này, chúng tôi tìm hiểu cách dùng “nhợt nhạt”.",
+        "ko": "이번 수업에서는 '창백한'라는 표현을 배웁니다.",
+        "en": "In this lesson, we learn the expression “pale”."
+      },
+      "references": [],
+      "aiModel": "template-offline-v1",
+      "grounded": false,
+      "aiProvider": "offline",
+      "reviewRecommended": true
+    },
+    {
+      "vi": "tinh tế",
+      "ko": "정교한",
+      "en": "elaborate",
+      "content": "",
+      "id": "74ec464e9801d64b211cfa89",
+      "sheetId": "19nL6wtouHV-0OumsQR2jF-5xWA1cpbpivRUIsm7hDgk",
+      "sheetTitle": "Google Sheets 19nL6wto",
+      "tabTitle": "Sheet1",
+      "row": 27,
+      "inputHash": "45bcb660f39dc10f9b563740",
+      "aiStatus": "ready",
+      "context": "Tham khảo offline: “tinh tế” được ghi trong bảng với tiếng Hàn “정교한” và tiếng Anh “elaborate”. Hãy đối chiếu văn cảnh để xác định sắc thái và chọn cách dịch tự nhiên. Đây là lời dẫn nhập thuật ngữ, không phải xác minh nghĩa từ điển.",
+      "grammar": "Gợi ý kiểm tra: “정교한” có thể là dạng định ngữ bổ nghĩa danh từ; cần kiểm tra danh từ theo sau. Để dùng trong câu, cần chọn trợ từ, đuôi câu và mức độ kính ngữ theo mục đích giao tiếp. Chưa có phân tích ngữ pháp riêng đã được thẩm định cho mục từ này.",
+      "examples": {
+        "vi": "Trong bài học này, chúng tôi tìm hiểu cách dùng “tinh tế”.",
+        "ko": "이번 수업에서는 '정교한'라는 표현을 배웁니다.",
+        "en": "In this lesson, we learn the expression “elaborate”."
+      },
+      "references": [],
+      "aiModel": "template-offline-v1",
+      "grounded": false,
+      "aiProvider": "offline",
+      "reviewRecommended": true
+    },
+    {
+      "vi": "bổ sung",
+      "ko": "추가의",
+      "en": "additional",
+      "content": "",
+      "id": "2e74206b6288af316d67fa6f",
+      "sheetId": "19nL6wtouHV-0OumsQR2jF-5xWA1cpbpivRUIsm7hDgk",
+      "sheetTitle": "Google Sheets 19nL6wto",
+      "tabTitle": "Sheet1",
+      "row": 28,
+      "inputHash": "cd7d71aa1084114b9bc3f042",
+      "aiStatus": "ready",
+      "context": "Tham khảo offline: “bổ sung” được ghi trong bảng với tiếng Hàn “추가의” và tiếng Anh “additional”. Hãy đối chiếu văn cảnh để xác định sắc thái và chọn cách dịch tự nhiên. Đây là lời dẫn nhập thuật ngữ, không phải xác minh nghĩa từ điển.",
+      "grammar": "Gợi ý kiểm tra: “추가의” một từ độc lập; cần kiểm tra từ loại và tiểu từ phù hợp theo câu. Để dùng trong câu, cần chọn trợ từ, đuôi câu và mức độ kính ngữ theo mục đích giao tiếp. Chưa có phân tích ngữ pháp riêng đã được thẩm định cho mục từ này.",
+      "examples": {
+        "vi": "Trong bài học này, chúng tôi tìm hiểu cách dùng “bổ sung”.",
+        "ko": "이번 수업에서는 '추가의'라는 표현을 배웁니다.",
+        "en": "In this lesson, we learn the expression “additional”."
+      },
+      "references": [],
+      "aiModel": "template-offline-v1",
+      "grounded": false,
+      "aiProvider": "offline",
+      "reviewRecommended": true
+    },
+    {
+      "vi": "đảm bảo",
+      "ko": "보장하다",
+      "en": "guarantee",
+      "content": "",
+      "id": "63f3a3053a5484bb11aea8c6",
+      "sheetId": "19nL6wtouHV-0OumsQR2jF-5xWA1cpbpivRUIsm7hDgk",
+      "sheetTitle": "Google Sheets 19nL6wto",
+      "tabTitle": "Sheet1",
+      "row": 29,
+      "inputHash": "c331eb3d8f4842a471fd0d60",
+      "aiStatus": "ready",
+      "context": "Tham khảo offline: “đảm bảo” được ghi trong bảng với tiếng Hàn “보장하다” và tiếng Anh “guarantee”. Hãy đối chiếu văn cảnh để xác định sắc thái và chọn cách dịch tự nhiên. Đây là lời dẫn nhập thuật ngữ, không phải xác minh nghĩa từ điển.",
+      "grammar": "Gợi ý kiểm tra: “보장하다” một từ độc lập; cần kiểm tra từ loại và tiểu từ phù hợp theo câu. Để dùng trong câu, cần chọn trợ từ, đuôi câu và mức độ kính ngữ theo mục đích giao tiếp. Chưa có phân tích ngữ pháp riêng đã được thẩm định cho mục từ này.",
+      "examples": {
+        "vi": "Trong bài học này, chúng tôi tìm hiểu cách dùng “đảm bảo”.",
+        "ko": "이번 수업에서는 '보장하다'라는 표현을 배웁니다.",
+        "en": "In this lesson, we learn the expression “guarantee”."
+      },
+      "references": [],
+      "aiModel": "template-offline-v1",
+      "grounded": false,
+      "aiProvider": "offline",
+      "reviewRecommended": true
+    },
+    {
+      "vi": "bổ sung giấy tờ",
+      "ko": "추가 서류",
+      "en": "Additional documents",
+      "content": "",
+      "id": "ef8bbb12181e044f3c5439cf",
+      "sheetId": "19nL6wtouHV-0OumsQR2jF-5xWA1cpbpivRUIsm7hDgk",
+      "sheetTitle": "Google Sheets 19nL6wto",
+      "tabTitle": "Sheet1",
+      "row": 30,
+      "inputHash": "f90695d16888c5e46e7cd409",
+      "aiStatus": "ready",
+      "context": "Tham khảo offline: “bổ sung giấy tờ” được ghi trong bảng với tiếng Hàn “추가 서류” và tiếng Anh “Additional documents”. Hãy đối chiếu văn cảnh để xác định sắc thái và chọn cách dịch tự nhiên. Đây là lời dẫn nhập thuật ngữ, không phải xác minh nghĩa từ điển.",
+      "grammar": "Gợi ý kiểm tra: “추가 서류” cụm từ gồm nhiều thành tố; tiểu từ tiếng Hàn (nếu có) phụ thuộc vai trò trong câu. Để dùng trong câu, cần chọn trợ từ, đuôi câu và mức độ kính ngữ theo mục đích giao tiếp. Chưa có phân tích ngữ pháp riêng đã được thẩm định cho mục từ này.",
+      "examples": {
+        "vi": "Trong bài học này, chúng tôi tìm hiểu cách dùng “bổ sung giấy tờ”.",
+        "ko": "이번 수업에서는 '추가 서류'라는 표현을 배웁니다.",
+        "en": "In this lesson, we learn the expression “Additional documents”."
+      },
+      "references": [],
+      "aiModel": "template-offline-v1",
+      "grounded": false,
+      "aiProvider": "offline",
+      "reviewRecommended": true
     }
   ]
 }
