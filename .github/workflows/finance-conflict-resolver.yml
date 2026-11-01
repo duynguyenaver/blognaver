@@ -1,0 +1,45 @@
+name: Finance Conflict Resolver · encrypted snapshot PRs
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize]
+  workflow_dispatch:
+  schedule:
+    - cron: '5,15,25,35,45,55 * * * *'
+
+permissions:
+  contents: read
+
+# Shared mutex with production finance sync: one encrypted PR writer at a time.
+concurrency:
+  group: blognaver-finance-data-pr
+  cancel-in-progress: false
+
+jobs:
+  repair:
+    if: >-
+      github.event_name != 'pull_request_target' ||
+      (github.event.pull_request.head.repo.full_name == github.repository &&
+       startsWith(github.event.pull_request.head.ref, 'data/chi-phi-thang-'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout trusted main (never PR-head code)
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Resolve owner-controlled finance ciphertext PR conflicts
+        env:
+          GH_TOKEN: ${{ secrets.BLOGNAVER_VOCAB_BOT_TOKEN }}
+          REPO: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
+          RUN_ATTEMPT: ${{ github.run_attempt }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "${GH_TOKEN:-}" ]; then
+            echo "::error::Missing owner PAT BLOGNAVER_VOCAB_BOT_TOKEN"
+            exit 1
+          fi
+          python3 scripts/finance-conflict-resolver.py repair
