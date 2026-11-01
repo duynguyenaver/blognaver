@@ -24,6 +24,23 @@ class FinanceResolverTest(unittest.TestCase):
         now=datetime.now(timezone.utc)
         self.assertEqual(m.decision(envelope(now,"a"*64),envelope(now+timedelta(seconds=1),"b"*64),True),"replace")
         self.assertEqual(m.decision(envelope(now,"a"*64),envelope(now+timedelta(seconds=1),"b"*64),False),"publish")
+    def test_no_change_closes_only_matching_owner_finance_pr(self):
+        from unittest.mock import patch
+        now=datetime.now(timezone.utc)
+        current=envelope(now,"a"*64)
+        identical=envelope(now+timedelta(seconds=1),"a"*64)
+        newer=envelope(now+timedelta(seconds=1),"b"*64)
+        prs=[
+            {"number":100,"head":{"ref":"data/chi-phi-thang-100"}},
+            {"number":101,"head":{"ref":"data/chi-phi-thang-101"}},
+        ]
+        with patch.object(m,"fetch_main",return_value=current), \
+             patch.object(m,"open_finance_prs",return_value=prs), \
+             patch.object(m,"fetch_head",side_effect=[identical,newer]), \
+             patch.object(m,"close_pr") as close:
+            m.close_duplicates()
+            close.assert_called_once()
+            self.assertEqual(close.call_args.args[0]["number"],100)
     def test_first_snapshot(self):
         self.assertEqual(m.decision(None,envelope(datetime.now(timezone.utc),"a"*64)),"publish")
     def test_rejects_unsafe_branch(self):
