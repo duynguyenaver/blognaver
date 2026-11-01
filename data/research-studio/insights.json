@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-01T10:59:43.475Z",
+  "updatedAt": "2026-11-01T11:00:30.714Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -1315,7 +1315,8 @@
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
-      ]
+      ],
+      "live": true
     },
     {
       "slug": "cold-fusion-giai-ma-nhat-hoa-va-bao-tu-su-menh-lich-su-cua-parker-solar-probe-2026-11-01",
@@ -1329,6 +1330,23 @@
         "tokens": 84233,
         "inputTokens": 74356,
         "outputTokens": 9877
+      },
+      "models": [
+        "Gemini · models/gemini-3.5-flash-lite"
+      ]
+    },
+    {
+      "slug": "cold-fusion-phan-tich-hien-tuong-thien-van-mat-trang-che-khuat-sao-moc-ngay-06-10-2026-2026-11-01",
+      "title": "Phân tích hiện tượng thiên văn Mặt Trăng che khuất sao Mộc ngày 06/10/2026",
+      "series": "cold-fusion",
+      "sha": "fec751d3f8c474ca649356586c1c3aff1104e1bc",
+      "commitAt": "2026-11-01T10:59:54.652Z",
+      "durationMs": 24171,
+      "quota": {
+        "requests": 7,
+        "tokens": 12333,
+        "inputTokens": 8067,
+        "outputTokens": 4266
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
