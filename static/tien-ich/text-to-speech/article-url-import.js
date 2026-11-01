@@ -64,7 +64,7 @@
 
   async function fetchArticle(url,signal) {
     const origin=new URL(url).origin;
-    const own=origin===window.location.origin;
+    const own=origin===new URL(window.location.href).origin;
     let directError=null;
     try {
       const response=await fetch(url,{method:"GET",credentials:own?"same-origin":"omit",mode:"cors",cache:"no-store",signal});
