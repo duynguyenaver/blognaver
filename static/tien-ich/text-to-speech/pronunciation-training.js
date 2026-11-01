@@ -9,7 +9,7 @@
   const FILE="static/tien-ich/text-to-speech/pronunciation-dictionary.json";
   const API="https://api.github.com/repos/"+REPO;
   const LIMIT=300, MAX_TERM=100, MAX_READING=180;
-  const store=new Map(), drafts=new Map();
+  const store=new Map(), submitted=new Map(), drafts=new Map();
   let loaded=false, saving=false;
   let readyResolve;
   const ready=new Promise(resolve=>{readyResolve=resolve});
@@ -46,7 +46,7 @@
 
   function activeEntries(){
     const combined=new Map(store);
-    for(const [k,v] of drafts){if(v===null)combined.delete(k);else combined.set(k,v)}
+    for(const pending of [submitted,drafts])for(const [k,v] of pending){if(v===null)combined.delete(k);else combined.set(k,v)}
     return Array.from(combined.values()).sort((a,b)=>b.term.length-a.term.length ||
       a.term.localeCompare(b.term,"vi"));
   }
@@ -105,7 +105,7 @@
     if(!list)return;
     list.replaceChildren();
     const items=activeEntries();
-    if(count)count.textContent=items.length+" quy tắc · "+drafts.size+" thay đổi chưa gửi PR";
+    if(count)count.textContent=items.length+" quy tắc · "+submitted.size+" đang chờ PR · "+drafts.size+" chưa gửi";
     for(const entry of items){
       const item=document.createElement("li");
       const label=document.createElement("span");
@@ -132,7 +132,7 @@
       del.setAttribute("aria-label","Xóa quy tắc "+entry.term);
       del.addEventListener("click",()=>{
         const k=key(entry.term);
-        if(store.has(k))drafts.set(k,null);else drafts.delete(k);
+        if(store.has(k)||submitted.has(k))drafts.set(k,null);else drafts.delete(k);
         refresh();preview();
         status("Đã đưa quy tắc "+entry.term+" vào thay đổi chờ PR. Chưa xóa khỏi GitHub.");
       });
@@ -197,6 +197,7 @@
   async function saveGitHub(){
     if(saving)return;
     if(!drafts.size){status("Chưa có từ/cụm từ mới để lưu GitHub.",true);return}
+    if(submitted.size){status("Đã có thay đổi trong PR đang chờ merge. Hãy xác minh merge/deploy và tải lại trang trước khi tạo PR mới để tránh bỏ sót quy tắc.",true);return}
     const token=$("ghToken")?.value.trim();
     if(!token){
       const details=$("ghToken")?.closest("details");
@@ -246,9 +247,9 @@
         throw Error("GitHub không trả về URL Pull Request hợp lệ; kiểm tra nhánh "+branch+".");
       const output=$("pronunciationPullRequest");
       if(output){output.href=link;output.textContent="Xem PR #"+pr.number+" · Chờ CI và auto-merge";output.hidden=false}
+      // Changes are in the PR branch, NOT on main yet; keep a separate in-session overlay.
+      for(const [k,v] of drafts)submitted.set(k,v);
       drafts.clear();
-      // Keep current-session edits active, but distinguish PR creation from merge and production deployment.
-      store.clear();for(const [k,v] of latest)store.set(k,v);
       refresh();preview();
       status("Đã lưu thay đổi lên GitHub trong PR #"+pr.number+". PR đang chờ CI/auto-merge; sau khi merge và deploy, các thiết bị khác sẽ nhận từ điển mới.");
     }catch(e){status("Chưa xác nhận lưu lên GitHub: "+(e.message||"Có lỗi xảy ra.")+" Bản chỉnh sửa trong tab vẫn được giữ.",true)}
@@ -261,6 +262,10 @@
       if(!response.ok)throw Error("HTTP "+response.status);
       const value=sanitizeList(await response.json());
       store.clear();for(const [k,v] of value)store.set(k,v);
+      for(const [k,v] of submitted){
+        const current=store.get(k)||null;
+        if(JSON.stringify(current)===JSON.stringify(v))submitted.delete(k);
+      }
       loaded=true;
       refresh();preview();
       status("Đã tải "+store.size+" quy tắc từ từ điển GitHub đã triển khai. Các mục bổ sung sẽ có hiệu lực trong tab này ngay khi thêm.");
