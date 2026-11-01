@@ -1,0 +1,29 @@
+#!/usr/bin/env python3
+import importlib.util
+import unittest
+from pathlib import Path
+spec=importlib.util.spec_from_file_location("finance",Path(__file__).with_name("sync-monthly-expenses.py"))
+finance=importlib.util.module_from_spec(spec);spec.loader.exec_module(finance)
+class TestFinance(unittest.TestCase):
+ def test_empty_headers(self):
+  self.assertEqual(finance.parse_transactions([finance.HEAD]),[])
+  self.assertEqual(finance.parse_budgets([finance.BUDGET_HEAD]),{})
+ def test_amounts_and_dates(self):
+  rows=[finance.HEAD,["2026-11-01","Chi","Ăn uống","Bữa trưa","45,000","Thẻ","","1"],["2026-11-02","Thu","Thu nhập","Lương","25.000.000","Chuyển khoản","","2"]]
+  result=finance.parse_transactions(rows)
+  self.assertEqual([x["amount"] for x in result],[45000,25000000])
+  self.assertEqual(result[0]["date"],"2026-11-01")
+ def test_fail_closed(self):
+  for bad in [["2026-02-30","Chi","","","100"],["2026-11-01","Chi","","","-1"],["2026-11-01","invalid","","","200"]]:
+   with self.assertRaises(finance.SyncError):finance.parse_transactions([finance.HEAD,bad])
+  with self.assertRaises(finance.SyncError):finance.parse_budgets([finance.BUDGET_HEAD,["11/2026","500"]])
+ def test_ciphertext(self):
+  from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+  from hashlib import pbkdf2_hmac
+  import base64,json
+  data={"transactions":[{"note":"private-value-123"}],"budgets":{}}
+  env=finance.encrypt(data,"long-enough-password")
+  self.assertNotIn("private-value-123",json.dumps(env))
+  key=pbkdf2_hmac("sha256",b"long-enough-password",base64.b64decode(env["salt"]),env["iterations"],32)
+  self.assertEqual(json.loads(AESGCM(key).decrypt(base64.b64decode(env["nonce"]),base64.b64decode(env["ciphertext"]),None)),data)
+if __name__=="__main__":unittest.main()
