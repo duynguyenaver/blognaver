@@ -6,6 +6,7 @@ on:
       - 'scripts/sync-monthly-expenses.py'
       - 'scripts/test-sync-monthly-expenses.py'
       - 'docs/google-apps-script/MonthlyExpenses.gs'
+      - 'scripts/test-finance-report.mjs'
       - '.github/workflows/monthly-expenses-sync.yml'
   workflow_dispatch:
   schedule:
@@ -31,6 +32,8 @@ jobs:
           python3 scripts/test-sync-monthly-expenses.py -v
           python3 -m py_compile scripts/sync-monthly-expenses.py
           node --check static/tien-ich/chi-phi-thang/app.js
+          node --check static/tien-ich/chi-phi-thang/finance-report.js
+          node scripts/test-finance-report.mjs
           node -e "new Function(require('fs').readFileSync('docs/google-apps-script/MonthlyExpenses.gs','utf8'))"
           test ! -e static/tien-ich/chi-phi-thang/data.json
   sync:
