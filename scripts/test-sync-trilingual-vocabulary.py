@@ -229,6 +229,35 @@ class TrilingualSyncTests(unittest.TestCase):
         self.assertEqual("ready", result["items"][0]["aiStatus"])
         self.assertEqual("groq", result["items"][0]["aiProvider"])
 
+    def test_groq_reasoning_effort_limited_for_json_output(self):
+        import json
+        calls = []
+        def fake_request(url, headers=None, body=None, retries=0):
+            calls.append(json.loads(body))
+            return b'{"choices":[{"message":{"content":"{}"}}]}'
+        with patch.object(mod, "GROQ_KEY", "placeholder-test-key"), \
+             patch.object(mod, "request", side_effect=fake_request):
+            mod.groq_post("openai/gpt-oss-120b", "test", True)
+            mod.groq_post("qwen/qwen3.8-27b", "test", True)
+        self.assertEqual(4800, calls[0]["max_completion_tokens"])
+        self.assertEqual("low", calls[0]["reasoning_effort"])
+        self.assertEqual("none", calls[1]["reasoning_effort"])
+        self.assertEqual("json_object", calls[0]["response_format"]["type"])
+
+    def test_workflow_summary_is_explicit_when_no_ai_content(self):
+        import os
+        with tempfile.TemporaryDirectory() as temp:
+            summary = pathlib.Path(temp) / "summary.md"
+            rows = [{"id":"1", "aiStatus":"pending"}]
+            with patch.dict(os.environ, {"GITHUB_STEP_SUMMARY":str(summary)}), \
+                 patch.object(mod, "GEMINI_KEY", "dummy"), \
+                 patch.object(mod, "GROQ_KEY", ""):
+                mod.write_run_summary({"items":rows}, {"items":[]})
+            result = summary.read_text(encoding="utf-8")
+        self.assertIn("Pending AI: **1**", result)
+        self.assertIn("Groq API key configured: **NO**", result)
+        self.assertIn("ACTION: Add GROQ_API_KEY", result)
+
     def test_safe_unicode(self):
         rows = [["Tiếng Việt", "한국어", "English"], ["Công nghệ", "기술", "Technology"]]
         result = mod.parse_table(rows, "a", self.tab, "x")
