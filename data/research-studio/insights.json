@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-01T11:00:30.714Z",
+  "updatedAt": "2026-11-01T11:02:12.632Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -1347,6 +1347,23 @@
         "tokens": 12333,
         "inputTokens": 8067,
         "outputTokens": 4266
+      },
+      "models": [
+        "Gemini · models/gemini-3.5-flash-lite"
+      ]
+    },
+    {
+      "slug": "cold-fusion-su-menh-juno-va-goc-nhin-tu-junocam-khi-cong-cu-truyen-thong-cong-dong-tao--2026-11-01",
+      "title": "Sứ mệnh Juno và góc nhìn từ JunoCam: Khi công cụ truyền thông cộng đồng tạo ra bước ngoặt khoa học",
+      "series": "cold-fusion",
+      "sha": "5e66944f950ed4a688edb36679947fc0d773d669",
+      "commitAt": "2026-11-01T11:01:29.790Z",
+      "durationMs": 49688,
+      "quota": {
+        "requests": 8,
+        "tokens": 15492,
+        "inputTokens": 9762,
+        "outputTokens": 5730
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
