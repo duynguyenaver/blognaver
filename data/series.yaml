@@ -34,3 +34,9 @@
   total: 0
   category: "Esports · League of Legends"
   accent: "#605be8"
+- id: techtalk
+  title: "TechTalk · Nhật ký code BlogNaver"
+  description: "Hậu trường thiết kế, lập trình, đồng bộ dữ liệu, xử lý lỗi và tối ưu trải nghiệm các tiện ích BlogNaver."
+  total: 2
+  category: "Công nghệ · Lập trình"
+  accent: "#107c41"
