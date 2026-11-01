@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-01T11:08:17.045Z",
+  "updatedAt": "2026-11-01T11:08:53.999Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -1422,7 +1422,8 @@
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
-      ]
+      ],
+      "live": true
     },
     {
       "slug": "cold-fusion-nghich-ly-fermi-va-hanh-trinh-tim-kiem-su-song-ngoai-trai-at-2026-11-01",
@@ -1436,6 +1437,23 @@
         "tokens": 45358,
         "inputTokens": 38508,
         "outputTokens": 6850
+      },
+      "models": [
+        "Gemini · models/gemini-3.5-flash-lite"
+      ]
+    },
+    {
+      "slug": "cold-fusion-tu-dong-hoa-nha-may-dien-tu-phan-tich-mo-hinh-san-xuat-linh-hoat-cua-circui-2026-11-01",
+      "title": "Tự động hóa nhà máy điện tử: Phân tích mô hình sản xuất linh hoạt của Circuit Hub",
+      "series": "cold-fusion",
+      "sha": "12b1950b8b582fe0724d8639ba43f66b488aedaf",
+      "commitAt": "2026-11-01T11:08:19.246Z",
+      "durationMs": 27616,
+      "quota": {
+        "requests": 8,
+        "tokens": 23815,
+        "inputTokens": 18316,
+        "outputTokens": 5499
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
