@@ -76,15 +76,24 @@ test("Section 04 is optional, collapsible and has clear GitHub PR status",()=>{
   assert.ok(page.includes("50.000"),"Existing TTS character cap remains visible");
 });
 
-test("Seeded dictionary contains explicit Gen.G owner correction",async()=>{
+test("GitHub dictionary respects each owner's pronunciation and case preference",async()=>{
   const {api}=environment(true);await api.ready;
-  assert.equal(api.apply("Gen.G chiến thắng. GEN.G tiếp tục."),"den di chiến thắng. den di tiếp tục.");
-  assert.equal(api.list().length,1);
+  assert.equal(api.list().length,seed.entries.length);
+  for(const entry of seed.entries){
+    assert.equal(api.list().find(item=>item.term===entry.term)?.reading,entry.reading);
+  }
+  const genG=seed.entries.find(entry=>entry.term==="Gen.G");
+  if(genG){
+    assert.equal(api.apply("Gen.G chiến thắng."),genG.reading+" chiến thắng.");
+    const upperExpected=genG.caseSensitive===false?genG.reading:"GEN.G";
+    assert.equal(api.apply("GEN.G tiếp tục."),upperExpected+" tiếp tục.");
+  }
 });
 
 test("Train exact English and Vietnamese words without changing embedded substrings",async()=>{
   const {api}=environment(true);
   await api.ready;
+  api.stage({term:"Gen.G",reading:"den di",language:"en",caseSensitive:false});
   api.stage({term:"G",reading:"di",language:"en",caseSensitive:true});
   api.stage({term:"hiểu nhầm",reading:"hiểu nhầm chuẩn",language:"vi",caseSensitive:false});
   assert.equal(api.apply("G giọng nói, 5G, Gaming, g"),"di giọng nói, 5G, Gaming, g");
