@@ -99,7 +99,7 @@ jobs:
           VOCAB_DRIVE_FOLDER_ID: '1coylrqzqPOLZP_lhUdWlb3nI47Qr-af7'
           VOCAB_PUBLIC_SHEET_IDS: '19nL6wtouHV-0OumsQR2jF-5xWA1cpbpivRUIsm7hDgk'
           VOCAB_GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.VOCAB_GOOGLE_SERVICE_ACCOUNT_JSON }}
-          VOCAB_OFFLINE_ONLY: "1"
+          VOCAB_OFFLINE_ONLY: "0"
           VOCAB_WRITEBACK_SHEETS: "1"
           VOCAB_MAX_GEMINI_ITEMS: '200'
         run: python3 scripts/sync-trilingual-vocabulary.py
