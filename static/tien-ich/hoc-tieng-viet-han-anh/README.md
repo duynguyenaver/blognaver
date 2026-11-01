@@ -1,52 +1,67 @@
-# BlogNaver Language Lab · Học tiếng Việt | Hàn | Anh
+# BlogNaver Language Lab · Học tiếng Việt · Hàn · Anh
 
-URL after verified deployment: \`/blognaver/tien-ich/hoc-tieng-viet-han-anh/\`
+Public page: https://duynguyenaver.github.io/blognaver/tien-ich/hoc-tieng-viet-han-anh/
 
-Google Drive folder: https://drive.google.com/drive/folders/1coylrqzqPOLZP_lhUdWlb3nI47Qr-af7
+Owner Google Drive folder: https://drive.google.com/drive/folders/1coylrqzqPOLZP_lhUdWlb3nI47Qr-af7
 
-Initial Sheet: https://docs.google.com/spreadsheets/d/19nL6wtouHV-0OumsQR2jF-5xWA1cpbpivRUIsm7hDgk/edit
+Primary Google Sheet: https://docs.google.com/spreadsheets/d/19nL6wtouHV-0OumsQR2jF-5xWA1cpbpivRUIsm7hDgk/edit
 
-## Sheet1 input format
+## Actual Sheet1 columns
 
-A header cell named **content** is accepted. Add entries below, one per row:
+| A: Việt | B: Hàn | C: Anh | D: Context or Expression | E: Ngữ pháp ví dụ |
+| --- | --- | --- | --- | --- |
+| Công ty phát triển ERP | ERP 개발사 | ERP Development Company | (AI writes) | (AI writes) |
 
-| content |
-| --- |
-| 환불 |
-| Hoàn tiền \| 환불 \| refund |
-| Việt: ngày nghỉ \| Hàn: 휴가 \| Anh: leave |
+The owner enters only A–C. D–E are generated/context-backed, and never overwrite existing user-authored values. The alternative older single-column \`content\` format is still supported for backwards compatibility, but is **not required** for this Sheet.
 
-You may alternatively create three columns headed **Việt | Hàn | Anh** (or equivalent names). Never enter AI context or grammar in Sheets unless you explicitly want to change this system later.
+## Immediate display of A–C
 
-- A single \`content\` entry is preserved as-is; Gemini can fill translations only when confidently matched.
-- Pipe-separated input follows **Việt | Hàn | Anh**. Unclear phrases are never silently assigned an invented translation.
-- Source IDs are based on spreadsheet, tab, and actual row number. Changes invalidate the AI cache; unchanged rows reuse it.
-- On a row edit, the importer takes the new source values; Gemini adds only missing translations and educational examples. Deletions propagate on successful next import. A sudden empty result after a nonempty dataset fails closed to prevent destructive outages.
-- If Gemini fails, source values remain available with \`pending\` status. We do not imply generated examples are verified quotes from web pages.
+The public utility reads A–C on open, on returning to the tab, on clicking Reload, and every 30 seconds while visible, using the public Google Visualization endpoint and a bounded timeout. Cached GitHub JSON remains as an offline/failure fallback; an absent or failed live request is never shown as a successful sync.
 
-## Required GitHub Actions secrets
+**Viewer permission is sufficient** for a public spreadsheet; **Anyone with link → Editor is unnecessary and unsafe**. Anyone with the link can potentially vandalize the entire file and potentially interfere with connected sheet automation. Restore Viewer immediately. If the sheet is restricted, the public browser live-read won't work; full authenticated Google service-account sync through Actions is then needed.
 
-- \`VOCAB_GOOGLE_SERVICE_ACCOUNT_JSON\` — Google Cloud service account **JSON**, with Drive readonly and Sheets readonly scopes. Share the Drive folder with the service account's email (Viewer). This is required to discover every new spreadsheet and every worksheet/tab in the folder. **Never commit this JSON or paste it into public issues or PRs.**
-- \`GEMINI_API_KEY\` — Gemini API key (server-side only), with a model supporting Google Search grounding. The action discovers supported \`generateContent\` models dynamically, rather than hardcoding a retired model.
-- \`BLOGNAVER_VOCAB_BOT_TOKEN\` — optional trusted GitHub token with \`contents:write\` / \`pull_requests:write\` for PR creation and normal push/deploy events; otherwise workflow uses \`github.token\` and existing PR automation.
+The Google Sheet does **not** emit an automatic \`sync_id\` for each edit to a third-party static site. Google Apps Script installable onEdit triggers can respond to direct human edits. For reliable cloud snapshots, GitHub Actions still runs a scheduled recheck and PR-first publication. Schedules, GitHub CI and deployment introduce nonzero delay.
 
-The linked public Sheet is available as a **fallback without a service account** using CSV export. In this fallback mode, only the specified sheet's first tab is loaded; the importer cannot discover new Drive folder files. Full folder syncing requires the service account. If the public sheet cannot be downloaded, fail without overwriting prior vocabulary.
+## Secured bidirectional automation
 
-## Operation
+There are **two alternatives**, not a need to make the Sheet publicly editable:
 
-- Workflow: \`.github/workflows/trilingual-vocabulary-sync.yml\`.
-- Checks every 30 minutes at minute 7 and 37 (UTC); GitHub may delay scheduled runs. GitHub Actions **Run workflow** triggers a manual refresh.
-- Data imports on a dedicated \`data/vocab-drive-sync-<run>\` branch and separate PR; no data commits to \`main\`. Existing reviews/checks and branch protections must pass before merge.
-- Only a **merged and deployed** data PR reaches public GitHub Pages. Clicking **Tải lại** in the UI refreshes the deployed snapshot; it does not run a Google API job.
-- Gemini enrichment is capped to 30 pending entries per run. New or changed words are prioritized; large sets fill in over multiple cycles.
-- Data from Sheets is published to a public GitHub Pages JSON file. **Do not store private/sensitive vocabulary or personal data in the source folder**; anyone with the site URL can read its content.
+### A. Recommended: owner-authorized Apps Script (no service-account JSON)
 
-## Test
+Source: \`docs/google-apps-script/LanguageLab.gs\`
 
-\`\`\`sh
-python3 -m unittest discover -s scripts -p 'test-sync-trilingual-vocabulary.py' -v
-python3 -m py_compile scripts/sync-trilingual-vocabulary.py
-node --check static/tien-ich/hoc-tieng-viet-han-anh/study.js
-\`\`\`
+1. Set the Google Sheet general access to **Viewer** (or Restricted, with different live-display architecture).
+2. In the owner Sheet choose **Extensions → Apps Script** and paste the complete contents of \`LanguageLab.gs\`.
+3. Save; run **installLanguageLabTriggers** once from the Apps Script editor and approve the Google permissions. This creates an **installable onEdit trigger** and a **5-minute writeback trigger** running as the installer.
+4. To request immediate Gemini enrichment when A–C changes, create a **fine-grained GitHub token restricted to this repo with Actions: Read and write**, and store it under **Apps Script → Project Settings → Script properties**, key \`GITHUB_DISPATCH_TOKEN\`. Never paste token into source files, sheet cells, public repos, browser pages, or comments.
+5. After a successful Gemini/GitHub Actions data PR and Hugo deploy, the time trigger reads the published vocabulary JSON, verifies exact A–C values at the same row, then writes **only blank D–E cells**. From the Sheet menu, **Language Lab → Ghi ngữ cảnh Gemini vào cột D–E** runs a manual check. Already-filled cells are never replaced.
 
-The system does not need an API key in the browser. The older private vocabulary utility \`tu-vung-han-anh-viet\` is not modified.
+Without \`GITHUB_DISPATCH_TOKEN\`, the browser can still read newly entered A–C directly and the scheduled Actions job can enrich every 30 minutes. The 5-minute Apps Script trigger can backfill **after** a validated AI snapshot has deployed.
+
+**Security:** Access to a bound Apps Script project must be limited to trusted collaborators. Protect the script properties and review script editors. The owner may wish to keep a standalone (not bound) script to isolate GitHub dispatch credentials from collaborators.
+
+### B. Service account with narrowly scoped Editor permission
+
+1. In Google Cloud create a dedicated Service Account; enable Drive API and Sheets API. Save credentials only as GitHub Actions secret \`VOCAB_GOOGLE_SERVICE_ACCOUNT_JSON\`.
+2. Share **only the vocabulary folder or targeted files** with the service-account email as **Editor**; the public remains Viewer or Restricted. Do **not** grant Editor to \`anyone\`.
+3. Workflow discovers every Google Sheet in the folder; reads tabs; Gemini (using secret \`GEMINI_API_KEY\`) produces web-grounded original educational examples. Where the Sheets A–E headers match exactly, it confirms A–C still match their source row and fills **only blank D and E cells** using authenticated Sheets API. \`VOCAB_WRITEBACK_SHEETS=1\` is configured in the workflow; without service-account authentication, it skips writeback.
+4. The public JSON changes still pass through a **data branch → PR → green CI → merge/deploy** before publication.
+
+When both integrations are configured they both act idempotently on blank cells, but using **one writeback mechanism** is simpler.
+
+## AI quality and safeguards
+
+- \`GEMINI_API_KEY\` is provided as an Actions secret; the browser never receives it.
+- Gemini model names are retrieved dynamically; no retired hardcoded model.
+- Google Search grounding is requested and evidence URLs kept. AI-generated examples are not presented as literal quotes.
+- Missing/uncertain AI content leaves the word marked as pending and does not fabricate translated content.
+- Cached AI result for an unchanged source row is reused; edits to A–C invalidate it.
+- D–E writeback requires verified source A–C, exact header placement, and blank target cells. It never changes source translations, formatting, or other sheets.
+- Data published in JSON is public. Keep private terms, credentials, confidential documents, and customer information out of this folder.
+- A public editing link can allow vandalism, so do not use it for automation.
+
+## Tests
+
+Run: \`python3 scripts/test-sync-trilingual-vocabulary.py -v\`, \`python3 -m py_compile scripts/sync-trilingual-vocabulary.py\`, \`node --check static/tien-ich/hoc-tieng-viet-han-anh/live-sheet.js\`, and \`node --check static/tien-ich/hoc-tieng-viet-han-anh/study.js\`.
+
+The existing separate \`tu-vung-han-anh-viet\` personal encrypted vocabulary utility has not been changed.
