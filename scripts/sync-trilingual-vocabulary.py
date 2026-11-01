@@ -166,7 +166,7 @@ def parse_content(value: str) -> dict:
     result = {"vi": "", "ko": "", "en": "", "content": value}
     if not value:
         return result
-    labelled = re.findall(r"(?i)(?:^|[|;\n])\s*(vi(?:et(?:namese)?)?|tiếng việt|han|kr|ko|korean|tiếng hàn|anh|en|english|tiếng anh)\s*[:：]\s*([^|;\n]+)", value)
+    labelled = re.findall(r"(?i)(?:^|[|;\n])\s*(vi(?:et(?:namese)?)?|tiếng việt|han|hàn|kr|ko|korean|tiếng hàn|anh|en|english|tiếng anh)\s*[:：]\s*([^|;\n]+)", value)
     for label, phrase in labelled:
         key = norm(label)
         lang = "ko" if key in {"han", "kr", "ko", "korean", "tieng han"} else "en" if key in {"anh", "en", "english", "tieng anh"} else "vi"
