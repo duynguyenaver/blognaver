@@ -20,7 +20,7 @@ class RestoreProviders(unittest.TestCase):
 
     def test_owner_pat_mandatory(self):
         workflow = WORKFLOW.read_text(encoding="utf-8")
-        self.assertEqual(workflow.count('GH_TOKEN:'), 3)
+        self.assertEqual(sum(line.lstrip().startswith('GH_TOKEN:') for line in workflow.splitlines()), 3)
         self.assertEqual(workflow.count('secrets.BLOGNAVER_VOCAB_BOT_TOKEN'), 3)
         self.assertNotIn('BLOGNAVER_VOCAB_BOT_TOKEN || github.token', workflow)
         self.assertIn('gh api user --jq .login', workflow)
