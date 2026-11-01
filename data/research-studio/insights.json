@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-01T10:42:34.552Z",
+  "updatedAt": "2026-11-01T10:55:54.115Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -1258,6 +1258,24 @@
         "tokens": 97445,
         "inputTokens": 88535,
         "outputTokens": 8910
+      },
+      "models": [
+        "Gemini · models/gemini-3.5-flash-lite"
+      ],
+      "live": true
+    },
+    {
+      "slug": "cold-fusion-chien-luoc-ha-tang-tai-lieu-doanh-nghiep-phan-tich-mo-hinh-hoat-dong-cua-re-2026-11-01",
+      "title": "Chiến lược hạ tầng tài liệu doanh nghiệp: Phân tích mô hình hoạt động của Reductto",
+      "series": "cold-fusion",
+      "sha": "08f9f73be235d63e79f33833db17adecfd9f3bb6",
+      "commitAt": "2026-11-01T10:55:20.876Z",
+      "durationMs": 34658,
+      "quota": {
+        "requests": 9,
+        "tokens": 32299,
+        "inputTokens": 25950,
+        "outputTokens": 6349
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
