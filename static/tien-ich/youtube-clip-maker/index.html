@@ -3,7 +3,7 @@
 <meta name="theme-color" content="#090d16"><meta name="description" content="Dựng YouTube Video và Shorts từ ảnh, giọng đọc WAV/MP3 và nhạc nền, hoàn toàn trên trình duyệt.">
 <title>YouTube Clip Maker Lab — BlogNaver</title>
 <link rel="stylesheet" href="studio.css"><link rel="stylesheet" href="../../access-gate.css"><script src="../../access-gate.js"></script>
-<script src="editor.js" defer></script>
+<script src="editor.js" defer></script><script src="pro-audio.js" defer></script><script src="pro-subtitles.js" defer></script>
 </head><body>
 <header class="topbar"><div class="brand"><a href="../" class="back">← Tiện ích</a><span class="mark">▶</span><div><strong>YouTube Clip Maker Lab</strong><small>CAPCUT PRO × YOUTUBE STUDIO EDITION</small></div></div><div class="top-actions"><span class="privacy">● Local-first · Không upload</span><a href="../text-to-speech/">TTS ↗</a><a href="../youtube-thumbnail-cover-generator/">Thumbnail ↗</a></div></header>
 <main class="editor">
@@ -28,6 +28,7 @@
 <div class="render-box"><div class="render-head"><div><strong>Xuất Video Pro</strong><small id="formatNote">Định dạng phụ thuộc trình duyệt · ưu tiên MP4 khi hỗ trợ, nếu không dùng WebM.</small></div><label class="control compact">Chất lượng <select id="quality"><option value="1080">1080p Full HD</option><option value="720">720p HD</option></select></label></div>
 <div class="render-actions"><button type="button" class="primary export-btn" id="export">⬇ Xuất Video Pro</button><button type="button" class="ghost" id="cancelExport" disabled>Dừng xuất</button><a id="download" class="download hidden" download>Tải video đã dựng ↓</a></div>
 <div class="progressline"><div id="progressFill"></div></div><div class="render-meta"><span id="exportStatus" role="status" aria-live="polite">Sẵn sàng dựng · Chưa xuất.</span><strong id="progressPct">0%</strong></div>
+<label class="toggle export-silent"><input id="silentExport" type="checkbox"><span><strong>Xuất video không tiếng (Video Only)</strong><small>Không ghép âm thanh nguồn, voiceover hoặc BGM vào video xuất. Dùng kèm nút Tải WAV ở Audio Track để lấy 2 file riêng.</small></span></label>
 <p class="mini-note">Render theo thời gian thực, không nhanh hơn độ dài audio. Trong lúc xuất hãy giữ tab đang mở; video có thể rất lớn. Độ phân giải 1080p/60fps tùy khả năng máy.</p>
 </div>
 </section>
@@ -38,21 +39,53 @@
 <label class="control">Ken Burns <select id="kenBurns"><option value="in">Pan & Zoom In</option><option value="out">Zoom Out</option><option value="off">Tắt hiệu ứng</option></select></label>
 <label class="control">Chuyển cảnh <select id="transition"><option value="fade">Crossfade</option><option value="cut">Cut trực tiếp</option></select></label>
 <label class="control">Bộ lọc <select id="filter"><option value="none">Tự nhiên</option><option value="cinema">Cinematic</option><option value="warm">Warm</option><option value="mono">Mono</option></select></label>
+<label class="control">Độ sáng <output id="brightnessValue">100%</output><input type="range" id="brightness" min="50" max="150" step="5" value="100"></label>
+<label class="control">Tương phản <output id="contrastValue">100%</output><input type="range" id="contrast" min="50" max="160" step="5" value="100"></label>
+<label class="control">Độ bão hòa màu <output id="saturationValue">100%</output><input type="range" id="saturation" min="0" max="200" step="5" value="100"></label>
 <div class="rule"></div><div class="section-label">Âm thanh</div>
 <label class="control">Âm lượng giọng <output id="voiceVolValue">100%</output><input id="voiceVol" type="range" min="0" max="1.5" step=".05" value="1"></label>
 <label class="control">Âm lượng BGM <output id="bgmVolValue">24%</output><input id="bgmVol" type="range" min="0" max=".8" step=".02" value=".24"></label>
 <label class="toggle"><input type="checkbox" id="ducking" checked><span><strong>Audio Ducking</strong><small>Giảm nhạc nền khi giọng đang nói</small></span></label>
 <label class="toggle"><input type="checkbox" id="waveform" checked><span><strong>Voice Waveform Overlay</strong><small>Sóng âm chạy theo cường độ voiceover</small></span></label>
+<details class="pro-disclosure" id="proAudioTools">
+<summary><span>♫ Embedded Audio Lab · Tách tiếng từ clip gốc</span><span class="chevron" aria-hidden="true">⌄</span></summary>
+<div class="pro-body">
+<p class="mini-note">Video gốc được giữ nguyên. Audio tách ra là track riêng, có thể chỉnh sửa không phá hủy file. Chọn clip video trong Media Library.</p>
+<strong class="pro-video-name" id="selectedVideoName">Chọn một video trong Media Library</strong>
+<div class="pro-actions"><button type="button" id="detachEmbeddedAudio" class="secondary">♫ Tách Audio</button><button type="button" id="saveDetachedWav" class="secondary">⬇ Tải WAV</button><button type="button" id="removeDetachedAudio" class="ghost">Xóa track</button></div>
+<div class="pro-control-grid">
+<label class="control">In · điểm bắt đầu (giây)<input id="audioTrimStart" type="number" min="0" step=".1" value="0"></label>
+<label class="control">Out · điểm kết thúc (giây)<input id="audioTrimEnd" type="number" min="0" step=".1" value="0"></label>
+<label class="control">Dịch thời điểm (giây)<input id="audioOffset" type="number" min="-300" max="300" step=".1" value="0"></label>
+<label class="control">Âm lượng (0–200%)<input id="audioGain" type="range" min="0" max="2" step=".05" value="1"></label>
+<label class="control">Fade In (giây)<input id="audioFadeIn" type="number" min="0" step=".1" value="0"></label>
+<label class="control">Fade Out (giây)<input id="audioFadeOut" type="number" min="0" step=".1" value="0"></label>
+</div>
+<div class="pro-checks"><label class="toggle"><input type="checkbox" id="audioMute"><span>Mute track</span></label><label class="toggle"><input type="checkbox" id="audioSolo"><span>Solo track</span></label></div>
+<p class="mini-note">WAV là PCM 16-bit, tải xuống máy trực tiếp. Trình duyệt cần giải mã được codec của clip; file dài có thể tốn RAM. Đây là tách tiếng gốc, không phải AI tách giọng hát/nhạc nền.</p>
+</div>
+</details>
+<p id="proAudioStatus" class="pro-status" role="status" aria-live="polite">Chọn một video để tách âm thanh.</p>
 <div class="rule"></div><div class="section-label">Subtitles / Text</div>
 <textarea id="script" rows="7" placeholder="Dán kịch bản từ Voice Fixer / TTS để tạo phụ đề..."></textarea>
 <div class="subtitle-tools"><button id="generateSubs" type="button" class="secondary">✦ Tạo phụ đề theo kịch bản</button><label class="toggle small"><input type="checkbox" id="showSubs" checked><span>Hiện phụ đề</span></label></div>
 <label class="control">Kích thước chữ <output id="fontSizeValue">52</output><input id="fontSize" type="range" min="28" max="90" step="2" value="52"></label>
 <div class="mini-note">Phụ đề được chia và phân bổ thời gian <strong>ước lượng theo số từ</strong>, không phải speech-to-text nhận diện thời điểm thực. Có thể chỉnh văn bản rồi tạo lại trước khi xuất.</div>
+<details class="pro-disclosure" id="proSrtTools">
+<summary><span>≡ SRT Subtitle Lab · Phụ đề chuẩn timecode</span><span class="chevron" aria-hidden="true">⌄</span></summary>
+<div class="pro-body">
+<p class="mini-note">Nhập file .srt đã có thời gian chính xác hoặc dán SRT vào ô bên dưới. Áp dụng vào preview và video xuất. Không tự nhận diện lời nói.</p>
+<label class="control">Nhập phụ đề SRT<input id="srtFile" type="file" accept=".srt,text/plain"></label>
+<textarea id="srtText" rows="7" spellcheck="false" aria-label="Nội dung phụ đề SRT" placeholder="1&#10;00:00:00,000 --> 00:00:02,500&#10;Xin chào!"></textarea>
+<div class="pro-actions"><button type="button" id="applySrt" class="secondary">Áp dụng SRT</button><button type="button" id="exportSrt" class="ghost">⬇ Xuất SRT</button><button type="button" id="editCurrentSrt" class="ghost">Nạp phụ đề hiện tại</button></div>
+</div></details>
+<p id="srtStatus" class="pro-status" role="status" aria-live="polite">Có thể nhập SRT chính xác thay vì chia kịch bản tự động.</p>
 </aside>
 </div>
-<section class="timeline panel" aria-labelledby="timelineTitle"><div class="panel-head"><div><h2 id="timelineTitle">04 / Multi-track Timeline</h2><p>Kéo ảnh trong thư viện để thay thứ tự. Nhấp ảnh rồi dùng nút ↑ ↓ hoặc Xóa. Voiceover quyết định thời lượng video khi đã tải.</p></div><span id="durationLabel" class="chip">00:10</span></div>
+<section class="timeline panel" aria-labelledby="timelineTitle"><div class="panel-head"><div><h2 id="timelineTitle">04 / Multi-track Timeline</h2><p>Kéo ảnh trong thư viện để thay thứ tự. Nhấp ảnh rồi dùng nút ↑ ↓ hoặc Xóa. Voiceover quyết định thời lượng video khi đã tải. Click video trong thư viện để tách âm thanh, chỉnh riêng và xuất WAV.</p></div><span id="durationLabel" class="chip">00:10</span></div>
 <div class="track"><div class="track-label"><strong>▧ VISUAL</strong><small>Ảnh / Video</small></div><div class="track-content" id="visualTrack"><span class="placeholder">Thêm ảnh để tạo Visual Track.</span></div></div>
 <div class="track"><div class="track-label"><strong>♫ AUDIO</strong><small>Voice & BGM</small></div><div class="track-content audio-track"><div id="voiceTrack" class="audio-clip voice-clip">🎙 Voiceover · Chưa có WAV/MP3</div><div id="bgmTrack" class="audio-clip bgm-clip">♫ BGM · Chưa có nhạc nền</div></div></div>
+<div class="track"><div class="track-label"><strong>♫ DETACHED</strong><small>Audio gốc · riêng biệt</small></div><div class="track-content detached-track" id="detachedTrack"><span class="placeholder">Chọn video → Tách Audio</span></div></div>
 <div class="track"><div class="track-label"><strong>≡ SUBTITLE</strong><small>Kịch bản / Text</small></div><div class="track-content" id="subtitleTrack"><span class="placeholder">Dán kịch bản và bấm tạo phụ đề.</span></div></div>
 <div class="timeline-bottom"><label class="control compact">Thời lượng khi chỉ có ảnh (giây) <input id="stillDuration" type="number" min="3" max="300" value="10" step="1"></label><span id="timelineHint">Mỗi ảnh được phân bổ đều theo thời lượng giọng đọc.</span></div></section>
 <footer>BlogNaver · Clip Maker Lab · Tất cả dữ liệu video xử lý trực tiếp trên trình duyệt. Không sử dụng tài nguyên có bản quyền nếu bạn chưa có quyền.</footer>
