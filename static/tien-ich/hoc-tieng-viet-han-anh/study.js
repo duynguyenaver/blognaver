@@ -5,7 +5,7 @@ const ordering=window.BNVocabOrdering;
 let all=[],snapshot=[],display=[],meta={},page=0,card=0,shown=false,reviewed=new Set(),liveLoading=false;
 const normal=s=>String(s??"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim();
 const element=(tag,text,cls)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=String(text);if(cls)e.className=cls;return e};
-const complete=x=>!!(x.context&&x.grammar&&(x.aiStatus==="ready"||x.aiStatus==="sheet"));
+const complete=x=>!!(x.context&&x.grammar&&(x.aiStatus==="sheet"||(x.aiStatus==="ready"&&["gemini","groq"].includes(x.aiProvider))));
 const languageNames={vi:"TIẾNG VIỆT",ko:"한국어",en:"ENGLISH"};
 const safeLink=s=>typeof s==="string"&&/^https:\/\/docs\.google\.com\/spreadsheets\/d\/[a-zA-Z0-9_-]+/.test(s);
 function setState(kind,title,detail){$("dot").className="dot "+kind;$("stateTitle").textContent=title;$("stateText").textContent=detail}
