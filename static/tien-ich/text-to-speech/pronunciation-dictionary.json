@@ -7,6 +7,12 @@
       "reading": "den di",
       "language": "en",
       "caseSensitive": true
+    },
+    {
+      "term": "LCK",
+      "reading": "eo ci cây",
+      "language": "en",
+      "caseSensitive": true
     }
   ]
 }
