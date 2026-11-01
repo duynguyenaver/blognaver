@@ -13,7 +13,7 @@ class SamsungCVSyncTests(unittest.TestCase):
     def value_ranges(self):
         profile = [["TRƯỜNG THÔNG TIN", "NỘI DUNG · NHẬP TẠI CỘT B"]]
         profile += [[label, ""] for label, _ in mod.PROFILE_KEYS]
-        tables = [[headers] for headers, _ in mod.TABLES.values()]
+        tables = [[headers.copy()] for headers, _ in mod.TABLES.values()]
         return [{"values": profile}] + [{"values": table} for table in tables]
 
     def test_empty_source_keeps_all_sections(self):
