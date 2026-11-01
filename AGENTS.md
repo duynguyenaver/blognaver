@@ -1,5 +1,13 @@
 # BlogNaver Agent Guidelines
 
+## Owner workflow preference: execute requested repository changes immediately (2026-11-01)
+
+- When the owner requests an actionable BlogNaver change, **implement it in the connected repository in the same request**, rather than answering with a long design analysis, hypothetical patches or instructions to manually copy code. No unnecessary reconfirmation when the requirements and target are already clear.
+- Default to **branch → commit → Pull Request → CI verification → report actual state**; never push directly to `main`. Keep each requested editorial article in a separate dedicated PR. Respect required review and check status; avoid saying "live" until a real deploy is verified.
+- Be concise in user-facing commentary: share the working PR, what actually changed, and test/merge/deploy state. Do not present speculative implementation as completed work. Ask for input only when truly required for access, safety or missing material constraints.
+- This is an execution-first preference, **not** permission to bypass security, licenses, tests, CI, review gates or source verification.
+
+
 ## YouTube Voiceover Storytelling & Hoai My pronunciation (owner policy, 2026-10-31)
 
 For all future BlogNaver YouTube voiceover script generators and related editorial projects, use a source-grounded **hook → conversational narrative → insight → audience question/CTA → warm sign-off** structure.
