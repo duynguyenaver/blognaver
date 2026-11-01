@@ -39,6 +39,9 @@
 <label class="control">Ken Burns <select id="kenBurns"><option value="in">Pan & Zoom In</option><option value="out">Zoom Out</option><option value="off">Tắt hiệu ứng</option></select></label>
 <label class="control">Chuyển cảnh <select id="transition"><option value="fade">Crossfade</option><option value="cut">Cut trực tiếp</option></select></label>
 <label class="control">Bộ lọc <select id="filter"><option value="none">Tự nhiên</option><option value="cinema">Cinematic</option><option value="warm">Warm</option><option value="mono">Mono</option></select></label>
+<label class="control">Độ sáng <output id="brightnessValue">100%</output><input type="range" id="brightness" min="50" max="150" step="5" value="100"></label>
+<label class="control">Tương phản <output id="contrastValue">100%</output><input type="range" id="contrast" min="50" max="160" step="5" value="100"></label>
+<label class="control">Độ bão hòa màu <output id="saturationValue">100%</output><input type="range" id="saturation" min="0" max="200" step="5" value="100"></label>
 <div class="rule"></div><div class="section-label">Âm thanh</div>
 <label class="control">Âm lượng giọng <output id="voiceVolValue">100%</output><input id="voiceVol" type="range" min="0" max="1.5" step=".05" value="1"></label>
 <label class="control">Âm lượng BGM <output id="bgmVolValue">24%</output><input id="bgmVol" type="range" min="0" max=".8" step=".02" value=".24"></label>
