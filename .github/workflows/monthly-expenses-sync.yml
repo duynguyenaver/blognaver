@@ -1,0 +1,87 @@
+name: Monthly expenses · Private Google Sheets encrypted sync
+on:
+  pull_request:
+    paths:
+      - 'static/tien-ich/chi-phi-thang/**'
+      - 'scripts/sync-monthly-expenses.py'
+      - 'scripts/test-sync-monthly-expenses.py'
+      - '.github/workflows/monthly-expenses-sync.yml'
+  workflow_dispatch:
+  schedule:
+    - cron: '7,22,37,52 * * * *'
+
+permissions:
+  contents: read
+concurrency:
+  group: monthly-expenses-${{ github.event_name }}
+  cancel-in-progress: false
+jobs:
+  test:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Install libraries
+        run: python3 -m pip install --quiet 'cryptography>=42,<48' 'google-auth>=2,<3' 'requests>=2,<3'
+      - name: Test parsing, schema and encryption
+        run: |
+          python3 scripts/test-sync-monthly-expenses.py -v
+          python3 -m py_compile scripts/sync-monthly-expenses.py
+          node --check static/tien-ich/chi-phi-thang/app.js
+          test ! -e static/tien-ich/chi-phi-thang/data.json
+  sync:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: main
+          persist-credentials: false
+      - name: Install Google API and encryption libraries
+        run: python3 -m pip install --quiet 'cryptography>=42,<48' 'google-auth>=2,<3' 'requests>=2,<3'
+      - name: Read private spreadsheet and encrypt
+        env:
+          VOCAB_GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.VOCAB_GOOGLE_SERVICE_ACCOUNT_JSON }}
+          MONTHLY_EXPENSES_ENCRYPTION_PASSPHRASE: ${{ secrets.MONTHLY_EXPENSES_ENCRYPTION_PASSPHRASE }}
+          MONTHLY_EXPENSES_SHEET_ID: '1gxikPCOe62Be2_Lp5n3m6HMfCdnh-8WT5apJZeEvM7E'
+        run: python3 scripts/sync-monthly-expenses.py
+      - name: Open PR containing ciphertext only
+        env:
+          GH_TOKEN: ${{ secrets.BLOGNAVER_VOCAB_BOT_TOKEN }}
+          REPO: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          FILE=static/tien-ich/chi-phi-thang/data.enc.json
+          if git diff --quiet -- "$FILE" && [ -z "$(git ls-files --others --exclude-standard -- "$FILE")" ]; then
+            echo "No changed finance data."
+            exit 0
+          fi
+          if [ -z "${GH_TOKEN:-}" ]; then
+            echo "::error::BLOGNAVER_VOCAB_BOT_TOKEN required for PR-based data sync"
+            exit 1
+          fi
+          ACTOR="$(gh api user --jq .login)"
+          if [ "$ACTOR" != "${REPO%%/*}" ]; then
+            echo "::error::Finance data PR must be created by repository owner"
+            exit 1
+          fi
+          OPEN="$(gh pr list -R "$REPO" --state open --search 'in:title data(finance): encrypted Google Sheets snapshot' --json number --jq '.[0].number // empty')"
+          if [ -n "$OPEN" ]; then
+            echo "::notice::Previous encrypted finance PR #$OPEN pending; do not overwrite."
+            exit 0
+          fi
+          git config user.name "$ACTOR"
+          git config user.email "$ACTOR@users.noreply.github.com"
+          BRANCH="data/chi-phi-thang-$RUN_ID"
+          git switch -c "$BRANCH"
+          git add -- "$FILE"
+          git commit -m "data(finance): sync encrypted Google Sheets snapshot"
+          gh auth setup-git
+          git push origin "$BRANCH"
+          gh pr create -R "$REPO" --base main --head "$BRANCH" --title "data(finance): encrypted Google Sheets snapshot" --body "Automated encrypted financial data snapshot (AES-256-GCM). No plaintext finance data or passwords committed. Merge after CI."
+          gh pr merge -R "$REPO" --auto --squash "$BRANCH" || echo "::warning::Existing CI/auto-approve workflow will handle merge"
