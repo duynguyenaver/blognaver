@@ -11,6 +11,7 @@
   const API="https://api.github.com/repos/"+REPO;
   const LIMIT=300, MAX_TERM=100, MAX_READING=180;
   const store=new Map(), submitted=new Map(), drafts=new Map();
+  const selectedForSync=new Set(); // Only user-selected pending edits are submitted.
   let loaded=false, saving=false;
   let readyResolve;
   const ready=new Promise(resolve=>{readyResolve=resolve});
@@ -108,13 +109,68 @@
     target.textContent=message;
     target.classList.toggle("bad",error);
   }
+  function isSame(a,b){return JSON.stringify(a??null)===JSON.stringify(b??null)}
+  function stageRule(entry){
+    const value=validate(entry), k=key(value.term);
+    if(!store.has(k)&&!submitted.has(k)&&!drafts.has(k)&&activeEntries().length>=LIMIT)
+      throw Error("Đã đạt 300 quy tắc. Xóa quy tắc cũ trước khi thêm mới.");
+    const original=submitted.has(k)?submitted.get(k):store.get(k);
+    if(isSame(value,original)){
+      drafts.delete(k);selectedForSync.delete(k);
+    }else{
+      drafts.set(k,value);
+      // Newly changed corrections are checked once. Existing untouched entries never resync.
+      selectedForSync.add(k);
+    }
+    return value;
+  }
+  function stageDeletion(entry){
+    const k=key(entry.term);
+    if(store.has(k)||submitted.has(k)){
+      drafts.set(k,null);selectedForSync.add(k);
+    }else{
+      drafts.delete(k);selectedForSync.delete(k);
+    }
+    refresh();preview();
+  }
+  function selectedChanges(){
+    return Array.from(drafts.entries()).filter(([k])=>selectedForSync.has(k));
+  }
+  function previewSpeech(value){
+    const spoken=String(value||"").trim();
+    if(!spoken){status("Chưa có cách đọc để nghe thử.",true);return false}
+    if($("#stop")?.disabled===false){
+      status("Section 01 đang phát/ghi âm. Bấm Dừng ở Section 01 trước khi nghe thử tại đây.",true);return false;
+    }
+    const synth=window.speechSynthesis;
+    const Utterance=window.SpeechSynthesisUtterance;
+    if(!synth||typeof Utterance!=="function"){
+      status("Trình duyệt này không hỗ trợ nghe thử bằng Web Speech API.",true);return false;
+    }
+    try{
+      // Cancel only an earlier Section 04 preview, never an ongoing Section 01 playback.
+      synth.cancel();
+      const utterance=new Utterance(spoken);
+      const voices=synth.getVoices?.()||[];
+      const voiceIndex=Number($("#voice")?.value);
+      const choice=voices[voiceIndex];
+      if(choice){utterance.voice=choice;utterance.lang=choice.lang}
+      else{const vn=voices.find(v=>/^vi[-_]/i.test(v.lang||""));if(vn){utterance.voice=vn;utterance.lang=vn.lang}else utterance.lang="vi-VN";}
+      utterance.rate=Number($("#rate")?.value)||1;
+      utterance.pitch=Number($("#pitch")?.value)||1;
+      utterance.onerror=()=>status("Không phát được âm thanh thử. Hãy kiểm tra giọng đọc đã chọn.",true);
+      synth.speak(utterance);
+      status("Đang nghe thử: “"+spoken+"”. Không thay đổi Section 01.");
+      return true;
+    }catch(e){status("Không nghe thử được: "+(e.message||"Lỗi âm thanh."),true);return false}
+  }
   function refresh(){
     const list=$("pronunciationRuleList");
     const count=$("pronunciationRuleCount");
     if(!list)return;
     list.replaceChildren();
     const items=activeEntries();
-    if(count)count.textContent=items.length+" quy tắc · "+submitted.size+" đang chờ PR · "+drafts.size+" chưa gửi";
+    if(count)count.textContent=items.length+" quy tắc · "+submitted.size+" đang chờ PR · "+drafts.size+" chỉnh sửa · "+selectedChanges().length+" được chọn sync";
     for(const entry of items){
       const item=document.createElement("li");
       const label=document.createElement("span");
@@ -126,6 +182,26 @@
       label.append(strong,reading,note);
       const buttons=document.createElement("span");
       buttons.className="pron-rule-actions";
+      const k=key(entry.term),pending=drafts.has(k),inReview=submitted.has(k);
+      const syncLabel=document.createElement("label");
+      syncLabel.className="pron-sync-choice";
+      const syncCheck=document.createElement("input");
+      syncCheck.type="checkbox";syncCheck.checked=pending&&selectedForSync.has(k);
+      syncCheck.disabled=!pending||saving;
+      syncCheck.setAttribute("aria-label","Đồng bộ quy tắc "+entry.term+" lên GitHub");
+      syncCheck.addEventListener("change",()=>{
+        if(syncCheck.checked)selectedForSync.add(k);else selectedForSync.delete(k);
+        refresh();
+        status(selectedChanges().length+" quy tắc đã chọn để tạo PR. Các từ không chọn sẽ được giữ trong tab, không gửi.");
+      });
+      const syncText=document.createElement("span");
+      syncText.textContent=pending?"Sync":inReview?"Chờ PR":"Đã lưu";
+      syncLabel.append(syncCheck,syncText);
+      const play=document.createElement("button");
+      play.type="button";play.className="secondary";play.textContent="▶ Nghe thử";
+      play.setAttribute("aria-label","Nghe thử cách đọc "+entry.term+" thành "+entry.reading);
+      play.addEventListener("click",()=>previewSpeech(entry.reading));
+      buttons.append(syncLabel,play);
       const edit=document.createElement("button");
       edit.type="button";edit.className="secondary";edit.textContent="Sửa";edit.setAttribute("aria-label","Sửa cách đọc của "+entry.term);
       edit.addEventListener("click",()=>{
@@ -140,14 +216,41 @@
       del.type="button";del.className="secondary";del.textContent="Xóa";
       del.setAttribute("aria-label","Xóa quy tắc "+entry.term);
       del.addEventListener("click",()=>{
-        const k=key(entry.term);
-        if(store.has(k)||submitted.has(k))drafts.set(k,null);else drafts.delete(k);
-        refresh();preview();
-        status("Đã đưa quy tắc "+entry.term+" vào thay đổi chờ PR. Chưa xóa khỏi GitHub.");
+        stageDeletion(entry);
+        status("Đã đánh dấu xóa "+entry.term+". Có thể bỏ chọn để chưa đồng bộ xóa, hoặc chọn Hoàn tác.");
       });
       buttons.append(edit,del);item.append(label,buttons);list.append(item);
     }
-    if(!items.length){const empty=document.createElement("li");empty.textContent="Chưa có quy tắc. Hãy thêm từ/cụm từ đầu tiên.";list.append(empty)}
+    for(const [k,original] of drafts){
+      if(original!==null)continue;
+      const entry=store.get(k)||submitted.get(k);
+      if(!entry)continue;
+      const item=document.createElement("li");
+      item.className="pron-pending-deletion";
+      const name=document.createElement("span");
+      name.textContent="Chờ xóa: "+entry.term+" → "+entry.reading;
+      const controls=document.createElement("span");controls.className="pron-rule-actions";
+      const label=document.createElement("label");label.className="pron-sync-choice";
+      const checkbox=document.createElement("input");checkbox.type="checkbox";
+      checkbox.checked=selectedForSync.has(k);checkbox.disabled=saving;
+      checkbox.setAttribute("aria-label","Đồng bộ xóa "+entry.term+" lên GitHub");
+      checkbox.addEventListener("change",()=>{
+        if(checkbox.checked)selectedForSync.add(k);else selectedForSync.delete(k);
+        refresh();
+      });
+      const span=document.createElement("span");span.textContent="Sync xóa";
+      label.append(checkbox,span);
+      const undo=document.createElement("button");undo.type="button";undo.className="secondary";
+      undo.textContent="Hoàn tác";undo.addEventListener("click",()=>{
+        drafts.delete(k);selectedForSync.delete(k);refresh();preview();
+        status("Đã hoàn tác thao tác xóa "+entry.term+".");
+      });
+      controls.append(label,undo);item.append(name,controls);list.append(item);
+    }
+    if(!items.length && !drafts.size){
+      const empty=document.createElement("li");
+      empty.textContent="Chưa có quy tắc. Hãy thêm từ/cụm từ đầu tiên.";list.append(empty);
+    }
   }
   function preview(){
     const input=$("pronunciationPreview"),result=$("pronunciationPreviewResult");
@@ -156,20 +259,25 @@
   function addRule(event){
     event?.preventDefault();
     try{
-      const rule=validate({term:$("pronunciationTerm").value,reading:$("pronunciationReading").value,
+      const rule=stageRule({term:$("pronunciationTerm").value,reading:$("pronunciationReading").value,
         language:$("pronunciationLanguage").value,
         caseSensitive:$("pronunciationCaseSensitive").checked});
-      const existing=store.get(key(rule.term));
-      if(!existing && !drafts.has(key(rule.term)) && activeEntries().length>=LIMIT)
-        throw Error("Đã đạt 300 quy tắc. Xóa quy tắc cũ trước khi thêm mới.");
-      drafts.set(key(rule.term),rule);
       refresh();preview();
-      status("Đã thêm/cập nhật "+rule.term+" → "+rule.reading+
-        " (có hiệu lực khi tiền xử lý ở tab này). Bấm Lưu GitHub để tạo PR; chưa được lưu trên cloud.");
+      const k=key(rule.term);
+      status(drafts.has(k) ?
+        "Đã sửa "+rule.term+" → "+rule.reading+". Quy tắc đã được chọn sync; bạn có thể bỏ chọn trước khi lưu GitHub." :
+        "Quy tắc "+rule.term+" đã giống bản lưu; không tạo thay đổi hoặc PR trùng.");
       $("pronunciationTerm").value="";
       $("pronunciationReading").value="";
       $("pronunciationTerm").focus();
     }catch(e){status(e.message,true)}
+  }
+  function selectPending(checked){
+    for(const k of drafts.keys()){
+      if(checked)selectedForSync.add(k);else selectedForSync.delete(k);
+    }
+    refresh();
+    status(selectedChanges().length+" chỉnh sửa được chọn sync. Không gửi từ đã lưu mà không thay đổi.");
   }
   const apiHeaders=token=>({
     Accept:"application/vnd.github+json",
@@ -206,7 +314,8 @@
   async function saveGitHub(){
     if(saving)return;
     await window.BNGithubTokenVault?.ready;
-    if(!drafts.size){status("Chưa có từ/cụm từ mới để lưu GitHub.",true);return}
+    const requested=selectedChanges();
+    if(!requested.length){status("Chưa chọn thay đổi nào để đồng bộ. Hãy tích vào ô Sync cạnh từng từ cần lưu.",true);return}
     if(submitted.size){status("Đã có thay đổi trong PR đang chờ merge. Hãy xác minh merge/deploy và tải lại trang trước khi tạo PR mới để tránh bỏ sót quy tắc.",true);return}
     const token=$("ghToken")?.value.trim();
     if(!token){
@@ -225,12 +334,22 @@
       const remote=await github("/contents/"+FILE+"?ref=main",token);
       if(remote.encoding!=="base64"||!remote.sha)throw Error("Không đọc được phiên bản JSON từ GitHub.");
       const latest=sanitizeList(JSON.parse(decodeUtf8(remote.content)));
-      for(const [k,value] of drafts){
+      const changes=[];
+      for(const [k,value] of requested){
         const old=store.get(k),fresh=latest.get(k);
         if(JSON.stringify(old??null)!==JSON.stringify(fresh??null) &&
           JSON.stringify(value)!==JSON.stringify(fresh??null))
           throw Error("Quy tắc "+(fresh?.term||old?.term||k)+" đã thay đổi trên GitHub. Tải lại từ điển trước để tránh ghi đè thay đổi của người khác.");
+        // Do not commit or create another PR when remote main already has the same value.
+        if(isSame(value,fresh))continue;
         if(value===null)latest.delete(k);else latest.set(k,value);
+        changes.push([k,value]);
+      }
+      if(!changes.length){
+        for(const [k] of requested){drafts.delete(k);selectedForSync.delete(k)}
+        refresh();preview();
+        status("Những quy tắc đã chọn đã giống dữ liệu trên GitHub. Không tạo PR hoặc commit trùng.");
+        return;
       }
       if(latest.size>LIMIT)throw Error("Đã vượt 300 quy tắc. Không tự cắt dữ liệu.");
       const file=JSON.stringify({version:1,note:"Public owner-approved pronunciation rules for BlogNaver Text to Speech Studio. All changes require a Pull Request.",entries:Array.from(latest.values()).sort((a,b)=>a.term.localeCompare(b.term,"vi"))},null,2)+"\n";
@@ -248,7 +367,7 @@
       }});
       status("Đã commit lên nhánh riêng. Đang mở Pull Request chờ CI…");
       const pr=await github("/pulls",token,{method:"POST",body:{
-        title:"data(tts): train "+drafts.size+" pronunciation correction(s)",
+        title:"data(tts): train "+changes.length+" selected pronunciation correction(s)",
         head:branch,base:"main",draft:false,
         body:"Cập nhật từ điển phiên âm Anh/Việt được người dùng phê duyệt từ TTS Studio.\n\n- Chỉ lưu từ/cụm từ và phiên âm; không lưu nội dung blog hay token.\n- PR được CI kiểm tra và auto-merge nếu toàn bộ required checks xanh.\n- Dữ liệu chỉ xuất hiện trên website sau khi merge và triển khai Pages."
       }});
@@ -259,8 +378,7 @@
       const output=$("pronunciationPullRequest");
       if(output){output.href=link;output.textContent="Xem PR #"+pr.number+" · Chờ CI và auto-merge";output.hidden=false}
       // Changes are in the PR branch, NOT on main yet; keep a separate in-session overlay.
-      for(const [k,v] of drafts)submitted.set(k,v);
-      drafts.clear();
+      for(const [k,v] of changes){submitted.set(k,v);drafts.delete(k);selectedForSync.delete(k)}
       refresh();preview();
       status("Đã lưu thay đổi lên GitHub trong PR #"+pr.number+". PR đang chờ CI/auto-merge; sau khi merge và deploy, các thiết bị khác sẽ nhận từ điển mới.");
     }catch(e){status("Chưa xác nhận lưu lên GitHub: "+(e.message||"Có lỗi xảy ra.")+" Bản chỉnh sửa trong tab vẫn được giữ.",true)}
@@ -285,12 +403,19 @@
     }finally{readyResolve()}
   }
   const api=Object.freeze({apply:applyAll,validate,normalize:normalized,ready,activeEntries,
-    stage:entry=>{const value=validate(entry);drafts.set(key(value.term),value);return value},
-    list:()=>activeEntries().map(x=>({...x})),load});
+    stage:stageRule,select: (term,checked)=>{const k=key(term);if(!drafts.has(k))return false;if(checked)selectedForSync.add(k);else selectedForSync.delete(k);refresh();return true},
+    pending:()=>Array.from(drafts.entries()).map(([k,v])=>({term:k,entry:v,selected:selectedForSync.has(k)})),
+    list:()=>activeEntries().map(x=>({...x})),previewSpeech,load});
   window.BNPronunciationTraining=api;
   if($("pronunciationTraining")){
     $("pronunciationEntryForm")?.addEventListener("submit",addRule);
     $("pronunciationSaveGithub")?.addEventListener("click",saveGitHub);
+    $("pronunciationSelectAll")?.addEventListener("click",()=>selectPending(true));
+    $("pronunciationSelectNone")?.addEventListener("click",()=>selectPending(false));
+    $("pronunciationPreviewAudio")?.addEventListener("click",()=>{
+      const word=$("pronunciationReading")?.value.trim()||applyAll($("pronunciationPreview")?.value||"");
+      previewSpeech(word);
+    });
     $("pronunciationPreview")?.addEventListener("input",preview);
     $("pronunciationRefresh")?.addEventListener("click",()=>{
       if(drafts.size && !confirm("Tải lại từ điển đã xuất bản? Các mục đang soạn vẫn được giữ."))return;
