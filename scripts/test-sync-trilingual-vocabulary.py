@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Offline source and merge regression checks: python3 -m unittest scripts/test-sync-trilingual-vocabulary.py"""
 import importlib.util
+import os
 import pathlib
 import tempfile
 import unittest
