@@ -1,6 +1,7 @@
 /* BlogNaver Section 04 — owner-trained pronunciation rules.
  * Public merged dictionary is source of truth. GitHub writes ALWAYS via branch + PR + CI.
- * No token persisted by this module and no token ever committed or placed in a URL.
+ * GitHub token is shared with the optional encrypted device vault in Section 01.
+ * No token is ever committed or placed in a URL.
  */
 (() => {
   "use strict";
@@ -204,6 +205,7 @@
 
   async function saveGitHub(){
     if(saving)return;
+    await window.BNGithubTokenVault?.ready;
     if(!drafts.size){status("Chưa có từ/cụm từ mới để lưu GitHub.",true);return}
     if(submitted.size){status("Đã có thay đổi trong PR đang chờ merge. Hãy xác minh merge/deploy và tải lại trang trước khi tạo PR mới để tránh bỏ sót quy tắc.",true);return}
     const token=$("ghToken")?.value.trim();
@@ -253,6 +255,7 @@
       const link=String(pr.html_url||"");
       if(!/^https:\/\/github\.com\/duynguyenaver\/blognaver\/pull\/\d+$/.test(link))
         throw Error("GitHub không trả về URL Pull Request hợp lệ; kiểm tra nhánh "+branch+".");
+      await window.BNGithubTokenVault?.rememberAfterSuccess?.();
       const output=$("pronunciationPullRequest");
       if(output){output.href=link;output.textContent="Xem PR #"+pr.number+" · Chờ CI và auto-merge";output.hidden=false}
       // Changes are in the PR branch, NOT on main yet; keep a separate in-session overlay.
