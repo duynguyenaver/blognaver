@@ -54,6 +54,8 @@ jobs:
         run: node --test scripts/test-tts-gen-g-pronunciation.mjs
       - name: Test saved pronunciation training and GitHub PR-only persistence
         run: node --test scripts/test-tts-pronunciation-training.mjs
+      - name: Test durable encrypted GitHub token on the same device
+        run: node --test scripts/test-tts-github-token-vault.mjs
       - name: Bug checks with bounded retries and AGENTS.md guidance
         shell: bash
         run: |
