@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "folderId": "1coylrqzqPOLZP_lhUdWlb3nI47Qr-af7",
-  "updatedAt": "2026-11-01T15:54:13+00:00",
+  "updatedAt": "2026-11-01T16:00:57+00:00",
   "sources": [
     {
       "id": "19nL6wtouHV-0OumsQR2jF-5xWA1cpbpivRUIsm7hDgk",
@@ -823,7 +823,7 @@
       "row": 34,
       "inputHash": "1971f8b47297fa4e898e232e",
       "context": "Dùng để chỉ thời gian trong năm khi nhiệt độ thấp, thời tiết lạnh, thường đi kèm với các hoạt động như trượt tuyết, lễ hội ánh sáng, hoặc mô tả cảm giác lạnh lẽo.",
-      "grammar": "‘겨울’ là danh từ chung, không chia dạng. Khi dùng làm trạng từ, thường kết hợp với hậu tố ‘에’ (vào mùa đông) hoặc ‘동안’ (trong suốt mùa đông). Cấu trúc thường gặp: 겨울에 + động từ, 겨울 동안 + danh từ, 겨울이 되다 (trở thành mùa đông).",
+      "grammar": "‘겨울’ là danh từ chung, không chia dạng. Khi dùng làm trạng từ, thường kết hợp với hậu tố ‘에’ (vào mùa đông) hoặc ‘동안’ (trong suốt mùa đông). Cấu trúc thường gặp: 겨울에 + động từ, 겨울 동안 + danh từ, 겨울이 되다 (trở thành mùa đông). VI: ['Mùa đông năm nay rất lạnh, tôi phải mặc áo dày.', 'Chúng tôi sẽ đi trượt tuyết vào mùa đông tới.', 'Trong suốt mùa đông, tôi thường đọc sách nhiều hơn.'] KR: ['올해 겨울은 매우 추워서 두꺼운 옷을 입어야 해요.', '우리는 다음 겨울에 스키를 타러 갈 거예요.', '겨울 동안 나는 책을 많이 읽어요.'] EN: ['This winter is very cold, so I have to wear a thick coat.', 'We will go skiing next winter.', 'During the winter, I read a lot of books.']",
       "examples": {
         "vi": "['Mùa đông năm nay rất lạnh, tôi phải mặc áo dày.', 'Chúng tôi sẽ đi trượt tuyết vào mùa đông tới.', 'Trong suốt mùa đông, tôi thường đọc sách nhiều hơn.']",
         "ko": "['올해 겨울은 매우 추워서 두꺼운 옷을 입어야 해요.', '우리는 다음 겨울에 스키를 타러 갈 거예요.', '겨울 동안 나는 책을 많이 읽어요.']",
