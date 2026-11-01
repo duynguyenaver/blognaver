@@ -88,17 +88,18 @@
 <header><div class="eyebrow">BLOGNAVER · FREE BROWSER TOOL</div><h1>Text to Speech Studio</h1><p>Chuyển văn bản thành giọng đọc, nghe thử và ghi thành WAV để dựng video. Không cần đăng nhập hoặc gửi nội dung lên máy chủ BlogNaver.</p></header>
 <section id="blogArticleImporter" class="panel" aria-labelledby="blogArticleImportTitle">
   <span class="eyebrow">BLOGNAVER · ARTICLE SOURCE</span>
-  <h2 id="blogArticleImportTitle">Nhập kịch bản từ URL bài viết BlogNaver</h2>
-  <p class="hint">Dán URL một bài viết công khai trên BlogNaver. Hệ thống chỉ lấy nội dung bài (không lấy menu, bình luận hay nút bấm), sau đó tự điền văn bản gốc ở Section 02, bản tối ưu ở Section 03 và kịch bản đọc ở Section 01. Không dùng AI, API key hoặc máy chủ trung gian.</p>
+  <h2 id="blogArticleImportTitle">Nhập kịch bản từ URL bài viết bất kỳ</h2>
+  <p class="hint">Dán URL bài viết công khai từ BlogNaver hoặc website báo chí khác. Trang sẽ thử trích xuất nội dung chính, rồi tự điền Section 02 → Section 03 → Section 01. Với website ngoài, việc đọc trực tiếp có thể bị chặn CORS; khi bạn đồng ý, công cụ sử dụng dịch vụ Jina Reader để lấy bài (không phải dịch). Không hỗ trợ nội dung cần đăng nhập hoặc vượt paywall.</p>
   <form id="blogArticleImportForm">
     <label for="blogArticleUrl" class="subtle">Đường dẫn bài viết</label>
     <div class="url-input-row">
       <input id="blogArticleUrl" type="url" required inputmode="url" autocomplete="url" spellcheck="false" aria-describedby="blogArticleImportStatus"
-        placeholder="https://duynguyenaver.github.io/blognaver/bai-viet/ten-bai-viet/">
+        placeholder="https://example.com/news/bai-viet/">
       <button id="blogArticleImportButton" class="primary" type="submit">Lấy bài &amp; tự điền 3 Section</button>
     </div>
+    <label class="hint" style="display:flex;gap:9px;align-items:flex-start;margin:12px 0 0;cursor:pointer"><input id="externalReaderConsent" type="checkbox" style="margin-top:2px;width:18px;height:18px;flex:none"> Cho phép gửi URL bài báo công khai đến Jina Reader nếu website ngoài chặn đọc trực tiếp. Không gửi token hoặc bản nháp.</label>
   </form>
-  <p id="blogArticleImportStatus" role="status" aria-live="polite">Sẵn sàng nhận URL bài viết từ BlogNaver. Giới hạn đầu ra TTS vẫn là 50.000 ký tự; hệ thống không tự cắt nội dung.</p>
+  <p id="blogArticleImportStatus" role="status" aria-live="polite">Sẵn sàng nhận URL bài viết HTTPS công khai. Giới hạn đầu ra TTS vẫn là 50.000 ký tự; hệ thống không tự cắt nội dung.</p>
   <a id="blogArticleSourceLink" href="#" rel="noopener noreferrer" target="_blank" hidden></a>
 </section>
 <div class="studio">
@@ -478,4 +479,4 @@ document.getElementById("sendToClip").addEventListener("click", () => {
   catch(e){window.alert("Trình duyệt không lưu được kịch bản. Hãy sao chép và dán thủ công vào Clip Maker.");return}
   window.location.href="../youtube-clip-maker/";
 });
-</script><script src="pronunciation-training.js?v=20261101" defer></script><script src="voiceover-preprocess.js?v=20261101-dictionary" defer></script><script src="voice-fixer.js?v=20261101-training" defer></script><script src="article-url-import.js?v=20261101" defer></script></body></html>
+</script><script src="pronunciation-training.js?v=20261101" defer></script><script src="voiceover-preprocess.js?v=20261101-dictionary" defer></script><script src="voice-fixer.js?v=20261101-training" defer></script><script src="article-url-import.js?v=20261101-external" defer></script></body></html>
