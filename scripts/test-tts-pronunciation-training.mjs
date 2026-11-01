@@ -82,14 +82,15 @@ test("Seeded dictionary contains explicit Gen.G owner correction",async()=>{
   assert.equal(api.list().length,1);
 });
 
-test("Train exact English and Vietnamese words without changing embedded substrings",()=>{
-  const {api}=environment();
+test("Train exact English and Vietnamese words without changing embedded substrings",async()=>{
+  const {api}=environment(true);
+  await api.ready;
   api.stage({term:"G",reading:"di",language:"en",caseSensitive:true});
   api.stage({term:"hiểu nhầm",reading:"hiểu nhầm chuẩn",language:"vi",caseSensitive:false});
   assert.equal(api.apply("G giọng nói, 5G, Gaming, g"),"di giọng nói, 5G, Gaming, g");
   assert.equal(api.apply("Tôi HIỂU NHẦM rồi."),"Tôi hiểu nhầm chuẩn rồi.");
   assert.equal(api.apply("https://blognaver.example/Gen.G hello@Gen.G.com \`Gen.G\` Gen.G"),
-    "https://blognaver.example/Gen.G hello@Gen.G.com \`Gen.G\` Gen.G");
+    "https://blognaver.example/Gen.G hello@Gen.G.com \`Gen.G\` den di");
 });
 
 test("Reject malformed/unsafe entries rather than turning into regex or commands",()=>{
