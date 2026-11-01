@@ -56,6 +56,21 @@ function merge(rows,cached){
    references:previous.references,inputHash:previous.inputHash,
    context:x.context||previous.context||"",grammar:x.grammar||previous.grammar||"",
    aiStatus:x.context&&x.grammar?"sheet":previous.aiStatus||"pending"}:x;
+  // A previous offline release wrote generic notes into Google D/E.
+  // A stale template must never hide a real AI result or be shown as complete.
+  const stale=x.context.startsWith("Tham khảo offline:")
+    &&x.grammar.startsWith("Gợi ý kiểm tra:");
+  if(stale){
+   const valid=previous?.aiStatus==="ready"
+      &&["groq","gemini"].includes(previous?.aiProvider);
+   updated.context=valid?previous.context:"";
+   updated.grammar=valid?previous.grammar:"";
+   updated.aiStatus=valid?"ready":"pending";
+   if(!valid){
+    delete updated.aiProvider;delete updated.aiModel;
+    delete updated.reviewRecommended;
+   }
+  }
   result.push(updated);
  }
  return result;

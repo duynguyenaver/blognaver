@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Offline source and merge regression checks: python3 -m unittest scripts/test-sync-trilingual-vocabulary.py"""
 import importlib.util
+import os
 import pathlib
 import tempfile
 import unittest
@@ -228,6 +229,60 @@ class TrilingualSyncTests(unittest.TestCase):
         groq.assert_called_once()
         self.assertEqual("ready", result["items"][0]["aiStatus"])
         self.assertEqual("groq", result["items"][0]["aiProvider"])
+
+    def test_retired_offline_sheet_notes_requeue_for_groq(self):
+        rows = [
+            ["Việt", "Hàn", "Anh", "Context or Expression", "Ngữ pháp ví dụ"],
+            ["mệt mỏi", "피곤한", "tired",
+             "Tham khảo offline: mệt mỏi", "Gợi ý kiểm tra: 피곤한"],
+        ]
+        prior = mod.parse_table(rows, mod.SHEETS[0], {"gid": "0", "title": "Sheet1"}, "old")
+        cached = dict(prior[0])
+        cached.update({"context": rows[1][3], "grammar": rows[1][4],
+                       "aiProvider": "offline", "aiStatus": "ready",
+                       "aiModel": "template-offline-v1"})
+        groq_answer = {"context": "Diễn tả trạng thái thiếu sức lực.",
+                       "grammar": "피곤한 là dạng định ngữ của 피곤하다.",
+                       "examples": {"vi": "Tôi thấy mệt mỏi.",
+                                    "ko": "오늘 피곤해요.",
+                                    "en": "I am tired today."},
+                       "aiProvider": "groq", "aiStatus": "ready",
+                       "aiModel": "openai/gpt-oss-120b"}
+        with patch.dict(os.environ, {"VOCAB_OFFLINE_ONLY": "0"}), \
+             patch.object(mod, "service_headers", return_value={}), \
+             patch.object(mod, "public_csv", return_value=rows), \
+             patch.object(mod, "models", return_value=[]), \
+             patch.object(mod, "groq_models", return_value=["openai/gpt-oss-120b"]), \
+             patch.object(mod, "ai_enrich_groq_batch",
+                          side_effect=lambda group, names, state: {
+                              group[0]["id"]: groq_answer}) as generate, \
+             patch.object(mod, "write_back_ready"):
+            result = mod.collect({"items": [cached], "sources": []})
+        generate.assert_called_once()
+        item = result["items"][0]
+        self.assertEqual("groq", item["aiProvider"])
+        self.assertEqual("ready", item["aiStatus"])
+        self.assertEqual(groq_answer["context"], item["context"])
+        self.assertEqual(groq_answer["grammar"], item["grammar"])
+
+    def test_retired_offline_notes_do_not_count_as_complete_when_api_unavailable(self):
+        rows = [
+            ["Việt", "Hàn", "Anh", "Context or Expression", "Ngữ pháp ví dụ"],
+            ["mệt mỏi", "피곤한", "tired",
+             "Tham khảo offline: mệt mỏi", "Gợi ý kiểm tra: 피곤한"],
+        ]
+        with patch.dict(os.environ, {"VOCAB_OFFLINE_ONLY": "0"}), \
+             patch.object(mod, "service_headers", return_value={}), \
+             patch.object(mod, "public_csv", return_value=rows), \
+             patch.object(mod, "models", return_value=[]), \
+             patch.object(mod, "groq_models", return_value=[]), \
+             patch.object(mod, "write_back_ready"):
+            result = mod.collect({"items": [], "sources": []})
+        item = result["items"][0]
+        self.assertEqual("pending", item["aiStatus"])
+        self.assertFalse(item.get("context"))
+        self.assertFalse(item.get("grammar"))
+        self.assertNotEqual("offline", item.get("aiProvider"))
 
     def test_groq_reasoning_effort_limited_for_json_output(self):
         import json

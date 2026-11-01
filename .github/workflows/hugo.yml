@@ -93,11 +93,23 @@ jobs:
       contents: read
       actions: write
     steps:
-      - name: Dispatch Google Sheets to Gemini and Groq
+      - name: Dispatch vocabulary sync with repository owner's credentials
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.BLOGNAVER_VOCAB_BOT_TOKEN }}
           REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
+          if [ -z "${GH_TOKEN:-}" ]; then
+            echo "::warning::No owner PAT. Skipping Language Lab dispatch, never dispatching as github-actions[bot]."
+            echo "## Vocabulary sync not dispatched" >> "$GITHUB_STEP_SUMMARY"
+            echo "Configure repository Actions secret BLOGNAVER_VOCAB_BOT_TOKEN for the duynguyenaver account." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          ACTOR="$(gh api user --jq .login)"
+          if [ "$ACTOR" != "duynguyenaver" ]; then
+            echo "::error::Only duynguyenaver may dispatch vocabulary sync. Got: $ACTOR."
+            exit 1
+          fi
           gh api -X POST "repos/$REPO/actions/workflows/trilingual-vocabulary-sync.yml/dispatches" -f ref=main
-          echo "Language Lab dispatched. Verify AI success separately in its workflow summary."
+          echo "::notice::Language Lab dispatched by authenticated owner $ACTOR."
+          echo "## Vocabulary sync dispatched as $ACTOR" >> "$GITHUB_STEP_SUMMARY"
