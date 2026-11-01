@@ -216,7 +216,7 @@
   }
 
   // Export pure helpers for regression tests, even when the UI is not mounted.
-  window.BNBlogArticleImport = Object.freeze({normalizeArticleUrl,extractArticle,buildNarration});
+  window.BNBlogArticleImport = Object.freeze({normalizeArticleUrl,extractArticle,buildNarration,importArticle});
   if (!form || !urlInput || !button || !status || !sourceLink) return;
   form.addEventListener("submit", event => {
     event.preventDefault();
