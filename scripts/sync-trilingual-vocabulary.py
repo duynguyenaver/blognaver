@@ -674,7 +674,7 @@ def collect(old: dict) -> dict:
     for x in items:
         last = cache.get(x["id"], {})
         if last.get("inputHash") == x["inputHash"] and last.get("aiStatus") == "ready":
-            for key in ("context", "grammar", "examples", "references", "aiStatus", "aiModel", "grounded", "aiProvider"):
+            for key in ("context", "grammar", "examples", "references", "aiStatus", "aiModel", "grounded", "aiProvider", "reviewRecommended"):
                 if not x.get(key):
                     x[key] = last.get(key)
             for lang in ("vi", "ko", "en"):
@@ -697,10 +697,13 @@ def collect(old: dict) -> dict:
     if cool_down and pending:
         print(f"INFO: Gemini quota cooldown active until {previous_retry}. "
               "Source rows still sync; skipping repeated rate-limit API calls.", file=sys.stderr)
-    # Gemini cooldown does NOT block Groq. The two providers have separate
-    # credentials/quotas; a Gemini 429 should not stop useful Groq enrichment.
-    names = models() if pending and not cool_down else []
-    groq_names = groq_models() if pending else []
+    # KEYLESS MODE: no Gemini/Groq requests are attempted. Offline reference
+    # generation works entirely from the Google Sheets A:C strings plus
+    # curated/linguistic data stored in this repository.
+    offline_only = os.environ.get("VOCAB_OFFLINE_ONLY", "0") == "1"
+    # Normal mode is retained for optional future AI provider use.
+    names = models() if pending and not cool_down and not offline_only else []
+    groq_names = groq_models() if pending and not offline_only else []
     if pending and not names and not groq_names:
         print(f"INFO: {len(pending)} words pending AI. Configure GROQ_API_KEY "
               "or wait for Gemini quota/model access.", file=sys.stderr)
@@ -714,6 +717,11 @@ def collect(old: dict) -> dict:
         # Always try Groq for missing results, including during Gemini cooldown.
         if remaining and groq_names:
             enriched.update(ai_enrich_groq_batch(remaining, groq_names, groq_state))
+        if remaining and (offline_only or os.environ.get("VOCAB_OFFLINE_FALLBACK", "0") == "1"):
+            from offline_trilingual_vocabulary import offline_enrich
+            for source in remaining:
+                if source["id"] not in enriched:
+                    enriched[source["id"]] = offline_enrich(source)
         for x in group:
             ai = enriched.get(x["id"])
             if ai:
@@ -722,14 +730,17 @@ def collect(old: dict) -> dict:
                     if not x.get(key):
                         x[key] = ai[key]
                 for key in ("context", "grammar", "examples", "references",
-                            "aiStatus", "aiModel", "grounded", "aiProvider"):
-                    x[key] = ai.get(key, "gemini" if key == "aiProvider" else None)
+                            "aiStatus", "aiModel", "grounded", "aiProvider",
+                            "reviewRecommended"):
+                    if key in ai:
+                        x[key] = ai[key]
+                x.setdefault("aiProvider", "gemini")
     write_back_ready(items, headers)
     result = {"schemaVersion": 1, "folderId": FOLDER, "updatedAt": None,
               "sources": sources, "items": items}
-    if cool_down:
+    if cool_down and not offline_only and pending:
         result["aiRetryAfter"] = previous_retry
-    elif (gemini_state["rate_limited"] and names
+    elif (not offline_only and gemini_state["rate_limited"] and names
           and len(gemini_state["blocked"]) >= len(names)
           and not any(x.get("aiStatus") == "ready" for x in todo)):
         # Daily/project-wide 429 cannot be solved by rotating models repeatedly.
