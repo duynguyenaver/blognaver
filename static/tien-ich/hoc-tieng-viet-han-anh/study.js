@@ -99,6 +99,20 @@ async function refreshLive(){
  if(liveLoading||document.hidden||!window.BNLiveVocabulary)return;
  liveLoading=true;
  try{
+  // API explanations are first committed to GitHub and deployed. Refresh that
+  // snapshot as well as Google A:E, or a still-open browser would show "pending"
+  // forever even after a successful Gemini/Groq run and Pages deployment.
+  try{
+   const reply=await fetch("./vocabulary.json?poll="+Date.now(),{cache:"no-store"});
+   if(reply.ok){
+    const latest=await reply.json();
+    if(Array.isArray(latest.items)&&Array.isArray(latest.sources)
+       &&(latest.updatedAt!==meta.updatedAt||latest.items.length!==snapshot.length)){
+     snapshot=latest.items.filter(x=>x&&(x.vi||x.ko||x.en||x.content));
+     meta=latest;
+    }
+   }
+  }catch(e){console.info("Latest AI snapshot unavailable; preserving cached data",e)}
   const rows=await window.BNLiveVocabulary.query();
   const updated=window.BNLiveVocabulary.merge(rows,snapshot);
   const newer=ordering.containsNewRows(updated,all);
