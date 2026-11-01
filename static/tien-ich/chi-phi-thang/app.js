@@ -64,6 +64,9 @@ function render(){
   e.style.width=(100*exp/ceiling)+"%";i.style.width=(100*inc/ceiling)+"%";e.title="Chi "+money(exp);i.title="Thu "+money(inc);bars.append(e,i);item.append(el("span",m.slice(5)+"/"+m.slice(2,4)),bars,el("strong",money(exp)));trend.append(item);
  }
  renderTable();
+ if(window.BNFinanceReport&&typeof window.BNFinanceReport.render==="function"){
+  window.BNFinanceReport.render({month,rows,transactions,budgets,spent,income,budget,money,monthOffset});
+ }
 }
 async function apply(password,remember){
  const data=await decrypt(envelope,password);transactions=safeRows(data);budgets={};
