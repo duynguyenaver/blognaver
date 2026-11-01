@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
   "folderId": "1coylrqzqPOLZP_lhUdWlb3nI47Qr-af7",
-  "updatedAt": "2026-11-01T14:52:46+00:00",
+  "updatedAt": "2026-11-01T15:17:23+00:00",
   "sources": [
     {
       "id": "19nL6wtouHV-0OumsQR2jF-5xWA1cpbpivRUIsm7hDgk",
       "title": "Google Sheets 19nL6wto",
       "url": "https://docs.google.com/spreadsheets/d/19nL6wtouHV-0OumsQR2jF-5xWA1cpbpivRUIsm7hDgk/edit",
-      "count": 29
+      "count": 32
     }
   ],
   "items": [
@@ -23,7 +23,7 @@
       "row": 2,
       "inputHash": "8f8c1762ca25bfc7b979c731",
       "context": "Dùng để chỉ doanh nghiệp chuyên cung cấp, thiết kế và triển khai hệ thống ERP cho các khách hàng.",
-      "grammar": "Cụm danh từ: 'Công ty' (danh từ) + 'phát triển' (động từ làm thành phần của cụm danh từ) + 'ERP' (từ viết tắt, danh từ). Trong tiếng Hàn, 'ERP 개발사' là danh từ ghép, trong đó '개발사' (công ty phát triển) đứng sau từ viết tắt 'ERP' để mô tả loại hình doanh nghiệp. VI: Công ty phát triển ERP của chúng tôi đã triển khai hệ thống cho hơn 50 doanh nghiệp. KR: 우리 ERP 개발사는 50개 이상의 기업에 시스템을 도입했습니다. EN: Our ERP development company has implemented systems for more than 50 businesses.",
+      "grammar": "Cụm danh từ: 'Công ty' (danh từ) + 'phát triển' (động từ làm thành phần của cụm danh từ) + 'ERP' (từ viết tắt, danh từ). Trong tiếng Hàn, 'ERP 개발사' là danh từ ghép, trong đó '개발사' (công ty phát triển) đứng sau từ viết tắt 'ERP' để mô tả loại hình doanh nghiệp. VI: Công ty phát triển ERP của chúng tôi đã triển khai hệ thống cho hơn 50 doanh nghiệp. KR: 우리 ERP 개발사는 50개 이상의 기업에 시스템을 도입했습니다. EN: Our ERP development company has implemented systems for more than 50 businesses. VI: Công ty phát triển ERP của chúng tôi đã triển khai hệ thống cho hơn 50 doanh nghiệp. KR: 우리 ERP 개발사는 50개 이상의 기업에 시스템을 도입했습니다. EN: Our ERP development company has implemented systems for more than 50 businesses.",
       "examples": {
         "vi": "Công ty phát triển ERP của chúng tôi đã triển khai hệ thống cho hơn 50 doanh nghiệp.",
         "ko": "우리 ERP 개발사는 50개 이상의 기업에 시스템을 도입했습니다.",
@@ -48,7 +48,7 @@
       "row": 3,
       "inputHash": "20759e00ae33f030e95d573e",
       "context": "Miêu tả quá trình tạo nội dung blog một cách tự động bằng phần mềm hoặc AI.",
-      "grammar": "Cụm động từ: 'viết' (động từ) + 'blog' (danh từ) + 'tự động' (trạng từ chỉ cách thực hiện). Trong tiếng Hàn, '자동 블로그 작성' là danh từ hóa của cụm động từ, trong đó '작성' (viết) là danh từ, '자동' (tự động) đứng trước để chỉ tính chất. VI: Công cụ này cho phép viết blog tự động chỉ trong vài phút. KR: 이 도구는 몇 분 안에 자동 블로그 작성을 가능하게 합니다. EN: This tool enables automatic blog writing in just a few minutes.",
+      "grammar": "Cụm động từ: 'viết' (động từ) + 'blog' (danh từ) + 'tự động' (trạng từ chỉ cách thực hiện). Trong tiếng Hàn, '자동 블로그 작성' là danh từ hóa của cụm động từ, trong đó '작성' (viết) là danh từ, '자동' (tự động) đứng trước để chỉ tính chất. VI: Công cụ này cho phép viết blog tự động chỉ trong vài phút. KR: 이 도구는 몇 분 안에 자동 블로그 작성을 가능하게 합니다. EN: This tool enables automatic blog writing in just a few minutes. VI: Công cụ này cho phép viết blog tự động chỉ trong vài phút. KR: 이 도구는 몇 분 안에 자동 블로그 작성을 가능하게 합니다. EN: This tool enables automatic blog writing in just a few minutes.",
       "examples": {
         "vi": "Công cụ này cho phép viết blog tự động chỉ trong vài phút.",
         "ko": "이 도구는 몇 분 안에 자동 블로그 작성을 가능하게 합니다.",
@@ -73,7 +73,7 @@
       "row": 4,
       "inputHash": "288c224b3ad8cdf2782a126a",
       "context": "Dùng khi kết hợp hai hay nhiều thành phần lại với nhau, thường trong nấu ăn, hoá học hoặc âm nhạc.",
-      "grammar": "Động từ 'hoà trộn' (verb) trong tiếng Việt, trong tiếng Hàn '혼합' là danh từ hoặc động từ gốc (혼합하다) tùy ngữ cảnh, còn tiếng Anh 'mix' là động từ và danh từ. Khi dùng làm động từ, cần có trợ từ hoặc dạng chia phù hợp. VI: Hãy hoà trộn các nguyên liệu cho đến khi đồng nhất. KR: 재료들을 균일해질 때까지 혼합하세요. EN: Mix the ingredients until they are uniform.",
+      "grammar": "Động từ 'hoà trộn' (verb) trong tiếng Việt, trong tiếng Hàn '혼합' là danh từ hoặc động từ gốc (혼합하다) tùy ngữ cảnh, còn tiếng Anh 'mix' là động từ và danh từ. Khi dùng làm động từ, cần có trợ từ hoặc dạng chia phù hợp. VI: Hãy hoà trộn các nguyên liệu cho đến khi đồng nhất. KR: 재료들을 균일해질 때까지 혼합하세요. EN: Mix the ingredients until they are uniform. VI: Hãy hoà trộn các nguyên liệu cho đến khi đồng nhất. KR: 재료들을 균일해질 때까지 혼합하세요. EN: Mix the ingredients until they are uniform.",
       "examples": {
         "vi": "Hãy hoà trộn các nguyên liệu cho đến khi đồng nhất.",
         "ko": "재료들을 균일해질 때까지 혼합하세요.",
@@ -98,7 +98,7 @@
       "row": 5,
       "inputHash": "48accf8a4ae8272d57b3bcb8",
       "context": "Dùng khi mô tả loại da có vùng T‑zone (trán, mũi, cằm) dầu và các vùng khác khô hoặc bình thường.",
-      "grammar": "Cụm danh từ, không có biến thể. Trong câu tiếng Hàn, 복합성 피부 là danh từ chung, thường đi kèm với 조사 ‘은/는’ để làm chủ ngữ hoặc ‘을/를’ làm tân ngữ. VI: Cô ấy có làn da hỗn hợp, nên cần dùng sản phẩm cân bằng độ ẩm. KR: 그녀는 복합성 피부라서 수분 균형을 맞추는 제품이 필요해요. EN: She has combination skin, so she needs products that balance moisture.",
+      "grammar": "Cụm danh từ, không có biến thể. Trong câu tiếng Hàn, 복합성 피부 là danh từ chung, thường đi kèm với 조사 ‘은/는’ để làm chủ ngữ hoặc ‘을/를’ làm tân ngữ. VI: Cô ấy có làn da hỗn hợp, nên cần dùng sản phẩm cân bằng độ ẩm. KR: 그녀는 복합성 피부라서 수분 균형을 맞추는 제품이 필요해요. EN: She has combination skin, so she needs products that balance moisture. VI: Cô ấy có làn da hỗn hợp, nên cần dùng sản phẩm cân bằng độ ẩm. KR: 그녀는 복합성 피부라서 수분 균형을 맞추는 제품이 필요해요. EN: She has combination skin, so she needs products that balance moisture.",
       "examples": {
         "vi": "Cô ấy có làn da hỗn hợp, nên cần dùng sản phẩm cân bằng độ ẩm.",
         "ko": "그녀는 복합성 피부라서 수분 균형을 맞추는 제품이 필요해요.",
@@ -123,7 +123,7 @@
       "row": 6,
       "inputHash": "d892f78c1cbb0dd2fb50d65d",
       "context": "Dùng để chỉ loại sản phẩm dạng lỏng nhẹ, xịt lên mặt để cấp ẩm, làm dịu da hoặc tạo lớp nền nhẹ.",
-      "grammar": "Cụm danh từ. Trong tiếng Hàn, 페이셜 미스트 thường đi kèm với 동사 ‘뿌리다’, ‘사용하다’ hoặc ‘스프레이하다’ để diễn tả hành động xịt. VI: Sau khi trang điểm, cô ấy thường xịt khoáng để da luôn tươi mát. KR: 메이크업 후에 페이셜 미스트를 뿌려서 피부를 촉촉하게 유지해요. EN: After makeup, she sprays facial mist to keep her skin fresh.",
+      "grammar": "Cụm danh từ. Trong tiếng Hàn, 페이셜 미스트 thường đi kèm với 동사 ‘뿌리다’, ‘사용하다’ hoặc ‘스프레이하다’ để diễn tả hành động xịt. VI: Sau khi trang điểm, cô ấy thường xịt khoáng để da luôn tươi mát. KR: 메이크업 후에 페이셜 미스트를 뿌려서 피부를 촉촉하게 유지해요. EN: After makeup, she sprays facial mist to keep her skin fresh. VI: Sau khi trang điểm, cô ấy thường xịt khoáng để da luôn tươi mát. KR: 메이크업 후에 페이셜 미스트를 뿌려서 피부를 촉촉하게 유지해요. EN: After makeup, she sprays facial mist to keep her skin fresh.",
       "examples": {
         "vi": "Sau khi trang điểm, cô ấy thường xịt khoáng để da luôn tươi mát.",
         "ko": "메이크업 후에 페이셜 미스트를 뿌려서 피부를 촉촉하게 유지해요.",
@@ -148,7 +148,7 @@
       "row": 7,
       "inputHash": "7a46e00df0d43e33bffdb7c9",
       "context": "Diễn tả trạng thái một vật (thường là mỹ phẩm, kem, hoặc vật liệu) dính chặt vào da mặt hoặc bề mặt nào đó.",
-      "grammar": "Cụm động từ trong tiếng Hàn: 표면에 달라붙어 (động từ 달라붙다 + -어) dùng để mô tả hành động đang diễn ra, thường đi kèm với 주어 như ‘마스크가’ hoặc ‘크림이’. Trong tiếng Việt, “bám trên mặt” là cụm động từ, có thể dùng với trợ từ “trên”. VI: Kem dưỡng ẩm này bám trên mặt suốt cả ngày mà không gây nhờn. KR: 이 보습 크림은 표면에 달라붙어 하루 종일 끈적임 없이 유지돼요. EN: This moisturizer sticks to the surface all day without feeling greasy.",
+      "grammar": "Cụm động từ trong tiếng Hàn: 표면에 달라붙어 (động từ 달라붙다 + -어) dùng để mô tả hành động đang diễn ra, thường đi kèm với 주어 như ‘마스크가’ hoặc ‘크림이’. Trong tiếng Việt, “bám trên mặt” là cụm động từ, có thể dùng với trợ từ “trên”. VI: Kem dưỡng ẩm này bám trên mặt suốt cả ngày mà không gây nhờn. KR: 이 보습 크림은 표면에 달라붙어 하루 종일 끈적임 없이 유지돼요. EN: This moisturizer sticks to the surface all day without feeling greasy. VI: Kem dưỡng ẩm này bám trên mặt suốt cả ngày mà không gây nhờn. KR: 이 보습 크림은 표면에 달라붙어 하루 종일 끈적임 없이 유지돼요. EN: This moisturizer sticks to the surface all day without feeling greasy.",
       "examples": {
         "vi": "Kem dưỡng ẩm này bám trên mặt suốt cả ngày mà không gây nhờn.",
         "ko": "이 보습 크림은 표면에 달라붙어 하루 종일 끈적임 없이 유지돼요.",
@@ -173,7 +173,7 @@
       "row": 8,
       "inputHash": "ef941cb85f57458828966262",
       "context": "Diễn đạt trạng thái một vật hoặc hiện tượng bao phủ, phủ lên bề mặt một cách toàn diện, thường dùng trong mô tả thời tiết, cảm xúc hoặc tình huống bất ngờ.",
-      "grammar": "Cấu trúc tiếng Hàn: 때로 + 동사 과거형/과거분사 (뒤덮여) → ‘đôi khi …’. Đây là cách dùng trạng từ 때로 (đôi khi) kết hợp với động từ bị động 뒤덮이다 (bị bao phủ). VI: Mây lúc nào cũng bám đầy trên mặt trời, khiến ánh sáng yếu đi. KR: 때로 구름이 하늘을 뒤덮여 햇빛이 약해진다. EN: Sometimes clouds cover the sky, making the sunlight dim.",
+      "grammar": "Cấu trúc tiếng Hàn: 때로 + 동사 과거형/과거분사 (뒤덮여) → ‘đôi khi …’. Đây là cách dùng trạng từ 때로 (đôi khi) kết hợp với động từ bị động 뒤덮이다 (bị bao phủ). VI: Mây lúc nào cũng bám đầy trên mặt trời, khiến ánh sáng yếu đi. KR: 때로 구름이 하늘을 뒤덮여 햇빛이 약해진다. EN: Sometimes clouds cover the sky, making the sunlight dim. VI: Mây lúc nào cũng bám đầy trên mặt trời, khiến ánh sáng yếu đi. KR: 때로 구름이 하늘을 뒤덮여 햇빛이 약해진다. EN: Sometimes clouds cover the sky, making the sunlight dim.",
       "examples": {
         "vi": "Mây lúc nào cũng bám đầy trên mặt trời, khiến ánh sáng yếu đi.",
         "ko": "때로 구름이 하늘을 뒤덮여 햇빛이 약해진다.",
@@ -198,7 +198,7 @@
       "row": 9,
       "inputHash": "47fecd8f23a4e6f595b351c7",
       "context": "Dùng để nhấn mạnh rằng một việc gì đó không chỉ khó đối với người khác mà còn khó đối với thí sinh, thường xuất hiện trong ngữ cảnh thi cử, phỏng vấn hoặc các cuộc thi.",
-      "grammar": "Câu tiếng Hàn là một câu khẳng định dạng 존댓말 (lịch sự). 후보자들에게도 (cũng đối với các thí sinh) + 어려운 일입니다 (là việc khó). ‘에도’ là trợ từ chỉ thêm vào, tương đương ‘cũng’ trong tiếng Việt. VI: Bài thi này không chỉ khó cho người mới bắt đầu, mà còn khó cho thí sinh có kinh nghiệm. KR: 이 시험은 초보자에게만 어려운 것이 아니라 후보자들에게도 어려운 일입니다. EN: This exam is not only hard for beginners but also a difficult task for the candidates.",
+      "grammar": "Câu tiếng Hàn là một câu khẳng định dạng 존댓말 (lịch sự). 후보자들에게도 (cũng đối với các thí sinh) + 어려운 일입니다 (là việc khó). ‘에도’ là trợ từ chỉ thêm vào, tương đương ‘cũng’ trong tiếng Việt. VI: Bài thi này không chỉ khó cho người mới bắt đầu, mà còn khó cho thí sinh có kinh nghiệm. KR: 이 시험은 초보자에게만 어려운 것이 아니라 후보자들에게도 어려운 일입니다. EN: This exam is not only hard for beginners but also a difficult task for the candidates. VI: Bài thi này không chỉ khó cho người mới bắt đầu, mà còn khó cho thí sinh có kinh nghiệm. KR: 이 시험은 초보자에게만 어려운 것이 아니라 후보자들에게도 어려운 일입니다. EN: This exam is not only hard for beginners but also a difficult task for the candidates.",
       "examples": {
         "vi": "Bài thi này không chỉ khó cho người mới bắt đầu, mà còn khó cho thí sinh có kinh nghiệm.",
         "ko": "이 시험은 초보자에게만 어려운 것이 아니라 후보자들에게도 어려운 일입니다.",
@@ -223,7 +223,7 @@
       "row": 10,
       "inputHash": "5cb00132c12635e86f4d093b",
       "context": "Cụm danh từ mô tả các thương hiệu đã ký kết hợp tác với tạp chí The Face Vietnam, thường xuất hiện trong bài báo, thông cáo báo chí hoặc nội dung marketing.",
-      "grammar": "Cấu trúc tiếng Hàn: 더페이스 베트남과 파트너십을 맺은 브랜드들. 여기서 ‘-은/는’ là hậu tố liên hệ danh từ, biến động từ ‘맺다’ (ký kết) thành tính từ mô tả. ‘파트너십을 맺은’ = ‘đã ký kết đối tác’. VI: Các thương hiệu đồng hành cùng The Face Vietnam thường xuất hiện trong các sự kiện thời trang. KR: 더페이스 베트남과 파트너십을 맺은 브랜드들은 패션 행사에 자주 참여합니다. EN: Brands that have partnered with The Face Vietnam often participate in fashion events.",
+      "grammar": "Cấu trúc tiếng Hàn: 더페이스 베트남과 파트너십을 맺은 브랜드들. 여기서 ‘-은/는’ là hậu tố liên hệ danh từ, biến động từ ‘맺다’ (ký kết) thành tính từ mô tả. ‘파트너십을 맺은’ = ‘đã ký kết đối tác’. VI: Các thương hiệu đồng hành cùng The Face Vietnam thường xuất hiện trong các sự kiện thời trang. KR: 더페이스 베트남과 파트너십을 맺은 브랜드들은 패션 행사에 자주 참여합니다. EN: Brands that have partnered with The Face Vietnam often participate in fashion events. VI: Các thương hiệu đồng hành cùng The Face Vietnam thường xuất hiện trong các sự kiện thời trang. KR: 더페이스 베트남과 파트너십을 맺은 브랜드들은 패션 행사에 자주 참여합니다. EN: Brands that have partnered with The Face Vietnam often participate in fashion events.",
       "examples": {
         "vi": "Các thương hiệu đồng hành cùng The Face Vietnam thường xuất hiện trong các sự kiện thời trang.",
         "ko": "더페이스 베트남과 파트너십을 맺은 브랜드들은 패션 행사에 자주 참여합니다.",
@@ -248,7 +248,7 @@
       "row": 11,
       "inputHash": "0656cc70d21347ec0206c924",
       "context": "Dùng khi người nói muốn xác nhận trạng thái chuẩn bị của một nhóm thí sinh trước khi bắt đầu một cuộc thi, buổi phỏng vấn hoặc một hoạt động nào đó.",
-      "grammar": "Câu hỏi dạng Yes/No trong tiếng Hàn dùng '-ㅂ니까/습니까' sau động từ gốc. Ở đây '준비되다' (được chuẩn bị) → '준비되었습니까' (đã chuẩn bị chưa). Chủ ngữ '후보자들' (các thí sinh) được đặt ở dạng số nhiều và có trợ từ '-은/는' để nhấn mạnh. VI: ['Các thí sinh đã sẵn sàng chưa? Chúng ta sẽ bắt đầu ngay.', \"Trước khi vào phòng thi, giáo viên hỏi: 'Thí sinh đã sẵn sàng chưa?'\", 'Nếu thí sinh chưa sẵn sàng, chúng ta sẽ hoãn lại.'] KR: ['후보자들은 준비되었습니까? 곧 시작하겠습니다.', \"시험 전에 선생님이 물으셨다: '후보자들은 준비되었습니까?'\", '후보자들이 아직 준비되지 않았다면, 우리는 연기할 것이다.'] EN: [\"Are the candidates ready? We'll start shortly.\", \"Before the exam, the teacher asked, 'Are the candidates ready?'\", \"If the candidates aren't ready yet, we will postpone.\"]",
+      "grammar": "Câu hỏi dạng Yes/No trong tiếng Hàn dùng '-ㅂ니까/습니까' sau động từ gốc. Ở đây '준비되다' (được chuẩn bị) → '준비되었습니까' (đã chuẩn bị chưa). Chủ ngữ '후보자들' (các thí sinh) được đặt ở dạng số nhiều và có trợ từ '-은/는' để nhấn mạnh. VI: ['Các thí sinh đã sẵn sàng chưa? Chúng ta sẽ bắt đầu ngay.', \"Trước khi vào phòng thi, giáo viên hỏi: 'Thí sinh đã sẵn sàng chưa?'\", 'Nếu thí sinh chưa sẵn sàng, chúng ta sẽ hoãn lại.'] KR: ['후보자들은 준비되었습니까? 곧 시작하겠습니다.', \"시험 전에 선생님이 물으셨다: '후보자들은 준비되었습니까?'\", '후보자들이 아직 준비되지 않았다면, 우리는 연기할 것이다.'] EN: [\"Are the candidates ready? We'll start shortly.\", \"Before the exam, the teacher asked, 'Are the candidates ready?'\", \"If the candidates aren't ready yet, we will postpone.\"] VI: ['Các thí sinh đã sẵn sàng chưa? Chúng ta sẽ bắt đầu ngay.', \"Trước khi vào phòng thi, giáo viên hỏi: 'Thí sinh đã sẵn sàng chưa?'\", 'Nếu thí sinh chưa sẵn sàng, chúng ta sẽ hoãn lại.'] KR: ['후보자들은 준비되었습니까? 곧 시작하겠습니다.', \"시험 전에 선생님이 물으셨다: '후보자들은 준비되었습니까?'\", '후보자들이 아직 준비되지 않았다면, 우리는 연기할 것이다.'] EN: [\"Ar",
       "examples": {
         "vi": "['Các thí sinh đã sẵn sàng chưa? Chúng ta sẽ bắt đầu ngay.', \"Trước khi vào phòng thi, giáo viên hỏi: 'Thí sinh đã sẵn sàng chưa?'\", 'Nếu thí sinh chưa sẵn sàng, chúng ta sẽ hoãn lại.']",
         "ko": "['후보자들은 준비되었습니까? 곧 시작하겠습니다.', \"시험 전에 선생님이 물으셨다: '후보자들은 준비되었습니까?'\", '후보자들이 아직 준비되지 않았다면, 우리는 연기할 것이다.']",
@@ -273,7 +273,7 @@
       "row": 12,
       "inputHash": "ad5f31cc9bba7e8c2caa9da3",
       "context": "Thuật ngữ chỉ người mẫu có ảnh hưởng lớn, thường xuất hiện trên các tạp chí thời trang quốc tế và có thu nhập cao.",
-      "grammar": "Trong tiếng Hàn, '슈퍼모델' là danh từ mượn tiếng Anh, không thay đổi dạng. Khi dùng làm chủ ngữ hoặc bổ ngữ, không cần thêm hậu tố. VI: ['Cô ấy đã trở thành một siêu mẫu nổi tiếng toàn cầu.', 'Siêu mẫu này thường xuất hiện trên tạp chí Vogue.', 'Nhiều thương hiệu muốn hợp tác với siêu mẫu để quảng cáo.'] KR: ['그녀는 세계적인 슈퍼모델이 되었다.', '이 슈퍼모델은 보그 잡지에 자주 실린다.', '많은 브랜드가 광고를 위해 슈퍼모델과 협업하고 싶어한다.'] EN: ['She has become a world-famous supermodel.', 'This supermodel often appears in Vogue magazine.', 'Many brands want to collaborate with the supermodel for advertising.']",
+      "grammar": "Trong tiếng Hàn, '슈퍼모델' là danh từ mượn tiếng Anh, không thay đổi dạng. Khi dùng làm chủ ngữ hoặc bổ ngữ, không cần thêm hậu tố. VI: ['Cô ấy đã trở thành một siêu mẫu nổi tiếng toàn cầu.', 'Siêu mẫu này thường xuất hiện trên tạp chí Vogue.', 'Nhiều thương hiệu muốn hợp tác với siêu mẫu để quảng cáo.'] KR: ['그녀는 세계적인 슈퍼모델이 되었다.', '이 슈퍼모델은 보그 잡지에 자주 실린다.', '많은 브랜드가 광고를 위해 슈퍼모델과 협업하고 싶어한다.'] EN: ['She has become a world-famous supermodel.', 'This supermodel often appears in Vogue magazine.', 'Many brands want to collaborate with the supermodel for advertising.'] VI: ['Cô ấy đã trở thành một siêu mẫu nổi tiếng toàn cầu.', 'Siêu mẫu này thường xuất hiện trên tạp chí Vogue.', 'Nhiều thương hiệu muốn hợp tác với siêu mẫu để quảng cáo.'] KR: ['그녀는 세계적인 슈퍼모델이 되었다.', '이 슈퍼모델은 보그 잡지에 자주 실린다.', '많은 브랜드가 광고를 위해 슈퍼모델과 협업하고 싶어한다.'] EN: ['She has become a world-famous supermodel.', 'This supermodel often appears in Vogue magazine.', 'Many brands want to collaborate with the supermodel for advertising.",
       "examples": {
         "vi": "['Cô ấy đã trở thành một siêu mẫu nổi tiếng toàn cầu.', 'Siêu mẫu này thường xuất hiện trên tạp chí Vogue.', 'Nhiều thương hiệu muốn hợp tác với siêu mẫu để quảng cáo.']",
         "ko": "['그녀는 세계적인 슈퍼모델이 되었다.', '이 슈퍼모델은 보그 잡지에 자주 실린다.', '많은 브랜드가 광고를 위해 슈퍼모델과 협업하고 싶어한다.']",
@@ -298,7 +298,7 @@
       "row": 13,
       "inputHash": "555fa796750c274bad300be5",
       "context": "Thường dùng để mô tả cách cư xử, thái độ của một người trong các tình huống xã hội; trong tiếng Hàn, '행실' thường chỉ hành vi chung, đặc biệt là hành vi đạo đức hoặc xã hội.",
-      "grammar": "행실' là danh từ, có thể đi kèm với các tính từ hoặc danh từ chỉ mức độ như '좋은 행실' (cư xử tốt), '나쁜 행실' (cư xử xấu). Khi dùng làm chủ ngữ, thường đi kèm với động từ '보이다', '보여주다' hoặc '평가되다'. VI: ['Cô ấy có phong thái lịch sự và chuyên nghiệp.', 'Phong thái của anh ấy trong buổi họp rất nghiêm túc.', 'Cha mẹ luôn dạy con về phong thái đúng mực.'] KR: ['그녀는 예의 바르고 전문적인 행실을 가지고 있다.', '그의 회의 중 행실은 매우 진지했다.', '부모는 자녀에게 올바른 행실을 가르친다.'] EN: ['She has a polite and professional behavior.', 'His behavior during the meeting was very serious.', 'Parents teach their children proper behavior.']",
+      "grammar": "행실' là danh từ, có thể đi kèm với các tính từ hoặc danh từ chỉ mức độ như '좋은 행실' (cư xử tốt), '나쁜 행실' (cư xử xấu). Khi dùng làm chủ ngữ, thường đi kèm với động từ '보이다', '보여주다' hoặc '평가되다'. VI: ['Cô ấy có phong thái lịch sự và chuyên nghiệp.', 'Phong thái của anh ấy trong buổi họp rất nghiêm túc.', 'Cha mẹ luôn dạy con về phong thái đúng mực.'] KR: ['그녀는 예의 바르고 전문적인 행실을 가지고 있다.', '그의 회의 중 행실은 매우 진지했다.', '부모는 자녀에게 올바른 행실을 가르친다.'] EN: ['She has a polite and professional behavior.', 'His behavior during the meeting was very serious.', 'Parents teach their children proper behavior.'] VI: ['Cô ấy có phong thái lịch sự và chuyên nghiệp.', 'Phong thái của anh ấy trong buổi họp rất nghiêm túc.', 'Cha mẹ luôn dạy con về phong thái đúng mực.'] KR: ['그녀는 예의 바르고 전문적인 행실을 가지고 있다.', '그의 회의 중 행실은 매우 진지했다.', '부모는 자녀에게 올바른 행실을 가르친다.'] EN: ['She has a polite and professional behavior.', 'His behavior during the meeting was very serious.', 'Parents teach their children proper behavior.']",
       "examples": {
         "vi": "['Cô ấy có phong thái lịch sự và chuyên nghiệp.', 'Phong thái của anh ấy trong buổi họp rất nghiêm túc.', 'Cha mẹ luôn dạy con về phong thái đúng mực.']",
         "ko": "['그녀는 예의 바르고 전문적인 행실을 가지고 있다.', '그의 회의 중 행실은 매우 진지했다.', '부모는 자녀에게 올바른 행실을 가르친다.']",
@@ -323,7 +323,7 @@
       "row": 14,
       "inputHash": "7d12679640f3f4af5c08e046",
       "context": "Dùng để mô tả người hoặc hành động có tính cách lạ, không bình thường, thường mang tính châm biếm hoặc hài hước.",
-      "grammar": "Từ \"미친\" là tính từ mô tả (형용사) trong tiếng Hàn, chia theo dạng \"미친 사람\" (người dở hơi). Khi dùng như tính từ độc lập có thể đứng trước danh từ hoặc làm vị ngữ với \"이다\" (예: 그는 미친 사람이다). VI: ['Anh ấy dở hơi quá, luôn làm những việc kỳ lạ.', 'Cô ấy dở hơi, luôn nói những câu không tưởng.', 'Họ dở hơi khi quyết định bỏ việc và đi du lịch vòng quanh thế giới.'] KR: ['그는 미친 사람이라서 이상한 행동을 자주 해요.', '그녀는 미친 듯이 웃으며 말했어요.', '우리는 미친 생각으로 여행을 떠났어요.'] EN: ['He is crazy and always does weird things.', 'She laughed like a crazy person.', 'We went on a trip with a crazy idea.']",
+      "grammar": "Từ \"미친\" là tính từ mô tả (형용사) trong tiếng Hàn, chia theo dạng \"미친 사람\" (người dở hơi). Khi dùng như tính từ độc lập có thể đứng trước danh từ hoặc làm vị ngữ với \"이다\" (예: 그는 미친 사람이다). VI: ['Anh ấy dở hơi quá, luôn làm những việc kỳ lạ.', 'Cô ấy dở hơi, luôn nói những câu không tưởng.', 'Họ dở hơi khi quyết định bỏ việc và đi du lịch vòng quanh thế giới.'] KR: ['그는 미친 사람이라서 이상한 행동을 자주 해요.', '그녀는 미친 듯이 웃으며 말했어요.', '우리는 미친 생각으로 여행을 떠났어요.'] EN: ['He is crazy and always does weird things.', 'She laughed like a crazy person.', 'We went on a trip with a crazy idea.'] VI: ['Anh ấy dở hơi quá, luôn làm những việc kỳ lạ.', 'Cô ấy dở hơi, luôn nói những câu không tưởng.', 'Họ dở hơi khi quyết định bỏ việc và đi du lịch vòng quanh thế giới.'] KR: ['그는 미친 사람이라서 이상한 행동을 자주 해요.', '그녀는 미친 듯이 웃으며 말했어요.', '우리는 미친 생각으로 여행을 떠났어요.'] EN: ['He is crazy and always does weird things.', 'She laughed like a crazy person.', 'We went on a trip with a crazy idea.']",
       "examples": {
         "vi": "['Anh ấy dở hơi quá, luôn làm những việc kỳ lạ.', 'Cô ấy dở hơi, luôn nói những câu không tưởng.', 'Họ dở hơi khi quyết định bỏ việc và đi du lịch vòng quanh thế giới.']",
         "ko": "['그는 미친 사람이라서 이상한 행동을 자주 해요.', '그녀는 미친 듯이 웃으며 말했어요.', '우리는 미친 생각으로 여행을 떠났어요.']",
@@ -348,7 +348,7 @@
       "row": 15,
       "inputHash": "d47ecc5a9c8e6e867d86545c",
       "context": "Thường dùng trong ngữ cảnh khoa học, công nghệ hoặc xã hội để chỉ quá trình lan truyền, lan rộng mà không cần can thiệp mạnh mẽ.",
-      "grammar": "\"자연 확산\" là danh từ ghép (명사) gồm \"자연\" (tự nhiên) + \"확산\" (lan truyền). Khi dùng làm chủ ngữ hoặc bổ ngữ, có thể kết hợp với động từ \"일어나다\", \"발생하다\" (예: 자연 확산이 일어나다). VI: ['Bệnh này đang lan truyền tự nhiên trong cộng đồng.', 'Thông tin sai lệch có thể lan truyền tự nhiên qua mạng xã hội.', 'Công nghệ mới sẽ được lan truyền tự nhiên nếu người dùng cảm thấy hữu ích.'] KR: ['이 질병은 자연 확산으로 지역 사회에 퍼지고 있다.', '잘못된 정보가 자연 확산을 통해 퍼질 수 있다.', '새로운 기술은 사용자에게 유용하면 자연 확산될 것이다.'] EN: ['The disease spreads by natural diffusion in the community.', 'Misinformation can spread through natural diffusion on social media.', 'The new technology will undergo natural diffusion if users find it useful.']",
+      "grammar": "\"자연 확산\" là danh từ ghép (명사) gồm \"자연\" (tự nhiên) + \"확산\" (lan truyền). Khi dùng làm chủ ngữ hoặc bổ ngữ, có thể kết hợp với động từ \"일어나다\", \"발생하다\" (예: 자연 확산이 일어나다). VI: ['Bệnh này đang lan truyền tự nhiên trong cộng đồng.', 'Thông tin sai lệch có thể lan truyền tự nhiên qua mạng xã hội.', 'Công nghệ mới sẽ được lan truyền tự nhiên nếu người dùng cảm thấy hữu ích.'] KR: ['이 질병은 자연 확산으로 지역 사회에 퍼지고 있다.', '잘못된 정보가 자연 확산을 통해 퍼질 수 있다.', '새로운 기술은 사용자에게 유용하면 자연 확산될 것이다.'] EN: ['The disease spreads by natural diffusion in the community.', 'Misinformation can spread through natural diffusion on social media.', 'The new technology will undergo natural diffusion if users find it useful.'] VI: ['Bệnh này đang lan truyền tự nhiên trong cộng đồng.', 'Thông tin sai lệch có thể lan truyền tự nhiên qua mạng xã hội.', 'Công nghệ mới sẽ được lan truyền tự nhiên nếu người dùng cảm thấy hữu ích.'] KR: ['이 질병은 자연 확산으로 지역 사회에 퍼지고 있다.', '잘못된 정보가 자연 확산을 통해 퍼질 수 있다.', '새로운 기술은 사용자에게 유용하면 자연 확산될 것이다.'] EN: ['The d",
       "examples": {
         "vi": "['Bệnh này đang lan truyền tự nhiên trong cộng đồng.', 'Thông tin sai lệch có thể lan truyền tự nhiên qua mạng xã hội.', 'Công nghệ mới sẽ được lan truyền tự nhiên nếu người dùng cảm thấy hữu ích.']",
         "ko": "['이 질병은 자연 확산으로 지역 사회에 퍼지고 있다.', '잘못된 정보가 자연 확산을 통해 퍼질 수 있다.', '새로운 기술은 사용자에게 유용하면 자연 확산될 것이다.']",
@@ -373,7 +373,7 @@
       "row": 16,
       "inputHash": "85d0e90809558839c8466a62",
       "context": "Dùng để chỉ việc tự mình luyện tập, không có người hướng dẫn, thường liên quan đến kỹ năng cá nhân như âm nhạc, thể thao, ngôn ngữ.",
-      "grammar": "\"자기 연습\" là danh từ (명사) gồm \"자기\" (tự) + \"연습\" (luyện tập). Khi dùng làm 목적어 hoặc 부사구, có thể kết hợp với 동사 \"하다\" (예: 자기 연습을 하다). VI: ['Cô ấy dành một giờ mỗi ngày để tự tập piano.', 'Tôi cần tự tập nói tiếng Hàn để cải thiện phát âm.', 'Họ tổ chức buổi hội thảo về cách tự tập thể dục tại nhà.'] KR: ['그녀는 매일 한 시간씩 자기 연습을 한다.', '나는 발음 향상을 위해 자기 연습을 해야 한다.', '그들은 집에서 자기 연습을 하는 방법에 대한 워크숍을 열었다.'] EN: ['She spends an hour daily on self-practice of the piano.', 'I need to do self-practice speaking Korean to improve my pronunciation.', 'They held a workshop on how to do self-practice exercises at home.']",
+      "grammar": "\"자기 연습\" là danh từ (명사) gồm \"자기\" (tự) + \"연습\" (luyện tập). Khi dùng làm 목적어 hoặc 부사구, có thể kết hợp với 동사 \"하다\" (예: 자기 연습을 하다). VI: ['Cô ấy dành một giờ mỗi ngày để tự tập piano.', 'Tôi cần tự tập nói tiếng Hàn để cải thiện phát âm.', 'Họ tổ chức buổi hội thảo về cách tự tập thể dục tại nhà.'] KR: ['그녀는 매일 한 시간씩 자기 연습을 한다.', '나는 발음 향상을 위해 자기 연습을 해야 한다.', '그들은 집에서 자기 연습을 하는 방법에 대한 워크숍을 열었다.'] EN: ['She spends an hour daily on self-practice of the piano.', 'I need to do self-practice speaking Korean to improve my pronunciation.', 'They held a workshop on how to do self-practice exercises at home.'] VI: ['Cô ấy dành một giờ mỗi ngày để tự tập piano.', 'Tôi cần tự tập nói tiếng Hàn để cải thiện phát âm.', 'Họ tổ chức buổi hội thảo về cách tự tập thể dục tại nhà.'] KR: ['그녀는 매일 한 시간씩 자기 연습을 한다.', '나는 발음 향상을 위해 자기 연습을 해야 한다.', '그들은 집에서 자기 연습을 하는 방법에 대한 워크숍을 열었다.'] EN: ['She spends an hour daily on self-practice of the piano.', 'I need to do self-practice speaking Korean to improve my pronunc",
       "examples": {
         "vi": "['Cô ấy dành một giờ mỗi ngày để tự tập piano.', 'Tôi cần tự tập nói tiếng Hàn để cải thiện phát âm.', 'Họ tổ chức buổi hội thảo về cách tự tập thể dục tại nhà.']",
         "ko": "['그녀는 매일 한 시간씩 자기 연습을 한다.', '나는 발음 향상을 위해 자기 연습을 해야 한다.', '그들은 집에서 자기 연습을 하는 방법에 대한 워크숍을 열었다.']",
@@ -398,7 +398,7 @@
       "row": 17,
       "inputHash": "d7dea78915f85778582c563a",
       "context": "Dùng để chỉ môi trường, hoàn cảnh xung quanh một sự việc, lời nói hoặc hành động, giúp hiểu đúng ý nghĩa.",
-      "grammar": "Danh từ chung, không chia số. Thường đi kèm với các giới từ như \"trong\", \"của\", \"theo\". VI: Trong bối cảnh hiện nay, việc bảo vệ môi trường trở nên cấp bách. KR: 현재 문맥에서는 환경 보호가 시급합니다. EN: In the current context, environmental protection is urgent.",
+      "grammar": "Danh từ chung, không chia số. Thường đi kèm với các giới từ như \"trong\", \"của\", \"theo\". VI: Trong bối cảnh hiện nay, việc bảo vệ môi trường trở nên cấp bách. KR: 현재 문맥에서는 환경 보호가 시급합니다. EN: In the current context, environmental protection is urgent. VI: Trong bối cảnh hiện nay, việc bảo vệ môi trường trở nên cấp bách. KR: 현재 문맥에서는 환경 보호가 시급합니다. EN: In the current context, environmental protection is urgent.",
       "examples": {
         "vi": "Trong bối cảnh hiện nay, việc bảo vệ môi trường trở nên cấp bách.",
         "ko": "현재 문맥에서는 환경 보호가 시급합니다.",
@@ -423,7 +423,7 @@
       "row": 18,
       "inputHash": "4fef5ed5692b2ff988c26ba7",
       "context": "Miêu tả tính chất chi tiết, tỉ mỉ, được thực hiện một cách cẩn thận và tỉ mỉ.",
-      "grammar": "Tính từ, có thể đứng trước danh từ (kỹ lưỡng kế hoạch) hoặc sau động từ \"là\" (đó là kỹ lưỡng). VI: Anh ấy đã chuẩn bị một kế hoạch kỹ lưỡng cho dự án. KR: 그는 프로젝트를 위해 정교한 계획을 준비했습니다. EN: He prepared an elaborate plan for the project.",
+      "grammar": "Tính từ, có thể đứng trước danh từ (kỹ lưỡng kế hoạch) hoặc sau động từ \"là\" (đó là kỹ lưỡng). VI: Anh ấy đã chuẩn bị một kế hoạch kỹ lưỡng cho dự án. KR: 그는 프로젝트를 위해 정교한 계획을 준비했습니다. EN: He prepared an elaborate plan for the project. VI: Anh ấy đã chuẩn bị một kế hoạch kỹ lưỡng cho dự án. KR: 그는 프로젝트를 위해 정교한 계획을 준비했습니다. EN: He prepared an elaborate plan for the project.",
       "examples": {
         "vi": "Anh ấy đã chuẩn bị một kế hoạch kỹ lưỡng cho dự án.",
         "ko": "그는 프로젝트를 위해 정교한 계획을 준비했습니다.",
@@ -448,7 +448,7 @@
       "row": 19,
       "inputHash": "5936799bd1503744d4ed017a",
       "context": "Dùng để chỉ mức độ nghiêm trọng, mạnh mẽ, thường liên quan đến vấn đề sức khỏe, tình huống hoặc cảm xúc.",
-      "grammar": "Tính từ, có thể đứng trước danh từ (nghiêm túc vấn đề) hoặc sau động từ \"là\" (đó là nghiêm túc). Khi dịch sang tiếng Hàn, \"심각한\" thường đi kèm với danh từ. VI: Bệnh này đang trở nên nghiêm túc hơn mỗi ngày. KR: 이 병은 매일 심각해지고 있습니다. EN: This disease is becoming more acute each day.",
+      "grammar": "Tính từ, có thể đứng trước danh từ (nghiêm túc vấn đề) hoặc sau động từ \"là\" (đó là nghiêm túc). Khi dịch sang tiếng Hàn, \"심각한\" thường đi kèm với danh từ. VI: Bệnh này đang trở nên nghiêm túc hơn mỗi ngày. KR: 이 병은 매일 심각해지고 있습니다. EN: This disease is becoming more acute each day. VI: Bệnh này đang trở nên nghiêm túc hơn mỗi ngày. KR: 이 병은 매일 심각해지고 있습니다. EN: This disease is becoming more acute each day.",
       "examples": {
         "vi": "Bệnh này đang trở nên nghiêm túc hơn mỗi ngày.",
         "ko": "이 병은 매일 심각해지고 있습니다.",
@@ -473,7 +473,7 @@
       "row": 20,
       "inputHash": "22cb841f97ad4e1846d857b1",
       "context": "Dùng để mô tả tính cách, lời nói hoặc hành động có yếu tố gây cười, mang tính châm biếm nhẹ nhàng.",
-      "grammar": "Tính từ mô tả tính chất, đứng trước danh từ hoặc sau động từ \"là\". Trong tiếng Hàn, \"유머러스한\" là tính từ dạng \"-한\" dùng trước danh từ hoặc làm bổ ngữ sau \"이다\". VI: Anh ấy có phong cách hài hước, luôn khiến mọi người cười. KR: 그는 유머러스한 스타일을 가지고 있어 언제나 사람들을 웃게 만든다. EN: He has a humorous style that always makes people laugh.",
+      "grammar": "Tính từ mô tả tính chất, đứng trước danh từ hoặc sau động từ \"là\". Trong tiếng Hàn, \"유머러스한\" là tính từ dạng \"-한\" dùng trước danh từ hoặc làm bổ ngữ sau \"이다\". VI: Anh ấy có phong cách hài hước, luôn khiến mọi người cười. KR: 그는 유머러스한 스타일을 가지고 있어 언제나 사람들을 웃게 만든다. EN: He has a humorous style that always makes people laugh. VI: Anh ấy có phong cách hài hước, luôn khiến mọi người cười. KR: 그는 유머러스한 스타일을 가지고 있어 언제나 사람들을 웃게 만든다. EN: He has a humorous style that always makes people laugh.",
       "examples": {
         "vi": "Anh ấy có phong cách hài hước, luôn khiến mọi người cười.",
         "ko": "그는 유머러스한 스타일을 가지고 있어 언제나 사람들을 웃게 만든다.",
@@ -498,7 +498,7 @@
       "row": 21,
       "inputHash": "6abb33ddbdcff339716b922f",
       "context": "Miêu tả một hoạt động, chương trình, hay câu chuyện khiến người nghe/đọc cảm thấy thú vị, muốn tiếp tục theo dõi.",
-      "grammar": "Tính từ mô tả tính chất, có thể đứng trước danh từ hoặc làm vị ngữ. \"재미있는\" là dạng \"-는\" dùng trước danh từ, hoặc \"재미있다\" làm vị ngữ. VI: Bộ phim này thật mắc cười, tôi không thể rời mắt. KR: 이 영화는 재미있어서 눈을 뗄 수 없었다. EN: The movie was so entertaining that I couldn't take my eyes off it.",
+      "grammar": "Tính từ mô tả tính chất, có thể đứng trước danh từ hoặc làm vị ngữ. \"재미있는\" là dạng \"-는\" dùng trước danh từ, hoặc \"재미있다\" làm vị ngữ. VI: Bộ phim này thật mắc cười, tôi không thể rời mắt. KR: 이 영화는 재미있어서 눈을 뗄 수 없었다. EN: The movie was so entertaining that I couldn't take my eyes off it. VI: Bộ phim này thật mắc cười, tôi không thể rời mắt. KR: 이 영화는 재미있어서 눈을 뗄 수 없었다. EN: The movie was so entertaining that I couldn't take my eyes off it.",
       "examples": {
         "vi": "Bộ phim này thật mắc cười, tôi không thể rời mắt.",
         "ko": "이 영화는 재미있어서 눈을 뗄 수 없었다.",
@@ -523,7 +523,7 @@
       "row": 22,
       "inputHash": "d892274730f31a515d898cf6",
       "context": "Thường dùng trong lĩnh vực thời trang, làm đẹp để chỉ cách trình diễn, trang điểm hoặc phong cách làm đẹp đặc trưng của một người hoặc một chương trình.",
-      "grammar": "Cụm danh từ, không thay đổi dạng. Trong tiếng Hàn, \"뷰티 스타일\" là danh từ ghép, có thể đứng trước hoặc sau các từ chỉ hành động như \"보이다\" (được thấy) hoặc \"연출하다\" (trình diễn). VI: Cô ấy luôn diễn kiểu beauty độc đáo trên Instagram. KR: 그녀는 인스타그램에서 독특한 뷰티 스타일을 항상 보여준다. EN: She always showcases a unique beauty style on Instagram.",
+      "grammar": "Cụm danh từ, không thay đổi dạng. Trong tiếng Hàn, \"뷰티 스타일\" là danh từ ghép, có thể đứng trước hoặc sau các từ chỉ hành động như \"보이다\" (được thấy) hoặc \"연출하다\" (trình diễn). VI: Cô ấy luôn diễn kiểu beauty độc đáo trên Instagram. KR: 그녀는 인스타그램에서 독특한 뷰티 스타일을 항상 보여준다. EN: She always showcases a unique beauty style on Instagram. VI: Cô ấy luôn diễn kiểu beauty độc đáo trên Instagram. KR: 그녀는 인스타그램에서 독특한 뷰티 스타일을 항상 보여준다. EN: She always showcases a unique beauty style on Instagram.",
       "examples": {
         "vi": "Cô ấy luôn diễn kiểu beauty độc đáo trên Instagram.",
         "ko": "그녀는 인스타그램에서 독특한 뷰티 스타일을 항상 보여준다.",
@@ -548,7 +548,7 @@
       "row": 23,
       "inputHash": "19cbc7aa538ee7cd0b981334",
       "context": "Dùng để mô tả tính cách hoặc phong cách của một người, thương hiệu, hoặc sản phẩm khi muốn nhấn mạnh sự tự tin, sự tỏa sáng và khả năng tạo ra những đột phá mới.",
-      "grammar": "Câu tiếng Hàn sử dụng các tính từ dạng ‘-고’ (và) để liệt kê các đặc tính. ‘자신감 넘치고’ (tự tin), ‘빛나며’ (tỏa sáng) và ‘혁신적입니다’ (bứt phá/đổi mới). Đây là cấu trúc liệt kê tính từ đồng thời, trong khi tiếng Việt và tiếng Anh dùng dấu phẩy và ‘và’ để nối các tính từ. VI: Công ty này luôn tự tin, toả sáng và bứt phá trong mỗi dự án mới. KR: 이 회사는 매 프로젝트마다 자신감 넘치고, 빛나며, 혁신적입니다. EN: The company is always confident, radiant, and innovative in every new project.",
+      "grammar": "Câu tiếng Hàn sử dụng các tính từ dạng ‘-고’ (và) để liệt kê các đặc tính. ‘자신감 넘치고’ (tự tin), ‘빛나며’ (tỏa sáng) và ‘혁신적입니다’ (bứt phá/đổi mới). Đây là cấu trúc liệt kê tính từ đồng thời, trong khi tiếng Việt và tiếng Anh dùng dấu phẩy và ‘và’ để nối các tính từ. VI: Công ty này luôn tự tin, toả sáng và bứt phá trong mỗi dự án mới. KR: 이 회사는 매 프로젝트마다 자신감 넘치고, 빛나며, 혁신적입니다. EN: The company is always confident, radiant, and innovative in every new project. VI: Công ty này luôn tự tin, toả sáng và bứt phá trong mỗi dự án mới. KR: 이 회사는 매 프로젝트마다 자신감 넘치고, 빛나며, 혁신적입니다. EN: The company is always confident, radiant, and innovative in every new project.",
       "examples": {
         "vi": "Công ty này luôn tự tin, toả sáng và bứt phá trong mỗi dự án mới.",
         "ko": "이 회사는 매 프로젝트마다 자신감 넘치고, 빛나며, 혁신적입니다.",
@@ -573,7 +573,7 @@
       "row": 24,
       "inputHash": "3cc9dad9dc14aa09c855ada4",
       "context": "Dùng để mô tả người, hành động hoặc khuôn mặt không bộc lộ bất kỳ cảm xúc nào, thường mang tính trung lập hoặc lạnh lùng.",
-      "grammar": "‘감정 없는’ là cụm danh từ làm tính từ (관형어) dùng trước danh từ, cấu trúc: 감정 + 없는 + 명사. Khi đứng độc lập có thể dùng ‘감정이 없다’ (không có cảm xúc). VI: ['Anh ấy luôn có vẻ mặt cảm xúc không, khiến mọi người khó đoán suy nghĩ của anh.', 'Cô ấy trả lời câu hỏi một cách không cảm xúc, như thể không quan tâm.', 'Trong buổi phỏng vấn, người ứng viên tỏ ra cảm xúc không, chỉ nói chuyện một cách máy móc.'] KR: ['그는 감정 없는 표정으로 회의에 참석했다.', '그녀는 질문에 감정 없이 대답했다, 마치 무관심한 듯이.', '면접에서 지원자는 감정 없는 태도로만 말했다.'] EN: ['He attended the meeting with an emotionless expression.', \"She answered the question without any emotion, as if she didn't care.\", 'During the interview, the candidate spoke with an emotionless demeanor.']",
+      "grammar": "‘감정 없는’ là cụm danh từ làm tính từ (관형어) dùng trước danh từ, cấu trúc: 감정 + 없는 + 명사. Khi đứng độc lập có thể dùng ‘감정이 없다’ (không có cảm xúc). VI: ['Anh ấy luôn có vẻ mặt cảm xúc không, khiến mọi người khó đoán suy nghĩ của anh.', 'Cô ấy trả lời câu hỏi một cách không cảm xúc, như thể không quan tâm.', 'Trong buổi phỏng vấn, người ứng viên tỏ ra cảm xúc không, chỉ nói chuyện một cách máy móc.'] KR: ['그는 감정 없는 표정으로 회의에 참석했다.', '그녀는 질문에 감정 없이 대답했다, 마치 무관심한 듯이.', '면접에서 지원자는 감정 없는 태도로만 말했다.'] EN: ['He attended the meeting with an emotionless expression.', \"She answered the question without any emotion, as if she didn't care.\", 'During the interview, the candidate spoke with an emotionless demeanor.'] VI: ['Anh ấy luôn có vẻ mặt cảm xúc không, khiến mọi người khó đoán suy nghĩ của anh.', 'Cô ấy trả lời câu hỏi một cách không cảm xúc, như thể không quan tâm.', 'Trong buổi phỏng vấn, người ứng viên tỏ ra cảm xúc không, chỉ nói chuyện một cách máy móc.'] KR: ['그는 감정 없는 표정으로 회의에 참석했다.', '그녀는 질문",
       "examples": {
         "vi": "['Anh ấy luôn có vẻ mặt cảm xúc không, khiến mọi người khó đoán suy nghĩ của anh.', 'Cô ấy trả lời câu hỏi một cách không cảm xúc, như thể không quan tâm.', 'Trong buổi phỏng vấn, người ứng viên tỏ ra cảm xúc không, chỉ nói chuyện một cách máy móc.']",
         "ko": "['그는 감정 없는 표정으로 회의에 참석했다.', '그녀는 질문에 감정 없이 대답했다, 마치 무관심한 듯이.', '면접에서 지원자는 감정 없는 태도로만 말했다.']",
@@ -598,18 +598,17 @@
       "row": 25,
       "inputHash": "b763164d1c3770b3d3d2f23c",
       "aiStatus": "ready",
-      "context": "Tham khảo offline: “mệt mỏi” được ghi trong bảng với tiếng Hàn “피곤한” và tiếng Anh “tired”. Hãy đối chiếu văn cảnh để xác định sắc thái và chọn cách dịch tự nhiên. Đây là lời dẫn nhập thuật ngữ, không phải xác minh nghĩa từ điển.",
-      "grammar": "Gợi ý kiểm tra: “피곤한” có thể là dạng định ngữ bổ nghĩa danh từ; cần kiểm tra danh từ theo sau. Để dùng trong câu, cần chọn trợ từ, đuôi câu và mức độ kính ngữ theo mục đích giao tiếp. Chưa có phân tích ngữ pháp riêng đã được thẩm định cho mục từ này.",
+      "context": "Dùng để mô tả trạng thái cơ thể hoặc tinh thần sau khi làm việc, học tập hoặc thiếu ngủ.",
+      "grammar": "Tính từ mô tả trạng thái; trong tiếng Hàn là tính từ ㅣ형 (피곤한) dùng trước danh từ hoặc làm vị ngữ với '-다' (피곤하다).",
       "examples": {
-        "vi": "Trong bài học này, chúng tôi tìm hiểu cách dùng “mệt mỏi”.",
-        "ko": "이번 수업에서는 '피곤한'라는 표현을 배웁니다.",
-        "en": "In this lesson, we learn the expression “tired”."
+        "vi": "Sau một ngày làm việc dài, tôi cảm thấy rất mệt mỏi.",
+        "ko": "긴 하루 일과를 마치고 나는 매우 피곤한다.",
+        "en": "After a long day's work, I feel very tired."
       },
       "references": [],
-      "aiModel": "template-offline-v1",
+      "aiModel": "openai/gpt-oss-120b",
       "grounded": false,
-      "aiProvider": "offline",
-      "reviewRecommended": true
+      "aiProvider": "groq"
     },
     {
       "vi": "nhợt nhạt",
@@ -623,18 +622,17 @@
       "row": 26,
       "inputHash": "32ebac6d3aa5b30367f043a9",
       "aiStatus": "ready",
-      "context": "Tham khảo offline: “nhợt nhạt” được ghi trong bảng với tiếng Hàn “창백한” và tiếng Anh “pale”. Hãy đối chiếu văn cảnh để xác định sắc thái và chọn cách dịch tự nhiên. Đây là lời dẫn nhập thuật ngữ, không phải xác minh nghĩa từ điển.",
-      "grammar": "Gợi ý kiểm tra: “창백한” có thể là dạng định ngữ bổ nghĩa danh từ; cần kiểm tra danh từ theo sau. Để dùng trong câu, cần chọn trợ từ, đuôi câu và mức độ kính ngữ theo mục đích giao tiếp. Chưa có phân tích ngữ pháp riêng đã được thẩm định cho mục từ này.",
+      "context": "Dùng để miêu tả màu sắc nhợt nhạt, thường là da, màu mắt hoặc màu sắc tổng thể thiếu sức sống.",
+      "grammar": "Tính từ miêu tả tính chất; tiếng Hàn là tính từ ㅣ형 (창백한) dùng trước danh từ hoặc làm vị ngữ với '-다' (창백하다).",
       "examples": {
-        "vi": "Trong bài học này, chúng tôi tìm hiểu cách dùng “nhợt nhạt”.",
-        "ko": "이번 수업에서는 '창백한'라는 표현을 배웁니다.",
-        "en": "In this lesson, we learn the expression “pale”."
+        "vi": "Cô ấy trông nhợt nhạt vì thiếu ngủ.",
+        "ko": "그녀는 잠이 부족해서 창백해 보였다.",
+        "en": "She looked pale because she hadn't slept enough."
       },
       "references": [],
-      "aiModel": "template-offline-v1",
+      "aiModel": "openai/gpt-oss-120b",
       "grounded": false,
-      "aiProvider": "offline",
-      "reviewRecommended": true
+      "aiProvider": "groq"
     },
     {
       "vi": "tinh tế",
@@ -648,18 +646,17 @@
       "row": 27,
       "inputHash": "45bcb660f39dc10f9b563740",
       "aiStatus": "ready",
-      "context": "Tham khảo offline: “tinh tế” được ghi trong bảng với tiếng Hàn “정교한” và tiếng Anh “elaborate”. Hãy đối chiếu văn cảnh để xác định sắc thái và chọn cách dịch tự nhiên. Đây là lời dẫn nhập thuật ngữ, không phải xác minh nghĩa từ điển.",
-      "grammar": "Gợi ý kiểm tra: “정교한” có thể là dạng định ngữ bổ nghĩa danh từ; cần kiểm tra danh từ theo sau. Để dùng trong câu, cần chọn trợ từ, đuôi câu và mức độ kính ngữ theo mục đích giao tiếp. Chưa có phân tích ngữ pháp riêng đã được thẩm định cho mục từ này.",
+      "context": "Dùng để chỉ sự chi tiết, tỉ mỉ, phức tạp trong cách thực hiện hoặc thiết kế.",
+      "grammar": "Tính từ mô tả tính chất; tiếng Hàn là tính từ ㅣ형 (정교한) dùng trước danh từ hoặc làm vị ngữ với '-다' (정교하다).",
       "examples": {
-        "vi": "Trong bài học này, chúng tôi tìm hiểu cách dùng “tinh tế”.",
-        "ko": "이번 수업에서는 '정교한'라는 표현을 배웁니다.",
-        "en": "In this lesson, we learn the expression “elaborate”."
+        "vi": "Bức tranh này rất tinh tế với những chi tiết nhỏ.",
+        "ko": "이 그림은 작은 디테일까지 정교하게 그려졌다.",
+        "en": "The painting is very elaborate with its fine details."
       },
       "references": [],
-      "aiModel": "template-offline-v1",
+      "aiModel": "openai/gpt-oss-120b",
       "grounded": false,
-      "aiProvider": "offline",
-      "reviewRecommended": true
+      "aiProvider": "groq"
     },
     {
       "vi": "bổ sung",
@@ -673,18 +670,17 @@
       "row": 28,
       "inputHash": "cd7d71aa1084114b9bc3f042",
       "aiStatus": "ready",
-      "context": "Tham khảo offline: “bổ sung” được ghi trong bảng với tiếng Hàn “추가의” và tiếng Anh “additional”. Hãy đối chiếu văn cảnh để xác định sắc thái và chọn cách dịch tự nhiên. Đây là lời dẫn nhập thuật ngữ, không phải xác minh nghĩa từ điển.",
-      "grammar": "Gợi ý kiểm tra: “추가의” một từ độc lập; cần kiểm tra từ loại và tiểu từ phù hợp theo câu. Để dùng trong câu, cần chọn trợ từ, đuôi câu và mức độ kính ngữ theo mục đích giao tiếp. Chưa có phân tích ngữ pháp riêng đã được thẩm định cho mục từ này.",
+      "context": "Dùng khi muốn diễn tả việc thêm vào một yếu tố, thông tin, hoặc vật phẩm đã có sẵn.",
+      "grammar": "Từ \"bổ sung\" là động từ trong tiếng Việt, nhưng trong tiếng Hàn \"추가의\" là tính từ (관형사) dùng trước danh từ. Trong tiếng Anh \"additional\" là tính từ, thường đứng trước danh từ hoặc sau danh từ khi dùng làm bổ ngữ.",
       "examples": {
-        "vi": "Trong bài học này, chúng tôi tìm hiểu cách dùng “bổ sung”.",
-        "ko": "이번 수업에서는 '추가의'라는 표현을 배웁니다.",
-        "en": "In this lesson, we learn the expression “additional”."
+        "vi": "Chúng tôi sẽ bổ sung thông tin cần thiết vào báo cáo.",
+        "ko": "우리는 보고서에 추가의 정보를 넣을 것입니다.",
+        "en": "We will add the necessary information to the report."
       },
       "references": [],
-      "aiModel": "template-offline-v1",
+      "aiModel": "openai/gpt-oss-120b",
       "grounded": false,
-      "aiProvider": "offline",
-      "reviewRecommended": true
+      "aiProvider": "groq"
     },
     {
       "vi": "đảm bảo",
@@ -698,18 +694,17 @@
       "row": 29,
       "inputHash": "c331eb3d8f4842a471fd0d60",
       "aiStatus": "ready",
-      "context": "Tham khảo offline: “đảm bảo” được ghi trong bảng với tiếng Hàn “보장하다” và tiếng Anh “guarantee”. Hãy đối chiếu văn cảnh để xác định sắc thái và chọn cách dịch tự nhiên. Đây là lời dẫn nhập thuật ngữ, không phải xác minh nghĩa từ điển.",
-      "grammar": "Gợi ý kiểm tra: “보장하다” một từ độc lập; cần kiểm tra từ loại và tiểu từ phù hợp theo câu. Để dùng trong câu, cần chọn trợ từ, đuôi câu và mức độ kính ngữ theo mục đích giao tiếp. Chưa có phân tích ngữ pháp riêng đã được thẩm định cho mục từ này.",
+      "context": "Dùng khi muốn cam kết hoặc hứa hẹn rằng một kết quả sẽ xảy ra hoặc một tiêu chuẩn sẽ được duy trì.",
+      "grammar": "\"đảm bảo\" là động từ trong tiếng Việt. \"보장하다\" là động từ Hàn (하다-verb) và có thể chia thành các dạng như 보장합니다, 보장했어요. \"guarantee\" là động từ (to guarantee) hoặc danh từ (a guarantee) trong tiếng Anh; khi dùng làm động từ thường đi kèm tân ngữ.",
       "examples": {
-        "vi": "Trong bài học này, chúng tôi tìm hiểu cách dùng “đảm bảo”.",
-        "ko": "이번 수업에서는 '보장하다'라는 표현을 배웁니다.",
-        "en": "In this lesson, we learn the expression “guarantee”."
+        "vi": "Chúng tôi đảm bảo chất lượng sản phẩm.",
+        "ko": "우리는 제품의 품질을 보장합니다.",
+        "en": "We guarantee the quality of the product."
       },
       "references": [],
-      "aiModel": "template-offline-v1",
+      "aiModel": "openai/gpt-oss-120b",
       "grounded": false,
-      "aiProvider": "offline",
-      "reviewRecommended": true
+      "aiProvider": "groq"
     },
     {
       "vi": "bổ sung giấy tờ",
@@ -723,18 +718,67 @@
       "row": 30,
       "inputHash": "f90695d16888c5e46e7cd409",
       "aiStatus": "ready",
-      "context": "Tham khảo offline: “bổ sung giấy tờ” được ghi trong bảng với tiếng Hàn “추가 서류” và tiếng Anh “Additional documents”. Hãy đối chiếu văn cảnh để xác định sắc thái và chọn cách dịch tự nhiên. Đây là lời dẫn nhập thuật ngữ, không phải xác minh nghĩa từ điển.",
-      "grammar": "Gợi ý kiểm tra: “추가 서류” cụm từ gồm nhiều thành tố; tiểu từ tiếng Hàn (nếu có) phụ thuộc vai trò trong câu. Để dùng trong câu, cần chọn trợ từ, đuôi câu và mức độ kính ngữ theo mục đích giao tiếp. Chưa có phân tích ngữ pháp riêng đã được thẩm định cho mục từ này.",
+      "context": "Thường xuất hiện trong các thủ tục hành chính, yêu cầu người nộp cung cấp thêm tài liệu để hoàn thiện hồ sơ.",
+      "grammar": "Cụm \"bổ sung giấy tờ\" là động từ + danh từ trong tiếng Việt. Trong tiếng Hàn \"추가 서류\" là danh từ ghép, trong đó \"추가\" là tính từ (관형사) sửa cho danh từ \"서류\". Trong tiếng Anh \"Additional documents\" là danh từ số nhiều, \"additional\" là tính từ đứng trước danh từ.",
       "examples": {
-        "vi": "Trong bài học này, chúng tôi tìm hiểu cách dùng “bổ sung giấy tờ”.",
-        "ko": "이번 수업에서는 '추가 서류'라는 표현을 배웁니다.",
-        "en": "In this lesson, we learn the expression “Additional documents”."
+        "vi": "Bạn cần bổ sung giấy tờ để hoàn thành đăng ký.",
+        "ko": "등록을 완료하려면 추가 서류가 필요합니다.",
+        "en": "You need to provide additional documents to complete the registration."
       },
       "references": [],
-      "aiModel": "template-offline-v1",
+      "aiModel": "openai/gpt-oss-120b",
       "grounded": false,
-      "aiProvider": "offline",
-      "reviewRecommended": true
+      "aiProvider": "groq"
+    },
+    {
+      "vi": "hôm nay",
+      "ko": "오늘",
+      "en": "today",
+      "content": "",
+      "id": "5b2947a51a16e15ccd3c7277",
+      "sheetId": "19nL6wtouHV-0OumsQR2jF-5xWA1cpbpivRUIsm7hDgk",
+      "sheetTitle": "Google Sheets 19nL6wto",
+      "tabTitle": "Sheet1",
+      "row": 31,
+      "inputHash": "c3fa78e306a27fe3d69c6f72",
+      "aiStatus": "ready",
+      "context": "Dùng để chỉ thời gian hiện tại trong ngày, thường xuất hiện trong câu nói về kế hoạch, sự kiện hoặc cảm xúc của người nói.",
+      "grammar": "Cụm danh từ chỉ thời gian, không thay đổi dạng. Khi dùng trong câu, có thể đứng một mình hoặc làm bổ ngữ cho động từ.",
+      "examples": {
+        "vi": "Hôm nay tôi sẽ đi thăm bố.",
+        "ko": "오늘 저는 아버지를 방문할 거예요.",
+        "en": "I will visit my father today."
+      },
+      "references": [],
+      "aiModel": "openai/gpt-oss-120b",
+      "grounded": false,
+      "aiProvider": "groq"
+    },
+    {
+      "vi": "khó khăn",
+      "ko": "딱딱한",
+      "en": "stiff",
+      "content": "",
+      "id": "2645205f1418394410799ed2",
+      "sheetId": "19nL6wtouHV-0OumsQR2jF-5xWA1cpbpivRUIsm7hDgk",
+      "sheetTitle": "Google Sheets 19nL6wto",
+      "tabTitle": "Sheet1",
+      "row": 32,
+      "inputHash": "71ec1567e80012fcdac50c39",
+      "aiStatus": "pending"
+    },
+    {
+      "vi": "vất vả",
+      "ko": "딱딱한",
+      "en": "stiff",
+      "content": "",
+      "id": "c41733287f5832b1daa2903e",
+      "sheetId": "19nL6wtouHV-0OumsQR2jF-5xWA1cpbpivRUIsm7hDgk",
+      "sheetTitle": "Google Sheets 19nL6wto",
+      "tabTitle": "Sheet1",
+      "row": 33,
+      "inputHash": "4ce866cbca070ee0869062c0",
+      "aiStatus": "pending"
     }
   ]
 }
