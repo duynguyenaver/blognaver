@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1020">
+<meta name="description" content="BlogNaver Podcast Studio — từ kịch bản đến thu âm, chỉnh sửa multitrack và xuất tập podcast WAV chất lượng cao ngay trên trình duyệt.">
+<title>Tạo Podcast · BlogNaver Studio</title>
+<link rel="stylesheet" href="studio.css">
+<link rel="stylesheet" href="../../access-gate.css">
+<script src="../../access-gate.js"></script>
+<script src="audio-engine.js" defer></script><script src="studio.js" defer></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><a class="back" href="../" aria-label="Quay về tiện ích">← Tiện ích</a><span class="brand-mark">◉</span><div><strong>BlogNaver <span>Podcast Studio</span></strong><small>PLAN · RECORD · EDIT · RELEASE</small></div></div>
+  <div class="top-actions"><span class="local-pill">● Local-first</span><button id="undo" class="button subtle" title="Hoàn tác · Ctrl/⌘ Z" disabled>↶ Undo</button><button id="redo" class="button subtle" title="Làm lại · Ctrl/⌘ Shift Z" disabled>↷ Redo</button><button id="save" class="button secondary">↥ Lưu dự án</button><button id="openExport" class="button primary">Xuất podcast ↗</button></div>
+</header>
+<div class="shell">
+  <div class="intro"><div><div class="eyebrow">BLOGNAVER / CREATOR AUDIO WORKSPACE</div><h1>Tạo podcast <em>từ A đến Z.</em></h1><p>Chuẩn bị kịch bản, thu giọng, nhập nhạc, chỉnh từng track, nghe thử và xuất tập hoàn chỉnh. File âm thanh được xử lý trên thiết bị, không tải lên server.</p></div><div id="saveState" class="save-state" role="status" aria-live="polite">Chưa có dữ liệu để lưu</div></div>
+  <nav class="steps" aria-label="Quy trình tạo podcast">
+    <button data-step="plan" class="step active"><span>01</span><strong>Chuẩn bị</strong><small>Show & script</small></button>
+    <button data-step="record" class="step"><span>02</span><strong>Thu / Nhập</strong><small>Audio library</small></button>
+    <button data-step="edit" class="step"><span>03</span><strong>Biên tập</strong><small>Multi-track</small></button>
+    <button data-step="release" class="step"><span>04</span><strong>Xuất bản</strong><small>Audio & metadata</small></button>
+  </nav>
+  <main class="layout">
+    <aside class="panel side-left">
+      <div class="panel-top"><h2>Thư viện audio</h2><span class="tag">MEDIA</span></div>
+      <label class="dropzone" id="dropzone" for="audioFiles"><span class="big-icon">♫</span><strong>Thêm âm thanh</strong><small>MP3 · WAV · M4A · OGG · WebM</small><span class="button secondary fake-button">+ Chọn file</span></label><input type="file" id="audioFiles" accept="audio/*,.wav,.mp3,.m4a,.ogg,.webm" multiple hidden>
+      <div class="mini-hint">Kéo file vào đây. File sẽ giải mã cục bộ; không phải upload.</div>
+      <div class="media-bar"><strong>Assets</strong><span id="assetCount">0</span></div>
+      <div id="assetList" class="asset-list"><p class="placeholder">Chưa có audio. Hãy nhập file hoặc thu bằng microphone.</p></div>
+      <details class="sub-disclosure"><summary>Hướng dẫn nhanh <span>⌄</span></summary><div class="sub-body">Tạo 1 track Giọng chính, nhạc Intro, BGM và Outro. Chọn clip trên timeline để cắt, di chuyển, fade hoặc tách tại playhead. Dùng tai nghe khi thu để tránh tiếng vọng.</div></details>
+      <div class="privacy-foot">🔒 Bản ghi lớn chỉ lưu bằng IndexedDB trên trình duyệt hiện tại. Xóa dữ liệu trình duyệt có thể làm mất dự án. Hãy tải WAV và file dự án dự phòng.</div>
+    </aside>
+    <section class="center">
+      <section class="tab-panel panel active" data-panel="plan">
+        <div class="section-head"><div><div class="eyebrow">STEP 01 / PRE-PRODUCTION</div><h2>Studio Brief & Kịch bản</h2><p>Thông tin tập và kịch bản sẽ đi cùng gói xuất bản.</p></div><span class="status-chip">✦ Creator Brief</span></div>
+        <div class="fields two"><label>Tên chương trình<input id="showTitle" placeholder="Ví dụ: BlogNaver Talks" maxlength="100"></label><label>Tên tập podcast<input id="episodeTitle" placeholder="Tập 01 · AI thay đổi thế giới" maxlength="160"></label></div>
+        <div class="fields three"><label>Người dẫn / Host<input id="hostName" placeholder="Duy Nguyen" maxlength="100"></label><label>Danh mục<select id="category"><option>Technology</option><option>Business</option><option>Education</option><option>Society & Culture</option><option>News</option><option>Arts</option><option>Science</option><option>Leisure</option></select></label><label>Ngôn ngữ<select id="language"><option value="vi-VN">Tiếng Việt</option><option value="ko-KR">한국어</option><option value="en-US">English</option></select></label></div>
+        <label class="field">Tóm tắt tập<textarea id="description" rows="3" placeholder="Tập này nói về điều gì? Người nghe sẽ học được gì?"></textarea></label>
+        <div class="section-subtitle"><strong>Podcast Script Editor</strong><span id="scriptCount">0 từ</span></div>
+        <textarea id="script" class="script-editor" rows="14" placeholder="MỞ ĐẦU / HOOK&#10;Chào mừng bạn đến với…&#10;&#10;PHẦN 1 / BỐI CẢNH&#10;…&#10;&#10;PHẦN 2 / PHÂN TÍCH&#10;…&#10;&#10;KẾT / CTA&#10;…"></textarea>
+        <div class="actions"><button id="scriptTemplate" class="button secondary">✦ Chèn khung kịch bản</button><button id="copyScript" class="button subtle">Sao chép script</button><button id="downloadScript" class="button subtle">↓ Tải .txt</button><button data-go="record" class="button primary push-right">Tiếp: Thu âm →</button></div>
+        <div class="hint-strip">Kịch bản là bản thảo biên tập, không phải bản chép lời tự động. Chưa có kết nối AI transcription hoặc AI speech enhancement.</div>
+      </section>
+      <section class="tab-panel panel" data-panel="record">
+        <div class="section-head"><div><div class="eyebrow">STEP 02 / RECORDING DESK</div><h2>Thu âm & Nhập tài nguyên</h2><p>Thu microphone trực tiếp, lựa chọn thiết bị và lưu từng take.</p></div><span class="status-chip">48 kHz khi trình duyệt hỗ trợ</span></div>
+        <div class="recorder-grid">
+          <div class="recorder-hero"><div class="rec-circle" id="recCircle">●</div><div class="rec-clock" id="recordClock">00:00</div><div class="rec-status" id="recordStatus">Chưa ghi âm</div><canvas id="inputMeter" width="500" height="76" aria-label="Đồng hồ mức micro"></canvas><div class="actions center-actions"><button id="startRecord" class="button record">● Bắt đầu thu</button><button id="stopRecord" class="button secondary" disabled>■ Dừng & lưu</button></div><div class="tiny">Khi nhấn Thu, trình duyệt sẽ xin quyền microphone. Không ghi âm khi chưa cấp quyền.</div></div>
+          <div class="recording-settings"><label>Thiết bị microphone<select id="micDevice"><option value="">Mặc định hệ thống</option></select></label><button id="refreshDevices" class="button subtle full">↻ Làm mới danh sách mic</button><label>Tên bản ghi<input id="takeName" value="Host · Take 01" maxlength="100"></label><label>Đưa bản ghi vào track<select id="recordTrack"><option value="voice">🎙 Voice</option><option value="guest">👥 Guest</option><option value="music">♫ BGM</option><option value="sfx">✦ SFX / Intro</option></select></label><label class="check"><input id="noiseSuppression" type="checkbox" checked> Xin bật khử ồn / echo cancellation trên thiết bị</label><div class="hint-strip">MediaRecorder tự chọn codec tương thích. Không có chế độ thu phòng họp nhiều người qua Internet; mỗi take là file local.</div></div>
+        </div>
+        <div class="section-subtitle"><strong>Nhạc Intro · Outro · SFX</strong><span>Tài nguyên có bản quyền cần được phép sử dụng</span></div>
+        <div class="actions"><label class="button secondary file-label" for="audioFiles2">+ Nhập nhạc / tiếng hiệu ứng</label><input id="audioFiles2" type="file" accept="audio/*,.wav,.mp3,.m4a" multiple hidden><button data-go="edit" class="button primary push-right">Tiếp: Chỉnh sửa →</button></div>
+        <div class="hint-strip">Mẹo: thu ở nơi yên tĩnh, duy trì mức âm khoảng -18 đến -6 dBFS, tránh đỉnh tín hiệu vượt 0 dBFS.</div>
+      </section>
+      <section class="tab-panel panel edit-panel" data-panel="edit">
+        <div class="section-head"><div><div class="eyebrow">STEP 03 / AUDIO POST-PRODUCTION</div><h2>Multi-track Editor</h2><p>Waveform, kéo clip, trim, split, gain, fade, mute/solo, noise gate và compressor.</p></div><span class="status-chip">Non-destructive</span></div>
+        <div class="transport">
+          <button id="play" class="transport-primary" title="Phát / tạm dừng" aria-label="Phát">▶</button><button id="stop" class="transport-btn" title="Về đầu" aria-label="Dừng">■</button>
+          <strong id="playClock">00:00.0</strong><span class="transport-sep">/</span><span id="totalClock">00:00.0</span>
+          <span class="push-right"></span><label class="speed">Tốc độ <select id="playRate"><option value=".75">0.75×</option><option value="1" selected>1×</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option></select></label><label class="speed">Zoom <select id="timelineZoom"><option value="1">1×</option><option value="2">2×</option><option value="4">4×</option></select></label>
+        </div>
+        <div class="timeline-frame" id="timelineFrame">
+          <div class="ruler" id="ruler"><span>Thời gian (giây)</span></div>
+          <div id="timeline" class="timeline" aria-label="Timeline nhiều track"></div>
+          <div id="playhead" class="playhead" aria-hidden="true"></div>
+        </div>
+        <div class="timeline-bottom"><label>Playhead <input type="range" id="scrubber" min="0" max="1" value="0" step=".01"></label><button id="split" class="button secondary">✂ Split tại playhead</button><button id="deleteClip" class="button subtle">× Xóa clip</button><button id="duplicateClip" class="button subtle">⧉ Nhân đôi</button></div>
+        <div class="inspector-grid">
+          <section class="inspector-card"><div class="section-subtitle"><strong>Clip Inspector</strong><span id="selectedName">Chưa chọn clip</span></div>
+            <div class="fields two"><label>Bắt đầu trên timeline (giây)<input id="clipOffset" type="number" min="0" step=".1"></label><label>Âm lượng (%)<input id="clipGain" type="number" min="0" max="200" step="5"></label><label>Trim In (giây)<input id="clipIn" type="number" min="0" step=".1"></label><label>Trim Out (giây)<input id="clipOut" type="number" min="0" step=".1"></label><label>Fade In (giây)<input id="clipFadeIn" type="number" min="0" step=".1"></label><label>Fade Out (giây)<input id="clipFadeOut" type="number" min="0" step=".1"></label></div>
+            <div class="actions"><button id="trimSilence" class="button subtle">✦ Cắt im lặng đầu/cuối</button><button id="applyClip" class="button primary">Áp dụng clip</button></div>
+          </section>
+          <section class="inspector-card"><div class="section-subtitle"><strong>Voice Processing</strong><span>Web Audio</span></div>
+            <label class="check"><input type="checkbox" id="highpass" checked> High-pass 80 Hz (giảm tiếng trầm nền)</label><label class="check"><input type="checkbox" id="compressor" checked> Compressor (ổn định giọng nói)</label><label class="check"><input type="checkbox" id="normalize" checked> Peak normalize khi export (-1 dBFS)</label>
+            <label class="range-label">Master Volume <output id="masterValue">100%</output><input id="master" type="range" min="0" max="150" value="100" step="5"></label>
+            <div class="hint-strip">Các hiệu ứng DSP tiêu chuẩn, không phải AI Enhance Speech. Peak normalization khác với chuẩn LUFS.</div>
+          </section>
+        </div>
+        <div class="actions"><button data-go="release" class="button primary push-right">Tiếp: Xuất podcast →</button></div>
+      </section>
+      <section class="tab-panel panel" data-panel="release">
+        <div class="section-head"><div><div class="eyebrow">STEP 04 / RELEASE DESK</div><h2>Xuất bản tập Podcast</h2><p>Chuẩn bị audio master, ảnh cover, show notes và metadata.</p></div><span class="status-chip">Publish-ready assets</span></div>
+        <div class="release-grid">
+          <div><h3>Episode Cover</h3><canvas id="cover" width="1200" height="1200" class="cover" aria-label="Ảnh bìa podcast tạo từ tên chương trình và tên tập"></canvas><div class="actions"><button id="downloadCover" class="button secondary">↓ Tải Cover PNG</button><label class="button subtle file-label" for="coverFile">+ Dùng ảnh của tôi</label><input type="file" id="coverFile" accept="image/png,image/jpeg,image/webp" hidden></div><p class="mini-hint">Bìa vuông 1200×1200, tự lấy tên chương trình / tập; cho phép tải ảnh riêng.</p></div>
+          <div><h3>Audio Master & Show Notes</h3><label class="field">Tần số mẫu xuất<select id="sampleRate"><option value="44100">44.1 kHz · WAV PCM 16-bit</option><option value="48000" selected>48 kHz · WAV PCM 16-bit</option></select></label><div class="stats"><div><small>Thời lượng</small><strong id="releaseDuration">00:00</strong></div><div><small>Clips</small><strong id="releaseClips">0</strong></div><div><small>Tracks</small><strong>4</strong></div></div><button id="renderWav" class="button primary full">↓ Mix & Xuất WAV Master</button><button id="cancelWav" class="button subtle full" disabled style="margin-top:8px">Hủy xuất WAV</button><div class="progress"><div id="exportProgress"></div></div><p id="exportStatus" role="status" aria-live="polite" class="export-status">Sẵn sàng xuất; quá trình render được xử lý offline.</p><div class="actions"><button id="downloadNotes" class="button secondary">↓ Show Notes .txt</button><button id="downloadMetadata" class="button subtle">↓ Metadata .json</button><button id="backupProject" class="button subtle">↓ Dự án .json</button></div><p class="hint-strip">Các file được tải về máy, không tự đăng Spotify/Apple Podcasts. Để phát hành công khai cần hosting podcast, file audio URL và RSS feed hợp lệ. Dự án .json chỉ lưu metadata; cần giữ file audio gốc.</p></div>
+        </div>
+      </section>
+      <div class="bottom-caption"><span>BlogNaver Podcast Studio · Bản local-first không ghi âm tự động.</span><span>⌘/Ctrl+Z · Space phát/tạm dừng · Esc hủy kéo</span></div>
+    </section>
+  </main>
+</div>
+<div id="toast" class="toast" hidden role="status" aria-live="polite"></div>
+</body>
+</html>
