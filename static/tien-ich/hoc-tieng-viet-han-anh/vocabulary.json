@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "folderId": "1coylrqzqPOLZP_lhUdWlb3nI47Qr-af7",
-  "updatedAt": "2026-11-01T17:04:08+00:00",
+  "updatedAt": "2026-11-01T17:07:06+00:00",
   "sources": [
     {
       "id": "19nL6wtouHV-0OumsQR2jF-5xWA1cpbpivRUIsm7hDgk",
@@ -1247,7 +1247,6 @@
       "tabTitle": "Sheet1",
       "row": 51,
       "inputHash": "967542adf197585153e0aab6",
-      "aiStatus": "ready",
       "context": "Dùng để chỉ chất lỏng đỏ trong cơ thể người hoặc động vật, hoặc ẩn dụ cho mối quan hệ gia đình, huyết thống.",
       "grammar": "Danh từ chung, không chia số. Khi dùng trong câu, thường đi kèm với các vị từ như 'của', 'trong', 'với'.",
       "examples": {
@@ -1256,9 +1255,11 @@
         "en": "['He was bleeding heavily.', 'Blood plays a vital role in the body.', 'Their blood ties them together.']"
       },
       "references": [],
+      "aiStatus": "ready",
       "aiModel": "openai/gpt-oss-120b",
       "grounded": false,
-      "aiProvider": "groq"
+      "aiProvider": "groq",
+      "reviewRecommended": null
     },
     {
       "vi": "huyết thống",
@@ -1271,7 +1272,6 @@
       "tabTitle": "Sheet1",
       "row": 52,
       "inputHash": "260cf1b0b756ec963c7e2cd2",
-      "aiStatus": "ready",
       "context": "Chỉ mối quan hệ huyết thống, nguồn gốc gia đình, thường dùng trong ngữ cảnh nói về xuất xứ, danh tộc hoặc di truyền.",
       "grammar": "Danh từ không đếm được, thường đi kèm với các từ chỉ sở hữu như 'của', 'từ', hoặc các động từ như 'có', 'được'.",
       "examples": {
@@ -1280,9 +1280,11 @@
         "en": "['He is proud of his lineage.', 'The royal lineage has been recorded for centuries.', 'In this tradition, lineage determines social status.']"
       },
       "references": [],
+      "aiStatus": "ready",
       "aiModel": "openai/gpt-oss-120b",
       "grounded": false,
-      "aiProvider": "groq"
+      "aiProvider": "groq",
+      "reviewRecommended": null
     }
   ]
 }
