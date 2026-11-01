@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-01T10:58:47.326Z",
+  "updatedAt": "2026-11-01T10:59:43.475Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -1279,7 +1279,8 @@
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
-      ]
+      ],
+      "live": true
     },
     {
       "slug": "cold-fusion-tai-dinh-hinh-chuong-trinh-artemis-phan-tich-chien-luoc-cai-to-va-ky-thuat--2026-11-01",
@@ -1296,7 +1297,8 @@
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
-      ]
+      ],
+      "live": true
     },
     {
       "slug": "cold-fusion-hanh-trinh-che-tao-va-phong-kinh-vien-vong-james-webb-2026-11-01",
@@ -1310,6 +1312,23 @@
         "tokens": 102559,
         "inputTokens": 92949,
         "outputTokens": 9610
+      },
+      "models": [
+        "Gemini · models/gemini-3.5-flash-lite"
+      ]
+    },
+    {
+      "slug": "cold-fusion-giai-ma-nhat-hoa-va-bao-tu-su-menh-lich-su-cua-parker-solar-probe-2026-11-01",
+      "title": "Giải mã nhật hoa và bão từ: Sứ mệnh lịch sử của Parker Solar Probe",
+      "series": "cold-fusion",
+      "sha": "579ae728ec2ce5560f4273389a9c8f5157392157",
+      "commitAt": "2026-11-01T10:59:09.252Z",
+      "durationMs": 46956,
+      "quota": {
+        "requests": 12,
+        "tokens": 84233,
+        "inputTokens": 74356,
+        "outputTokens": 9877
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
