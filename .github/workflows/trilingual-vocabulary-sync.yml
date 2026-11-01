@@ -13,6 +13,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  actions: write
 
 concurrency:
   group: blognaver-vocabulary-sync-${{ github.event_name }}
@@ -61,13 +62,24 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          n="$(gh pr list --repo "$REPO" --state open --json title --jq '[.[]|select(.title=="data(vocab): sync Google Drive Sheets")]|length')"
-          if [ "$n" != "0" ]; then
+          PR="$(gh pr list --repo "$REPO" --state open --json title,number,headRefOid --jq '[.[]|select(.title=="data(vocab): sync Google Drive Sheets")][0] // {}')"
+          NUMBER="$(jq -r '.number // empty' <<<"$PR")"
+          if [ -n "$NUMBER" ]; then
             echo 'skip=true' >> "$GITHUB_OUTPUT"
-            echo "Already have a pending data PR, waiting for its checks/merge."
+            echo "pr=$NUMBER" >> "$GITHUB_OUTPUT"
+            echo "sha=$(jq -r '.headRefOid' <<<"$PR")" >> "$GITHUB_OUTPUT"
+            echo "Existing pending generated data PR #$NUMBER. Attempt recovery with verified CI."
           else
             echo 'skip=false' >> "$GITHUB_OUTPUT"
           fi
+      - name: Auto-merge previously pending data PR after verified green CI
+        if: steps.existing.outputs.skip == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.BLOGNAVER_VOCAB_BOT_TOKEN || github.token }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ steps.existing.outputs.pr }}
+          HEAD_SHA: ${{ steps.existing.outputs.sha }}
+        run: bash scripts/merge-verified-vocabulary-pr.sh "$PR_NUMBER" "$HEAD_SHA"
       - name: Read all Sheets and enrich only new/modified words
         if: steps.existing.outputs.skip == 'false'
         env:
