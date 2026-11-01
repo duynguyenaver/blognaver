@@ -34,3 +34,53 @@
 }
 .vocab-library .pager #pagination{color:#196c41;font-weight:850;font-variant-numeric:tabular-nums}
 @media(max-width:620px){.vocab-library{padding:20px 16px}}
+
+/* Language Lab hero: use available horizontal space without forced short lines. */
+.hero{
+  padding:clamp(28px,3vw,42px) clamp(24px,3.5vw,48px);
+}
+.hero h1{
+  font-size:clamp(32px,3.9vw,56px);
+  line-height:1.15;
+  letter-spacing:-.045em;
+  margin:14px 0 18px;
+}
+.hero p{
+  max-width:none;
+  font-size:clamp(14px,1.35vw,16px);
+  line-height:1.7;
+  margin:0 0 22px;
+  text-wrap:pretty;
+}
+.hero .tags{
+  align-items:center;
+  gap:10px;
+}
+.hero .tags>span{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  min-height:38px;
+  padding:7px 15px;
+  font-size:13px;
+  font-weight:700;
+  line-height:1.2;
+  border-color:rgba(255,255,255,.3);
+  background:rgba(255,255,255,.1);
+}
+.hero .tags .flower{
+  font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;
+  font-size:19px;
+  line-height:1;
+}
+@media (min-width:780px){
+  .hero h1{white-space:nowrap}
+}
+@media (max-width:620px){
+  .hero{padding:30px 22px}
+  .hero h1{font-size:clamp(29px,7.2vw,38px);line-height:1.2}
+  .hero p{font-size:14px;line-height:1.65}
+  .hero .tags{gap:8px}
+  .hero .tags>span{padding:7px 11px;font-size:12px}
+  .hero .tags .flower{font-size:18px}
+}
