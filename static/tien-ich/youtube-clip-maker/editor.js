@@ -15,7 +15,7 @@
  }
  const canvas=ui.canvas,ctx=canvas.getContext("2d",{alpha:false});
  const voice=ui.voiceElement,bgm=ui.bgmElement;
- let assets=[],voiceURL=null,bgmURL=null,outputURL=null,cues=[],duration=10,position=0,playing=false,
+ let assets=[],voiceURL=null,bgmURL=null,outputURL=null,cues=[],manualCueTiming=false,duration=10,position=0,playing=false,
      exporting=false,exportAbort=false,frame=0,origin=0,playBase=0,selectedAsset=null,activeVideo=null;
  let audioCtx=null,audioDest=null,voiceGain=null,bgmGain=null,voiceAnalyser=null;
  let recorder=null,capture=null,recordedChunks=[];
@@ -48,7 +48,7 @@
    ui.timelineHint.textContent=voiceLen>0&&Number.isFinite(voiceLen)
      ?"Auto-Fit: video khớp "+duration.toFixed(1)+" giây voiceover."
      :"Chưa có voiceover: dùng thời lượng video nền hoặc thời lượng ảnh mặc định.";
-   if(ui.script.value.trim())createCues(false);
+   if(ui.script.value.trim()&&!manualCueTiming)createCues(false);
    refreshTimeline();
    window.BNClipMakerPro?.onAssetsChanged?.();
  }
@@ -179,6 +179,7 @@
    return sentences.slice(0,1200);
  }
  function createCues(showMessage=true){
+   manualCueTiming=false;
    const chunks=makeCueLines(ui.script.value);
    cues=[];if(chunks.length){
      const weights=chunks.map(x=>Math.max(1,x.trim().split(/\s+/).length));
@@ -406,7 +407,7 @@
  }
  for(const id of ["voiceVol","bgmVol","ducking"]){ui[id].addEventListener("input",()=>{labelSettings();setMixer()})}
  ui.stillDuration.addEventListener("input",()=>{if(!exporting)syncDuration()});
- ui.script.addEventListener("input",()=>{cues=[];refreshTimeline()});
+ ui.script.addEventListener("input",()=>{manualCueTiming=false;cues=[];refreshTimeline()});
  function chooseMime(){
    const withAudio=!window.BNClipMakerPro?.isSilentExport?.() && Boolean(voiceURL||bgmURL||window.BNClipMakerPro?.hasAudio?.());
    const types=withAudio?["video/mp4;codecs=avc1.42E01E,mp4a.40.2","video/mp4",
@@ -496,6 +497,7 @@
    getCues:()=>cues.map(c=>({...c})),
    setCues:items=>{
      if(!Array.isArray(items))throw Error("Invalid subtitle cues.");
+     manualCueTiming=true;
      cues=items.slice(0,1200).map(c=>({start:Number(c.start),end:Number(c.end),text:String(c.text||"").trim()}))
        .filter(c=>Number.isFinite(c.start)&&Number.isFinite(c.end)&&c.start>=0&&c.end>c.start&&c.text)
        .sort((a,b)=>a.start-b.start);
