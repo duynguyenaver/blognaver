@@ -15,7 +15,7 @@ import os
 import re
 import sys
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode, quote
@@ -320,6 +320,7 @@ def ai_enrich_batch(batch: list[dict], model_names: list[str],
         return {}
     state = quota_state if quota_state is not None else {"blocked": set()}
     blocked = state.setdefault("blocked", set())
+    rate_limited = state.setdefault("rate_limited", set())
     request_items = [{k: x[k] for k in ("id", "vi", "ko", "en", "content")} for x in batch]
     prompt = (
         "Bạn là biên tập viên từ điển Việt–Hàn–Anh. Chỉ phân tích ngữ nghĩa/ngữ pháp "
@@ -389,6 +390,7 @@ def ai_enrich_batch(batch: list[dict], model_names: list[str],
                 if re.search(r"\bHTTP 429\b", error):
                     # A different model may still have its own available quota.
                     blocked.add(name)
+                    rate_limited.add(name)
                     print(f"WARNING: Gemini model {name} returned 429; rotating to the next eligible model",
                           file=sys.stderr)
                     break
@@ -521,12 +523,24 @@ def collect(old: dict) -> dict:
             x["aiStatus"] = "pending"
         if x["aiStatus"] == "pending":
             pending.append(x)
-    names = models()
-    if pending and not names:
-        print(f"INFO: {len(pending)} terms pending Gemini; configure GEMINI_API_KEY secret.", file=sys.stderr)
-    # Track models that failed once, avoiding repeated HTTP 429 storms across batches.
-    quota_state = {"blocked": set()}
-    todo = pending[:max(0, MAX_ENRICH)]
+    now = datetime.now(timezone.utc)
+    previous_retry = old.get("aiRetryAfter")
+    cool_down = False
+    if isinstance(previous_retry, str) and previous_retry:
+        try:
+            cool_down = datetime.fromisoformat(previous_retry.replace("Z", "+00:00")) > now
+        except ValueError:
+            pass
+    if cool_down and pending:
+        print(f"INFO: Gemini quota cooldown active until {previous_retry}. "
+              "Source rows still sync; skipping repeated rate-limit API calls.", file=sys.stderr)
+    names = models() if pending and not cool_down else []
+    if pending and not names and not cool_down:
+        print(f"INFO: {len(pending)} words pending Gemini; no eligible models with access. "
+              "Check GEMINI_API_KEY, model availability and project quotas.", file=sys.stderr)
+    # Keep 429 failures blocked across all groups for this workflow execution.
+    quota_state = {"blocked": set(), "rate_limited": set()}
+    todo = pending[:max(0, MAX_ENRICH)] if not cool_down else []
     for start in range(0, len(todo), 3):
         group = todo[start:start+3]
         enriched = ai_enrich_batch(group, names, quota_state) if names else {}
@@ -537,12 +551,25 @@ def collect(old: dict) -> dict:
                 for key in ("vi", "ko", "en"):
                     if not x.get(key):
                         x[key] = ai[key]
-                for key in ("context", "grammar", "examples", "references", "aiStatus"):
+                for key in ("context", "grammar", "examples", "references", "aiStatus", "aiModel", "grounded"):
                     x[key] = ai[key]
     write_back_ready(items, headers)
     result = {"schemaVersion": 1, "folderId": FOLDER, "updatedAt": None,
               "sources": sources, "items": items}
-    stable = lambda data: json.dumps({"sources": data.get("sources", []), "items": data.get("items", [])}, sort_keys=True, ensure_ascii=False)
+    if cool_down:
+        result["aiRetryAfter"] = previous_retry
+    elif (quota_state["rate_limited"] and names
+          and len(quota_state["blocked"]) >= len(names)
+          and not any(x.get("aiStatus") == "ready" for x in todo)):
+        # Daily/project-wide 429 cannot be solved by rotating models repeatedly.
+        # Retry after a bounded 15-minute pause; the Sheet's A:C still imports.
+        result["aiRetryAfter"] = (now + timedelta(minutes=15)).isoformat(timespec="seconds")
+        print("WARNING: All available Gemini text models failed; next AI retry after "
+              + result["aiRetryAfter"], file=sys.stderr)
+    stable = lambda data: json.dumps({
+        "sources": data.get("sources", []), "items": data.get("items", []),
+        "aiRetryAfter": data.get("aiRetryAfter")
+    }, sort_keys=True, ensure_ascii=False)
     if stable(result) == stable(old):
         result["updatedAt"] = old.get("updatedAt")
     else:
