@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-01T11:03:00.557Z",
+  "updatedAt": "2026-11-01T11:07:04.943Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -1383,6 +1383,40 @@
         "tokens": 11148,
         "inputTokens": 6789,
         "outputTokens": 4359
+      },
+      "models": [
+        "Gemini · models/gemini-3.5-flash-lite"
+      ]
+    },
+    {
+      "slug": "cold-fusion-giai-ma-the-spheres-khi-amazon-dua-thien-nhien-vao-khong-gian-lam-viec-do-t-2026-11-01",
+      "title": "Giải mã 'The Spheres': Khi Amazon đưa thiên nhiên vào không gian làm việc đô thị",
+      "series": "cold-fusion",
+      "sha": "45463e7be710961f34af1eb1607bad14a5351c27",
+      "commitAt": "2026-11-01T11:07:03.396Z",
+      "durationMs": 36630,
+      "quota": {
+        "requests": 8,
+        "tokens": 17312,
+        "inputTokens": 11505,
+        "outputTokens": 5807
+      },
+      "models": [
+        "Gemini · models/gemini-3.5-flash-lite"
+      ]
+    },
+    {
+      "slug": "cold-fusion-nghien-cuu-t2k-va-bat-doi-xung-neutrino-giai-ma-bi-an-vat-chat-vu-tru-2026-11-01",
+      "title": "Nghiên cứu T2K và bất đối xứng neutrino: Giải mã bí ẩn vật chất vũ trụ",
+      "series": "cold-fusion",
+      "sha": "cfe9289ff7fbd4d8eda606a74a6b3acb57c80950",
+      "commitAt": "2026-11-01T11:06:19.505Z",
+      "durationMs": 31851,
+      "quota": {
+        "requests": 8,
+        "tokens": 15892,
+        "inputTokens": 10263,
+        "outputTokens": 5629
       },
       "models": [
         "Gemini · models/gemini-3.5-flash-lite"
