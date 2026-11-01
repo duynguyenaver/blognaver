@@ -151,9 +151,22 @@ jobs:
           fi
           AUTH="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
           git -c http.extraheader="AUTHORIZATION: basic $AUTH" push "https://github.com/$REPO.git" "HEAD:refs/heads/$BRANCH"
-          PR_URL="$(gh pr create --repo "$REPO" --base main --head "$BRANCH" \
-            --title 'data(vocab): sync Google Drive Sheets' \
-            --body 'Automated refresh from the owner-approved Drive folder; exact row provenance, Gemini/Groq generated educational explanations, and fail-closed errors. No keys committed.')"
+          # Fine-grained PATs need Pull requests: Read and write; use
+          # GitHub REST API directly, avoiding gh pr create GraphQL ambiguity.
+          # Never fall back to github.token, which creates bot-owned PRs.
+          ERROR_LOG="$(mktemp)"
+          if ! PR_URL="$(gh api -X POST "repos/$REPO/pulls" \
+            -f base=main -f head="$BRANCH" \
+            -f title='data(vocab): sync Google Drive Sheets' \
+            -f body='Automated refresh from owner-approved Google Sheets. Gemini/Groq notes and source provenance. No keys committed.' \
+            --jq .html_url 2>"$ERROR_LOG")"; then
+            echo "::error::The duynguyenaver PAT can push a branch but cannot create a PR. Edit its Repository permissions → Pull requests → Read and write, then update Actions secret BLOGNAVER_VOCAB_BOT_TOKEN if the token value changes."
+            echo "::error::Branch $BRANCH is safely preserved. After fixing PAT permission, rerun Language Lab."
+            sed -E 's/(github_pat_[A-Za-z0-9_]+)/[REDACTED]/g' "$ERROR_LOG" >&2
+            rm -f "$ERROR_LOG"
+            exit 1
+          fi
+          rm -f "$ERROR_LOG"
           echo "::notice::Created generated vocabulary PR: $PR_URL"
           PR_NUMBER="$(basename "$PR_URL")"
           HEAD_SHA="$(git rev-parse HEAD)"
