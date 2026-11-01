@@ -139,7 +139,7 @@
   function previewSpeech(value){
     const spoken=String(value||"").trim();
     if(!spoken){status("Chưa có cách đọc để nghe thử.",true);return false}
-    if($("#stop")?.disabled===false){
+    if($("stop")?.disabled===false){
       status("Section 01 đang phát/ghi âm. Bấm Dừng ở Section 01 trước khi nghe thử tại đây.",true);return false;
     }
     const synth=window.speechSynthesis;
@@ -152,12 +152,12 @@
       synth.cancel();
       const utterance=new Utterance(spoken);
       const voices=synth.getVoices?.()||[];
-      const voiceIndex=Number($("#voice")?.value);
+      const voiceIndex=Number($("voice")?.value);
       const choice=voices[voiceIndex];
       if(choice){utterance.voice=choice;utterance.lang=choice.lang}
       else{const vn=voices.find(v=>/^vi[-_]/i.test(v.lang||""));if(vn){utterance.voice=vn;utterance.lang=vn.lang}else utterance.lang="vi-VN";}
-      utterance.rate=Number($("#rate")?.value)||1;
-      utterance.pitch=Number($("#pitch")?.value)||1;
+      utterance.rate=Number($("rate")?.value)||1;
+      utterance.pitch=Number($("pitch")?.value)||1;
       utterance.onerror=()=>status("Không phát được âm thanh thử. Hãy kiểm tra giọng đọc đã chọn.",true);
       synth.speak(utterance);
       status("Đang nghe thử: “"+spoken+"”. Không thay đổi Section 01.");
@@ -403,7 +403,7 @@
     }finally{readyResolve()}
   }
   const api=Object.freeze({apply:applyAll,validate,normalize:normalized,ready,activeEntries,
-    stage:stageRule,select: (term,checked)=>{const k=key(term);if(!drafts.has(k))return false;if(checked)selectedForSync.add(k);else selectedForSync.delete(k);refresh();return true},
+    stage:entry=>{const value=stageRule(entry);refresh();preview();return value},select: (term,checked)=>{const k=key(term);if(!drafts.has(k))return false;if(checked)selectedForSync.add(k);else selectedForSync.delete(k);refresh();return true},
     pending:()=>Array.from(drafts.entries()).map(([k,v])=>({term:k,entry:v,selected:selectedForSync.has(k)})),
     list:()=>activeEntries().map(x=>({...x})),previewSpeech,load});
   window.BNPronunciationTraining=api;
