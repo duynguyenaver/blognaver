@@ -36,6 +36,7 @@ jobs:
           python3 -m py_compile scripts/sync-trilingual-vocabulary.py
           node --check static/tien-ich/hoc-tieng-viet-han-anh/study.js
           node --check static/tien-ich/hoc-tieng-viet-han-anh/live-sheet.js
+          bash -n scripts/merge-verified-vocabulary-pr.sh
           node -e "new Function(require('fs').readFileSync('docs/google-apps-script/LanguageLab.gs', 'utf8'))"
           python3 -m json.tool static/tien-ich/hoc-tieng-viet-han-anh/vocabulary.json >/dev/null
 
@@ -99,8 +100,13 @@ jobs:
           git commit -m "data(vocab): sync trilingual Google Sheets and Gemini explanations"
           AUTH="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
           git -c http.extraheader="AUTHORIZATION: basic $AUTH" push "https://github.com/$REPO.git" "HEAD:refs/heads/$BRANCH"
-          gh pr create --repo "$REPO" --base main --head "$BRANCH" \
+          PR_URL="$(gh pr create --repo "$REPO" --base main --head "$BRANCH" \
             --title 'data(vocab): sync Google Drive Sheets' \
-            --body 'Automated refresh from the owner-approved Drive folder; exact row provenance, Gemini Google Search-grounded educational examples, and fail-closed errors. No keys committed.'
-          gh pr merge "$BRANCH" --repo "$REPO" --auto --squash || \
-            echo 'Auto-merge could not be enabled; PR remains open for existing CI automation.'
+            --body 'Automated refresh from the owner-approved Drive folder; exact row provenance, Gemini Google Search-grounded educational examples, and fail-closed errors. No keys committed.')"
+          echo "::notice::Created generated vocabulary PR: $PR_URL"
+          PR_NUMBER="$(basename "$PR_URL")"
+          HEAD_SHA="$(git rev-parse HEAD)"
+          # Avoid gh pr merge --auto: GitHub requires branch protection for that
+          # feature, which this repository currently does not configure.
+          # Inspect exact changed-file scope and await the actual CI green checks.
+          bash scripts/merge-verified-vocabulary-pr.sh "$PR_NUMBER" "$HEAD_SHA"
