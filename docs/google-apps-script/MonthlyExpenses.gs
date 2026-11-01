@@ -4,7 +4,7 @@
  * Install in the OWNER'S spreadsheet: Extensions → Apps Script.
  * Script properties (Project Settings):
  *   FINANCE_SYNC_TOKEN = strong randomly generated secret (>= 32 characters)
- *   GITHUB_DISPATCH_TOKEN = optional owner GitHub PAT, Actions: read/write, for fast onEdit dispatch.
+ *   GITHUB_DISPATCH_TOKEN = optional owner GitHub PAT, Actions: read/write, for fast onEdit/onChange dispatch.
  *
  * The same FINANCE_SYNC_TOKEN must be saved as GitHub Actions secret
  * MONTHLY_EXPENSES_APPS_SCRIPT_TOKEN.
@@ -91,13 +91,18 @@ function installMonthlyExpensesTriggers() {
   if (!book || book.getId() !== FINANCE_SHEET_ID) {
     throw new Error("Mở Apps Script từ đúng Google Sheet chiphithang.");
   }
+  // Reinstall safely: one onEdit and one onChange trigger, no orphaned flush jobs.
   ScriptApp.getProjectTriggers().forEach(function(trigger) {
-    if (trigger.getHandlerFunction() === "monthlyExpensesOnEdit") ScriptApp.deleteTrigger(trigger);
+    if (["monthlyExpensesOnEdit", "monthlyExpensesOnChange", "flushMonthlyExpensesDispatch"]
+        .indexOf(trigger.getHandlerFunction()) !== -1) ScriptApp.deleteTrigger(trigger);
   });
   ScriptApp.newTrigger("monthlyExpensesOnEdit").forSpreadsheet(book).onEdit().create();
+  ScriptApp.newTrigger("monthlyExpensesOnChange").forSpreadsheet(book).onChange().create();
   SpreadsheetApp.getUi().alert(
-    "Đã cài onEdit. Khi sửa tab chiphithang hoặc ngansach, script sẽ kích hoạt workflow " +
-    "nếu đã lưu GITHUB_DISPATCH_TOKEN. Ngoài ra workflow GitHub vẫn kiểm tra 15 phút/lần."
+    "Đã bật tự đồng bộ khi sửa bất kỳ ô A:H nào của tab chiphithang, " +
+    "sửa tab ngansach, hoặc thêm/xóa dòng. Các lượt sửa trong 60 giây " +
+    "sẽ được gộp và gửi tiếp, không bị bỏ qua. Cần GITHUB_DISPATCH_TOKEN " +
+    "để cập nhật nhanh; GitHub Actions vẫn kiểm tra mỗi 5 phút."
   );
 }
 
@@ -106,10 +111,43 @@ function monthlyExpensesOnEdit(event) {
   var sheet = event.range.getSheet();
   if (!FINANCE_TABS[sheet.getName()] ||
       sheet.getParent().getId() !== FINANCE_SHEET_ID) return;
-  dispatchMonthlyExpenses();
+  // Fires for updates to an existing row, not only new rows.
+  dispatchMonthlyExpenses(false);
 }
 
-function dispatchMonthlyExpenses() {
+function monthlyExpensesOnChange(event) {
+  if (!event || !event.source || event.source.getId() !== FINANCE_SHEET_ID) return;
+  // A structural change does not always produce an onEdit event.
+  if (["EDIT", "INSERT_ROW", "REMOVE_ROW", "INSERT_COLUMN", "REMOVE_COLUMN",
+       "INSERT_GRID", "REMOVE_GRID", "FORMAT", "OTHER"].indexOf(event.changeType) !== -1) {
+    dispatchMonthlyExpenses(false);
+  }
+}
+
+function queueMonthlyExpensesFlush_() {
+  // Never discard an edit just because another edit dispatched <60 seconds ago.
+  var queued = ScriptApp.getProjectTriggers().some(function(trigger) {
+    return trigger.getHandlerFunction() === "flushMonthlyExpensesDispatch";
+  });
+  if (!queued) {
+    ScriptApp.newTrigger("flushMonthlyExpensesDispatch").timeBased().after(65000).create();
+    console.log("Finance sync queued after edit burst.");
+  }
+}
+
+function flushMonthlyExpensesDispatch() {
+  // This is an authorized one-time installable trigger; prevent trigger accumulation.
+  ScriptApp.getProjectTriggers().forEach(function(trigger) {
+    if (trigger.getHandlerFunction() === "flushMonthlyExpensesDispatch") {
+      ScriptApp.deleteTrigger(trigger);
+    }
+  });
+  dispatchMonthlyExpenses(true);
+}
+
+// Manual menu invocation is immediate. Automatic onEdit/onChange events use
+// a trailing dispatch if a previous request was sent in the last 60 seconds.
+function dispatchMonthlyExpenses(force) {
   var props = PropertiesService.getScriptProperties();
   var token = props.getProperty("GITHUB_DISPATCH_TOKEN");
   if (!token) {
@@ -117,11 +155,18 @@ function dispatchMonthlyExpenses() {
     return;
   }
   var lock = LockService.getScriptLock();
-  if (!lock.tryLock(1500)) return;
+  if (!lock.tryLock(5000)) {
+    // Another trigger is dispatching; the next scheduled GitHub read is authoritative.
+    console.log("Finance dispatch already running.");
+    return;
+  }
   try {
     var now = Date.now();
     var previous = Number(props.getProperty("last_finance_dispatch") || "0");
-    if (now - previous < 60000) return;
+    if (force === false && now - previous < 60000) {
+      queueMonthlyExpensesFlush_();
+      return;
+    }
     var response = UrlFetchApp.fetch(FINANCE_DISPATCH_URL, {
       method: "post",
       contentType: "application/json",

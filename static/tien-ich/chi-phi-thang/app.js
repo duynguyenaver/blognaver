@@ -1,6 +1,6 @@
 (()=>{"use strict";
 const $=id=>document.getElementById(id),ENC="data.enc.json",PER_PAGE=10;
-let envelope=null,transactions=[],budgets={},currentKey="",page=1,currentHash="";
+let envelope=null,transactions=[],budgets={},currentKey="",page=1,currentHash="",fetchInFlight=false;
 const todayMonth=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")};
 const money=n=>Math.round(Number(n)||0).toLocaleString("vi-VN")+" ₫";
 const text=(node,value)=>{node.textContent=String(value)};
@@ -77,18 +77,21 @@ async function apply(password,remember){
  text($("lastUpdated"),"Cập nhật dữ liệu mã hóa: "+(envelope.updatedAt||"—"));render();
 }
 async function fetchEncrypted(){
+ if(fetchInFlight)return;
+ fetchInFlight=true;
  try{
   setStatus("Đang kiểm tra dữ liệu mã hóa…","Đọc bản đã phát hành trên GitHub Pages.");
   const response=await fetch(ENC+"?v="+Date.now(),{cache:"no-store"});
   if(!response.ok)throw Error(response.status===404?"Chưa có bản dữ liệu mã hóa. Cần kích hoạt workflow đồng bộ Google Sheets.":"HTTP "+response.status);
   const data=await response.json();
   if(data.version!==1)throw Error("Phiên bản dữ liệu chưa được hỗ trợ.");
-  if(currentKey){if(data.sourceHash===currentHash){setStatus("Dữ liệu đã cập nhật đến bản gần nhất","Không phát hiện thay đổi giao dịch mới.","good");return}
+  if(currentKey){if(data.sourceHash===currentHash){setStatus("Đang xem bản đã phát hành mới nhất","Chưa có bản dữ liệu mới trên GitHub Pages. Thay đổi ở Google Sheets cần qua Actions, PR và triển khai Pages.","good");return}
    envelope=data;try{await apply(currentKey,false)}catch(e){currentKey="";$("dashboard").hidden=true;$("unlockPanel").hidden=false;setStatus("Đã có bản đồng bộ mới","Hãy nhập mật khẩu mới để giải mã.","bad")}
   }else{envelope=data;setStatus("Đã tìm thấy bản dữ liệu mã hóa","Mở khóa để xem số liệu · "+(data.updatedAt||""),"good");
     if(window.BNDeviceSecrets){const saved=await window.BNDeviceSecrets.read("monthly-expenses-passphrase");if(saved){try{await apply(saved,false)}catch{setStatus("Cần mở khóa lại","Mật khẩu đã nhớ không giải mã được bản này.","bad")}}}
   }
  }catch(e){setStatus("Chưa thể tải bản đồng bộ",e.message,"bad");$("unlockError").textContent="Chưa có dữ liệu để mở. Kiểm tra GitHub Actions và quyền đọc Google Sheets."}
+ finally{fetchInFlight=false}
 }
 $("month").value=todayMonth();$("refresh").addEventListener("click",fetchEncrypted);
 $("unlockForm").addEventListener("submit",async e=>{e.preventDefault();if(!envelope){$("unlockError").textContent="Chưa có bản dữ liệu mã hóa từ GitHub Actions.";return}
@@ -102,5 +105,7 @@ $("exportCsv").addEventListener("click",()=>{
  const csv="\uFEFF"+cells.map(row=>row.map(s=>'"'+String(s??"").replaceAll('"','""')+'"').join(",")).join("\r\n");
  const url=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));const a=document.createElement("a");a.href=url;a.download="chi-phi-thang-"+$("month").value+".csv";document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
 });
-fetchEncrypted();setInterval(()=>{if(!document.hidden)fetchEncrypted()},5*60*1000);
+fetchEncrypted();
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)fetchEncrypted()});
+setInterval(()=>{if(!document.hidden)fetchEncrypted()},60*1000);
 })();

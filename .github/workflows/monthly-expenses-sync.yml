@@ -5,6 +5,7 @@ on:
       - 'static/tien-ich/chi-phi-thang/**'
       - 'scripts/sync-monthly-expenses.py'
       - 'scripts/test-sync-monthly-expenses.py'
+      - 'scripts/test-monthly-expenses-apps-script.mjs'
       - 'scripts/finance-conflict-resolver.py'
       - 'scripts/test-finance-conflict-resolver.py'
       - '.github/workflows/finance-conflict-resolver.yml'
@@ -13,7 +14,7 @@ on:
       - '.github/workflows/monthly-expenses-sync.yml'
   workflow_dispatch:
   schedule:
-    - cron: '7,22,37,52 * * * *'
+    - cron: '*/5 * * * *'
 
 permissions:
   contents: read
@@ -38,6 +39,7 @@ jobs:
           python3 -m py_compile scripts/finance-conflict-resolver.py
           python3 -m py_compile scripts/sync-monthly-expenses.py
           node --check static/tien-ich/chi-phi-thang/app.js
+          node scripts/test-monthly-expenses-apps-script.mjs
           node --check static/tien-ich/chi-phi-thang/finance-report.js
           node scripts/test-finance-report.mjs
           node -e "new Function(require('fs').readFileSync('docs/google-apps-script/MonthlyExpenses.gs','utf8'))"
