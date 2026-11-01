@@ -233,20 +233,69 @@ def parse_table(values: list[list[str]], sid: str, tab: dict, title: str) -> lis
     return result
 
 
+# A Gemini model returned by ListModels is discoverable, not necessarily available
+# to this project today. Actual 429/404/400 errors determine runtime fallbacks.
+NON_TEXT_MODEL_TOKENS = (
+    "tts", "speech", "audio", "image", "imagen", "veo", "video", "embedding",
+    "live", "realtime", "robotics", "computer", "transcribe",
+)
+
+
+def is_text_model(model: dict) -> bool:
+    name = str(model.get("name", "")).split("/")[-1].lower()
+    if not name.startswith("gemini-") or any(token in name for token in NON_TEXT_MODEL_TOKENS):
+        return False
+    if "generateContent" not in model.get("supportedGenerationMethods", []):
+        return False
+    output_modes = model.get("supportedOutputModalities", []) or model.get("outputModalities", [])
+    if output_modes and "TEXT" not in output_modes:
+        return False
+    return int(model.get("outputTokenLimit") or 1024) >= 512
+
+
+def model_priority(name: str) -> tuple:
+    # Stable text Flash / Flash-Lite first, then Pro and any other capable text
+    # models. Prefer recent numeric generations, not arbitrary lexicographic order.
+    low = name.lower()
+    family = 0 if "flash" in low and "lite" not in low else 1 if "lite" in low else 2 if "pro" in low else 3
+    preview = 1 if any(s in low for s in ("preview", "exp", "-latest")) else 0
+    parts = [int(n) for n in re.findall(r"\d+", low)[:2]]
+    version = tuple((parts + [0, 0])[:2])
+    return (family, preview, -version[0], -version[1], name)
+
+
+def discover_text_models(listed: list[dict], preferred: str = "") -> list[str]:
+    names = {model["name"].split("/")[-1] for model in listed if is_text_model(model)}
+    ranked = sorted(names, key=model_priority)
+    override = preferred.strip().removeprefix("models/")
+    if override in names:
+        ranked.remove(override)
+        ranked.insert(0, override)
+    return ranked
+
+
 def models() -> list[str]:
     if not GEMINI_KEY:
         return []
     try:
-        listed = get_json("https://generativelanguage.googleapis.com/v1beta/models?" + urlencode({"key": GEMINI_KEY}))
-        eligible = [x["name"].split("/")[-1] for x in listed.get("models", [])
-                    if "generateContent" in x.get("supportedGenerationMethods", []) and "gemini" in x.get("name", "")
-                    and "flash" in x.get("name", "").lower() and "image" not in x.get("name", "").lower()]
-        preferred = os.environ.get("VOCAB_GEMINI_MODEL", "").strip().removeprefix("models/")
-        return ([preferred] if preferred in eligible else []) + sorted(
-            [x for x in eligible if x != preferred and not any(p in x for p in ("preview", "exp", "lite"))],
-            reverse=True)[:3]
-    except Exception as exc:
-        print("WARNING: Gemini model list unavailable:", str(exc)[:130], file=sys.stderr)
+        listed: list[dict] = []
+        token = ""
+        # Paginate instead of silently limiting fallback to three candidates.
+        for _ in range(5):
+            args = {"key": GEMINI_KEY, "pageSize": "100"}
+            if token:
+                args["pageToken"] = token
+            page = get_json("https://generativelanguage.googleapis.com/v1beta/models?" + urlencode(args))
+            listed.extend(page.get("models", []))
+            token = page.get("nextPageToken", "")
+            if not token:
+                break
+        names = discover_text_models(listed, os.environ.get("VOCAB_GEMINI_MODEL", ""))
+        print("INFO: Gemini text-capable models eligible for bounded auto-fallback: "
+              + (", ".join(names[:12]) or "none"), file=sys.stderr)
+        return names[:min(16, max(1, int(os.environ.get("VOCAB_MAX_GEMINI_MODEL_ATTEMPTS", "12"))))]
+    except (SyncError, ValueError, KeyError, TypeError) as exc:
+        print("WARNING: Gemini model discovery unavailable:", str(exc)[:180], file=sys.stderr)
         return []
 
 
@@ -259,68 +308,118 @@ def extract_json(text: str) -> dict:
     return obj
 
 
-def ai_enrich_batch(batch: list[dict], model_names: list[str]) -> dict[str, dict]:
-    """Ground Gemini's content in Google Search, not an ungrounded generated assertion."""
+def ai_enrich_batch(batch: list[dict], model_names: list[str],
+                    quota_state: dict | None = None) -> dict[str, dict]:
+    """Rotate only text models the project exposes; never exceed quota by retry storms.
+
+    Prefer Google Search grounding. If the model does not support the tool, a
+    plain generation may still provide original language-learning examples,
+    explicitly WITHOUT reference links or a claim of external verification.
+    """
     if not batch or not model_names:
         return {}
+    state = quota_state if quota_state is not None else {"blocked": set()}
+    blocked = state.setdefault("blocked", set())
     request_items = [{k: x[k] for k in ("id", "vi", "ko", "en", "content")} for x in batch]
     prompt = (
-        "Bạn là biên tập viên từ điển Việt–Hàn–Anh. Dùng công cụ Google Search để tham khảo cách dùng/ngữ pháp "
-        "từ nguồn đáng tin cậy (các từ điển, nguồn giáo dục). DỮ LIỆU NGUỒN: "
+        "Bạn là biên tập viên từ điển Việt–Hàn–Anh. Chỉ phân tích ngữ nghĩa/ngữ pháp "
+        "và sáng tác câu ví dụ tự nhiên phù hợp với cả ba ngôn ngữ. Không bịa nguồn, "
+        "số liệu hay thông tin kiểm chứng bên ngoài. Nếu có Google Search, ưu tiên "
+        "nguồn giáo dục đáng tin cậy; nếu không thì chỉ cung cấp kiến thức ngôn ngữ "
+        "phổ thông, không tuyên bố đã kiểm chứng từ web. DỮ LIỆU NGUỒN: "
         + json.dumps(request_items, ensure_ascii=False)
         + "\nTrả về DUY NHẤT JSON hợp lệ: {\"items\":[{\"id\":\"id ban đầu\",\"vi\":\"...\",\"ko\":\"...\","
           "\"en\":\"...\",\"context\":\"Giải thích ngắn ngữ cảnh sử dụng bằng tiếng Việt\","
           "\"grammar\":\"Giải thích ngữ pháp/cấu trúc và sắc thái bằng tiếng Việt\","
           "\"examples\":{\"vi\":\"Một ví dụ tiếng Việt tự viết\",\"ko\":\"Một câu tiếng Hàn tự viết\","
           "\"en\":\"Một câu tiếng Anh tự viết\"}}]}. "
-          "Giữ nguyên nghĩa đã có, chỉ điền ngôn ngữ còn thiếu khi chắc chắn; không suy diễn cụm từ mơ hồ, "
-          "không bịa nguồn; nếu không chắc, để trống trường tương ứng. Ví dụ phải tự viết, tự nhiên, "
-          "cùng ngữ nghĩa ở cả ba ngôn ngữ. Không thêm giải thích ngoài JSON."
+          "Giữ nguyên nghĩa đã có; chỉ điền ngôn ngữ còn thiếu khi chắc chắn, "
+          "không suy diễn câu mơ hồ. Viết ví dụ cùng ngữ nghĩa trong cả ba ngôn ngữ. "
+          "Không thêm giải thích ngoài JSON."
     )
-    body = json.dumps({"contents":[{"parts":[{"text":prompt}]}],
-       "tools":[{"googleSearch":{}}],
-       "generationConfig":{"temperature":0.25,"maxOutputTokens":4000}},ensure_ascii=False).encode()
+    base = {"contents": [{"parts": [{"text": prompt}]}],
+            "generationConfig": {"temperature": 0.2, "maxOutputTokens": 4096}}
+    valid_ids = {x["id"] for x in batch}
     for name in model_names:
-        try:
-            url = "https://generativelanguage.googleapis.com/v1beta/models/" + quote(name) + ":generateContent?" + urlencode({"key": GEMINI_KEY})
-            response = get_json_post(url, body)
-            candidates = response.get("candidates", [])
-            if not candidates:
-                raise ValueError("Gemini produced no candidates")
-            first = candidates[0]
-            chunks = first.get("groundingMetadata", {}).get("groundingChunks", [])
-            urls = []
-            for chunk in chunks:
-                uri = chunk.get("web", {}).get("uri", "")
-                if uri.startswith("https://") and uri not in urls:
-                    urls.append(uri)
-            # Google Search grounding must actually return grounding evidence.
-            if not urls:
-                raise ValueError("Gemini Google Search produced no grounding sources")
-            output = "".join(x.get("text", "") for x in first.get("content", {}).get("parts", []))
-            parsed = extract_json(output)
-            valid = {}
-            for row in parsed.get("items", []):
-                if not isinstance(row, dict) or row.get("id") not in {x["id"] for x in batch}:
+        if name in blocked:
+            continue
+        endpoint = ("https://generativelanguage.googleapis.com/v1beta/models/"
+                    + quote(name) + ":generateContent?" + urlencode({"key": GEMINI_KEY}))
+        for grounded in (True, False):
+            body = dict(base)
+            if grounded:
+                body["tools"] = [{"googleSearch": {}}]
+            try:
+                response = get_json_post(endpoint, json.dumps(body, ensure_ascii=False).encode())
+                candidates = response.get("candidates", [])
+                if not candidates:
+                    raise ValueError("Model returned no response candidates")
+                first = candidates[0]
+                output = "".join(part.get("text", "") for part in first.get("content", {}).get("parts", []))
+                parsed = extract_json(output)
+                urls: list[str] = []
+                if grounded:
+                    for chunk in first.get("groundingMetadata", {}).get("groundingChunks", []):
+                        uri = chunk.get("web", {}).get("uri", "")
+                        if isinstance(uri, str) and uri.startswith("https://") and uri not in urls:
+                            urls.append(uri)
+                results = {}
+                for row in parsed.get("items", []):
+                    if not isinstance(row, dict) or row.get("id") not in valid_ids:
+                        continue
+                    ex = row.get("examples", {})
+                    if not isinstance(ex, dict):
+                        continue
+                    record = {k: clean(row.get(k, ""), 750) for k in ("vi", "ko", "en", "context", "grammar")}
+                    record["examples"] = {k: clean(ex.get(k, ""), 600) for k in ("vi", "ko", "en")}
+                    if not record["context"] or not record["grammar"] or not all(record["examples"].values()):
+                        continue
+                    record.update({"references": urls[:4], "aiStatus": "ready",
+                                   "aiModel": name, "grounded": bool(urls)})
+                    results[row["id"]] = record
+                if results:
+                    state["last_success_model"] = name
+                    state["last_success_grounded"] = bool(urls)
+                    print(f"INFO: Gemini success using {name}; grounded={bool(urls)}; "
+                          f"enriched={len(results)}/{len(batch)}", file=sys.stderr)
+                    return results
+                raise ValueError("Model response did not contain complete, valid examples")
+            except SyncError as exc:
+                error = str(exc)
+                if re.search(r"\bHTTP 429\b", error):
+                    # A different model may still have its own available quota.
+                    blocked.add(name)
+                    print(f"WARNING: Gemini model {name} returned 429; rotating to the next eligible model",
+                          file=sys.stderr)
+                    break
+                if grounded and re.search(r"\bHTTP 400\b", error):
+                    print(f"INFO: {name} rejected Google Search; trying plain text generation",
+                          file=sys.stderr)
                     continue
-                ex = row.get("examples", {})
-                if not isinstance(ex, dict):
+                # Invalid API key and other access errors must not be hidden as
+                # "successful" fallback; rotate only with bounded candidates.
+                blocked.add(name)
+                print(f"WARNING: Gemini {name} HTTP failure: {error[:165]}", file=sys.stderr)
+                break
+            except (ValueError, KeyError, TypeError) as exc:
+                if grounded:
+                    # A grounded model can return valid language text but no JSON;
+                    # one plain retry is permitted for this model.
+                    print(f"INFO: Gemini {name} grounded output invalid; trying ungrounded once: "
+                          f"{str(exc)[:100]}", file=sys.stderr)
                     continue
-                clean_row = {k: clean(row.get(k, ""), 750) for k in ("vi", "ko", "en", "context", "grammar")}
-                clean_row["examples"] = {k: clean(ex.get(k, ""), 600) for k in ("vi", "ko", "en")}
-                if not clean_row["context"] or not clean_row["grammar"] or not all(clean_row["examples"].values()):
-                    continue
-                clean_row["references"] = urls[:4]
-                clean_row["aiStatus"] = "ready"
-                valid[row["id"]] = clean_row
-            return valid
-        except Exception as exc:
-            print(f"WARNING: Gemini {name} enrichment deferred: {str(exc)[:190]}", file=sys.stderr)
+                blocked.add(name)
+                print(f"WARNING: Gemini {name} invalid output: {str(exc)[:150]}", file=sys.stderr)
+                break
+    if len(blocked) >= len(model_names):
+        print("WARNING: Gemini has no successful eligible text model in this run. "
+              "Project-level quota may be exhausted; retain all pending words. "
+              "Model switching cannot bypass project-wide quotas.", file=sys.stderr)
     return {}
 
 
 def get_json_post(url: str, body: bytes) -> dict:
-    return json.loads(request(url, headers={"Content-Type": "application/json"}, body=body, retries=1))
+    return json.loads(request(url, headers={"Content-Type": "application/json"}, body=body, retries=0))
 
 
 def write_back_ready(rows: list[dict], headers: dict) -> None:
@@ -410,7 +509,7 @@ def collect(old: dict) -> dict:
     for x in items:
         last = cache.get(x["id"], {})
         if last.get("inputHash") == x["inputHash"] and last.get("aiStatus") == "ready":
-            for key in ("context", "grammar", "examples", "references", "aiStatus"):
+            for key in ("context", "grammar", "examples", "references", "aiStatus", "aiModel", "grounded"):
                 if not x.get(key):
                     x[key] = last.get(key)
             for lang in ("vi", "ko", "en"):
@@ -425,10 +524,12 @@ def collect(old: dict) -> dict:
     names = models()
     if pending and not names:
         print(f"INFO: {len(pending)} terms pending Gemini; configure GEMINI_API_KEY secret.", file=sys.stderr)
+    # Track models that failed once, avoiding repeated HTTP 429 storms across batches.
+    quota_state = {"blocked": set()}
     todo = pending[:max(0, MAX_ENRICH)]
     for start in range(0, len(todo), 3):
         group = todo[start:start+3]
-        enriched = ai_enrich_batch(group, names) if names else {}
+        enriched = ai_enrich_batch(group, names, quota_state) if names else {}
         for x in group:
             ai = enriched.get(x["id"])
             if ai:
