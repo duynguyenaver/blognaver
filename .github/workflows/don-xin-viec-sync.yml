@@ -32,7 +32,7 @@ jobs:
         run: python3 -m pip install --quiet 'cryptography>=42,<48' 'google-auth>=2.27,<3' 'requests>=2,<3'
       - name: Check sanitizer, schema and browser logic
         run: |
-          python3 -m unittest discover -s scripts -p 'test-sync-don-xin-viec.py' -v
+          python3 scripts/test-sync-don-xin-viec.py -v
           python3 -m py_compile scripts/sync-don-xin-viec.py
           node --check static/tien-ich/don-xin-viec/app.js
           test ! -e static/tien-ich/don-xin-viec/data.json
