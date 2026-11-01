@@ -21,11 +21,16 @@
   let edited = false;
   let busy = false;
   let cachedDB;
-  const status = (message, bad=false) => {
+  // The connection state is always visible above the collapsed GitHub settings.
+  const status = (message, state="idle") => {
     if (!statusEl) return;
     statusEl.textContent = message;
-    statusEl.classList.toggle("bad",bad);
+    statusEl.dataset.state = state;
+    statusEl.classList.toggle("bad",state==="error");
   };
+  const connected = (login, detail) => status(
+    "Đã kết nối GitHub thành công"+(login?" · @"+login:"")+" — "+detail,"connected"
+  );
 
   function requireStorage() {
     if (!window.indexedDB || !window.crypto?.subtle || !window.isSecureContext)
@@ -136,13 +141,18 @@
     return String(data.login);
   }
   async function rememberAfterSuccess() {
-    if(!tokenInput || rememberInput?.checked!==true)return false;
+    if(!tokenInput)return false;
+    // This is called only after GitHub accepted a WAV or dictionary write.
+    if(rememberInput?.checked!==true){
+      connected("", "Đang dùng trong tab này; không lưu token trên thiết bị.");
+      return false;
+    }
     try {
       await persist(tokenInput.value);
-      status("Đã ghi nhớ GitHub token trên thiết bị này (mã hóa). Tự khôi phục khi tải lại trang.");
+      connected("", "Token đã mã hóa trên thiết bị và sẽ được tự khôi phục khi tải lại trang.");
       return true;
     } catch(error) {
-      status("GitHub đã xử lý tác vụ, nhưng không lưu được token trên thiết bị: "+(error.message||"Lỗi lưu trữ."),true);
+      status("GitHub đã xử lý tác vụ thành công nhưng không lưu được token trên thiết bị: "+(error.message||"Lỗi lưu trữ."),"error");
       return false;
     }
   }
@@ -151,20 +161,30 @@
     busy=true;
     if(connectButton)connectButton.disabled=true;
     try {
-      status("Đang xác thực tài khoản GitHub…");
+      await ready;
+      status("Đang xác thực token và tài khoản GitHub…","checking");
       const token=normalizeToken(tokenInput?.value);
       const login=await verifyGitHub(token);
       if(rememberInput?.checked) {
-        await persist(token);
-        status("Đã kết nối @"+login+" và mã hóa token trên thiết bị này. Lần sau mở lại trang sẽ tự khôi phục.");
+        try {
+          await persist(token);
+          connected(login,"Token đã lưu mã hóa trên thiết bị. Tự kết nối lại sau khi tải trang.");
+        } catch(error) {
+          status("Đã xác thực GitHub thành công · @"+login+", nhưng không ghi nhớ được token: "+(error.message||"Lỗi lưu trữ."),"error");
+          return false;
+        }
       } else {
-        await remove("credentials",GITHUB);
-        status("Đã kết nối @"+login+" chỉ trong tab này; không ghi nhớ token.");
+        try{await remove("credentials",GITHUB)}
+        catch(error){
+          status("Đã xác thực GitHub thành công · @"+login+", nhưng không xóa được bản lưu trước: "+(error.message||"Lỗi lưu trữ."),"error");
+          return false;
+        }
+        connected(login,"Kết nối chỉ trong tab này; không lưu token.");
       }
       edited=false;
       return true;
     } catch(error) {
-      status("Chưa lưu GitHub token: "+(error.message||"Lỗi kết nối."),true);
+      status("Kết nối GitHub thất bại: "+(error.message||"Lỗi xác thực.")+" Kiểm tra token và quyền truy cập rồi thử lại.","error");
       return false;
     } finally {
       busy=false;
@@ -177,10 +197,10 @@
       await remove("credentials",GITHUB);
       if(tokenInput)tokenInput.value="";
       edited=false;
-      status("Đã quên GitHub token đã lưu trên thiết bị này. Các tệp GitHub trước đây không bị ảnh hưởng.");
+      status("Chưa kết nối GitHub — Đã xóa token khỏi thiết bị này. Dữ liệu trên GitHub không bị ảnh hưởng.","idle");
       return true;
     } catch(error) {
-      status("Không xóa được token thiết bị: "+(error.message||"Lỗi bộ nhớ."),true);
+      status("Không xóa được token thiết bị: "+(error.message||"Lỗi bộ nhớ."),"error");
       return false;
     }
   }
@@ -188,24 +208,32 @@
   const ready=(async()=>{
     if(!tokenInput)return;
     try{
-      status("Đang kiểm tra token GitHub đã lưu trên thiết bị…");
+      status("Đang kiểm tra kết nối GitHub đã lưu trên thiết bị…","checking");
       const token=await restore();
-      if(token && !edited) {
-        tokenInput.value=token;
-        if(rememberInput)rememberInput.checked=true;
-        status("Đã khôi phục GitHub token từ thiết bị. Sẵn sàng đồng bộ WAV và lưu cách đọc; không cần dán lại.");
-      } else if(!edited) {
-        status("Chưa có token lưu trên thiết bị. Dán token một lần rồi chọn Kết nối & ghi nhớ.");
+      if(edited)return; // Do not overwrite a token the user is currently editing.
+      if(!token) {
+        status("Chưa kết nối GitHub — Dán token và bấm Kết nối & ghi nhớ.","idle");
+        return;
+      }
+      tokenInput.value=token;
+      if(rememberInput)rememberInput.checked=true;
+      status("Đã tìm thấy token trên thiết bị. Đang xác minh lại kết nối GitHub…","checking");
+      try {
+        const login=await verifyGitHub(token);
+        if(!edited && tokenInput.value.trim()===token)
+          connected(login,"Tự kết nối lại từ token mã hóa trên thiết bị; không cần dán lại.");
+      } catch(error) {
+        if(!edited && tokenInput.value.trim()===token)
+          status("Đã khôi phục token nhưng chưa kết nối GitHub: "+(error.message||"Không thể xác thực.")+" Token vẫn còn trên thiết bị.","error");
       }
     }catch(error){
-      if(!edited)status("Không khôi phục được token đã lưu: "+(error.message||"Lỗi bộ nhớ.")+" Bạn vẫn có thể dán token để dùng trong tab.",true);
+      if(!edited)status("Không khôi phục được token đã lưu: "+(error.message||"Lỗi bộ nhớ.")+" Bạn vẫn có thể dán token để kết nối.","error");
     }
   })();
-
   if(tokenInput){
     tokenInput.addEventListener("input",()=>{
       edited=true;
-      status("Token mới chưa được ghi nhớ. Bấm Kết nối & ghi nhớ hoặc sử dụng thành công một tính năng GitHub.",false);
+      status("Token đã thay đổi — Bấm Kết nối & ghi nhớ để xác nhận tài khoản GitHub.","idle");
     });
     connectButton?.addEventListener("click",()=>{void connect()});
     forgetButton?.addEventListener("click",()=>{void forget()});

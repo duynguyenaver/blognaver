@@ -49,7 +49,7 @@ function fakeIndexedDB(){
 }
 function mockEl(){
   return {
-    value:"",disabled:false,checked:true,textContent:"",classList:{toggle(){}},
+    value:"",disabled:false,checked:true,textContent:"",dataset:{},classList:{toggle(){}},
     handlers:{},addEventListener(kind,cb){this.handlers[kind]=cb}
   };
 }
@@ -78,6 +78,8 @@ test("TTS shows a remembered connection state without expanding optional setting
   for(const id of ["ghToken","ghRememberDevice","ghConnectRemember","ghForgetDevice"])
     assert.ok(page.includes('id="'+id+'"'),id);
   assert.ok(page.includes('<script src="github-credential-vault.js?v='));
+  assert.match(page,/#ghCredentialStatus\[data-state="connected"\]/);
+  assert.match(page,/id="ghCredentialStatus"[^>]*role="status"[^>]*aria-live="polite"/);
   assert.ok(page.indexOf('src="github-credential-vault.js')<page.indexOf('src="dynamic-voice.js'));
   assert.match(page,/await window\.BNGithubTokenVault\?\.ready/);
   assert.match(page,/rememberAfterSuccess/);
@@ -91,6 +93,8 @@ test("Validated token survives a reload in encrypted IndexedDB, not plaintext",a
   assert.equal(await first.vault.connect(),true);
   assert.equal(first.calls.length,1);
   assert.equal(first.calls[0].url,"https://api.github.com/user");
+  assert.match(first.controls.get("ghCredentialStatus").textContent,/Đã kết nối GitHub thành công · @test-github-user/);
+  assert.equal(first.controls.get("ghCredentialStatus").dataset.state,"connected");
   const encrypted=db.data.get("credentials").get("github");
   assert.equal(encrypted.version,1);
   assert.equal(encrypted.provider,"github");
@@ -100,8 +104,11 @@ test("Validated token survives a reload in encrypted IndexedDB, not plaintext",a
   assert.equal(key.extractable,false);
   const reopened=run(db);await reopened.vault.ready;
   assert.equal(reopened.controls.get("ghToken").value,TOKEN);
-  assert.match(reopened.controls.get("ghCredentialStatus").textContent,/Đã khôi phục GitHub token/);
-  assert.equal(reopened.calls.length,0,"restoring should not require revalidation or a new token");
+  const reopenedStatus=reopened.controls.get("ghCredentialStatus");
+  assert.match(reopenedStatus.textContent,/Đã kết nối GitHub thành công · @test-github-user/);
+  assert.match(reopenedStatus.textContent,/Tự kết nối lại/);
+  assert.equal(reopenedStatus.dataset.state,"connected");
+  assert.equal(reopened.calls.length,1,"restoring requires one GitHub verification, not manual token entry");
 });
 
 test("Successful WAV/PR action can securely remember a pasted token automatically",async()=>{
@@ -130,6 +137,7 @@ test("Opting out means session-only token, no permanent copy",async()=>{
   assert.equal(await first.vault.connect(),true);
   assert.equal(db.data.get("credentials").has("github"),false);
   assert.equal(await first.vault.rememberAfterSuccess(),false);
+  assert.equal(first.controls.get("ghCredentialStatus").dataset.state,"connected");
 });
 
 test("Never store invalid tokens or create localStorage-based secret copies",async()=>{
@@ -148,4 +156,45 @@ test("Unavailable persistent browser storage never claims token was saved",async
   ctx.controls.get("ghToken").value=TOKEN;
   assert.equal(await ctx.vault.rememberAfterSuccess(),false);
   assert.match(ctx.controls.get("ghCredentialStatus").textContent,/không lưu được token/i);
+});
+
+test("Rejected or revoked token never appears as successfully connected",async()=>{
+  const db=fakeIndexedDB();
+  const initial=run(db);await initial.vault.ready;
+  initial.controls.get("ghToken").value=TOKEN;
+  assert.equal(await initial.vault.connect(),true);
+  const reopened=run(db,{apiStatus:401});await reopened.vault.ready;
+  const banner=reopened.controls.get("ghCredentialStatus");
+  assert.equal(banner.dataset.state,"error");
+  assert.doesNotMatch(banner.textContent,/Đã kết nối GitHub thành công/);
+  assert.match(banner.textContent,/GitHub từ chối token/);
+  assert.equal(reopened.controls.get("ghToken").value,TOKEN,"Token can be replaced without manual recovery");
+});
+
+test("A GitHub authentication failure shows an error banner, not a green connected state",async()=>{
+  const ctx=run(fakeIndexedDB(),{apiStatus:401});await ctx.vault.ready;
+  ctx.controls.get("ghToken").value=TOKEN;
+  assert.equal(await ctx.vault.connect(),false);
+  assert.equal(ctx.controls.get("ghCredentialStatus").dataset.state,"error");
+  assert.match(ctx.controls.get("ghCredentialStatus").textContent,/Kết nối GitHub thất bại/);
+});
+
+test("After successful sync, connection banner shows success even without pressing Connect",async()=>{
+  const ctx=run();await ctx.vault.ready;
+  ctx.controls.get("ghToken").value=TOKEN;
+  assert.equal(await ctx.vault.rememberAfterSuccess(),true);
+  assert.equal(ctx.controls.get("ghCredentialStatus").dataset.state,"connected");
+  assert.match(ctx.controls.get("ghCredentialStatus").textContent,/Đã kết nối GitHub thành công/);
+});
+
+test("Changing or forgetting token immediately clears the green connected state",async()=>{
+  const ctx=run();await ctx.vault.ready;
+  ctx.controls.get("ghToken").value=TOKEN;
+  await ctx.vault.connect();
+  ctx.controls.get("ghToken").value="new_invalid_token";
+  ctx.controls.get("ghToken").handlers.input();
+  assert.equal(ctx.controls.get("ghCredentialStatus").dataset.state,"idle");
+  await ctx.vault.forget();
+  assert.equal(ctx.controls.get("ghCredentialStatus").dataset.state,"idle");
+  assert.doesNotMatch(ctx.controls.get("ghCredentialStatus").textContent,/Đã kết nối GitHub thành công/);
 });
