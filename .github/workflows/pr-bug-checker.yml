@@ -48,6 +48,8 @@ jobs:
         run: python3 scripts/test-ci-knowledge.py
       - name: Verify CMS V2 navigation and permalinks
         run: node scripts/test-cms-v2-router.mjs
+      - name: Test BlogNaver article URL to TTS import
+        run: node --test scripts/test-tts-url-import.mjs scripts/test-tts-50000-chars.mjs scripts/test-tts-dynamic-voice.mjs scripts/test-voiceover-preprocess.mjs
       - name: Bug checks with bounded retries and AGENTS.md guidance
         shell: bash
         run: |
