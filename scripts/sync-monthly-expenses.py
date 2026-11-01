@@ -39,7 +39,7 @@ def parse_transactions(rows):
         # actual transaction. Skip ONLY if every other transaction cell is empty.
         # A partially entered transaction still fails validation (no silent loss).
         if (not any(cols[1:]) and
-            re.fullmatch(r"#(?:NUM!|REF!|VALUE!|N/A|ERROR!|DIV/0!|NAME\\?|NULL!)", cols[0], re.IGNORECASE)):
+            re.fullmatch(r"#(?:NUM!|REF!|VALUE!|N/A|ERROR!|DIV/0!|NAME[?]|NULL!)", cols[0], re.IGNORECASE)):
             continue
         day,kind,category,description,value,method,note,uid=cols
         if kind not in ("Thu","Chi"):raise SyncError(f"chiphithang!B{rownum}: chỉ nhận Thu hoặc Chi")
