@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "folderId": "1coylrqzqPOLZP_lhUdWlb3nI47Qr-af7",
-  "updatedAt": "2026-11-01T14:41:47+00:00",
+  "updatedAt": "2026-11-01T14:44:41+00:00",
   "sources": [
     {
       "id": "19nL6wtouHV-0OumsQR2jF-5xWA1cpbpivRUIsm7hDgk",
@@ -573,7 +573,7 @@
       "row": 24,
       "inputHash": "3cc9dad9dc14aa09c855ada4",
       "context": "Dùng để mô tả người, hành động hoặc khuôn mặt không bộc lộ bất kỳ cảm xúc nào, thường mang tính trung lập hoặc lạnh lùng.",
-      "grammar": "‘감정 없는’ là cụm danh từ làm tính từ (관형어) dùng trước danh từ, cấu trúc: 감정 + 없는 + 명사. Khi đứng độc lập có thể dùng ‘감정이 없다’ (không có cảm xúc).",
+      "grammar": "‘감정 없는’ là cụm danh từ làm tính từ (관형어) dùng trước danh từ, cấu trúc: 감정 + 없는 + 명사. Khi đứng độc lập có thể dùng ‘감정이 없다’ (không có cảm xúc). VI: ['Anh ấy luôn có vẻ mặt cảm xúc không, khiến mọi người khó đoán suy nghĩ của anh.', 'Cô ấy trả lời câu hỏi một cách không cảm xúc, như thể không quan tâm.', 'Trong buổi phỏng vấn, người ứng viên tỏ ra cảm xúc không, chỉ nói chuyện một cách máy móc.'] KR: ['그는 감정 없는 표정으로 회의에 참석했다.', '그녀는 질문에 감정 없이 대답했다, 마치 무관심한 듯이.', '면접에서 지원자는 감정 없는 태도로만 말했다.'] EN: ['He attended the meeting with an emotionless expression.', \"She answered the question without any emotion, as if she didn't care.\", 'During the interview, the candidate spoke with an emotionless demeanor.']",
       "examples": {
         "vi": "['Anh ấy luôn có vẻ mặt cảm xúc không, khiến mọi người khó đoán suy nghĩ của anh.', 'Cô ấy trả lời câu hỏi một cách không cảm xúc, như thể không quan tâm.', 'Trong buổi phỏng vấn, người ứng viên tỏ ra cảm xúc không, chỉ nói chuyện một cách máy móc.']",
         "ko": "['그는 감정 없는 표정으로 회의에 참석했다.', '그녀는 질문에 감정 없이 대답했다, 마치 무관심한 듯이.', '면접에서 지원자는 감정 없는 태도로만 말했다.']",
