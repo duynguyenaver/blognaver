@@ -254,7 +254,7 @@ class TrilingualSyncTests(unittest.TestCase):
                  patch.object(mod, "GROQ_KEY", ""):
                 mod.write_run_summary({"items":rows}, {"items":[]})
             result = summary.read_text(encoding="utf-8")
-        self.assertIn("Pending AI: **1**", result)
+        self.assertIn("Pending notes: **1**", result)
         self.assertIn("Groq API key configured: **NO**", result)
         self.assertIn("ACTION: Add GROQ_API_KEY", result)
 
