@@ -31,7 +31,7 @@ def date_value(raw,where):
 
 def parse_transactions(rows):
     if not rows or [str(x).strip() for x in rows[0][:8]]!=HEAD:raise SyncError("Sai header của tab chiphithang; giữ nguyên snapshot cũ")
-    result=[];seen=set()
+    result=[];seen={}
     for rownum,raw in enumerate(rows[1:10001],2):
         cols=[str(v).strip() for v in raw[:8]]+[""]*max(0,8-len(raw))
         if not any(cols):continue
@@ -46,11 +46,18 @@ def parse_transactions(rows):
         amt=amount(value,f"chiphithang!E{rownum}")
         if amt<=0:raise SyncError(f"chiphithang!E{rownum}: cần số tiền > 0")
         uid=uid or f"row-{rownum}"
-        if uid in seen:raise SyncError(f"chiphithang!H{rownum}: mã giao dịch trùng")
-        seen.add(uid)
-        result.append({"id":uid,"date":date_value(day,f"chiphithang!A{rownum}"),
-                       "type":kind,"category":category or "Khác","description":description,
-                       "amount":amt,"method":method,"note":note})
+        transaction={"id":uid,"date":date_value(day,f"chiphithang!A{rownum}"),
+                     "type":kind,"category":category or "Khác","description":description,
+                     "amount":amt,"method":method,"note":note}
+        if uid in seen:
+            # Repeated identical rows are a harmless no-op, not a failed deploy.
+            # Different details under one ID must never be silently discarded.
+            if seen[uid] == transaction:
+                print(f"::notice::chiphithang!H{rownum}: identical duplicate row skipped")
+                continue
+            raise SyncError(f"chiphithang!H{rownum}: mã giao dịch trùng nhưng nội dung khác nhau; cần sửa trên Google Sheets")
+        seen[uid]=transaction
+        result.append(transaction)
     return result
 
 def parse_budgets(rows):

@@ -240,6 +240,24 @@ def publish(run_id):
                 print(f"Unable to close old finance PR #{pr['number']}: {err}")
 
 
+def close_duplicates():
+    """On a no-change sync, close only owner PRs identical to the snapshot on main."""
+    main = fetch_main()
+    if main is None:
+        print("No main finance snapshot yet; nothing to deduplicate.")
+        return
+    closed = 0
+    for pr in open_finance_prs():
+        try:
+            head = fetch_head(pr["head"]["ref"])
+            if head and decision(main, head) == "duplicate":
+                close_pr(pr, "No financial changes: encrypted snapshot already exists on main. Closed without deploy.")
+                closed += 1
+        except FinanceError as err:
+            print(f"Skipped finance PR #{pr['number']} during no-change cleanup: {err}")
+    print(f"No data changes; checked pending finance PRs and requested closure for {closed} duplicates.")
+
+
 def repair(run_id):
     main = fetch_main()
     existing = open_finance_prs()
@@ -275,7 +293,7 @@ def repair(run_id):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("mode", choices=("publish", "repair"))
+    parser.add_argument("mode", choices=("publish", "repair", "close-duplicates"))
     args = parser.parse_args()
     if not re.fullmatch(r"[0-9]+", os.getenv("RUN_ID", "")):
         raise FinanceError("Missing valid RUN_ID")
@@ -283,6 +301,8 @@ def main():
     run_id = os.environ["RUN_ID"] + "-" + os.environ.get("RUN_ATTEMPT", "1")
     if args.mode == "publish":
         publish(run_id)
+    elif args.mode == "close-duplicates":
+        close_duplicates()
     else:
         repair(run_id)
 
