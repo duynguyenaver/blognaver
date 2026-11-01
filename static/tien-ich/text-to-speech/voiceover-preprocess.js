@@ -365,8 +365,9 @@
   send.addEventListener("click", () => {
     const value = output.value.trim();
     if (!value) { message("Chưa có kịch bản sau xử lý.", true); return; }
-    if (value.length > tts.maxLength) {
-      message("Kịch bản " + value.length.toLocaleString("vi-VN") + " ký tự vượt giới hạn TTS " + tts.maxLength.toLocaleString("vi-VN") + ". Hãy rút gọn trước; hệ thống không tự cắt nội dung.", true);
+    const maxTtsChars = Number(tts.dataset.maxChars) || 50000;
+    if (value.length > maxTtsChars) {
+      message("Kịch bản " + value.length.toLocaleString("vi-VN") + " ký tự vượt giới hạn TTS " + maxTtsChars.toLocaleString("vi-VN") + ". Hãy rút gọn trước; hệ thống không tự cắt nội dung.", true);
       return;
     }
     if ($("stop")?.disabled === false) {

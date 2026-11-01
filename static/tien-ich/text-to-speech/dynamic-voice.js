@@ -14,9 +14,24 @@
     aside:"Chú thích / Giải thích",
     cta:"Lời kết / CTA"
   };
+  // Browser speech engines handle short utterances more reliably; preserve exact offsets for progress.
+  const MAX_UTTERANCE_CHARS=220;
   function splitSentences(text){
     const value=String(text||"");
     const segments=[];
+    function pushBounded(start,end,paragraphIndex){
+      let cursor=start;
+      while(cursor<end){
+        let stop=Math.min(end,cursor+MAX_UTTERANCE_CHARS);
+        if(stop<end){
+          const space=Math.max(value.lastIndexOf(" ",stop-1),value.lastIndexOf("\t",stop-1));
+          if(space>=cursor+Math.floor(MAX_UTTERANCE_CHARS/2))stop=space+1;
+        }
+        const raw=value.slice(cursor,stop),left=raw.length-raw.trimStart().length,right=raw.trimEnd().length;
+        if(right>left)segments.push({text:raw.trim(),start:cursor+left,end:cursor+right,paragraphIndex});
+        cursor=stop;
+      }
+    }
     const paragraphRegex=/[^\n]+/g;
     const splitter=typeof Intl.Segmenter==="function"?new Intl.Segmenter("vi",{granularity:"sentence"}):null;
     let match,paragraphIndex=0;
@@ -31,7 +46,7 @@
         const left=candidate.value.length-candidate.value.trimStart().length;
         const right=candidate.value.trimEnd().length;
         const content=candidate.value.trim();
-        if(content)segments.push({text:content,start:start+left,end:start+right,paragraphIndex});
+        if(content)pushBounded(start+left,start+right,paragraphIndex);
       }
       paragraphIndex++;
     }
