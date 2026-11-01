@@ -29,6 +29,12 @@ class OwnerOnlyVocabulary(unittest.TestCase):
         self.assertIn('Bug Checker — Hugo', MERGE)
         self.assertIn('conclusion=="success"', MERGE)
 
+    def test_rest_pr_creation_never_falls_back_to_bot(self):
+        self.assertIn('gh api -X POST "repos/$REPO/pulls"', SYNC)
+        self.assertIn("Pull requests → Read and write", SYNC)
+        self.assertNotIn('gh pr create', SYNC.split("      - name: Create data branch and Pull Request", 1)[1])
+        self.assertIn('BLOGNAVER_VOCAB_BOT_TOKEN', SYNC)
+
     def test_gemini_groq_not_offline_in_production(self):
         self.assertIn('VOCAB_OFFLINE_ONLY: "0"', SYNC)
         self.assertIn('GEMINI_API_KEY:', SYNC)
