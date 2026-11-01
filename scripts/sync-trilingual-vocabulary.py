@@ -32,6 +32,8 @@ HEADERS = {
     "ko": {"korean", "tieng han", "han", "kr", "ko", "hangul", "한국어", "베트남어 뜻"},
     "en": {"english", "tieng anh", "anh", "en", "nghia anh"},
     "content": {"content", "noi dung", "noi dung tu vung", "tu vung", "vocabulary", "vocab", "text"},
+    "context": {"context or expression", "context", "expression", "ngu canh su dung", "cach bieu hien"},
+    "grammar": {"ngu phap vi du", "ngu phap", "grammar examples", "grammar"},
 }
 SERVICE_JSON = os.environ.get("VOCAB_GOOGLE_SERVICE_ACCOUNT_JSON", "").strip()
 GEMINI_KEY = os.environ.get("GEMINI_API_KEY", "").strip()
@@ -104,7 +106,7 @@ def service_headers() -> dict:
         from google.auth.transport.requests import Request as GoogleRequest
         creds = Credentials.from_service_account_info(json.loads(SERVICE_JSON), scopes=[
             "https://www.googleapis.com/auth/drive.readonly",
-            "https://www.googleapis.com/auth/spreadsheets.readonly",
+            "https://www.googleapis.com/auth/spreadsheets",
         ])
         creds.refresh(GoogleRequest())
         return {"Authorization": "Bearer " + creds.token}
@@ -207,6 +209,7 @@ def parse_table(values: list[list[str]], sid: str, tab: dict, title: str) -> lis
             at = indices.get(key, -1)
             return row[at] if 0 <= at < len(row) else ""
         item = {"vi": col("vi"), "ko": col("ko"), "en": col("en"), "content": col("content")}
+        sheet_context, sheet_grammar = col("context"), col("grammar")
         if item["content"]:
             extracted = parse_content(item["content"])
             for k in ("vi", "ko", "en"):
@@ -220,6 +223,10 @@ def parse_table(values: list[list[str]], sid: str, tab: dict, title: str) -> lis
             "row": row_num,
         })
         item["inputHash"] = text_hash(item)
+        if sheet_context:
+            item["context"] = sheet_context
+        if sheet_grammar:
+            item["grammar"] = sheet_grammar
         result.append(item)
         if len(result) >= MAX_ROWS:
             break
@@ -316,6 +323,57 @@ def get_json_post(url: str, body: bytes) -> dict:
     return json.loads(request(url, headers={"Content-Type": "application/json"}, body=body, retries=1))
 
 
+def write_back_ready(rows: list[dict], headers: dict) -> None:
+    """Best-effort Sheets D/E writeback. Only exact A:C + header matches; never overwrite edits."""
+    if not headers or os.environ.get("VOCAB_WRITEBACK_SHEETS", "0") != "1":
+        return
+    by_sheet: dict[tuple[str, str], list[dict]] = {}
+    for x in rows:
+        if x.get("aiStatus") == "ready" and x.get("context") and x.get("grammar"):
+            by_sheet.setdefault((x["sheetId"], x["tabTitle"]), []).append(x)
+    for (sid, title), entries in by_sheet.items():
+        try:
+            tab = next((t for t in list_tabs(sid, headers) if t["title"] == title), None)
+            if not tab:
+                continue
+            current = read_values(sid, tab, headers)
+            if not current or len(current[0]) < 5:
+                continue
+            h = [norm(v) for v in current[0][:5]]
+            if not (h[0] in HEADERS["vi"] and h[1] in HEADERS["ko"] and h[2] in HEADERS["en"]
+                    and h[3] in HEADERS["context"] and h[4] in HEADERS["grammar"]):
+                print(f"INFO: Skip writeback to {title}: exact A:E headers not matched", file=sys.stderr)
+                continue
+            edits = []
+            for x in entries:
+                index = x["row"] - 1
+                if index < 1 or index >= len(current):
+                    continue
+                raw = (current[index] + [""] * 5)[:5]
+                if [clean(v) for v in raw[:3]] != [clean(x[k]) for k in ("vi", "ko", "en")]:
+                    continue
+                examples = x.get("examples") or {}
+                phrases = [x["grammar"]]
+                for lang, key in (("VI", "vi"), ("KR", "ko"), ("EN", "en")):
+                    if examples.get(key):
+                        phrases.append(f"{lang}: {examples[key]}")
+                grammar = "\n".join(phrases)
+                if not clean(raw[3]):
+                    edits.append({"range": f"'{title.replace(chr(39), chr(39)*2)}'!D{x['row']}",
+                                  "values": [[x["context"]]]})
+                if not clean(raw[4]):
+                    edits.append({"range": f"'{title.replace(chr(39), chr(39)*2)}'!E{x['row']}",
+                                  "values": [[grammar]]})
+            if not edits:
+                continue
+            url = f"https://sheets.googleapis.com/v4/spreadsheets/{quote(sid)}/values:batchUpdate"
+            payload = json.dumps({"valueInputOption": "RAW", "data": edits}, ensure_ascii=False).encode()
+            response = json.loads(request(url, headers={**headers, "Content-Type": "application/json"}, body=payload))
+            print(f"INFO: Sheets writeback {sid}: {response.get('totalUpdatedCells', 0)} cells")
+        except (SyncError, ValueError, KeyError, HTTPError) as exc:
+            print(f"WARNING: Could not write Gemini D/E to {sid}: {str(exc)[:250]}", file=sys.stderr)
+
+
 def collect(old: dict) -> dict:
     headers = service_headers()
     if headers:
@@ -353,13 +411,16 @@ def collect(old: dict) -> dict:
         last = cache.get(x["id"], {})
         if last.get("inputHash") == x["inputHash"] and last.get("aiStatus") == "ready":
             for key in ("context", "grammar", "examples", "references", "aiStatus"):
-                x[key] = last.get(key)
+                if not x.get(key):
+                    x[key] = last.get(key)
             for lang in ("vi", "ko", "en"):
                 if not x.get(lang):
                     x[lang] = last.get(lang, "")
+        elif x.get("context") and x.get("grammar"):
+            x["aiStatus"] = "sheet"
         else:
             x["aiStatus"] = "pending"
-        if x["aiStatus"] != "ready":
+        if x["aiStatus"] == "pending":
             pending.append(x)
     names = models()
     if pending and not names:
@@ -377,6 +438,7 @@ def collect(old: dict) -> dict:
                         x[key] = ai[key]
                 for key in ("context", "grammar", "examples", "references", "aiStatus"):
                     x[key] = ai[key]
+    write_back_ready(items, headers)
     result = {"schemaVersion": 1, "folderId": FOLDER, "updatedAt": None,
               "sources": sources, "items": items}
     stable = lambda data: json.dumps({"sources": data.get("sources", []), "items": data.get("items", [])}, sort_keys=True, ensure_ascii=False)
