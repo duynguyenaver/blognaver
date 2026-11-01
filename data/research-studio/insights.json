@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-31T02:47:35.588Z",
+  "updatedAt": "2026-11-01T00:10:48.230Z",
   "entries": [
     {
       "slug": "cold-fusion-nghich-ly-cua-su-sinh-ton-tai-sao-su-tu-te-la-chien-luoc-toi-uu-trong-ly-th-2026-10-29",
@@ -1227,6 +1227,23 @@
         "Gemini · models/gemini-3.5-flash-lite"
       ],
       "live": true
+    },
+    {
+      "slug": "cold-fusion-ban-dao-tencent-tai-tham-quyen-mo-hinh-do-thi-tich-hop-va-nhung-thach-thuc--2026-11-01",
+      "title": "Bán đảo Tencent tại Thâm Quyến: Mô hình đô thị tích hợp và những thách thức thực tế",
+      "series": "cold-fusion",
+      "sha": "bee4291f7a59b22f367cc4a7314b007ebe2596b9",
+      "commitAt": "2026-11-01T00:10:12.522Z",
+      "durationMs": 24384,
+      "quota": {
+        "requests": 7,
+        "tokens": 20858,
+        "inputTokens": 15840,
+        "outputTokens": 5018
+      },
+      "models": [
+        "Gemini · models/gemini-3.5-flash-lite"
+      ]
     }
   ]
 }
