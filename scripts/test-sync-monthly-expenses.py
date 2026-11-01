@@ -17,6 +17,26 @@ class TestFinance(unittest.TestCase):
   for bad in [["2026-02-30","Chi","","","100"],["2026-11-01","Chi","","","-1"],["2026-11-01","invalid","","","200"]]:
    with self.assertRaises(finance.SyncError):finance.parse_transactions([finance.HEAD,bad])
   with self.assertRaises(finance.SyncError):finance.parse_budgets([finance.BUDGET_HEAD,["11/2026","500"]])
+ def test_apps_script_payload_validation(self):
+  from unittest.mock import patch
+  class Response:
+   def raise_for_status(self):return None
+   def json(self):return {"ok":True,"schema":1,"spreadsheetId":finance.ID,"tables":{"chiphithang":[finance.HEAD,["2026-11-01","Chi","Ăn uống","Bữa trưa","45,000","Tiền mặt","","id-1"]],"ngansach":[finance.BUDGET_HEAD,["2026-11","8000000",""]]}}
+  with patch.object(finance.requests,"post",return_value=Response()) as post:
+   result=finance.sheets_data("https://script.google.com/macros/s/AKfycbABCDE_123/exec","t"*40)
+   self.assertEqual(result["transactions"][0]["amount"],45000)
+   self.assertEqual(result["budgets"]["2026-11"],8000000)
+   self.assertEqual(post.call_args.kwargs["json"],{"token":"t"*40})
+ def test_apps_script_reject_unauthenticated(self):
+  from unittest.mock import patch
+  class Response:
+   def raise_for_status(self):return None
+   def json(self):return {"ok":False,"error":"unauthorized"}
+  with patch.object(finance.requests,"post",return_value=Response()):
+   with self.assertRaises(finance.SyncError):
+    finance.sheets_data("https://script.google.com/macros/s/AKfycbABCDE_123/exec","t"*40)
+  with self.assertRaises(finance.SyncError):
+   finance.sheets_data("https://example.com/foo","t"*40)
  def test_ciphertext(self):
   from cryptography.hazmat.primitives.ciphers.aead import AESGCM
   from hashlib import pbkdf2_hmac
