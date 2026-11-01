@@ -110,6 +110,20 @@ jobs:
             echo "::error::Only duynguyenaver may dispatch vocabulary sync. Got: $ACTOR."
             exit 1
           fi
-          gh api -X POST "repos/$REPO/actions/workflows/trilingual-vocabulary-sync.yml/dispatches" -f ref=main
+          # The Pages deployment has already succeeded. A missing Actions
+          # permission on this owner's fine-grained PAT must not label the
+          # successfully published website as a failed deployment.
+          # Do not fall back to github.token: only the owner may dispatch.
+          if ! gh api -X POST "repos/$REPO/actions/workflows/trilingual-vocabulary-sync.yml/dispatches" -f ref=main; then
+            echo "::warning title=Vocabulary sync permission denied::Pages deployed successfully, but the duynguyenaver PAT cannot dispatch Language Lab. Edit fine-grained PAT Repository permissions: Actions → Read and write. Also ensure Pull requests → Read and write. Scheduled vocabulary sync is independent of Pages."
+            {
+              echo "## Pages deployed, Language Lab not dispatched"
+              echo "- The website deployment finished successfully."
+              echo "- Owner PAT \`BLOGNAVER_VOCAB_BOT_TOKEN\` lacks permission to dispatch this workflow, or GitHub temporarily rejected dispatch."
+              echo "- Fix: GitHub → Settings → Developer settings → Personal access tokens → Fine-grained tokens → edit this token → Repository permissions → **Actions: Read and write** and **Pull requests: Read and write** for \`blognaver\`."
+              echo "- No github-actions[bot] fallback is used. After fixing permissions, rerun the Language Lab workflow from the Actions tab."
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
           echo "::notice::Language Lab dispatched by authenticated owner $ACTOR."
           echo "## Vocabulary sync dispatched as $ACTOR" >> "$GITHUB_STEP_SUMMARY"

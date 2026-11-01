@@ -23,6 +23,15 @@ class OwnerOnlyVocabulary(unittest.TestCase):
         self.assertIn('if [ "$ACTOR" != "duynguyenaver" ]', trigger)
         self.assertIn('gh api -X POST', trigger)
 
+    def test_pat_actions_dispatch_denial_does_not_fail_pages(self):
+        trigger = HUGO.split("  start-language-lab:", 1)[1]
+        self.assertIn('if ! gh api -X POST', trigger)
+        self.assertIn('Pages deployed, Language Lab not dispatched', trigger)
+        self.assertIn('Actions: Read and write', trigger)
+        self.assertIn('Pull requests: Read and write', trigger)
+        self.assertIn('exit 0', trigger)
+        self.assertNotIn('GH_TOKEN: ${{ github.token }}', trigger)
+
     def test_merge_rejects_bot_authored_prs(self):
         self.assertIn('ACTOR="$(gh api user --jq .login)"', MERGE)
         self.assertIn('.user.login==$owner', MERGE)
