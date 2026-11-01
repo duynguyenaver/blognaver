@@ -17,6 +17,30 @@ class TestFinance(unittest.TestCase):
   for bad in [["2026-02-30","Chi","","","100"],["2026-11-01","Chi","","","-1"],["2026-11-01","invalid","","","200"]]:
    with self.assertRaises(finance.SyncError):finance.parse_transactions([finance.HEAD,bad])
   with self.assertRaises(finance.SyncError):finance.parse_budgets([finance.BUDGET_HEAD,["11/2026","500"]])
+ def test_every_existing_transaction_column_changes_snapshot_hash(self):
+  import hashlib
+  base=["2026-11-01","Chi","Ăn uống","Bữa trưa","45000","Tiền mặt","Ban đầu","tx-001"]
+  replacements=["2026-11-02","Thu","Đi lại","Taxi","50000","Chuyển khoản","Đã sửa","tx-002"]
+  def fingerprint(row):
+   data={"transactions":finance.parse_transactions([finance.HEAD,row]),"budgets":{}}
+   return hashlib.sha256(finance.canonical(data)).hexdigest()
+  original=fingerprint(base)
+  for column,replacement in enumerate(replacements):
+   with self.subTest(column=finance.HEAD[column]):
+    updated=list(base)
+    updated[column]=replacement
+    self.assertNotEqual(original,fingerprint(updated))
+    parsed=finance.parse_transactions([finance.HEAD,updated])[0]
+    if column==5:
+     self.assertEqual(parsed["method"],"Chuyển khoản")
+     self.assertEqual(parsed["id"],"tx-001")
+ def test_changing_payment_method_does_not_require_a_new_row(self):
+  before=[finance.HEAD,["2026-11-01","Chi","Ăn uống","Bữa trưa","45000","Tiền mặt","","expense-1"]]
+  after=[finance.HEAD,["2026-11-01","Chi","Ăn uống","Bữa trưa","45000","Ví điện tử","","expense-1"]]
+  a,b=finance.parse_transactions(before),finance.parse_transactions(after)
+  self.assertEqual(a[0]["id"],b[0]["id"])
+  self.assertEqual(b[0]["method"],"Ví điện tử")
+  self.assertNotEqual(finance.canonical(a),finance.canonical(b))
  def test_apps_script_payload_validation(self):
   from unittest.mock import patch
   class Response:
