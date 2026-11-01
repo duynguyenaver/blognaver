@@ -30,7 +30,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Test parsing, stable IDs, Vietnamese/Korean/English mapping
-        run: python3 -m unittest discover -s scripts -p 'test-sync-trilingual-vocabulary.py' -v
+        run: python3 scripts/test-sync-trilingual-vocabulary.py -v
       - name: Syntax check
         run: |
           python3 -m py_compile scripts/sync-trilingual-vocabulary.py
@@ -49,7 +49,7 @@ jobs:
       - name: Install Google Drive authentication library
         run: python3 -m pip install --disable-pip-version-check --quiet 'google-auth>=2.0,<3.0' 'requests>=2,<3'
       - name: Verify vocabulary importer
-        run: python3 -m unittest discover -s scripts -p 'test-sync-trilingual-vocabulary.py' -q
+        run: python3 scripts/test-sync-trilingual-vocabulary.py -q
       - name: Skip duplicate pending vocabulary sync PR
         id: existing
         env:
