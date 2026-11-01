@@ -50,6 +50,7 @@
      :"Chưa có voiceover: dùng thời lượng video nền hoặc thời lượng ảnh mặc định.";
    if(ui.script.value.trim())createCues(false);
    refreshTimeline();
+   window.BNClipMakerPro?.onAssetsChanged?.();
  }
  function imgLoad(asset){
    return new Promise((resolve,reject)=>{
@@ -73,6 +74,7 @@
    const asset={id:crypto.randomUUID(),name:name||"Cover BlogNaver",blob,type,url:userURL(blob),media:null,duration:0};
    try{await (type==="image"?imgLoad(asset):videoLoad(asset))}catch(e){revoke(asset.url);throw e}
    assets.push(asset);
+   window.BNClipMakerPro?.onAssetsChanged?.();
    ui.emptyCanvas.classList.add("hidden");
    position=0;draw(position);renderAssets();syncDuration();
  }
@@ -116,6 +118,7 @@
      const remove=document.createElement("button");remove.type="button";remove.textContent="×";remove.title="Xóa";
      remove.disabled=exporting;remove.onclick=()=>removeAsset(index);actions.append(remove);
      card.append(thumb,title,actions);
+     window.BNClipMakerPro?.decorateAssetCard?.(card,asset);
      card.addEventListener("dragstart",e=>e.dataTransfer.setData("text/plain",String(index)));
      card.addEventListener("dragover",e=>e.preventDefault());
      card.addEventListener("drop",e=>{e.preventDefault();const from=Number(e.dataTransfer.getData("text/plain"));if(Number.isInteger(from))moveAsset(from,index)});
@@ -125,10 +128,12 @@
  function moveAsset(from,to){
    if(exporting||from<0||to<0||from>=assets.length||to>=assets.length)return;
    assets.splice(to,0,assets.splice(from,1)[0]);position=0;draw(0);renderAssets();refreshTimeline();
+   window.BNClipMakerPro?.onAssetsChanged?.();
  }
  function removeAsset(index){
    if(exporting)return;
    const [a]=assets.splice(index,1);if(!a)return;
+   window.BNClipMakerPro?.onRemoveAsset?.(a);
    if(a.media?.pause)a.media.pause();
    if(a.type==="image"&&a.media)a.media.src="";
    revoke(a.url);
@@ -315,6 +320,7 @@
    voiceSource.connect(voiceAnalyser);voiceAnalyser.connect(voiceGain);
    voiceGain.connect(audioDest);voiceGain.connect(audioCtx.destination);
    bgmSource.connect(bgmGain);bgmGain.connect(audioDest);bgmGain.connect(audioCtx.destination);
+   window.BNClipMakerPro?.connect?.(audioCtx,audioDest);
    setMixer();return audioCtx.resume();
  }
  function setMixer(){
@@ -339,13 +345,15 @@
      try{bgm.currentTime=target%bgm.duration}catch{}
    if(playing&&!voiceURL){playBase=target;origin=performance.now()}
    ui.scrubber.value=target;ui.clock.textContent=fmt(target)+" / "+fmt(duration);draw(target);
+   window.BNClipMakerPro?.sync?.(target,playing);
  }
- function stopLoop(){if(frame)cancelAnimationFrame(frame);frame=0;playing=false;voice.pause();bgm.pause();if(activeVideo?.type==="video")activeVideo.media.pause()}
+ function stopLoop(){if(frame)cancelAnimationFrame(frame);frame=0;playing=false;voice.pause();bgm.pause();if(activeVideo?.type==="video")activeVideo.media.pause();window.BNClipMakerPro?.stop?.()}
  function tick(){
    if(!playing)return;
    if(voiceURL)position=clamp(voice.currentTime,0,duration);
    else position=clamp(playBase+(performance.now()-origin)/1000,0,duration);
    if(audioCtx)setMixer();
+   window.BNClipMakerPro?.sync?.(position,true);
    draw(position);
    ui.scrubber.value=position;
    ui.clock.textContent=fmt(position)+" / "+fmt(duration);
@@ -358,10 +366,11 @@
    if(!assets.length){report("Hãy nhập ít nhất một ảnh hoặc video nền.",true);return}
    if(fromStart||position>=duration-.1)seek(0);
    try{
-     if(voiceURL||bgmURL)await ensureAudioGraph();
+     if(voiceURL||bgmURL||window.BNClipMakerPro?.hasAudio?.())await ensureAudioGraph();
      if(voiceURL){await voice.play()}
      if(bgmURL){await bgm.play()}
      playing=true;ui.play.disabled=true;ui.pause.disabled=exporting;
+     window.BNClipMakerPro?.sync?.(position,true);
      playBase=position;origin=performance.now();
      if(activeVideo?.type==="video")activeVideo.media.play().catch(()=>{});
      frame=requestAnimationFrame(tick);
@@ -391,7 +400,7 @@
  ui.stillDuration.addEventListener("input",()=>{if(!exporting)syncDuration()});
  ui.script.addEventListener("input",()=>{cues=[];refreshTimeline()});
  function chooseMime(){
-   const withAudio=Boolean(voiceURL||bgmURL);
+   const withAudio=!window.BNClipMakerPro?.isSilentExport?.() && Boolean(voiceURL||bgmURL||window.BNClipMakerPro?.hasAudio?.());
    const types=withAudio?["video/mp4;codecs=avc1.42E01E,mp4a.40.2","video/mp4",
      "video/webm;codecs=vp9,opus","video/webm;codecs=vp8,opus","video/webm"]:
      ["video/mp4;codecs=avc1.42E01E","video/mp4",
@@ -407,6 +416,7 @@
    ui.restart.disabled=lock;
    ui.scrubber.disabled=lock;
    renderAssets();
+   window.BNClipMakerPro?.setLock?.(lock);
  }
  function finishCapture(){
    if(capture){capture.getTracks().forEach(t=>t.stop());capture=null}
@@ -440,15 +450,15 @@
    report("Đang chuẩn bị bộ mã hóa "+mime.split(";")[0]+"…");
    try{
      pausePlayback();seek(0); // freeze before capturing for deterministic start
-     if(voiceURL||bgmURL)await ensureAudioGraph();
+     if(voiceURL||bgmURL||window.BNClipMakerPro?.hasAudio?.())await ensureAudioGraph();
      draw(0);
      capture=canvas.captureStream(fps);
-     if(audioDest && (voiceURL||bgmURL)){
+     if(audioDest && !window.BNClipMakerPro?.isSilentExport?.() && (voiceURL||bgmURL||window.BNClipMakerPro?.hasAudio?.())){
        const track=audioDest.stream.getAudioTracks()[0];
        if(track)capture.addTrack(track);
      }
      const recordingOptions={mimeType:mime,videoBitsPerSecond:ui.quality.value==="1080"?(fps===60?14000000:9500000):5000000};
-     if(audioDest&&(voiceURL||bgmURL))recordingOptions.audioBitsPerSecond=192000;
+     if(audioDest&&!window.BNClipMakerPro?.isSilentExport?.()&&(voiceURL||bgmURL||window.BNClipMakerPro?.hasAudio?.()))recordingOptions.audioBitsPerSecond=192000;
      recorder=new MediaRecorder(capture,recordingOptions);
      recorder.ondataavailable=e=>{if(e.data?.size)recordedChunks.push(e.data)};
      recorder.onerror=e=>{exportAbort=true;report("Lỗi bộ ghi video: "+(e.error?.message||"unknown"),true)};
@@ -474,7 +484,9 @@
    for(const item of assets)revoke(item.url);
    audioCtx?.close().catch(()=>{});
  });
- window.BNClipMakerCore=Object.freeze({makeCueLines,chooseMime,fmt});
+ window.BNClipMakerCore=Object.freeze({makeCueLines,chooseMime,fmt,seek,refreshTimeline,renderAssets,
+   getAssets:()=>assets,getTimeline:()=>({duration,position,playing,exporting}),
+   getAudioPipeline:()=>({context:audioCtx,destination:audioDest})});
  sizeCanvas();labelSettings();syncDuration();
  report("Sẵn sàng. Nhập ảnh, voiceover và bấm phát để xem trước.");
  try {
