@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "folderId": "1coylrqzqPOLZP_lhUdWlb3nI47Qr-af7",
-  "updatedAt": "2026-11-01T15:17:23+00:00",
+  "updatedAt": "2026-11-01T15:26:40+00:00",
   "sources": [
     {
       "id": "19nL6wtouHV-0OumsQR2jF-5xWA1cpbpivRUIsm7hDgk",
@@ -597,7 +597,6 @@
       "tabTitle": "Sheet1",
       "row": 25,
       "inputHash": "b763164d1c3770b3d3d2f23c",
-      "aiStatus": "ready",
       "context": "Dùng để mô tả trạng thái cơ thể hoặc tinh thần sau khi làm việc, học tập hoặc thiếu ngủ.",
       "grammar": "Tính từ mô tả trạng thái; trong tiếng Hàn là tính từ ㅣ형 (피곤한) dùng trước danh từ hoặc làm vị ngữ với '-다' (피곤하다).",
       "examples": {
@@ -606,9 +605,11 @@
         "en": "After a long day's work, I feel very tired."
       },
       "references": [],
+      "aiStatus": "ready",
       "aiModel": "openai/gpt-oss-120b",
       "grounded": false,
-      "aiProvider": "groq"
+      "aiProvider": "groq",
+      "reviewRecommended": null
     },
     {
       "vi": "nhợt nhạt",
@@ -621,7 +622,6 @@
       "tabTitle": "Sheet1",
       "row": 26,
       "inputHash": "32ebac6d3aa5b30367f043a9",
-      "aiStatus": "ready",
       "context": "Dùng để miêu tả màu sắc nhợt nhạt, thường là da, màu mắt hoặc màu sắc tổng thể thiếu sức sống.",
       "grammar": "Tính từ miêu tả tính chất; tiếng Hàn là tính từ ㅣ형 (창백한) dùng trước danh từ hoặc làm vị ngữ với '-다' (창백하다).",
       "examples": {
@@ -630,9 +630,11 @@
         "en": "She looked pale because she hadn't slept enough."
       },
       "references": [],
+      "aiStatus": "ready",
       "aiModel": "openai/gpt-oss-120b",
       "grounded": false,
-      "aiProvider": "groq"
+      "aiProvider": "groq",
+      "reviewRecommended": null
     },
     {
       "vi": "tinh tế",
@@ -645,7 +647,6 @@
       "tabTitle": "Sheet1",
       "row": 27,
       "inputHash": "45bcb660f39dc10f9b563740",
-      "aiStatus": "ready",
       "context": "Dùng để chỉ sự chi tiết, tỉ mỉ, phức tạp trong cách thực hiện hoặc thiết kế.",
       "grammar": "Tính từ mô tả tính chất; tiếng Hàn là tính từ ㅣ형 (정교한) dùng trước danh từ hoặc làm vị ngữ với '-다' (정교하다).",
       "examples": {
@@ -654,9 +655,11 @@
         "en": "The painting is very elaborate with its fine details."
       },
       "references": [],
+      "aiStatus": "ready",
       "aiModel": "openai/gpt-oss-120b",
       "grounded": false,
-      "aiProvider": "groq"
+      "aiProvider": "groq",
+      "reviewRecommended": null
     },
     {
       "vi": "bổ sung",
@@ -669,7 +672,6 @@
       "tabTitle": "Sheet1",
       "row": 28,
       "inputHash": "cd7d71aa1084114b9bc3f042",
-      "aiStatus": "ready",
       "context": "Dùng khi muốn diễn tả việc thêm vào một yếu tố, thông tin, hoặc vật phẩm đã có sẵn.",
       "grammar": "Từ \"bổ sung\" là động từ trong tiếng Việt, nhưng trong tiếng Hàn \"추가의\" là tính từ (관형사) dùng trước danh từ. Trong tiếng Anh \"additional\" là tính từ, thường đứng trước danh từ hoặc sau danh từ khi dùng làm bổ ngữ.",
       "examples": {
@@ -678,9 +680,11 @@
         "en": "We will add the necessary information to the report."
       },
       "references": [],
+      "aiStatus": "ready",
       "aiModel": "openai/gpt-oss-120b",
       "grounded": false,
-      "aiProvider": "groq"
+      "aiProvider": "groq",
+      "reviewRecommended": null
     },
     {
       "vi": "đảm bảo",
@@ -693,7 +697,6 @@
       "tabTitle": "Sheet1",
       "row": 29,
       "inputHash": "c331eb3d8f4842a471fd0d60",
-      "aiStatus": "ready",
       "context": "Dùng khi muốn cam kết hoặc hứa hẹn rằng một kết quả sẽ xảy ra hoặc một tiêu chuẩn sẽ được duy trì.",
       "grammar": "\"đảm bảo\" là động từ trong tiếng Việt. \"보장하다\" là động từ Hàn (하다-verb) và có thể chia thành các dạng như 보장합니다, 보장했어요. \"guarantee\" là động từ (to guarantee) hoặc danh từ (a guarantee) trong tiếng Anh; khi dùng làm động từ thường đi kèm tân ngữ.",
       "examples": {
@@ -702,9 +705,11 @@
         "en": "We guarantee the quality of the product."
       },
       "references": [],
+      "aiStatus": "ready",
       "aiModel": "openai/gpt-oss-120b",
       "grounded": false,
-      "aiProvider": "groq"
+      "aiProvider": "groq",
+      "reviewRecommended": null
     },
     {
       "vi": "bổ sung giấy tờ",
@@ -717,7 +722,6 @@
       "tabTitle": "Sheet1",
       "row": 30,
       "inputHash": "f90695d16888c5e46e7cd409",
-      "aiStatus": "ready",
       "context": "Thường xuất hiện trong các thủ tục hành chính, yêu cầu người nộp cung cấp thêm tài liệu để hoàn thiện hồ sơ.",
       "grammar": "Cụm \"bổ sung giấy tờ\" là động từ + danh từ trong tiếng Việt. Trong tiếng Hàn \"추가 서류\" là danh từ ghép, trong đó \"추가\" là tính từ (관형사) sửa cho danh từ \"서류\". Trong tiếng Anh \"Additional documents\" là danh từ số nhiều, \"additional\" là tính từ đứng trước danh từ.",
       "examples": {
@@ -726,9 +730,11 @@
         "en": "You need to provide additional documents to complete the registration."
       },
       "references": [],
+      "aiStatus": "ready",
       "aiModel": "openai/gpt-oss-120b",
       "grounded": false,
-      "aiProvider": "groq"
+      "aiProvider": "groq",
+      "reviewRecommended": null
     },
     {
       "vi": "hôm nay",
@@ -741,18 +747,19 @@
       "tabTitle": "Sheet1",
       "row": 31,
       "inputHash": "c3fa78e306a27fe3d69c6f72",
-      "aiStatus": "ready",
       "context": "Dùng để chỉ thời gian hiện tại trong ngày, thường xuất hiện trong câu nói về kế hoạch, sự kiện hoặc cảm xúc của người nói.",
-      "grammar": "Cụm danh từ chỉ thời gian, không thay đổi dạng. Khi dùng trong câu, có thể đứng một mình hoặc làm bổ ngữ cho động từ.",
+      "grammar": "Cụm danh từ chỉ thời gian, không thay đổi dạng. Khi dùng trong câu, có thể đứng một mình hoặc làm bổ ngữ cho động từ. VI: Hôm nay tôi sẽ đi thăm bố. KR: 오늘 저는 아버지를 방문할 거예요. EN: I will visit my father today.",
       "examples": {
         "vi": "Hôm nay tôi sẽ đi thăm bố.",
         "ko": "오늘 저는 아버지를 방문할 거예요.",
         "en": "I will visit my father today."
       },
       "references": [],
+      "aiStatus": "ready",
       "aiModel": "openai/gpt-oss-120b",
       "grounded": false,
-      "aiProvider": "groq"
+      "aiProvider": "groq",
+      "reviewRecommended": null
     },
     {
       "vi": "khó khăn",
@@ -765,7 +772,18 @@
       "tabTitle": "Sheet1",
       "row": 32,
       "inputHash": "71ec1567e80012fcdac50c39",
-      "aiStatus": "pending"
+      "aiStatus": "ready",
+      "context": "Dùng để mô tả một tình huống, vấn đề hoặc công việc gây ra nhiều trở ngại, yêu cầu nỗ lực lớn để giải quyết.",
+      "grammar": "Danh từ \"khó khăn\" (VN) – tính từ \"딱딱한\" (KO) – tính từ \"stiff\" (EN). Khi dùng trong câu, thường đi kèm với danh từ hoặc động từ để chỉ mức độ khó của việc làm: \"có khó khăn\", \"gặp khó khăn\", \"đối mặt với khó khăn\".",
+      "examples": {
+        "vi": "['Chúng tôi gặp khó khăn trong việc hoàn thành dự án đúng hạn.', 'Việc học tiếng Hàn có nhiều khó khăn đối với người mới bắt đầu.', 'Dù có khó khăn, anh vẫn kiên trì tiến về phía trước.']",
+        "ko": "['우리는 프로젝트를 제때 마치는 데 딱딱한 문제가 있었다.', '한국어를 배우는 것은 초보자에게 딱딱한 점이 많다.', '어려움에도 불구하고 그는 꾸준히 나아갔다.']",
+        "en": "['We faced stiff challenges in completing the project on time.', 'Learning Korean has many stiff aspects for beginners.', 'Despite the difficulties, he kept moving forward.']"
+      },
+      "references": [],
+      "aiModel": "openai/gpt-oss-120b",
+      "grounded": false,
+      "aiProvider": "groq"
     },
     {
       "vi": "vất vả",
@@ -778,7 +796,18 @@
       "tabTitle": "Sheet1",
       "row": 33,
       "inputHash": "4ce866cbca070ee0869062c0",
-      "aiStatus": "pending"
+      "aiStatus": "ready",
+      "context": "Diễn tả trạng thái làm việc hoặc di chuyển một cách nặng nề, mệt mỏi, đòi hỏi sức lực lớn.",
+      "grammar": "Danh từ \"vất vả\" (VN) – tính từ \"딱딱한\" (KO) – tính từ \"stiff\" (EN). Thường đi kèm với động từ chỉ hành động: \"công việc vất vả\", \"đi bộ vất vả\", \"cảm thấy vất vả\".",
+      "examples": {
+        "vi": "['Công việc này thật vất vả, tôi cần nghỉ ngơi.', 'Sau một ngày làm việc vất vả, anh cảm thấy mệt mỏi.', 'Hành trình leo núi rất vất vả nhưng rất đáng giá.']",
+        "ko": "['이 일은 딱딱해서 쉬어야 한다.', '하루 종일 딱딱한 일을 하고 나니 피곤하다.', '산을 오르는 것은 딱딱하지만 보람 있다.']",
+        "en": "['This task is stiff; I need a break.', 'After a stiff day of work, he feels exhausted.', 'Climbing the mountain is stiff but rewarding.']"
+      },
+      "references": [],
+      "aiModel": "openai/gpt-oss-120b",
+      "grounded": false,
+      "aiProvider": "groq"
     }
   ]
 }
