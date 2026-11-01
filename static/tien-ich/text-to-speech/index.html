@@ -49,12 +49,12 @@
 <nav><a href="../">← Tiện ích</a><span>EDITORIAL / AUDIO LAB</span></nav>
 <header><div class="eyebrow">BLOGNAVER · FREE BROWSER TOOL</div><h1>Text to Speech Studio</h1><p>Chuyển văn bản thành giọng đọc, nghe thử và ghi thành WAV để dựng video. Không cần đăng nhập hoặc gửi nội dung lên máy chủ BlogNaver.</p></header>
 <div class="studio">
-<section class="panel"><div class="toolbar"><h2>01 / Nội dung đọc</h2><small id="count">0 ký tự</small></div>
+<section class="panel"><div class="toolbar"><h2>01 / Nội dung đọc</h2><small id="count">0 / 50.000 ký tự</small></div>
 <label class="subtle" for="script">Kịch bản lồng tiếng</label>
-<textarea id="script" spellcheck="true" maxlength="15000" placeholder="Dán kịch bản video YouTube của bạn vào đây..."></textarea>
+<textarea id="script" spellcheck="true" data-max-chars="50000" placeholder="Dán kịch bản video YouTube của bạn vào đây..."></textarea>
 <div class="controls" style="margin-top:9px"><button type="button" id="sendToClip" class="secondary">↗ Gửi kịch bản sang YouTube Clip Maker</button></div>
 <div class="controls"><button id="listen" class="primary" type="button">▶ Phát âm thanh</button><button id="stop" type="button" class="secondary" disabled>■ Dừng</button><button id="record" type="button">↓ Ghi giọng đọc thành WAV</button></div>
-<p class="hint">Nút ghi WAV dùng để thu âm thanh đang phát trong tab và tải về máy. Chrome/Edge sẽ yêu cầu bạn chọn tab và bật chia sẻ âm thanh; không phải nút tải trực tiếp từ Web Speech API.</p><div class="progress-wrap" id="progressWrap" aria-live="polite"><div class="progress-row"><span id="progressLabel">Chờ bắt đầu</span><strong id="progressPct">0%</strong></div><div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progressTrack"><div class="progress-fill" id="progressFill"></div></div><p class="hint">Phần trăm ước lượng theo vị trí văn bản đang đọc; chỉ đạt 100% sau khi file WAV được tạo thành công.</p></div><div id="status" class="statusline" role="status" aria-live="polite">Sẵn sàng.</div>
+<p class="hint">Có thể đọc trọn kịch bản đến 50.000 ký tự; khi phát, hệ thống chia nội dung thành câu/đoạn ngắn mà không cắt nội dung. Ghi WAV qua chia sẻ âm thanh tab vẫn giới hạn 20 phút/file; kịch bản dài hơn cần ghi thành nhiều phần để xuất WAV. Chrome/Edge yêu cầu chọn tab và bật chia sẻ âm thanh.</p><div class="progress-wrap" id="progressWrap" aria-live="polite"><div class="progress-row"><span id="progressLabel">Chờ bắt đầu</span><strong id="progressPct">0%</strong></div><div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progressTrack"><div class="progress-fill" id="progressFill"></div></div><p class="hint">Phần trăm ước lượng theo vị trí văn bản đang đọc; chỉ đạt 100% sau khi file WAV được tạo thành công.</p></div><div id="status" class="statusline" role="status" aria-live="polite">Sẵn sàng.</div>
 <a id="download" class="btn download" download="blognaver-voice.wav">Tải lại bản WAV vừa ghi</a>
 <audio id="preview" controls class="hidden" aria-label="Nghe lại file WAV"></audio><section class="cloud"><details><summary>Đồng bộ WAV lên GitHub (tùy chọn)</summary><label for="ghToken">GitHub token có quyền Contents: Read and write của repository</label><input id="ghToken" type="password" autocomplete="off" spellcheck="false" placeholder="Dán GitHub token (không lưu localStorage)"><label><input id="autoSync" type="checkbox"> Tự đồng bộ mỗi file WAV đã ghi lên GitHub</label><p class="hint">Tệp sẽ được lưu trên nhánh <code>tts-audio-archive</code>, dưới thư mục <code>data/tts-audio/</code>. Repository công khai có thể khiến tệp âm thanh được người khác truy cập. Không bật nếu kịch bản riêng tư. Giới hạn file đồng bộ 8 MB. Token chỉ ở bộ nhớ tab và không đưa vào URL.</p><button id="syncWav" type="button" class="secondary" disabled>Đồng bộ file WAV hiện tại</button><p id="cloudStatus" class="cloudstatus" role="status" aria-live="polite">Chưa có file WAV.</p></details></section>
 </section>
@@ -144,6 +144,8 @@
 const $ = id => document.getElementById(id);
 const synth = window.speechSynthesis;
 const els = {script:$("script"),voice:$("voice"),rate:$("rate"),pitch:$("pitch"),dynamic:$("dynamicVoice"),dynamicStatus:$("dynamicSentenceStatus"),listen:$("listen"),stop:$("stop"),record:$("record"),status:$("status"),download:$("download"),preview:$("preview")};
+const MAX_TTS_CHARS=Number(els.script.dataset.maxChars)||50000;
+const sizeError=n=>"Kịch bản "+n.toLocaleString("vi-VN")+" ký tự vượt giới hạn TTS "+MAX_TTS_CHARS.toLocaleString("vi-VN")+". Hãy rút gọn trước; hệ thống không tự cắt nội dung.";
 let voices=[],speaking=false,recording=false,stream=null,context=null,source=null,processor=null,silence=null,chunks=[],sampleRate=44100,objectURL=null,recordedBlob=null,recordingHasSignal=false;
 const progress={wrap:$("progressWrap"),fill:$("progressFill"),pct:$("progressPct"),label:$("progressLabel"),track:$("progressTrack")};
 function setProgress(value,label){const n=Math.max(0,Math.min(100,Math.round(value)));progress.wrap.classList.add("visible");progress.fill.style.width=n+"%";progress.pct.textContent=n+"%";progress.track.setAttribute("aria-valuenow",String(n));progress.label.textContent=label}
@@ -234,7 +236,13 @@ function scheduleVoiceRefresh(){
 if(typeof synth.addEventListener==="function")synth.addEventListener("voiceschanged",scheduleVoiceRefresh);
 else synth.onvoiceschanged=scheduleVoiceRefresh;
 scheduleVoiceRefresh();
-els.script.addEventListener("input",()=>{$("count").textContent=els.script.value.length.toLocaleString("vi-VN")+" ký tự"});
+els.script.addEventListener("input",()=>{
+ const length=els.script.value.length,over=length>MAX_TTS_CHARS;
+ $("count").textContent=length.toLocaleString("vi-VN")+" / "+MAX_TTS_CHARS.toLocaleString("vi-VN")+" ký tự";
+ $("count").style.color=over?"#ffb1bb":"";
+ if(over){status(sizeError(length),true);els.status.dataset.sizeError="1"}
+ else if(els.status.dataset.sizeError==="1"){status("Sẵn sàng.");delete els.status.dataset.sizeError}
+});
 ["rate","pitch"].forEach(k=>els[k].addEventListener("input",()=>{$(k+"Value").textContent=Number(els[k].value).toFixed(2).replace(/0$/,"").replace(/\.$/,"")+(k==="rate"?"×":"")}));
 els.dynamic.addEventListener("change",()=>{els.dynamicStatus.textContent=els.dynamic.checked?"Dynamic Voice đã bật · Sẵn sàng phân tích ngữ cảnh.":"Giọng đọc cố định theo hai thanh trượt Rate / Pitch."});
 function updateVoiceSliders(rate,pitch){els.rate.value=rate;els.pitch.value=pitch;$("rateValue").textContent=Number(rate).toFixed(2).replace(/0$/,"").replace(/\.$/,"")+"×";$("pitchValue").textContent=Number(pitch).toFixed(2).replace(/0$/,"").replace(/\.$/,"")}
@@ -265,9 +273,12 @@ function restoreManualSettings(){
 function speak(onFinish){
  const text=els.script.value.trim();
  if(!text){status("Hãy nhập nội dung trước.",true);return false}
+ if(text.length>MAX_TTS_CHARS){status(sizeError(text.length),true);return false}
  const dynamic=els.dynamic.checked && Boolean(window.BNDynamicVoice);
  const rate=Number(els.rate.value),pitch=Number(els.pitch.value);
- const plan=dynamic ? window.BNDynamicVoice.buildPlan(text) : [{text,start:0,end:text.length,rate,pitch,label:"Chế độ thủ công"}];
+ // Bound utterances even in manual mode: a single huge Web Speech request may fail silently.
+ const segments=window.BNDynamicVoice?.splitSentences(text)||[{text,start:0,end:text.length}];
+ const plan=dynamic ? window.BNDynamicVoice.buildPlan(text) : segments.map(part=>({...part,rate,pitch,label:"Chế độ thủ công"}));
  if(!plan.length){status("Kịch bản không có câu hợp lệ.",true);return false}
  const generation=++speechGeneration;
  synth.cancel();
@@ -335,6 +346,7 @@ els.stop.addEventListener("click",()=>{speechGeneration++;synth.cancel();current
 els.record.addEventListener("click",async()=>{
  if(recording||speaking)return;
  if(!els.script.value.trim()){status("Hãy nhập nội dung trước.",true);return}
+ if(els.script.value.trim().length>MAX_TTS_CHARS){status(sizeError(els.script.value.trim().length),true);return}
  if(!navigator.mediaDevices?.getDisplayMedia){status("Trình duyệt không hỗ trợ ghi âm tab. Hãy thử Chrome/Edge desktop.",true);return}
  els.download.classList.remove("visible");els.preview.classList.add("hidden");recordedBlob=null;recordingHasSignal=false;cloud.button.disabled=true;setProgress(0,"Đang chuẩn bị ghi âm…");
  try{
