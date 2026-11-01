@@ -75,6 +75,17 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          if [ -z "${GH_TOKEN:-}" ]; then
+            echo "::error::Missing Actions secret BLOGNAVER_VOCAB_BOT_TOKEN. Refusing bot-created PR to avoid manual workflow approvals."
+            exit 1
+          fi
+          ACTOR="$(gh api user --jq .login)"
+          EXPECTED="${REPO%%/*}"
+          if [ "$ACTOR" != "$EXPECTED" ]; then
+            echo "::error::Vocabulary PAT resolves to $ACTOR, not repo owner $EXPECTED. Refusing fallback to GitHub bot."
+            exit 1
+          fi
+          echo "::notice::Vocabulary PR authentication verified as $ACTOR."
           PR="$(gh pr list --repo "$REPO" --state open --json title,number,headRefOid --jq '[.[]|select(.title=="data(vocab): sync Google Drive Sheets")][0] // {}')"
           NUMBER="$(jq -r '.number // empty' <<<"$PR")"
           if [ -n "$NUMBER" ]; then
