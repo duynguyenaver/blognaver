@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "folderId": "1coylrqzqPOLZP_lhUdWlb3nI47Qr-af7",
-  "updatedAt": "2026-11-01T15:30:31+00:00",
+  "updatedAt": "2026-11-01T15:32:48+00:00",
   "sources": [
     {
       "id": "19nL6wtouHV-0OumsQR2jF-5xWA1cpbpivRUIsm7hDgk",
@@ -798,7 +798,7 @@
       "row": 33,
       "inputHash": "4ce866cbca070ee0869062c0",
       "context": "Diễn tả trạng thái làm việc hoặc di chuyển một cách nặng nề, mệt mỏi, đòi hỏi sức lực lớn.",
-      "grammar": "Danh từ \"vất vả\" (VN) – tính từ \"딱딱한\" (KO) – tính từ \"stiff\" (EN). Thường đi kèm với động từ chỉ hành động: \"công việc vất vả\", \"đi bộ vất vả\", \"cảm thấy vất vả\".",
+      "grammar": "Danh từ \"vất vả\" (VN) – tính từ \"딱딱한\" (KO) – tính từ \"stiff\" (EN). Thường đi kèm với động từ chỉ hành động: \"công việc vất vả\", \"đi bộ vất vả\", \"cảm thấy vất vả\". VI: ['Công việc này thật vất vả, tôi cần nghỉ ngơi.', 'Sau một ngày làm việc vất vả, anh cảm thấy mệt mỏi.', 'Hành trình leo núi rất vất vả nhưng rất đáng giá.'] KR: ['이 일은 딱딱해서 쉬어야 한다.', '하루 종일 딱딱한 일을 하고 나니 피곤하다.', '산을 오르는 것은 딱딱하지만 보람 있다.'] EN: ['This task is stiff; I need a break.', 'After a stiff day of work, he feels exhausted.', 'Climbing the mountain is stiff but rewarding.']",
       "examples": {
         "vi": "['Công việc này thật vất vả, tôi cần nghỉ ngơi.', 'Sau một ngày làm việc vất vả, anh cảm thấy mệt mỏi.', 'Hành trình leo núi rất vất vả nhưng rất đáng giá.']",
         "ko": "['이 일은 딱딱해서 쉬어야 한다.', '하루 종일 딱딱한 일을 하고 나니 피곤하다.', '산을 오르는 것은 딱딱하지만 보람 있다.']",
