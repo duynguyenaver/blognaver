@@ -3,7 +3,7 @@
 <meta name="theme-color" content="#090d16"><meta name="description" content="Dựng YouTube Video và Shorts từ ảnh, giọng đọc WAV/MP3 và nhạc nền, hoàn toàn trên trình duyệt.">
 <title>YouTube Clip Maker Lab — BlogNaver</title>
 <link rel="stylesheet" href="studio.css"><link rel="stylesheet" href="../../access-gate.css"><script src="../../access-gate.js"></script>
-<script src="editor.js" defer></script><script src="pro-audio.js" defer></script>
+<script src="editor.js" defer></script><script src="pro-audio.js" defer></script><script src="pro-subtitles.js" defer></script>
 </head><body>
 <header class="topbar"><div class="brand"><a href="../" class="back">← Tiện ích</a><span class="mark">▶</span><div><strong>YouTube Clip Maker Lab</strong><small>CAPCUT PRO × YOUTUBE STUDIO EDITION</small></div></div><div class="top-actions"><span class="privacy">● Local-first · Không upload</span><a href="../text-to-speech/">TTS ↗</a><a href="../youtube-thumbnail-cover-generator/">Thumbnail ↗</a></div></header>
 <main class="editor">
@@ -71,6 +71,15 @@
 <div class="subtitle-tools"><button id="generateSubs" type="button" class="secondary">✦ Tạo phụ đề theo kịch bản</button><label class="toggle small"><input type="checkbox" id="showSubs" checked><span>Hiện phụ đề</span></label></div>
 <label class="control">Kích thước chữ <output id="fontSizeValue">52</output><input id="fontSize" type="range" min="28" max="90" step="2" value="52"></label>
 <div class="mini-note">Phụ đề được chia và phân bổ thời gian <strong>ước lượng theo số từ</strong>, không phải speech-to-text nhận diện thời điểm thực. Có thể chỉnh văn bản rồi tạo lại trước khi xuất.</div>
+<details class="pro-disclosure" id="proSrtTools">
+<summary><span>≡ SRT Subtitle Lab · Phụ đề chuẩn timecode</span><span class="chevron" aria-hidden="true">⌄</span></summary>
+<div class="pro-body">
+<p class="mini-note">Nhập file .srt đã có thời gian chính xác hoặc dán SRT vào ô bên dưới. Áp dụng vào preview và video xuất. Không tự nhận diện lời nói.</p>
+<label class="control">Nhập phụ đề SRT<input id="srtFile" type="file" accept=".srt,text/plain"></label>
+<textarea id="srtText" rows="7" spellcheck="false" aria-label="Nội dung phụ đề SRT" placeholder="1&#10;00:00:00,000 --> 00:00:02,500&#10;Xin chào!"></textarea>
+<div class="pro-actions"><button type="button" id="applySrt" class="secondary">Áp dụng SRT</button><button type="button" id="exportSrt" class="ghost">⬇ Xuất SRT</button><button type="button" id="editCurrentSrt" class="ghost">Nạp phụ đề hiện tại</button></div>
+</div></details>
+<p id="srtStatus" class="pro-status" role="status" aria-live="polite">Có thể nhập SRT chính xác thay vì chia kịch bản tự động.</p>
 </aside>
 </div>
 <section class="timeline panel" aria-labelledby="timelineTitle"><div class="panel-head"><div><h2 id="timelineTitle">04 / Multi-track Timeline</h2><p>Kéo ảnh trong thư viện để thay thứ tự. Nhấp ảnh rồi dùng nút ↑ ↓ hoặc Xóa. Voiceover quyết định thời lượng video khi đã tải. Click video trong thư viện để tách âm thanh, chỉnh riêng và xuất WAV.</p></div><span id="durationLabel" class="chip">00:10</span></div>
