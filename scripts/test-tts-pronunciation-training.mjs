@@ -30,12 +30,18 @@ function environment(withUI=false){
     "pronunciationReading","pronunciationLanguage","pronunciationCaseSensitive",
     "pronunciationPublishConsent","pronunciationSaveGithub","pronunciationRuleList",
     "pronunciationRuleCount","pronunciationTrainingStatus","pronunciationPreview",
-    "pronunciationPreviewResult","pronunciationRefresh","pronunciationPullRequest","ghToken"];
+    "pronunciationPreviewResult","pronunciationRefresh","pronunciationPullRequest","ghToken",
+    "pronunciationSelectAll","pronunciationSelectNone","pronunciationPreviewAudio",
+    "voice","rate","pitch","stop"];
   const nodes=new Map((withUI?ids:[]).map(id=>[id,node(id)]));
   if(withUI){
     nodes.get("pronunciationLanguage").value="en";
     nodes.get("ghToken").value="TOKEN-TEST-NOT-FOR-PUBLIC";
     nodes.get("pronunciationPreview").value="Gen.G chiến thắng";
+    nodes.get("voice").value="0";
+    nodes.get("rate").value="1";
+    nodes.get("pitch").value="1";
+    nodes.get("stop").disabled=true;
   }
   const calls=[];
   const fakeFetch=async (url,options={})=>{
@@ -52,7 +58,18 @@ function environment(withUI=false){
       return response({number:321,html_url:"https://github.com/duynguyenaver/blognaver/pull/321"},201);
     throw Error("Unmocked request "+method+" "+url);
   };
-  const window={};
+  const speechCalls=[];
+  const window={
+    speechSynthesis:{
+      cancel:()=>speechCalls.push({event:"cancel"}),
+      speak:utterance=>speechCalls.push({event:"speak",text:utterance.text,
+        voice:utterance.voice,rate:utterance.rate,pitch:utterance.pitch}),
+      getVoices:()=>[{name:"Microsoft Hoai My Online (Natural)",lang:"vi-VN"}]
+    },
+    SpeechSynthesisUtterance:class SpeechSynthesisUtterance{
+      constructor(text){this.text=text}
+    }
+  };
   runInNewContext(engine,{
     window,document:{
       getElementById:id=>nodes.get(id)||null,
@@ -64,13 +81,14 @@ function environment(withUI=false){
     crypto:{randomUUID:()=>"abcdef12-1234-1234-1234-123456789abc"},
     Date,confirm:()=>true
   });
-  return {api:window.BNPronunciationTraining,nodes,calls};
+  return {api:window.BNPronunciationTraining,nodes,calls,speechCalls};
 }
 
 test("Section 04 is optional, collapsible and has clear GitHub PR status",()=>{
   assert.match(page,/<details id="pronunciationTraining"/);
   for(const id of ["pronunciationTerm","pronunciationReading","pronunciationRuleList",
-    "pronunciationSaveGithub","pronunciationPublishConsent","pronunciationTrainingStatus"])
+    "pronunciationSaveGithub","pronunciationPublishConsent","pronunciationTrainingStatus",
+    "pronunciationSelectAll","pronunciationSelectNone","pronunciationPreviewAudio"])
     assert.ok(page.includes('id="'+id+'"'),id);
   assert.match(page,/pronunciation-training\.js[^"]*" defer><\/script><script src="voiceover-preprocess\.js/);
   assert.ok(page.includes("50.000"),"Existing TTS character cap remains visible");
@@ -148,4 +166,91 @@ test("Do not make GitHub requests to save without public consent",async()=>{
   await nodes.get("pronunciationSaveGithub").listeners.click();
   assert.equal(calls.length,n);
   assert.match(nodes.get("pronunciationTrainingStatus").textContent,/xác nhận/);
+});
+
+
+test("Only checked pending corrections are included in GitHub PR; unselected stay local",async()=>{
+  const {api,nodes,calls}=environment(true);await api.ready;
+  api.stage({term:"KSV",reading:"kây ét vi",language:"en",caseSensitive:false});
+  api.stage({term:"Esports",reading:"i-spót",language:"en",caseSensitive:false});
+  assert.equal(api.pending().filter(x=>x.selected).length,2);
+  assert.equal(api.select("KSV",false),true);
+  assert.equal(api.pending().filter(x=>x.selected).length,1);
+  nodes.get("pronunciationPublishConsent").checked=true;
+  await nodes.get("pronunciationSaveGithub").listeners.click();
+  const commits=calls.filter(c=>c.method==="PUT");
+  assert.equal(commits.length,1);
+  const written=JSON.parse(Buffer.from(commits[0].body.content,"base64").toString("utf8"));
+  assert.ok(written.entries.some(x=>x.term==="Esports"&&x.reading==="i-spót"));
+  assert.ok(!written.entries.some(x=>x.term==="KSV"),"Unselected correction was written");
+  assert.ok(written.entries.some(x=>x.term==="Gen.G"),"Existing remote rules disappeared");
+  assert.deepEqual(api.pending().map(x=>x.term),["ksv"],"Unselected draft was lost");
+  assert.equal(api.list().find(x=>x.term==="KSV")?.reading,"kây ét vi");
+});
+
+test("An already-saved identical correction never creates a redundant PR",async()=>{
+  const {api,nodes,calls}=environment(true);await api.ready;
+  const same=seed.entries.find(x=>x.term==="Gen.G");
+  api.stage({...same});
+  assert.equal(api.pending().length,0);
+  nodes.get("pronunciationPublishConsent").checked=true;
+  await nodes.get("pronunciationSaveGithub").listeners.click();
+  assert.equal(calls.filter(c=>c.method==="POST"&&c.url.endsWith("/pulls")).length,0);
+  assert.match(nodes.get("pronunciationTrainingStatus").textContent,/Chưa chọn/);
+});
+
+test("Bỏ chọn tất cả prevents any GitHub write, then Chọn tất cả restores selection",async()=>{
+  const {api,nodes,calls}=environment(true);await api.ready;
+  api.stage({term:"Demo",reading:"đem mô",language:"en",caseSensitive:false});
+  nodes.get("pronunciationSelectNone").listeners.click();
+  assert.equal(api.pending()[0].selected,false);
+  nodes.get("pronunciationPublishConsent").checked=true;
+  await nodes.get("pronunciationSaveGithub").listeners.click();
+  assert.equal(calls.filter(c=>c.method==="PUT").length,0);
+  nodes.get("pronunciationSelectAll").listeners.click();
+  assert.equal(api.pending()[0].selected,true);
+});
+
+test("Each rule offers accessible Sync and Nghe thử controls directly in Section 04",async()=>{
+  const {api,nodes}=environment(true);await api.ready;
+  api.stage({term:"Esports",reading:"i-spót",language:"en",caseSensitive:false});
+  const list=nodes.get("pronunciationRuleList");
+  const esportsRow=list.children.find(item=>item.children.some(child=>child.children?.some(c=>c.textContent==="Esports")));
+  assert.ok(esportsRow,"New rule not rendered in Section 04");
+  const controls=esportsRow.children.find(c=>c.className==="pron-rule-actions");
+  assert.ok(controls);
+  const checkbox=controls.children[0].children[0];
+  assert.equal(checkbox.type,"checkbox");
+  assert.equal(checkbox.checked,true);
+  assert.equal(checkbox.disabled,false);
+  checkbox.checked=false;
+  checkbox.listeners.change();
+  assert.equal(api.pending().find(x=>x.term==="esports").selected,false);
+  const savedRow=list.children.find(item=>item.children.some(child=>child.children?.some(c=>c.textContent==="Gen.G")));
+  const savedCheckbox=savedRow.children.find(c=>c.className==="pron-rule-actions").children[0].children[0];
+  assert.equal(savedCheckbox.checked,false);
+  assert.equal(savedCheckbox.disabled,true);
+});
+
+test("Per-word audio uses corrected Vietnamese reading and selected Hoai My voice",async()=>{
+  const {api,speechCalls,nodes}=environment(true);await api.ready;
+  assert.equal(api.previewSpeech("den di"),true);
+  const played=speechCalls.find(x=>x.event==="speak");
+  assert.equal(played.text,"den di");
+  assert.equal(played.voice?.name,"Microsoft Hoai My Online (Natural)");
+  assert.equal(played.rate,1);
+  assert.equal(played.pitch,1);
+  assert.ok(speechCalls.some(x=>x.event==="cancel"));
+  nodes.get("stop").disabled=false;
+  const before=speechCalls.length;
+  assert.equal(api.previewSpeech("đội hình"),false);
+  assert.equal(speechCalls.length,before,"Audio preview interrupted ongoing Section 01 recording");
+});
+
+test("Pronunciation preview reads an uncommitted correction without Section 01",async()=>{
+  const {nodes,speechCalls,api}=environment(true);await api.ready;
+  nodes.get("pronunciationReading").value="đỉnh thế giới";
+  await nodes.get("pronunciationPreviewAudio").listeners.click();
+  assert.ok(speechCalls.some(x=>x.event==="speak"&&x.text==="đỉnh thế giới"));
+  assert.equal(api.pending().length,0,"Listening should not automatically create a draft");
 });
