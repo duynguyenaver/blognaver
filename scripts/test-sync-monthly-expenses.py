@@ -13,6 +13,26 @@ class TestFinance(unittest.TestCase):
   result=finance.parse_transactions(rows)
   self.assertEqual([x["amount"] for x in result],[45000,25000000])
   self.assertEqual(result[0]["date"],"2026-11-01")
+ def test_formula_errors_below_transactions_do_not_block_sync(self):
+  rows=[finance.HEAD,
+   ["2026-11-01","Chi","đổ xăng","Giao dịch mới","50,000","Tiền mặt","",""],
+   ["#NUM!","","","","","","",""],
+   ["#REF!"],
+   ["#VALUE!","","","","","","",""],
+   ["","","","","","","",""]]
+  parsed=finance.parse_transactions(rows)
+  self.assertEqual(len(parsed),1)
+  self.assertEqual(parsed[0]["amount"],50000)
+  self.assertEqual(parsed[0]["id"],"row-2")
+ def test_formula_error_with_partial_transaction_fails_closed(self):
+  rows=[finance.HEAD,["#NUM!","","","Thông tin đã nhập","","","",""]]
+  with self.assertRaises(finance.SyncError):finance.parse_transactions(rows)
+  rows=[finance.HEAD,["#NUM!","Chi","","","50000","","",""]]
+  with self.assertRaises(finance.SyncError):finance.parse_transactions(rows)
+ def test_dont_drop_real_bad_dates_or_types(self):
+  for bad in ["#NOTAREALERROR!","2026-11-99","abc"]:
+   with self.subTest(value=bad):
+    with self.assertRaises(finance.SyncError):finance.parse_transactions([finance.HEAD,[bad]])
  def test_fail_closed(self):
   for bad in [["2026-02-30","Chi","","","100"],["2026-11-01","Chi","","","-1"],["2026-11-01","invalid","","","200"]]:
    with self.assertRaises(finance.SyncError):finance.parse_transactions([finance.HEAD,bad])
