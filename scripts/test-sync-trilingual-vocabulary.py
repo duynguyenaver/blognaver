@@ -139,6 +139,96 @@ class TrilingualSyncTests(unittest.TestCase):
         self.assertEqual(2, request.call_count)
         self.assertEqual({"gemini-a", "gemini-b"}, state["blocked"])
 
+    def test_groq_model_discovery_excludes_nontext_and_retired(self):
+        listing = [
+            {"id": "openai/gpt-oss-120b", "active": True},
+            {"id": "openai/gpt-oss-20b", "active": True},
+            {"id": "qwen/qwen3.8-27b", "active": True},
+            {"id": "whisper-large-v3", "active": True},
+            {"id": "meta-llama/llama-prompt-guard-2-22m", "active": True},
+            {"id": "llama-3.3-70b-versatile", "active": True},
+            {"id": "openai/disabled-text", "active": False},
+        ]
+        names = mod.groq_text_models(listing)
+        self.assertEqual(["openai/gpt-oss-120b", "qwen/qwen3.8-27b",
+                          "openai/gpt-oss-20b"], names)
+        self.assertEqual("openai/gpt-oss-20b",
+                         mod.groq_text_models(listing, "openai/gpt-oss-20b")[0])
+
+    def test_groq_fallback_after_first_model_429(self):
+        example = {"id": "row-7", "vi": "Công ty", "ko": "회사", "en": "Company",
+                   "content": ""}
+        output = {"choices": [{"message": {"content":
+            '{"items":[{"id":"row-7","vi":"Công ty","ko":"회사","en":"Company",'
+            '"context":"Trong môi trường công sở","grammar":"Danh từ chỉ doanh nghiệp",'
+            '"examples":{"vi":"Đây là công ty.","ko":"이것은 회사입니다.",'
+            '"en":"This is a company."}}]}'}}]}
+        state = {"blocked": set()}
+        def service(model, prompt, json_mode):
+            if model == "openai/gpt-oss-120b":
+                raise mod.SyncError("API returned HTTP 429: rate limited")
+            return output
+        with patch.object(mod, "GROQ_KEY", "test-key"), \
+             patch.object(mod, "groq_post", side_effect=service) as mock:
+            ready = mod.ai_enrich_groq_batch(
+                [example], ["openai/gpt-oss-120b", "openai/gpt-oss-20b"], state)
+        self.assertEqual(2, mock.call_count)
+        self.assertEqual({"openai/gpt-oss-120b"}, state["blocked"])
+        self.assertEqual("groq", ready["row-7"]["aiProvider"])
+        self.assertEqual("openai/gpt-oss-20b", ready["row-7"]["aiModel"])
+        self.assertEqual("ready", ready["row-7"]["aiStatus"])
+        self.assertEqual([], ready["row-7"]["references"])
+        self.assertFalse(ready["row-7"]["grounded"])
+
+    def test_groq_fallback_json_mode_unsupported(self):
+        item = {"id": "row-8", "vi": "Nhà", "ko": "집", "en": "House", "content": ""}
+        output = {"choices": [{"message": {"content":
+            '{"items":[{"id":"row-8","vi":"Nhà","ko":"집","en":"House",'
+            '"context":"Nhà ở","grammar":"Danh từ",'
+            '"examples":{"vi":"Đây là nhà tôi.","ko":"여기가 제 집입니다.",'
+            '"en":"This is my house."}}]}'}}]}
+        def service(model, prompt, json_mode):
+            if json_mode:
+                raise mod.SyncError("API returned HTTP 400: unsupported response_format")
+            return output
+        with patch.object(mod, "GROQ_KEY", "test-key"), \
+             patch.object(mod, "groq_post", side_effect=service) as mocked:
+            ready = mod.ai_enrich_groq_batch([item], ["openai/gpt-oss-20b"])
+        self.assertEqual(2, mocked.call_count)
+        self.assertEqual("ready", ready["row-8"]["aiStatus"])
+
+    def test_groq_all_rate_limited_stops_retry_storm(self):
+        item = {"id": "row-9", "vi": "Nhà", "ko": "집", "en": "House", "content": ""}
+        state = {"blocked": set()}
+        with patch.object(mod, "GROQ_KEY", "test-key"), \
+             patch.object(mod, "groq_post", side_effect=mod.SyncError("HTTP 429")) as mocked:
+            mod.ai_enrich_groq_batch([item], ["model-a", "model-b"], state)
+            mod.ai_enrich_groq_batch([item], ["model-a", "model-b"], state)
+        self.assertEqual(2, mocked.call_count)
+        self.assertEqual({"model-a", "model-b"}, state["blocked"])
+
+    def test_groq_still_runs_during_gemini_cooldown(self):
+        old = {"items": [], "sources": [], "updatedAt": None,
+               "aiRetryAfter": "2099-01-01T00:00:00+00:00"}
+        rows = [["Việt", "Hàn", "Anh", "Context or Expression", "Ngữ pháp ví dụ"],
+                ["Công ty", "회사", "Company", "", ""]]
+        ai = {"vi": "Công ty", "ko": "회사", "en": "Company",
+              "context": "Môi trường doanh nghiệp", "grammar": "Danh từ",
+              "examples": {"vi": "Một công ty.", "ko": "한 회사.", "en": "A company."},
+              "references": [], "grounded": False, "aiStatus": "ready",
+              "aiModel": "openai/gpt-oss-20b", "aiProvider": "groq"}
+        with patch.object(mod, "service_headers", return_value={}), \
+             patch.object(mod, "public_csv", return_value=rows), \
+             patch.object(mod, "models") as gemini, \
+             patch.object(mod, "groq_models", return_value=["openai/gpt-oss-20b"]), \
+             patch.object(mod, "ai_enrich_groq_batch", side_effect=lambda group, names, state: {group[0]["id"]: ai}) as groq, \
+             patch.object(mod, "write_back_ready"):
+            result = mod.collect(old)
+        gemini.assert_not_called()
+        groq.assert_called_once()
+        self.assertEqual("ready", result["items"][0]["aiStatus"])
+        self.assertEqual("groq", result["items"][0]["aiProvider"])
+
     def test_safe_unicode(self):
         rows = [["Tiếng Việt", "한국어", "English"], ["Công nghệ", "기술", "Technology"]]
         result = mod.parse_table(rows, "a", self.tab, "x")
