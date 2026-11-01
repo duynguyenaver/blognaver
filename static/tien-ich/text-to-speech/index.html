@@ -60,7 +60,17 @@
 #pronunciationTraining .pron-rule-label{overflow-wrap:anywhere;min-width:0}
 #pronunciationTraining .pron-rule-label small{color:var(--muted)}
 #pronunciationTraining .pron-rule-actions{display:flex;gap:6px}
-#pronunciationTraining .pron-rule-actions button{font-size:12px;padding:7px 12px;min-height:37px}
+#pronunciationTraining .pron-rule-actions button{font-size:12px;padding:7px 12px;min-height:44px}
+#pronunciationTraining .pron-sync-choice{display:inline-flex;align-items:center;gap:7px;margin:0;font-weight:600;white-space:nowrap;font-size:12px;cursor:pointer}
+#pronunciationTraining .pron-sync-choice input{width:18px;height:18px;margin:0;accent-color:#38bdf8;flex:none}
+#pronunciationTraining .pron-sync-choice input:disabled{opacity:.55;cursor:not-allowed}
+#pronunciationTraining .pron-sync-choice:has(input:disabled){opacity:.7;cursor:default}
+#pronunciationTraining .pron-pending-deletion{border-style:dashed;border-color:#f5a7b2}
+#pronunciationTraining #pronunciationPreviewAudio{margin:6px 0 10px;min-height:44px}
+#pronunciationTraining .pron-select-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:9px 0}
+#pronunciationTraining .pron-select-actions button{min-height:44px}
+@media(max-width:740px){#pronunciationTraining .pron-rule-list>li{align-items:flex-start}#pronunciationTraining .pron-rule-actions{width:100%;justify-content:flex-start;flex-wrap:wrap}}
+
 #pronunciationTrainingStatus{margin:10px 0 24px;font-size:13px;line-height:1.6;min-height:20px}
 #pronunciationTrainingStatus.bad{color:#ffb1bb}
 #pronunciationPullRequest[hidden]{display:none}
@@ -234,16 +244,18 @@
   </form>
   <div class="control"><label for="pronunciationPreview">Nghe thử qua kịch bản · Kiểm tra văn bản sau thay thế</label>
     <input id="pronunciationPreview" type="text" placeholder="Ví dụ: Hôm nay Gen.G thi đấu!" value="Hôm nay Gen.G thi đấu!">
-    <p id="pronunciationPreviewResult" class="hint" aria-live="polite"></p></div>
+    <p id="pronunciationPreviewResult" class="hint" aria-live="polite"></p><button id="pronunciationPreviewAudio" type="button" class="secondary">▶ Nghe thử cách đọc vừa nhập</button></div>
   <div class="toolbar"><strong>Bộ từ điển đã học</strong><small id="pronunciationRuleCount">Đang tải…</small></div>
+  <p class="hint">Tích <strong>Sync</strong> cạnh các từ vừa sửa mà bạn muốn đưa lên GitHub. Từ đã lưu, không thay đổi sẽ được bỏ qua. Bấm <strong>▶ Nghe thử</strong> cạnh từ để nghe trực tiếp trong Section 04.</p>
+  <div class="pron-select-actions"><button id="pronunciationSelectAll" type="button" class="secondary">✓ Chọn tất cả thay đổi</button><button id="pronunciationSelectNone" type="button" class="secondary">Bỏ chọn tất cả</button></div>
   <ul id="pronunciationRuleList" class="pron-rule-list" aria-label="Các cách đọc đã học"></ul>
-  <p class="hint">Quy tắc mới dùng ngay trong tab. Để dùng lại trên thiết bị khác, bấm <strong>Lưu GitHub</strong>: hệ thống tạo nhánh dữ liệu và Pull Request, chờ CI xanh rồi auto-merge. Không ghi thẳng vào main.</p>
+  <p class="hint">Bạn có thể sửa nhiều từ và chỉ chọn một số để đồng bộ. Những dòng không chọn vẫn dùng để thử trong tab, không đưa vào PR. Từ điển đã lưu trên GitHub được giữ nguyên. Hệ thống vẫn tạo nhánh riêng, mở PR và chờ CI xanh để auto-merge, không ghi thẳng vào main.</p>
   <label class="pron-check" for="pronunciationPublishConsent">
     <input id="pronunciationPublishConsent" type="checkbox">
     <span>Tôi đồng ý công khai <strong>chỉ các từ và cách đọc</strong> trong repository BlogNaver. Không gửi kịch bản, token hoặc dữ liệu riêng tư.</span>
   </label>
   <div class="pron-actions">
-    <button type="button" id="pronunciationSaveGithub" class="primary">Lưu cách đọc lên GitHub (tạo PR)</button>
+    <button type="button" id="pronunciationSaveGithub" class="primary">Đồng bộ các từ đã chọn (tạo PR)</button>
     <button type="button" id="pronunciationRefresh" class="secondary">↻ Tải lại từ GitHub</button>
     <a id="pronunciationPullRequest" href="#" target="_blank" rel="noopener noreferrer" hidden></a>
   </div>
@@ -504,4 +516,4 @@ document.getElementById("sendToClip").addEventListener("click", () => {
   catch(e){window.alert("Trình duyệt không lưu được kịch bản. Hãy sao chép và dán thủ công vào Clip Maker.");return}
   window.location.href="../youtube-clip-maker/";
 });
-</script><script src="pronunciation-training.js?v=20261101" defer></script><script src="voiceover-preprocess.js?v=20261101-dictionary" defer></script><script src="voice-fixer.js?v=20261101-training" defer></script><script src="article-url-import.js?v=20261101" defer></script></body></html>
+</script><script src="pronunciation-training.js?v=20261101-selective-preview" defer></script><script src="voiceover-preprocess.js?v=20261101-dictionary" defer></script><script src="voice-fixer.js?v=20261101-training" defer></script><script src="article-url-import.js?v=20261101" defer></script></body></html>
