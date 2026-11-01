@@ -136,11 +136,19 @@ jobs:
             exit 0
           fi
           BRANCH="data/vocab-drive-sync-$RUN_ID"
-          git config user.name "BlogNaver Vocabulary Bot"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # The owner PAT controls the authenticated push/PR and commit identity.
+          # Never label vocabulary commits as github-actions[bot].
+          git config user.name "duynguyenaver"
+          git config user.email "349135289+duynguyenaver@users.noreply.github.com"
           git switch -c "$BRANCH"
           git add -- "$DATA"
           git commit -m "data(vocab): sync trilingual Google Sheets and Gemini/Groq grammar notes"
+          # Defense-in-depth: credentials must authenticate as the repo owner.
+          OWNER="$(gh api user --jq .login)"
+          if [ "$OWNER" != "duynguyenaver" ]; then
+            echo "::error::Vocabulary publishing requires owner login duynguyenaver (actual: $OWNER)."
+            exit 1
+          fi
           AUTH="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
           git -c http.extraheader="AUTHORIZATION: basic $AUTH" push "https://github.com/$REPO.git" "HEAD:refs/heads/$BRANCH"
           PR_URL="$(gh pr create --repo "$REPO" --base main --head "$BRANCH" \
