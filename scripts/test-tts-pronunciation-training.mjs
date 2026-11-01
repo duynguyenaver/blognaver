@@ -184,7 +184,7 @@ test("Only checked pending corrections are included in GitHub PR; unselected sta
   assert.ok(written.entries.some(x=>x.term==="Esports"&&x.reading==="i-spót"));
   assert.ok(!written.entries.some(x=>x.term==="KSV"),"Unselected correction was written");
   assert.ok(written.entries.some(x=>x.term==="Gen.G"),"Existing remote rules disappeared");
-  assert.deepEqual(api.pending().map(x=>x.term),["ksv"],"Unselected draft was lost");
+  assert.equal(api.pending().map(x=>x.term).join(","),"ksv","Unselected draft was lost");
   assert.equal(api.list().find(x=>x.term==="KSV")?.reading,"kây ét vi");
 });
 
