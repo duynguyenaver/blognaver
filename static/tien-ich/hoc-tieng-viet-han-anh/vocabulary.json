@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "folderId": "1coylrqzqPOLZP_lhUdWlb3nI47Qr-af7",
-  "updatedAt": "2026-11-01T15:32:48+00:00",
+  "updatedAt": "2026-11-01T15:50:26+00:00",
   "sources": [
     {
       "id": "19nL6wtouHV-0OumsQR2jF-5xWA1cpbpivRUIsm7hDgk",
@@ -773,7 +773,7 @@
       "row": 32,
       "inputHash": "b127ea313a02e2170a1a3595",
       "context": "Dùng để mô tả một tình huống, nhiệm vụ, vấn đề hoặc cảm xúc mang tính thách thức, gây khó chịu hoặc cần nỗ lực vượt qua.",
-      "grammar": "‘어려운’ là tính từ dạng ‘-운/ -운’ (형용사) dùng trước danh từ để mô tả tính chất. Khi dùng làm vị ngữ, cần chia thành ‘어렵다’ và chia theo thời gian, mức độ lịch sự (예: 어려워요, 어려웠다).",
+      "grammar": "‘어려운’ là tính từ dạng ‘-운/ -운’ (형용사) dùng trước danh từ để mô tả tính chất. Khi dùng làm vị ngữ, cần chia thành ‘어렵다’ và chia theo thời gian, mức độ lịch sự (예: 어려워요, 어려웠다). VI: ['Bài toán này rất khó khăn, tôi cần thời gian để giải.', 'Việc chuyển nhà trong mùa mưa là một việc khó khăn.', 'Anh ấy cảm thấy khó khăn khi phải đưa ra quyết định quan trọng.'] KR: ['이 문제는 매우 어려운 문제라서 시간이 많이 필요해요.', '비가 많이 오는 계절에 이사하는 것은 어려운 일이에요.', '그는 중요한 결정을 내려야 해서 어려워하고 있어요.'] EN: ['This problem is very difficult, so I need more time to solve it.', 'Moving house during the rainy season is a difficult task.', 'He feels difficult about having to make an important decision.']",
       "examples": {
         "vi": "['Bài toán này rất khó khăn, tôi cần thời gian để giải.', 'Việc chuyển nhà trong mùa mưa là một việc khó khăn.', 'Anh ấy cảm thấy khó khăn khi phải đưa ra quyết định quan trọng.']",
         "ko": "['이 문제는 매우 어려운 문제라서 시간이 많이 필요해요.', '비가 많이 오는 계절에 이사하는 것은 어려운 일이에요.', '그는 중요한 결정을 내려야 해서 어려워하고 있어요.']",
