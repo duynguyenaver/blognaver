@@ -5,6 +5,7 @@ on:
       - 'static/tien-ich/chi-phi-thang/**'
       - 'scripts/sync-monthly-expenses.py'
       - 'scripts/test-sync-monthly-expenses.py'
+      - 'docs/google-apps-script/MonthlyExpenses.gs'
       - '.github/workflows/monthly-expenses-sync.yml'
   workflow_dispatch:
   schedule:
@@ -23,13 +24,14 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           persist-credentials: false
-      - name: Install libraries
-        run: python3 -m pip install --quiet 'cryptography>=42,<48' 'google-auth>=2,<3' 'requests>=2,<3'
+      - name: Install encryption and HTTP libraries
+        run: python3 -m pip install --quiet 'cryptography>=42,<48' 'requests>=2,<3'
       - name: Test parsing, schema and encryption
         run: |
           python3 scripts/test-sync-monthly-expenses.py -v
           python3 -m py_compile scripts/sync-monthly-expenses.py
           node --check static/tien-ich/chi-phi-thang/app.js
+          node -e "new Function(require('fs').readFileSync('docs/google-apps-script/MonthlyExpenses.gs','utf8'))"
           test ! -e static/tien-ich/chi-phi-thang/data.json
   sync:
     if: github.event_name != 'pull_request'
@@ -40,11 +42,12 @@ jobs:
         with:
           ref: main
           persist-credentials: false
-      - name: Install Google API and encryption libraries
-        run: python3 -m pip install --quiet 'cryptography>=42,<48' 'google-auth>=2,<3' 'requests>=2,<3'
-      - name: Read private spreadsheet and encrypt
+      - name: Install encryption and HTTP libraries
+        run: python3 -m pip install --quiet 'cryptography>=42,<48' 'requests>=2,<3'
+      - name: Read private spreadsheet via owner Apps Script and encrypt
         env:
-          VOCAB_GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.VOCAB_GOOGLE_SERVICE_ACCOUNT_JSON }}
+          MONTHLY_EXPENSES_APPS_SCRIPT_URL: ${{ vars.MONTHLY_EXPENSES_APPS_SCRIPT_URL }}
+          MONTHLY_EXPENSES_APPS_SCRIPT_TOKEN: ${{ secrets.MONTHLY_EXPENSES_APPS_SCRIPT_TOKEN }}
           MONTHLY_EXPENSES_ENCRYPTION_PASSPHRASE: ${{ secrets.MONTHLY_EXPENSES_ENCRYPTION_PASSPHRASE }}
           MONTHLY_EXPENSES_SHEET_ID: '1gxikPCOe62Be2_Lp5n3m6HMfCdnh-8WT5apJZeEvM7E'
         run: python3 scripts/sync-monthly-expenses.py

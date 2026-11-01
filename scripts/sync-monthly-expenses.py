@@ -8,7 +8,6 @@ import re
 import sys
 from datetime import date, datetime, timezone
 from pathlib import Path
-from urllib.parse import quote
 import requests
 
 ID=os.getenv("MONTHLY_EXPENSES_SHEET_ID","1gxikPCOe62Be2_Lp5n3m6HMfCdnh-8WT5apJZeEvM7E")
@@ -60,20 +59,38 @@ def parse_budgets(rows):
         data[month]=amount(value,f"ngansach!B{rownum}")
     return data
 
-def sheets_data(service_json):
-    from google.oauth2.service_account import Credentials
-    from google.auth.transport.requests import Request
-    creds=Credentials.from_service_account_info(json.loads(service_json),
-       scopes=["https://www.googleapis.com/auth/spreadsheets.readonly"])
-    creds.refresh(Request())
-    def read(name,end):
-        rng=quote("'"+name+"'!A1:"+end+"10001",safe="")
-        url="https://sheets.googleapis.com/v4/spreadsheets/"+quote(ID)+"/values/"+rng
-        response=requests.get(url,headers={"Authorization":"Bearer "+creds.token},timeout=40)
+def sheets_data(web_app_url, sync_token):
+    """Authenticated owner-run Apps Script bridge. Plaintext is transient memory only."""
+    if not re.fullmatch(r"https://script\.google\.com/macros/s/[A-Za-z0-9_-]+/exec", web_app_url):
+        raise SyncError("Invalid Apps Script /exec URL; copy URL from the Web App deployment")
+    if len(sync_token) < 32:
+        raise SyncError("Missing MONTHLY_EXPENSES_APPS_SCRIPT_TOKEN (minimum 32 characters)")
+    try:
+        response = requests.post(
+            web_app_url, json={"token": sync_token}, timeout=65,
+            allow_redirects=True,
+        )
         response.raise_for_status()
-        return response.json().get("values",[])
-    return {"transactions":parse_transactions(read("chiphithang","H")),
-            "budgets":parse_budgets(read("ngansach","C"))}
+        payload = response.json()
+    except (requests.RequestException, ValueError) as exc:
+        # Avoid logging raw response bodies or credentials.
+        raise SyncError("Apps Script bridge connection/JSON response failed") from None
+    if not isinstance(payload, dict) or payload.get("ok") is not True:
+        error = payload.get("error", "invalid_response") if isinstance(payload, dict) else "invalid_response"
+        if error not in {"not_configured", "invalid_request", "invalid_json",
+                         "unauthorized", "sheet_read_failed"}:
+            error = "invalid_response"
+        raise SyncError("Apps Script bridge refused request: " + error)
+    if payload.get("schema") != 1 or payload.get("spreadsheetId") != ID:
+        raise SyncError("Unexpected spreadsheet identity/schema: refusing sync")
+    tables = payload.get("tables")
+    if not isinstance(tables, dict):
+        raise SyncError("Apps Script response missing tables")
+    for name in ("chiphithang", "ngansach"):
+        if not isinstance(tables.get(name), list) or len(tables[name]) > 10001:
+            raise SyncError("Missing, invalid or oversized Apps Script tab: " + name)
+    return {"transactions": parse_transactions(tables["chiphithang"]),
+            "budgets": parse_budgets(tables["ngansach"])}
 
 def canonical(value):
     return json.dumps(value,ensure_ascii=False,sort_keys=True,separators=(",",":")).encode()
@@ -92,11 +109,12 @@ def encrypt(data,password):
       "updatedAt":datetime.now(timezone.utc).isoformat(timespec="seconds")}
 
 def main():
-    service=os.getenv("VOCAB_GOOGLE_SERVICE_ACCOUNT_JSON","").strip()
+    webapp=os.getenv("MONTHLY_EXPENSES_APPS_SCRIPT_URL","").strip()
+    sync_token=os.getenv("MONTHLY_EXPENSES_APPS_SCRIPT_TOKEN","").strip()
     secret=os.getenv("MONTHLY_EXPENSES_ENCRYPTION_PASSPHRASE","")
-    if not service:raise SyncError("Missing VOCAB_GOOGLE_SERVICE_ACCOUNT_JSON; share private sheet with service account Viewer")
+    if not webapp:raise SyncError("Missing MONTHLY_EXPENSES_APPS_SCRIPT_URL (Actions variable)")
     if len(secret)<16:raise SyncError("Missing MONTHLY_EXPENSES_ENCRYPTION_PASSPHRASE (minimum 16 characters)")
-    data=sheets_data(service)
+    data=sheets_data(webapp,sync_token)
     fingerprint=hashlib.sha256(canonical(data)).hexdigest()
     if OUT.is_file():
         try:
