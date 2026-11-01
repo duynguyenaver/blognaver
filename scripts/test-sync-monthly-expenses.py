@@ -13,6 +13,17 @@ class TestFinance(unittest.TestCase):
   result=finance.parse_transactions(rows)
   self.assertEqual([x["amount"] for x in result],[45000,25000000])
   self.assertEqual(result[0]["date"],"2026-11-01")
+ def test_identical_duplicate_row_is_noop(self):
+  row=["2026-11-01","Chi","Ăn uống","Bữa trưa","45,000","Tiền mặt","","tx-01"]
+  self.assertEqual(finance.parse_transactions([finance.HEAD,row,row]),
+                   finance.parse_transactions([finance.HEAD,row]))
+  self.assertEqual(finance.canonical(finance.parse_transactions([finance.HEAD,row,row])),
+                   finance.canonical(finance.parse_transactions([finance.HEAD,row])))
+ def test_same_id_different_transaction_fails_closed(self):
+  original=["2026-11-01","Chi","Ăn uống","Bữa trưa","45,000","Tiền mặt","","tx-01"]
+  changed=list(original); changed[5]="Chuyển khoản"
+  with self.assertRaisesRegex(finance.SyncError,"mã giao dịch trùng nhưng nội dung khác nhau"):
+   finance.parse_transactions([finance.HEAD,original,changed])
  def test_formula_errors_below_transactions_do_not_block_sync(self):
   rows=[finance.HEAD,
    ["2026-11-01","Chi","đổ xăng","Giao dịch mới","50,000","Tiền mặt","",""],
