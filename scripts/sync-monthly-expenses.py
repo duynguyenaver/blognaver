@@ -35,6 +35,12 @@ def parse_transactions(rows):
     for rownum,raw in enumerate(rows[1:10001],2):
         cols=[str(v).strip() for v in raw[:8]]+[""]*max(0,8-len(raw))
         if not any(cols):continue
+        # Google Sheets may show #NUM! in formula-filled dates below the last
+        # actual transaction. Skip ONLY if every other transaction cell is empty.
+        # A partially entered transaction still fails validation (no silent loss).
+        if (not any(cols[1:]) and
+            re.fullmatch(r"#(?:NUM!|REF!|VALUE!|N/A|ERROR!|DIV/0!|NAME[?]|NULL!)", cols[0], re.IGNORECASE)):
+            continue
         day,kind,category,description,value,method,note,uid=cols
         if kind not in ("Thu","Chi"):raise SyncError(f"chiphithang!B{rownum}: chỉ nhận Thu hoặc Chi")
         amt=amount(value,f"chiphithang!E{rownum}")
