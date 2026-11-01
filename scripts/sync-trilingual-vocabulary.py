@@ -733,6 +733,8 @@ def collect(old: dict) -> dict:
                             "aiStatus", "aiModel", "grounded", "aiProvider",
                             "reviewRecommended"):
                     if key in ai:
+                        if key in ("context", "grammar") and x.get(key):
+                            continue  # the spreadsheet owner's partial note wins
                         x[key] = ai[key]
                 x.setdefault("aiProvider", "gemini")
     write_back_ready(items, headers)
