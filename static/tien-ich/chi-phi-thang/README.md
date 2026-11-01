@@ -52,3 +52,16 @@ Tab \`ngansach\` (A:C): Tháng (YYYY-MM) | Ngân sách (VND) | Ghi chú. Mỗi t
 \`node -e "new Function(require('fs').readFileSync('docs/google-apps-script/MonthlyExpenses.gs','utf8'))"\`
 
 Không thay đổi tiện ích nhập liệu thủ công \`/chi-tieu-thang/\`.
+
+## Finance Conflict Resolver
+
+See scripts/finance-conflict-resolver.py and .github/workflows/finance-conflict-resolver.yml.
+
+- Production finance syncs and finance resolver share one GitHub concurrency group. CI on finance PRs uses a separate group, avoiding competing manual and scheduled data PRs.
+- Before publishing, compare SHA-256 sourceHash against the newest main snapshot. AES-GCM produces random salt, nonce, and ciphertext: these are not evidence of new Google Sheets data.
+- If main already carries the sourceHash, create no PR. If a mergeable PR already carries it, do not create a duplicate.
+- A conflicted finance data PR may be closed as a duplicate/stale snapshot, or replaced by a new PR from latest main carrying the *complete, unchanged* encrypted envelope. Never merge individual ciphertext fields, force-update main or expose original financial rows.
+- The resolver only touches owner-authored PRs on numeric finance data branches whose changes affect exactly static/tien-ich/chi-phi-thang/data.enc.json. All other conflicts require explicit review.
+- The resolver runs on PR creation/updates, via manual dispatch and on a ten-minute schedule. Every replacement still follows PR → CI → merge/deploy. GitHub schedules can be delayed.
+- Uses the already-configured BLOGNAVER_VOCAB_BOT_TOKEN (owner token with Contents/Pull requests permissions). No extra token or Google spreadsheet sharing is needed.
+- Test with python3 scripts/test-finance-conflict-resolver.py -v.
