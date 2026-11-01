@@ -13,6 +13,12 @@
   // Spaces are often read more smoothly than syllable-joining dashes.
   // Keep AI case-sensitive so the Vietnamese word "ai" is not altered.
   const terms = [
+    // Gen.G: pronounce the English G like "di" (/dʒiː/), not Vietnamese "dê".
+    {term:"Gen.G", reading:"den di", ci:true},
+    {term:"Gen G", reading:"den di", ci:true},
+    {term:"Gen-G", reading:"den di", ci:true},
+    {term:"GenG", reading:"den di", ci:true},
+    {term:"G", reading:"di", ci:false},
     {term:"Gigabytes", reading:"gi ga bai", ci:true},
     {term:"Gigabyte", reading:"gi ga bai", ci:true},
     {term:"Terabits", reading:"tê ra bít", ci:true},

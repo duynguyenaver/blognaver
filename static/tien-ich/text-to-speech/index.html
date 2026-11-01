@@ -325,7 +325,10 @@ function speak(onFinish){
   if(finished||generation!==speechGeneration)return;
   if(position>=plan.length){complete(false);return}
   const part=plan[position++];
-  const utterance=new SpeechSynthesisUtterance(part.text);
+  // Pronounce English brands even when text is pasted directly into Section 01.
+  // Keep source text and offsets unchanged for progress tracking and editing.
+  const spoken=window.BNVoiceFixer?.pronounceEnglish?.(part.text)??part.text;
+  const utterance=new SpeechSynthesisUtterance(spoken);
   currentUtterance=utterance;
   if(selectedVoice){utterance.voice=selectedVoice;utterance.lang=selectedVoice.lang}
   else utterance.lang="vi-VN";
@@ -410,4 +413,4 @@ document.getElementById("sendToClip").addEventListener("click", () => {
   catch(e){window.alert("Trình duyệt không lưu được kịch bản. Hãy sao chép và dán thủ công vào Clip Maker.");return}
   window.location.href="../youtube-clip-maker/";
 });
-</script><script src="voiceover-preprocess.js?v=20261031-purge-dates-hotfix" defer></script><script src="voice-fixer.js" defer></script><script src="article-url-import.js?v=20261101" defer></script></body></html>
+</script><script src="voiceover-preprocess.js?v=20261031-purge-dates-hotfix" defer></script><script src="voice-fixer.js?v=20261101-g-pronunciation" defer></script><script src="article-url-import.js?v=20261101" defer></script></body></html>
