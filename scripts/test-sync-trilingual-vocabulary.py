@@ -60,6 +60,31 @@ class TrilingualSyncTests(unittest.TestCase):
         b = dict(a, en="leave")
         self.assertNotEqual(mod.text_hash(a), mod.text_hash(b))
 
+    def test_actual_owner_sheet_a_to_e_headers(self):
+        rows = [
+            ["Việt ", "Hàn ", "Anh ", "Context or Expression", "Ngữ pháp ví dụ"],
+            ["Công ty phát triển ERP", "ERP 개발사", "ERP Development Company", "", ""],
+        ]
+        result = mod.parse_table(rows, "19nL6wtouHV-0OumsQR2jF-5xWA1cpbpivRUIsm7hDgk", self.tab, "viethananh")
+        self.assertEqual(1, len(result))
+        self.assertEqual(2, result[0]["row"])
+        self.assertEqual("Công ty phát triển ERP", result[0]["vi"])
+        self.assertEqual("ERP 개발사", result[0]["ko"])
+        self.assertEqual("ERP Development Company", result[0]["en"])
+        self.assertNotIn("context", result[0])
+        self.assertNotIn("grammar", result[0])
+
+    def test_context_and_grammar_from_sheet_are_preserved(self):
+        rows = [
+            ["Việt", "Hàn", "Anh", "Context or Expression", "Ngữ pháp ví dụ"],
+            ["Công ty phát triển ERP", "ERP 개발사", "ERP Development Company",
+             "Công ty chuyên phát triển hệ thống ERP", "ERP(시스템) + 개발사"],
+        ]
+        result = mod.parse_table(rows, "s", self.tab, "x")
+        self.assertEqual(result[0]["context"], "Công ty chuyên phát triển hệ thống ERP")
+        self.assertEqual(result[0]["grammar"], "ERP(시스템) + 개발사")
+        self.assertEqual(result[0]["aiStatus"] if "aiStatus" in result[0] else "source", "source")
+
     def test_safe_unicode(self):
         rows = [["Tiếng Việt", "한국어", "English"], ["Công nghệ", "기술", "Technology"]]
         result = mod.parse_table(rows, "a", self.tab, "x")
