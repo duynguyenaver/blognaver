@@ -97,7 +97,6 @@ jobs:
           VOCAB_GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.VOCAB_GOOGLE_SERVICE_ACCOUNT_JSON }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-          GITHUB_STEP_SUMMARY_FILE: ${{ github.step_summary }}
           VOCAB_MAX_GROQ_MODEL_ATTEMPTS: "5"
           VOCAB_WRITEBACK_SHEETS: "1"
           VOCAB_MAX_GEMINI_ITEMS: '30'
