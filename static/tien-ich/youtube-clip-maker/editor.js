@@ -202,11 +202,16 @@
    ui.bgmTrack.textContent=bgmURL?"♫ BGM · lặp theo timeline":"♫ BGM · Chưa có nhạc nền";
    ui.subtitleTrack.replaceChildren();
    if(!cues.length)ui.subtitleTrack.textContent="Dán kịch bản và tạo phụ đề.";
-   else cues.forEach(c=>{
+   else {let cursor=0;
+   for(const c of cues){
+     if(c.start>cursor){const space=document.createElement("span");space.className="subtitle-gap";space.style.flex=""+(c.start-cursor)+" 1 0";ui.subtitleTrack.append(space)}
      const clip=document.createElement("div");clip.className="clip subs-clip";clip.style.flexGrow=String(Math.max(.1,c.end-c.start));
      const span=document.createElement("span");span.textContent=c.text;clip.title=fmt(c.start)+"–"+fmt(c.end)+": "+c.text;clip.append(span);
      clip.onclick=()=>seek(c.start);ui.subtitleTrack.append(clip);
-   });
+     cursor=Math.max(cursor,c.end);
+   }
+   if(duration>cursor){const tail=document.createElement("span");tail.className="subtitle-gap";tail.style.flex=""+(duration-cursor)+" 1 0";ui.subtitleTrack.append(tail)}
+   }
  }
  function currentSlide(t){
    const unit=duration/Math.max(assets.length,1);
@@ -488,6 +493,14 @@
    audioCtx?.close().catch(()=>{});
  });
  window.BNClipMakerCore=Object.freeze({makeCueLines,chooseMime,fmt,seek,refreshTimeline,renderAssets,
+   getCues:()=>cues.map(c=>({...c})),
+   setCues:items=>{
+     if(!Array.isArray(items))throw Error("Invalid subtitle cues.");
+     cues=items.slice(0,1200).map(c=>({start:Number(c.start),end:Number(c.end),text:String(c.text||"").trim()}))
+       .filter(c=>Number.isFinite(c.start)&&Number.isFinite(c.end)&&c.start>=0&&c.end>c.start&&c.text)
+       .sort((a,b)=>a.start-b.start);
+     refreshTimeline();draw(position);
+   },
    getAssets:()=>assets,getTimeline:()=>({duration,position,playing,exporting}),
    getAudioPipeline:()=>({context:audioCtx,destination:audioDest})});
  sizeCanvas();labelSettings();syncDuration();
