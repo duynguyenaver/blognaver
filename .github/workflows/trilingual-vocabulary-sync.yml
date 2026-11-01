@@ -35,6 +35,8 @@ jobs:
         run: |
           python3 -m py_compile scripts/sync-trilingual-vocabulary.py
           node --check static/tien-ich/hoc-tieng-viet-han-anh/study.js
+          node --check static/tien-ich/hoc-tieng-viet-han-anh/live-sheet.js
+          node -e "new Function(require('fs').readFileSync('docs/google-apps-script/LanguageLab.gs', 'utf8'))"
           python3 -m json.tool static/tien-ich/hoc-tieng-viet-han-anh/vocabulary.json >/dev/null
 
   sync:
@@ -72,6 +74,7 @@ jobs:
           VOCAB_PUBLIC_SHEET_IDS: '19nL6wtouHV-0OumsQR2jF-5xWA1cpbpivRUIsm7hDgk'
           VOCAB_GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.VOCAB_GOOGLE_SERVICE_ACCOUNT_JSON }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          VOCAB_WRITEBACK_SHEETS: "1"
           VOCAB_MAX_GEMINI_ITEMS: '30'
         run: python3 scripts/sync-trilingual-vocabulary.py
       - name: Create data branch and Pull Request (never commit to main)
