@@ -34,7 +34,7 @@ READY=false
 for attempt in $(seq 1 45); do
   CHECKS="$(gh api "repos/$REPO/commits/$EXPECTED_SHA/check-runs?per_page=100")"
   if jq -e '[.check_runs[] | select(.status=="completed" and
-    (["failure","cancelled","timed_out","action_required","startup_failure"] | index(.conclusion) != null))] | length > 0' <<<"$CHECKS" >/dev/null; then
+    (.conclusion as $outcome | ["failure","cancelled","timed_out","action_required","startup_failure"] | index($outcome) != null))] | length > 0' <<<"$CHECKS" >/dev/null; then
     echo "::error::One or more CI checks failed or were cancelled; leaving PR open"; exit 1
   fi
   if jq -e '
@@ -42,7 +42,7 @@ for attempt in $(seq 1 45); do
         and .status=="completed" and .conclusion=="success")
       and any(.check_runs[]; .name=="test" and .status=="completed" and .conclusion=="success")
       and all(.check_runs[]; .status=="completed"
-        and (["success","neutral","skipped"] | index(.conclusion) != null))
+        and (.conclusion as $outcome | ["success","neutral","skipped"] | index($outcome) != null))
     ' <<<"$CHECKS" >/dev/null; then
     READY=true; echo "Required checks green, and all checks completed"; break
   fi
