@@ -44,7 +44,7 @@ function wrapSafeText(c,text,width){
 }
 // Fit complete text to a finite rectangle with top-baseline placement, not Canvas maxWidth squashing.
 function fitSafeText(c,text,rect,options={}){
- const maxFont=Math.max(1,Math.round(options.maxFont||32)),minFont=Math.max(1,Math.round(options.minFont||8));
+ const maxFont=Math.max(1,Math.round(options.maxFont||32));
  const step=options.step||1.12,weight=options.weight||700;
  let best=null;
  for(let size=maxFont;size>=1;size--){
@@ -87,8 +87,8 @@ function renderCanvas(j,type,variant){const w=type==="thumbnail"?1280:1600,h=typ
  const seriesBox={x:safe.left,y:h*.132,width:safeW*.82,height:h*.055};
  const subBox={x:safe.left,y:h*.808,width:w*.575,height:h*.074};
  const footerBox={x:w*.717,y:h*.842,width:safe.right-w*.717,height:h*.038};
- c.save();c.beginPath();c.rect(safe.left,safe.top,safeW,safe.bottom-safe.top);c.clip();
  c.fillStyle="rgba(0,0,0,.13)";c.fillRect(0,h*.79,w,h*.21);
+ c.save();c.beginPath();c.rect(safe.left,safe.top,safeW,safe.bottom-safe.top);c.clip();
  drawSafeText(c,series,seriesBox,{weight:750,maxFont:Math.round(w*.017),color:"#c2e5ff"});
  drawSafeText(c,head,titleBox,{weight:900,maxFont:type==="thumbnail"?75:91,color:"#fff",shadowColor:"#00000066",shadowBlur:12});
  // Brand accent and captions remain INSIDE the same safe zone.
