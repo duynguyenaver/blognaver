@@ -102,7 +102,7 @@ function installMonthlyExpensesTriggers() {
     "Đã bật tự đồng bộ khi sửa bất kỳ ô A:H nào của tab chiphithang, " +
     "sửa tab ngansach, hoặc thêm/xóa dòng. Các lượt sửa trong 60 giây " +
     "sẽ được gộp và gửi tiếp, không bị bỏ qua. Cần GITHUB_DISPATCH_TOKEN " +
-    "để cập nhật nhanh; GitHub Actions vẫn kiểm tra mỗi 15 phút."
+    "để cập nhật nhanh; GitHub Actions vẫn kiểm tra mỗi 5 phút."
   );
 }
 
