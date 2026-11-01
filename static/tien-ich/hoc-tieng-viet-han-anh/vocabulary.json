@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "folderId": "1coylrqzqPOLZP_lhUdWlb3nI47Qr-af7",
-  "updatedAt": "2026-11-01T15:28:25+00:00",
+  "updatedAt": "2026-11-01T15:29:39+00:00",
   "sources": [
     {
       "id": "19nL6wtouHV-0OumsQR2jF-5xWA1cpbpivRUIsm7hDgk",
@@ -763,28 +763,27 @@
     },
     {
       "vi": "khó khăn",
-      "ko": "딱딱한",
-      "en": "stiff",
+      "ko": "어려운",
+      "en": "difficult",
       "content": "",
       "id": "2645205f1418394410799ed2",
       "sheetId": "19nL6wtouHV-0OumsQR2jF-5xWA1cpbpivRUIsm7hDgk",
       "sheetTitle": "Google Sheets 19nL6wto",
       "tabTitle": "Sheet1",
       "row": 32,
-      "inputHash": "71ec1567e80012fcdac50c39",
-      "context": "Dùng để mô tả một tình huống, vấn đề hoặc công việc gây ra nhiều trở ngại, yêu cầu nỗ lực lớn để giải quyết.",
-      "grammar": "Danh từ \"khó khăn\" (VN) – tính từ \"딱딱한\" (KO) – tính từ \"stiff\" (EN). Khi dùng trong câu, thường đi kèm với danh từ hoặc động từ để chỉ mức độ khó của việc làm: \"có khó khăn\", \"gặp khó khăn\", \"đối mặt với khó khăn\".",
+      "inputHash": "b127ea313a02e2170a1a3595",
+      "aiStatus": "ready",
+      "context": "Dùng để mô tả một tình huống, nhiệm vụ, vấn đề hoặc cảm xúc mang tính thách thức, gây khó chịu hoặc cần nỗ lực vượt qua.",
+      "grammar": "‘어려운’ là tính từ dạng ‘-운/ -운’ (형용사) dùng trước danh từ để mô tả tính chất. Khi dùng làm vị ngữ, cần chia thành ‘어렵다’ và chia theo thời gian, mức độ lịch sự (예: 어려워요, 어려웠다).",
       "examples": {
-        "vi": "['Chúng tôi gặp khó khăn trong việc hoàn thành dự án đúng hạn.', 'Việc học tiếng Hàn có nhiều khó khăn đối với người mới bắt đầu.', 'Dù có khó khăn, anh vẫn kiên trì tiến về phía trước.']",
-        "ko": "['우리는 프로젝트를 제때 마치는 데 딱딱한 문제가 있었다.', '한국어를 배우는 것은 초보자에게 딱딱한 점이 많다.', '어려움에도 불구하고 그는 꾸준히 나아갔다.']",
-        "en": "['We faced stiff challenges in completing the project on time.', 'Learning Korean has many stiff aspects for beginners.', 'Despite the difficulties, he kept moving forward.']"
+        "vi": "['Bài toán này rất khó khăn, tôi cần thời gian để giải.', 'Việc chuyển nhà trong mùa mưa là một việc khó khăn.', 'Anh ấy cảm thấy khó khăn khi phải đưa ra quyết định quan trọng.']",
+        "ko": "['이 문제는 매우 어려운 문제라서 시간이 많이 필요해요.', '비가 많이 오는 계절에 이사하는 것은 어려운 일이에요.', '그는 중요한 결정을 내려야 해서 어려워하고 있어요.']",
+        "en": "['This problem is very difficult, so I need more time to solve it.', 'Moving house during the rainy season is a difficult task.', 'He feels difficult about having to make an important decision.']"
       },
       "references": [],
-      "aiStatus": "ready",
       "aiModel": "openai/gpt-oss-120b",
       "grounded": false,
-      "aiProvider": "groq",
-      "reviewRecommended": null
+      "aiProvider": "groq"
     },
     {
       "vi": "vất vả",
